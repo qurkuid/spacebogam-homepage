@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>공간보감 포트폴리오 | 실제 현장 사례</title>
+  <meta name="description" content="실제 현장 사진을 바탕으로 만든 공간보감 포트폴리오 페이지입니다." />
+  <style>
+    :root{--ink:#24211f;--soft:#756f68;--bg:#ffffff;--paper:#fbfaf8;--line:#e8e1d8;--brown:#7a604b;--deep:#171411;--max:1180px;--shadow:0 18px 54px rgba(45,32,20,.08)}
+    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Pretendard","Noto Sans KR","Segoe UI",sans-serif;line-height:1.68;letter-spacing:-.018em;font-weight:400} a{text-decoration:none;color:inherit}.wrap{width:min(var(--max),calc(100% - 44px));margin:auto}
+    .top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}.top .wrap{height:78px;display:flex;align-items:center;justify-content:space-between;gap:26px}.brand{font-size:24px;font-weight:620;letter-spacing:-.04em}.brand small{font-size:10px;letter-spacing:.15em;color:var(--brown);display:block;margin-top:-5px;font-weight:500}.nav{display:flex;gap:21px;color:#302b26;flex-wrap:wrap}.nav a{font-size:15px;font-weight:500}.top-cta{background:var(--deep);color:#fff;padding:11px 17px;border-radius:999px;font-weight:560;font-size:14px;white-space:nowrap}
+    .hero{padding:92px 0 64px;border-bottom:1px solid var(--line)}.eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--brown);font-weight:500;margin-bottom:18px}.hero h1{font-size:clamp(38px,5.4vw,68px);line-height:1.08;letter-spacing:-.045em;margin:0 0 22px;font-weight:520}.hero p{font-size:20px;color:var(--soft);max-width:780px;margin:0;word-break:keep-all}.hero-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}.chip{border:1px solid var(--line);background:rgba(255,255,255,.52);border-radius:999px;padding:8px 12px;font-size:13px;color:#514a42}
+    section{padding:72px 0;border-bottom:1px solid var(--line)}.head{display:grid;grid-template-columns:220px 1fr;gap:36px;margin-bottom:34px}.kicker{font-size:12px;color:var(--brown);font-weight:500;letter-spacing:.13em;text-transform:uppercase}.head h2{font-size:clamp(28px,3.1vw,40px);line-height:1.22;letter-spacing:-.035em;margin:0;font-weight:520}.head p{font-size:18px;color:var(--soft);max-width:760px;word-break:keep-all;margin:16px 0 0;font-weight:350}
+    .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}.filter{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 13px;font-size:14px;color:#4d453e}.filter.on{background:var(--deep);color:#fff;border-color:var(--deep)}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.case{background:var(--paper);border:1px solid var(--line);border-radius:26px;overflow:hidden;box-shadow:0 12px 32px rgba(45,32,20,.045);display:flex;flex-direction:column}.case-img{position:relative;aspect-ratio:4/3;background:#ded6ca;overflow:hidden}.case-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}.case:hover .case-img img{transform:scale(1.035)}.badge{position:absolute;left:14px;top:14px;background:rgba(23,20,17,.74);color:#fff;border-radius:999px;padding:6px 10px;font-size:12px;backdrop-filter:blur(8px)}.case-body{padding:22px;display:grid;gap:14px;flex:1}.case h3{font-size:22px;line-height:1.2;letter-spacing:-.035em;margin:0;font-weight:560}.meta{display:flex;gap:7px;flex-wrap:wrap}.meta span{font-size:12px;color:#5c534a;border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 8px}.desc{color:var(--soft);font-size:14px;margin:0}.links{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border-radius:999px;padding:0 14px;font-weight:520;font-size:13px;border:1px solid var(--line);background:#fff}.btn.dark{background:var(--deep);color:#fff;border-color:var(--deep)}
+    .note{background:#2a2420;color:#fff;border-radius:30px;padding:34px;display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:start}.note h2{font-size:clamp(30px,3.5vw,46px);line-height:1.15;letter-spacing:-.04em;margin:0;font-weight:560}.note p{color:rgba(255,255,255,.7);font-weight:350;margin:12px 0 0}.note-list{display:grid;gap:12px}.note-item{border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.07);border-radius:18px;padding:16px}.note-item b{font-weight:560;color:#ead0aa}.note-item span{display:block;color:rgba(255,255,255,.67);font-size:14px;margin-top:4px}
+    .cta{padding:72px 0 92px;border-bottom:0}.cta-box{background:linear-gradient(135deg,#8a715d,#2a2420);border-radius:34px;color:#fff;padding:52px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;box-shadow:var(--shadow)}.cta h2{font-size:clamp(34px,4.4vw,58px);line-height:1.08;letter-spacing:-.05em;margin:0 0 18px;font-weight:560}.cta p{color:rgba(255,255,255,.74);font-size:18px;margin:0;font-weight:350}.cta-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}.cta .btn{min-height:48px;padding:0 18px;color:#111}.cta .btn.dark{background:#fff;color:#111;border-color:#fff}
+    footer{background:#8a8178;color:#fff;padding:42px 0}.foot{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;color:rgba(255,255,255,.88);font-weight:350;font-size:14px}
+    @media(max-width:980px){.top .wrap{height:auto;min-height:78px;flex-direction:column;padding:18px 0}.head,.note,.cta-box{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.cta-actions{justify-content:flex-start}.nav{justify-content:center}}
+    @media(max-width:620px){.grid{grid-template-columns:1fr}.hero{padding-top:64px}.case-img{aspect-ratio:1.25/1}}
+  </style>
+
+  <link rel="canonical" href="https://qurkuid.github.io/spacebogam-homepage/portfolio.html" />
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+  <meta name="keywords" content="공간보감 포트폴리오, 부산 인테리어 포트폴리오, 부산 아파트 인테리어 사례, 부산 리모델링 사례, 화명동 인테리어, 대우이안 아파트 인테리어, 코오롱하늘채 인테리어, 롯데캐슬멤버스 리모델링" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta property="og:site_name" content="공간보감" />
+  <meta property="og:title" content="공간보감 포트폴리오 | 부산 아파트 인테리어 사례" />
+  <meta property="og:description" content="부산 아파트 리모델링 실제 현장 사진, 평형, 예산대, 상담 후보 사례를 확인하세요." />
+  <meta property="og:url" content="https://qurkuid.github.io/spacebogam-homepage/portfolio.html" />
+  <meta property="og:image" content="https://intm.kr/api/uploads/thumbnails/67ed99a1-dbdd-43c9-84f2-d79a1210bb39/94978ace-32ba-4446-9b04-cf627347cba8.webp" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"공간보감 부산 인테리어 포트폴리오","url":"https://qurkuid.github.io/spacebogam-homepage/portfolio.html","about":["부산 아파트 인테리어","부산 리모델링 사례","아파트 포트폴리오"],"mainEntity":{"@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@type":"CreativeWork","name":"대우이안 아파트 35평 거실 중심 리모델링","image":"https://intm.kr/api/uploads/thumbnails/67ed99a1-dbdd-43c9-84f2-d79a1210bb39/94978ace-32ba-4446-9b04-cf627347cba8.webp","contentLocation":"부산 북구 화명동"}},{"@type":"ListItem","position":2,"item":{"@type":"CreativeWork","name":"화명 코오롱하늘채2차 아파트 리모델링","image":"https://intm.kr/images/portfolio/88f665f2-63f4-42e7-aba7-b9b1d80bc2c2/a418c40e-0146-4abf-9499-91bc703ea3c7.webp","contentLocation":"부산 화명동"}},{"@type":"ListItem","position":3,"item":{"@type":"CreativeWork","name":"화명 롯데캐슬멤버스 아파트 리모델링","image":"https://intm.kr/images/portfolio/f6de6aa0-f321-4f8d-9018-f955585a526e/dc704eac-3c6b-456c-a889-2ccd514b5eda.webp","contentLocation":"부산 화명동"}}]}}</script>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="index.html">공간보감<small>SPACE BOGAM</small></a>
+      <nav class="nav">
+        <a href="index.html#type">공간유형</a>
+        <a href="index.html#cost">비용 가이드</a>
+        <a href="#cases">포트폴리오</a>
+        <a href="index.html#contact">우리집 더 알아보기</a>
+      </nav>
+      <a class="top-cta" href="index.html#contact">우리집 더 알아보기</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div class="eyebrow">Portfolio · Real Cases</div>
+        <h1>비슷한 집을 보며<br>우리집을 생각해봅니다.</h1>
+        <p>전체 리모델링은 보통 큰 결정입니다. 비슷한 평수와 분위기의 사진을 보면서 우리 집에 맞는 방향을 함께 잡습니다.</p>
+        <div class="hero-meta"><span class="chip">실제 현장 사진</span><span class="chip">프로젝트 8개</span><span class="chip">원본 이미지 보기</span><span class="chip">7천만~1억 이상 예산대</span></div>
+      </div>
+    </section>
+
+    <section id="cases">
+      <div class="wrap">
+        <div class="head"><div class="kicker">Cases</div><div><h2>사진과 예산대를 같이 봅니다</h2><p>사진은 실제 현장 이미지를 사용했습니다. 금액은 확정 견적이 아니라 상담 전에 감을 잡기 위한 범위입니다.</p></div></div>
+        <div class="filters"><span class="filter on">전체</span><span class="filter">아파트</span><span class="filter">부산</span><span class="filter">30평대</span><span class="filter">40평대 이상</span><span class="filter">상담 후보</span></div>
+        <div class="grid">
+          <article class="case"><a class="case-img" href="https://intm.kr/api/uploads/photos/67ed99a1-dbdd-43c9-84f2-d79a1210bb39/f389ae63-a6af-40c4-977c-d77f8991d2e9.jpg" target="_blank" rel="noopener"><img src="https://intm.kr/api/uploads/thumbnails/67ed99a1-dbdd-43c9-84f2-d79a1210bb39/94978ace-32ba-4446-9b04-cf627347cba8.webp" alt="대우이안 아파트 35평 대표 이미지"><span class="badge">52 photos</span></a><div class="case-body"><h3>대우이안 아파트 35평</h3><div class="meta"><span>부산 북구</span><span>35평</span><span>7천만~1억대</span><span>거실</span></div><p class="desc">부산 북구 화명신도시로 현장. 거실 대표 이미지와 다수의 현장 사진이 등록된 프로젝트입니다.</p><div class="links"><a class="btn dark" href="https://intm.kr/api/uploads/photos/67ed99a1-dbdd-43c9-84f2-d79a1210bb39/f389ae63-a6af-40c4-977c-d77f8991d2e9.jpg" target="_blank" rel="noopener">원본 보기</a><a class="btn" href="index.html#contact">비슷한 현장 상담</a></div></div></article>
+          <article class="case"><a class="case-img" href="https://intm.kr/images/portfolio/88f665f2-63f4-42e7-aba7-b9b1d80bc2c2/a418c40e-0146-4abf-9499-91bc703ea3c7.webp" target="_blank" rel="noopener"><img src="https://intm.kr/api/uploads/thumbnails/7c0fc322-94c1-4031-a4b2-4cec2ce868eb/a418c40e-0146-4abf-9499-91bc703ea3c7.webp" alt="화명 코오롱하늘채2차 대표 이미지"><span class="badge">36 photos</span></a><div class="case-body"><h3>화명 코오롱하늘채2차</h3><div class="meta"><span>아파트</span><span>8천만~1억대</span><span>부산</span></div><p class="desc">실제 등록된 포트폴리오 사진을 사용한 사례입니다.</p><div class="links"><a class="btn dark" href="https://intm.kr/images/portfolio/88f665f2-63f4-42e7-aba7-b9b1d80bc2c2/a418c40e-0146-4abf-9499-91bc703ea3c7.webp" target="_blank" rel="noopener">원본 보기</a><a class="btn" href="index.html#contact">상담하기</a></div></div></article>
+          <article class="case"><a class="case-img" href="https://intm.kr/images/portfolio/f6de6aa0-f321-4f8d-9018-f955585a526e/dc704eac-3c6b-456c-a889-2ccd514b5eda.webp" target="_blank" rel="noopener"><img src="https://intm.kr/api/uploads/thumbnails/e905ce47-cd38-473b-b9de-e136fa4abf5b/dc704eac-3c6b-456c-a889-2ccd514b5eda.webp" alt="화명 롯데캐슬멤버스 대표 이미지"><span class="badge">34 photos</span></a><div class="case-body"><h3>화명 롯데캐슬멤버스</h3><div class="meta"><span>아파트</span><span>8천만~1억대</span><span>부산</span></div><p class="desc">비슷한 단지와 평형을 찾는 고객에게 보여주기 좋은 사례입니다.</p><div class="links"><a class="btn dark" href="https://intm.kr/images/portfolio/f6de6aa0-f321-4f8d-9018-f955585a526e/dc704eac-3c6b-456c-a889-2ccd514b5eda.webp" target="_blank" rel="noopener">원본 보기</a><a class="btn" href="index.html#contact">상담하기</a></div></div></article>
+          <article class="case"><a class="case-img" href="https://intm.kr/images/portfolio/ad270e74-a62c-4f19-a25a-c9e0eb91cf34/0bc5f79c-ab61-4780-ab73-6939c7454ec8.webp" target="_blank" rel="noopener"><img src="https://intm.kr/api/uploads/thumbnails/038a919f-e734-4c93-bcfd-9758251a944e/0bc5f79c-ab61-4780-ab73-6939c7454ec8.webp" alt="구서 쌍용예가아파트 2단지 대표 이미지"><span class="badge">29 photos</span></a><div class="case-body"><h3>구서 쌍용예가아파트 2단지</h3><div class="meta"><span>아파트</span><span>구서동</span><span>8천만 이상</span></div><p class="desc">단지명과 지역을 기준으로 비교하기 좋은 사례입니다.</p><div class="links"><a class="btn dark" href="https://intm.kr/images/portfolio/ad270e74-a62c-4f19-a25a-c9e0eb91cf34/0bc5f79c-ab61-4780-ab73-6939c7454ec8.webp" target="_blank" rel="noopener">원본 보기</a><a class="btn" href="index.html#contact">상담하기</a></div></div></article>
+          <article class="case"><a class="case-img" href="https://intm.kr/images/portfolio/2d965ba4-64ad-4d62-a7c3-8902b41e321c/9231405c-0b87-40ea-bc8f-323d8756ae16.webp" target="_blank" rel="noopener"><img src="https://intm.kr/api/uploads/thumbnails/1c37fb36-ac9c-41e2-9def-5c137fc5c53d/9231405c-0b87-40ea-bc8f-323d8756ae16.webp" alt="오륙도 SK뷰 대표 이미지"><span class="badge">23 photos</span></a><div class="case-body"><h3>오륙도 SK뷰</h3><div class="meta"><span>아파트</span><span>해안권</span><span>1억 전후</span></div><p class="desc">사진 수가 많아 전체 분위기를 보기 좋습니다.</p><div class="links"><a class="btn dark" href="https://intm.kr/images/portfolio/2d965ba4-64ad-4d62-a7c3-8902b41e321c/9231405c-0b87-40ea-bc8f-323d8756ae16.webp" target="_blank" rel="noopener">원본 보기</a><a class="btn" href="index.html#contact">상담하기</a></div></div></article>
+          <article class="case"><a class="case-img" href="https://intm.kr/images/portfolio/4bdfb1b8-15a9-4161-af75-adb14492757b/d31cbfe7-469b-4d42-8cf2-578a54800c08.webp" target="_blank" rel="noopener"><img src="https://intm.kr/api/uploads/thumbnails/7f81658c-a03d-4ee7-850a-08fb83449bb8/d31cbfe7-469b-4d42-8cf2-578a54800c08.webp" alt="삼한골든뷰센트럴파크 대표 이미지"><span class="badge">20 photos</span></a><div class="case-body"><h3>삼한골든뷰센트럴파크</h3><div class="meta"><span>주상복합</span><span>아파트</span><span>1억 이상</span></div><p class="desc">주상복합처럼 조건이 다른 집은 따로 보는 편이 좋습니다.</p><div class="links"><a class="btn dark" href="https://intm.kr/images/portfolio/4bdfb1b8-15a9-4161-af75-adb14492757b/d31cbfe7-469b-4d42-8cf2-578a54800c08.webp" target="_blank" rel="noopener">원본 보기</a><a class="btn" href="index.html#contact">상담하기</a></div></div></article>
+          <article class="case"><a class="case-img" href="https://intm.kr/images/portfolio/4a608997-1907-411a-a143-55f370b4400b/85648883-35b5-41b8-8c20-6e74fb87604c.webp" target="_blank" rel="noopener"><img src="https://intm.kr/api/uploads/thumbnails/82f1da5a-9b38-4243-a2d0-96132d0a6944/85648883-35b5-41b8-8c20-6e74fb87604c.webp" alt="거제 현대홈타운 2차 대표 이미지"><span class="badge">17 photos</span></a><div class="case-body"><h3>거제 현대홈타운 2차</h3><div class="meta"><span>아파트</span><span>거제</span><span>7천만 이상</span></div><p class="desc">지역과 단지명을 함께 보고 상담을 시작할 수 있습니다.</p><div class="links"><a class="btn dark" href="https://intm.kr/images/portfolio/4a608997-1907-411a-a143-55f370b4400b/85648883-35b5-41b8-8c20-6e74fb87604c.webp" target="_blank" rel="noopener">원본 보기</a><a class="btn" href="index.html#contact">상담하기</a></div></div></article>
+          <article class="case"><a class="case-img" href="https://intm.kr/images/products/411f20cf-44cd-4b6d-bcbb-3a7f88cb750f-1764382318912.jpg" target="_blank" rel="noopener"><img src="https://intm.kr/api/uploads/thumbnails/aab21dd2-a0ff-41a6-8ce6-a67a27bf136b/afff97dd-67ce-4e6c-be05-cad21691ae44.webp" alt="메가센텀꿈에그린 49평 대표 이미지"><span class="badge">9 photos</span></a><div class="case-body"><h3>메가센텀꿈에그린 49평</h3><div class="meta"><span>부산 해운대구</span><span>49평</span><span>1억 이상</span></div><p class="desc">넓은 평형을 고민하는 고객에게 맞는 사례입니다.</p><div class="links"><a class="btn dark" href="https://intm.kr/images/products/411f20cf-44cd-4b6d-bcbb-3a7f88cb750f-1764382318912.jpg" target="_blank" rel="noopener">원본 보기</a><a class="btn" href="index.html#contact">상담하기</a></div></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="note">
+          <div><div class="kicker">사례 읽는 법</div><h2>사진만으로는 다 알 수 없습니다.</h2><p>전후 사진, 평면도, 3D, 공사 범위, 기간, 자재, 대략 금액대를 함께 봐야 합니다.</p></div>
+          <div class="note-list">
+            <div class="note-item"><b>이미지 출처</b><span>실제 등록된 현장 사진과 대표 썸네일을 사용합니다.</span></div>
+            <div class="note-item"><b>찾기 쉽게</b><span>지역, 단지명, 평형을 함께 적어두면 비슷한 조건을 찾기 쉽습니다.</span></div>
+            <div class="note-item"><b>상담 전환</b><span>마음에 가까운 사례가 있으면 그 사례를 기준으로 상담을 시작합니다.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div class="wrap">
+        <div class="cta-box">
+          <div><h2>마음에 가까운 집이<br>있으셨나요?</h2><p>마음에 가까운 사례가 있으면 그 집을 기준으로 평수, 예산, 원하는 분위기를 이야기하면 됩니다.</p></div>
+          <div class="cta-actions"><a class="btn dark" href="index.html#contact">우리집 더 알아보기</a><a class="btn" href="index.html#cost">비용 기준 보기</a></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="wrap foot"><div><b>공간보감 포트폴리오</b><br>주거와 상업공간 디자인 사례</div><div>공간은 사는 사람을 닮아야 합니다.</div></div></footer>
+</body>
+</html>
