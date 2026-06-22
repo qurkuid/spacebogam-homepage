@@ -1,3 +1,7 @@
 User-agent: *
 Allow: /
+
+User-agent: Yeti
+Allow: /
+
 Sitemap: https://qurkuid.github.io/spacebogam-homepage/sitemap.xml
