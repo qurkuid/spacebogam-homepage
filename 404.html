@@ -1,0 +1,14 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,follow"><title>공간보감 페이지 찾기</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"Pretendard","Noto Sans KR",sans-serif;line-height:1.7;padding:42px;color:#24211f}a{color:#7a604b}</style><script>
+(function(){
+  var base='/spacebogam-homepage/';
+  var known={'commercial-clinic':'commercial-clinic.html','hwamyeong-interior':'hwamyeong-interior.html','busan-cafe-interior':'busan-cafe-interior.html','busan-apartment-interior':'busan-apartment-interior.html','living-20py':'living-20py.html','case-samhan-goldenview':'case-samhan-goldenview.html','centum-apartment-interior':'centum-apartment-interior.html','busan-remodeling':'busan-remodeling.html','geumjeong-gu-interior':'geumjeong-gu-interior.html','living-30py':'living-30py.html','estimate':'estimate.html','process':'process.html','case-oryukdo-sk-view':'case-oryukdo-sk-view.html','case-hwamyeong-lottecastle':'case-hwamyeong-lottecastle.html','living':'living.html','geoje-dong-apartment-remodeling':'geoje-dong-apartment-remodeling.html','case-hwamyeong-kolong':'case-hwamyeong-kolong.html','commercial-shop':'commercial-shop.html','busan-commercial-interior':'busan-commercial-interior.html','busan-40pyeong-apartment-remodeling':'busan-40pyeong-apartment-remodeling.html','case-daewoo-ian-35py':'case-daewoo-ian-35py.html','overview':'overview.html','busan-office-hospital-interior':'busan-office-hospital-interior.html','living-50py':'living-50py.html','estimate-living':'estimate-living.html','commercial':'commercial.html','case-geoje-hyundai-hometown':'case-geoje-hyundai-hometown.html','busan-30pyeong-apartment-interior':'busan-30pyeong-apartment-interior.html','buk-gu-interior':'buk-gu-interior.html','living-40py':'living-40py.html','case-mega-centum-49py':'case-mega-centum-49py.html','dongnae-interior':'dongnae-interior.html','living-60py':'living-60py.html','haeundae-interior':'haeundae-interior.html','office':'office.html','estimate-commercial':'estimate-commercial.html','case-guseo-ssangyong':'case-guseo-ssangyong.html','guseo-dong-apartment-interior':'guseo-dong-apartment-interior.html','portfolio':'portfolio.html','index':''};
+  var path=location.pathname;
+  var rest=path.indexOf(base)===0 ? path.slice(base.length) : path.replace(/^\//,'');
+  rest=rest.replace(/\/$/,'');
+  var key=rest.replace(/\.html$/,'');
+  if(known[key]!==undefined){
+    var dest=base + known[key] + location.search + location.hash;
+    location.replace(dest);
+  }
+})();
+</script></head><body><h1>페이지 주소를 다시 확인하고 있습니다</h1><p>주소가 바뀌었거나 .html이 빠진 경우 자동으로 이동합니다.</p><p><a href="/spacebogam-homepage/">공간보감 메인으로 이동</a></p></body></html>
