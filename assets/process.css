@@ -1,0 +1,114 @@
+/* 공간보감 — 진행 과정 페이지 전용 (page.css 위에 얹는 bespoke 레이어)
+   page.css의 토큰(--ink/--soft/--bg/--paper/--line/--brown/--deep/--shadow)과
+   헤더·푸터·.wrap 을 재사용하고, 여기서는 타임라인 등 고유 컴포넌트만 정의한다. */
+
+.pr-soft{--card:#fff}
+.pr-wrap{width:min(1100px,calc(100% - 44px));margin:auto}
+
+/* ── 히어로 ── */
+.pr-hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,var(--paper),var(--bg))}
+.pr-hero .pr-wrap{padding:64px 0 52px;position:relative;z-index:1}
+.pr-hero .crumb{font-size:13px;color:var(--soft);margin-bottom:20px}
+.pr-hero .crumb a{color:var(--brown)}
+.pr-eyebrow{font-size:12px;color:var(--brown);font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.pr-hero h1{font-size:clamp(28px,4vw,46px);line-height:1.12;letter-spacing:-.04em;font-weight:620;margin:14px 0 16px;word-break:keep-all}
+.pr-card h3,.pr-shead h2{word-break:keep-all}
+.pr-hero p{font-size:clamp(15px,1.4vw,18px);color:var(--soft);max-width:640px;word-break:keep-all;margin:0}
+.pr-facts{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+.pr-fact{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 15px;min-width:140px}
+.pr-fact b{display:block;font-size:18px;font-weight:650;letter-spacing:-.03em}
+.pr-fact span{font-size:12px;color:var(--soft)}
+
+/* ── 단계 요약 (4 페이즈 아크) ── */
+.pr-phases{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:0;
+  border:1px solid var(--line);border-radius:20px;overflow:hidden;background:#fff;box-shadow:var(--shadow)}
+.pr-phase{position:relative;padding:22px 20px;border-right:1px solid var(--line)}
+.pr-phase:last-child{border-right:0}
+.pr-phase .n{font-size:12px;font-weight:700;color:var(--brown);letter-spacing:.08em}
+.pr-phase b{display:block;font-size:18px;font-weight:620;letter-spacing:-.03em;margin:8px 0 6px}
+.pr-phase span{font-size:13px;color:var(--soft);line-height:1.55}
+.pr-phase:not(:last-child):after{content:"→";position:absolute;right:-9px;top:26px;z-index:2;
+  width:18px;height:18px;display:flex;align-items:center;justify-content:center;
+  background:var(--brown);color:#fff;border-radius:50%;font-size:11px}
+
+/* ── 타임라인 ── */
+.pr-timeline{position:relative;margin-top:8px;padding-left:0}
+.pr-step{position:relative;display:grid;grid-template-columns:64px 1fr;gap:22px;padding:0 0 30px}
+.pr-step:before{content:"";position:absolute;left:31px;top:8px;bottom:-8px;width:2px;background:var(--line)}
+.pr-step:last-child:before{display:none}
+.pr-node{position:relative;z-index:1;width:64px;height:64px;border-radius:50%;
+  background:var(--deep);color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:650;letter-spacing:-.02em;box-shadow:0 8px 22px rgba(45,32,20,.16)}
+.pr-step.accent .pr-node{background:var(--brown)}
+.pr-card{background:var(--card,#fff);border:1px solid var(--line);border-radius:22px;
+  padding:24px 26px;box-shadow:0 10px 30px rgba(45,32,20,.05)}
+.pr-tagrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.pr-ph{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--brown)}
+.pr-when{font-size:12px;color:var(--soft);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+.pr-cost{font-size:12px;font-weight:600;color:#fff;background:var(--brown);border-radius:999px;padding:4px 10px}
+.pr-cost.free{background:var(--deep)}
+.pr-card h3{font-size:21px;line-height:1.25;letter-spacing:-.035em;margin:0 0 8px;font-weight:620}
+.pr-card>p{margin:0 0 16px;color:var(--soft);font-size:15px;word-break:keep-all;line-height:1.65}
+.pr-get{border-top:1px dashed var(--line);padding-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pr-get .lab{font-size:12px;font-weight:700;color:var(--ink)}
+.pr-chip{font-size:12px;color:#4a4239;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:5px 10px}
+.pr-figure{margin-top:14px;border-radius:16px;overflow:hidden;border:1px solid var(--line);aspect-ratio:16/9;background:var(--paper)}
+.pr-figure img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* ── 산출물 ── */
+.pr-deliver{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.pr-d{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.pr-d .ic{width:34px;height:34px;border-radius:10px;background:var(--paper);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;color:var(--brown);font-weight:700;margin-bottom:12px}
+.pr-d b{display:block;font-size:15px;font-weight:600;letter-spacing:-.02em}
+.pr-d span{font-size:12.5px;color:var(--soft);line-height:1.5}
+
+/* ── 신뢰 ── */
+.pr-trust{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.pr-t{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:22px}
+.pr-t b{display:block;font-size:16px;font-weight:620;margin-bottom:6px}
+.pr-t span{font-size:13.5px;color:var(--soft);line-height:1.6}
+
+/* ── FAQ ── */
+.pr-faq{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pr-q{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px}
+.pr-q b{display:block;font-weight:620;margin-bottom:7px}
+.pr-q p{margin:0;color:var(--soft);font-size:14px;line-height:1.65}
+
+/* ── CTA ── */
+.pr-cta{background:linear-gradient(135deg,var(--brown),var(--deep));color:#fff;border-radius:28px;
+  padding:42px;display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:center;box-shadow:var(--shadow)}
+.pr-cta h2{font-size:clamp(24px,3vw,34px);line-height:1.15;letter-spacing:-.04em;margin:0 0 10px;font-weight:650}
+.pr-cta p{margin:0;color:rgba(255,255,255,.82);font-size:15px}
+.pr-cta-act{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.pr-btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;
+  border-radius:999px;font-weight:620;font-size:15px;background:#fff;color:var(--deep);border:1.5px solid #fff}
+.pr-btn.ghost{background:transparent;color:#fff}
+
+.pr-section{padding:60px 0;border-bottom:1px solid var(--line)}
+.pr-section.last{border-bottom:0}
+.pr-shead{margin-bottom:28px}
+.pr-shead .k{font-size:12px;color:var(--brown);font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+.pr-shead h2{font-size:clamp(21px,2.5vw,30px);line-height:1.2;letter-spacing:-.035em;margin:8px 0 0;font-weight:620}
+.pr-shead p{margin:10px 0 0;color:var(--soft);font-size:15px;max-width:680px;word-break:keep-all}
+
+@media(max-width:860px){
+  .pr-phases{grid-template-columns:1fr 1fr}
+  .pr-phase:nth-child(2):after{display:none}
+  .pr-deliver{grid-template-columns:1fr 1fr}
+  .pr-trust,.pr-faq{grid-template-columns:1fr}
+  .pr-cta{grid-template-columns:1fr;padding:32px 24px}
+  .pr-cta-act{justify-content:flex-start}
+}
+@media(max-width:560px){
+  .pr-phases{grid-template-columns:1fr}
+  .pr-phase{border-right:0;border-bottom:1px solid var(--line)}
+  .pr-phase:last-child{border-bottom:0}
+  .pr-phase:after{display:none !important}
+  .pr-deliver{grid-template-columns:1fr 1fr}
+  .pr-step{grid-template-columns:48px 1fr;gap:14px}
+  .pr-step:before{left:23px}
+  .pr-node{width:48px;height:48px;font-size:18px}
+  .pr-card{padding:20px}
+}
