@@ -4,6 +4,6 @@ Allow: /
 User-agent: Yeti
 Allow: /
 
-Sitemap: https://spacebogam.com/sitemap.xml
-Sitemap: https://spacebogam.com/feed.xml
-# Domain: spacebogam.com. Update sitemap URLs with scripts_configure_domain.py if the domain changes.
+Sitemap: https://spacebogam.kr/sitemap.xml
+Sitemap: https://spacebogam.kr/feed.xml
+# Domain: spacebogam.kr. Update sitemap URLs with scripts_configure_domain.py if the domain changes.

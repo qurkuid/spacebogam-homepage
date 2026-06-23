@@ -24,7 +24,7 @@ def main() -> None:
 
     replacements = {
         OLD: target,
-        cfg.get("candidateDomain", "https://spacebogam.com").rstrip("/"): target,
+        cfg.get("candidateDomain", "https://spacebogam.kr").rstrip("/"): target,
     }
     for path in html_files():
         text = path.read_text(encoding="utf-8", errors="ignore")
