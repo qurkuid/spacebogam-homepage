@@ -295,3 +295,24 @@ footer{background:var(--deep);color:#fff;padding:46px 0}
   .case-img{aspect-ratio:16/10}
   .specs{grid-template-columns:1fr}
 }
+
+/* ════════ 홈 섹션 보강 (공간유형·처음상담·견적) ════════ */
+/* 공간 유형 — 아이콘 + 체크포인트로 밀도 ↑ */
+.space{min-height:0;justify-content:flex-start;padding:22px 22px 20px}
+.space .ic{width:42px;height:42px;border-radius:12px;background:var(--paper);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--terra);margin-bottom:14px}
+.space .ic svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.space small{margin-top:5px}
+.space .pts{display:block;font-size:12px;color:var(--soft);border-top:1px solid var(--line);padding-top:11px;margin-top:13px;line-height:1.55}
+.space em{margin-top:12px}
+
+/* 처음 상담 — 아이콘 + 보조 라인 */
+.blend-card{display:flex;flex-direction:column;min-height:0}
+.blend-card .ic{width:40px;height:40px;border-radius:12px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--terra);margin-bottom:15px}
+.blend-card .ic svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.blend-card .sub{margin-top:auto;padding-top:14px;font-size:12.5px;color:var(--wood);font-weight:560;letter-spacing:-.01em}
+
+/* 견적 카드 — 번호 배지 */
+.cost{position:relative}
+.cost b{display:block;padding-right:30px}
+.cost .num{position:absolute;top:22px;right:22px;font-size:13px;font-weight:700;color:oklch(0.595 0.13 46 / .5)}
+.cost.notice .num{color:var(--sand)}
