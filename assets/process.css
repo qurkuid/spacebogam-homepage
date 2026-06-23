@@ -112,3 +112,28 @@
   .pr-node{width:48px;height:48px;font-size:18px}
   .pr-card{padding:20px}
 }
+
+/* ── 현장 점검 리스트(현장 보고서) 미리보기 — INTM 실제 양식 ── */
+.pr-report{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+.pr-rhead{padding:18px 22px;border-bottom:1px solid var(--line);background:var(--paper);display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.pr-rhead .t{font-size:16px;font-weight:700;letter-spacing:-.02em}
+.pr-rhead .t small{display:block;font-size:12px;font-weight:500;color:var(--soft);letter-spacing:0;margin-top:3px}
+.pr-rhead .stamp{font-size:11px;font-weight:700;color:var(--brown);border:1px solid var(--brown);border-radius:6px;padding:4px 9px;white-space:nowrap}
+.pr-rtabs{display:flex;gap:6px;flex-wrap:wrap;padding:13px 22px;border-bottom:1px solid var(--line)}
+.pr-rtab{font:inherit;font-size:13px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--soft);border-radius:999px;padding:7px 14px;transition:.15s}
+.pr-rtab:hover{border-color:var(--brown);color:var(--brown)}
+.pr-rtab.on{background:var(--deep);color:#fff;border-color:var(--deep)}
+.pr-rbody{padding:6px 22px 20px}
+.pr-rcat{margin-top:16px}
+.pr-rcat .cn{font-size:11.5px;font-weight:700;color:var(--brown);letter-spacing:.07em;padding-bottom:7px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.pr-ritem{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.pr-ritem:last-child{border-bottom:0}
+.pr-rf{font-size:13.5px;color:var(--ink);word-break:keep-all;line-height:1.4}
+.pr-rc{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0}
+.pr-opt{font-size:11.5px;color:var(--soft);border:1px solid var(--line);border-radius:7px;padding:3px 9px;background:var(--paper);white-space:nowrap}
+.pr-mm{font-size:12px;color:var(--soft);border:1px dashed var(--line);border-radius:7px;padding:3px 11px;min-width:62px;text-align:right;white-space:nowrap}
+.pr-mm b{color:var(--ink);font-weight:600}
+.pr-txt{font-size:11.5px;color:#a59a90;border:1px dashed var(--line);border-radius:7px;padding:3px 11px;white-space:nowrap}
+.pr-chk{font-size:12px;color:var(--soft);white-space:nowrap}
+.pr-rnote{font-size:12.5px;color:var(--soft);margin-top:14px;line-height:1.6}
+@media(max-width:560px){.pr-ritem{flex-direction:column;align-items:flex-start;gap:7px}.pr-rc{justify-content:flex-start}.pr-rf{font-weight:560}}

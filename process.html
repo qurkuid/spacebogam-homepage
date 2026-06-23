@@ -132,6 +132,26 @@
     </div>
   </section>
 
+  <!-- 현장 점검 리스트 (INTM 실제 양식) -->
+  <section class="pr-section">
+    <div class="pr-wrap">
+      <div class="pr-shead">
+        <div class="k">현장 보고서 · 점검 리스트</div>
+        <h2>실측 때 공간마다 이 항목들을 직접 확인합니다</h2>
+        <p>아래는 공간보감이 현장 실측에서 사용하는 점검 리스트입니다. 공간을 눌러 어떤 항목을 확인하고 기록하는지 직접 살펴보세요.</p>
+      </div>
+      <div class="pr-report">
+        <div class="pr-rhead">
+          <div class="t">현장 점검 리스트<small>실측 기준 · 시공 전 점검</small></div>
+          <div class="stamp">SAMPLE</div>
+        </div>
+        <div class="pr-rtabs" id="pr-rtabs"></div>
+        <div class="pr-rbody" id="pr-rbody"></div>
+      </div>
+      <p class="pr-rnote">실제 보고서에는 공간별 치수와 점검 결과, 현장 사진이 함께 기록되어 실측 견적서와 도면의 근거가 됩니다.</p>
+    </div>
+  </section>
+
   <!-- 산출물 -->
   <section class="pr-section">
     <div class="pr-wrap">
@@ -202,5 +222,32 @@
 </main>
 
 <footer><div class="wrap">공간보감 · 부산 인테리어 상담 · <a href="https://intm.kr/consultation/ggbg">상담 신청</a></div></footer>
+<script type="application/json" id="pr-insp-data">[{"space":"전체","items":[{"cat":"준비물","f":"단위세대평면도 준비","t":"checkbox","o":null,"u":null},{"cat":"준비물","f":"실측 준비물 (줄자, 레이저자 등)","t":"checkbox","o":null,"u":null},{"cat":"설비","f":"수도계량기 위치 확인","t":"text","o":null,"u":null},{"cat":"설비","f":"가스계량기, 배관 위치 확인","t":"text","o":null,"u":null},{"cat":"기타","f":"통신함 여부 확인 (인터넷선 인입)","t":"radio","o":["있음","없음"],"u":null},{"cat":"기타","f":"자재, 폐기물 반출 경로 및 방법 확인","t":"text","o":null,"u":null},{"cat":"기타","f":"특이사항","t":"text","o":null,"u":null}]},{"space":"거실","items":[{"cat":"치수","f":"가로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"세로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"높이 치수","t":"dimension","o":null,"u":"mm"},{"cat":"구조/간섭","f":"구조 간섭","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 처짐 및 자재 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 누수 및 결로 흔적 확인","t":"radio","o":["있음","없음"],"u":null},{"cat":"천장","f":"천장 깊이 확인","t":"dimension","o":null,"u":"mm"},{"cat":"천장","f":"커튼박스 사이즈 확인","t":"dimension","o":null,"u":"mm"},{"cat":"천장","f":"화재 감지기 종류와 수량","t":"text","o":null,"u":null},{"cat":"천장","f":"스프링클러 위치 및 수량","t":"text","o":null,"u":null},{"cat":"천장","f":"전열교환기 디퓨저 위치 및 수량","t":"text","o":null,"u":null},{"cat":"천장","f":"각 공간 조명 회로 체크","t":"text","o":null,"u":null},{"cat":"벽체","f":"스위치 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"콘센트 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"창호 사이즈 확인","t":"dimension","o":null,"u":"mm"},{"cat":"벽체","f":"벽체 상태","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"바닥","f":"기존 바닥재 확인 (덧방 여부)","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"설비","f":"에어컨 배관라인, 실외기 위치 확인","t":"text","o":null,"u":null},{"cat":"기타","f":"특이사항","t":"text","o":null,"u":null}]},{"space":"주방","items":[{"cat":"치수","f":"가로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"세로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"높이 치수","t":"dimension","o":null,"u":"mm"},{"cat":"구조/간섭","f":"구조 간섭","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 처짐 및 자재 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 누수 및 결로 흔적 확인","t":"radio","o":["있음","없음"],"u":null},{"cat":"천장","f":"각 공간 조명 회로 체크","t":"text","o":null,"u":null},{"cat":"천장","f":"화재 감지기 종류와 수량","t":"text","o":null,"u":null},{"cat":"벽체","f":"스위치 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"콘센트 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"창호 사이즈 확인","t":"dimension","o":null,"u":"mm"},{"cat":"벽체","f":"벽체 상태","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"바닥","f":"기존 바닥재 확인 (덧방 여부)","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"설비","f":"급수 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"설비","f":"배수 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"기타","f":"특이사항","t":"text","o":null,"u":null}]},{"space":"안방","items":[{"cat":"치수","f":"가로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"세로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"높이 치수","t":"dimension","o":null,"u":"mm"},{"cat":"구조/간섭","f":"구조 간섭","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 처짐 및 자재 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 누수 및 결로 흔적 확인","t":"radio","o":["있음","없음"],"u":null},{"cat":"천장","f":"커튼박스 사이즈 확인","t":"dimension","o":null,"u":"mm"},{"cat":"천장","f":"각 공간 조명 회로 체크","t":"text","o":null,"u":null},{"cat":"천장","f":"화재 감지기 종류와 수량","t":"text","o":null,"u":null},{"cat":"천장","f":"스프링클러 위치 및 수량","t":"text","o":null,"u":null},{"cat":"천장","f":"전열교환기 디퓨저 위치 및 수량","t":"text","o":null,"u":null},{"cat":"벽체","f":"스위치 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"콘센트 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"창호 사이즈 확인","t":"dimension","o":null,"u":"mm"},{"cat":"벽체","f":"벽체 상태","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"벽체","f":"문 사이즈 확인","t":"dimension","o":null,"u":"mm"},{"cat":"바닥","f":"기존 바닥재 확인 (덧방 여부)","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"설비","f":"에어컨 배관라인, 실외기 위치 확인","t":"text","o":null,"u":null},{"cat":"기타","f":"특이사항","t":"text","o":null,"u":null}]},{"space":"공용욕실","items":[{"cat":"치수","f":"가로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"세로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"높이 치수","t":"dimension","o":null,"u":"mm"},{"cat":"구조/간섭","f":"구조 간섭","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 처짐 및 자재 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 누수 및 결로 흔적 확인","t":"radio","o":["있음","없음"],"u":null},{"cat":"천장","f":"화재 감지기 종류와 수량","t":"text","o":null,"u":null},{"cat":"천장","f":"전열교환기 디퓨저 위치 및 수량","t":"text","o":null,"u":null},{"cat":"벽체","f":"결로, 곰팡이 확인","t":"radio","o":["있음","없음"],"u":null},{"cat":"벽체","f":"스위치 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"콘센트 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"벽체 상태","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"벽체","f":"문 사이즈 확인","t":"dimension","o":null,"u":"mm"},{"cat":"바닥","f":"기존 바닥재 확인 (덧방 여부)","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"설비","f":"급수 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"설비","f":"배수 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"기타","f":"특이사항","t":"text","o":null,"u":null}]},{"space":"현관","items":[{"cat":"치수","f":"가로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"세로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"높이 치수","t":"dimension","o":null,"u":"mm"},{"cat":"구조/간섭","f":"구조 간섭","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 처짐 및 자재 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"각 공간 조명 회로 체크","t":"text","o":null,"u":null},{"cat":"벽체","f":"월패드(인터폰), 도어락 모델 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"스위치 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"콘센트 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"전열교환기 스위치 및 모델 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"문 사이즈 확인","t":"dimension","o":null,"u":"mm"},{"cat":"벽체","f":"벽체 상태","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"바닥","f":"기존 바닥재 확인 (덧방 여부)","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"기타","f":"특이사항","t":"text","o":null,"u":null}]}]</script>
+<script>
+(function(){
+  var el=document.getElementById('pr-insp-data'); if(!el) return;
+  var data=JSON.parse(el.textContent);
+  var tabs=document.getElementById('pr-rtabs'), body=document.getElementById('pr-rbody');
+  function ctrl(it){
+    if(it.t==='dimension') return '<span class="pr-mm">— <b>'+(it.u||'mm')+'</b></span>';
+    if(it.t==='checkbox') return '<span class="pr-chk">\u2610 준비</span>';
+    if(it.t==='radio' && it.o) return it.o.map(function(o){return '<span class="pr-opt">'+o+'</span>';}).join('');
+    return '<span class="pr-txt">현장 확인</span>';
+  }
+  function render(idx){
+    var sp=data[idx], cats=[], map={};
+    sp.items.forEach(function(it){ if(!map[it.cat]){map[it.cat]=[];cats.push(it.cat);} map[it.cat].push(it); });
+    body.innerHTML=cats.map(function(c){
+      return '<div class="pr-rcat"><div class="cn">'+c+'</div>'+map[c].map(function(it){
+        return '<div class="pr-ritem"><span class="pr-rf">'+it.f+'</span><span class="pr-rc">'+ctrl(it)+'</span></div>';
+      }).join('')+'</div>';
+    }).join('');
+    [].forEach.call(tabs.children,function(b,i){b.classList.toggle('on',i===idx);});
+  }
+  tabs.innerHTML=data.map(function(s,i){return '<button class="pr-rtab'+(i===0?' on':'')+'" type="button">'+s.space+'</button>';}).join('');
+  [].forEach.call(tabs.children,function(b,i){b.addEventListener('click',function(){render(i);});});
+  render(0);
+})();
+</script>
 </body>
 </html>
