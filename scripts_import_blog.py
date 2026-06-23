@@ -7,7 +7,7 @@ import subprocess
 import sys
 import textwrap
 import html
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from datetime import datetime
 from email.utils import parsedate_to_datetime
 from pathlib import Path
@@ -17,7 +17,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parent
 RSS_URL = "https://rss.blog.naver.com/baek1985.xml"
 BLOG_ID = "baek1985"
-SITE_URL = "https://qurkuid.github.io/spacebogam-homepage"
+SITE_URL = "https://spacebogam.kr"
 BRAND = "공간보감"
 NAVER_BLOG = "https://blog.naver.com/baek1985"
 INSTAGRAM = "https://instagram.com/ggbg.official"
@@ -35,6 +35,7 @@ class BlogPost:
     cover: str
     source: str
     html: str
+    images: list[str] = field(default_factory=list)
 
 
 def run(cmd: list[str], cwd: Path | None = None, timeout: int = 180) -> str:
@@ -58,6 +59,32 @@ def fetch_url(url: str, out: Path) -> None:
 
 def sh_quote(s: str) -> str:
     return "'" + s.replace("'", "'\\''") + "'"
+
+
+def localize_image(url: str, dest: Path, width: int = 1000) -> bool:
+    """네이버 이미지는 브라우저 핫링크가 막혀 있어, referer 없이 받아 로컬에 리사이즈 저장한다."""
+    if dest.exists() and dest.stat().st_size > 1500:
+        return True
+    try:
+        from urllib.request import Request, urlopen
+        req = Request(url, headers={"User-Agent": "Mozilla/5.0 (Macintosh)"})  # referer 미지정
+        data = urlopen(req, timeout=30).read()
+    except Exception as e:
+        print("  img download failed", e)
+        return False
+    if len(data) < 1500:
+        return False
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    tmp = dest.with_suffix(".src")
+    tmp.write_bytes(data)
+    try:
+        subprocess.run(["sips", "-Z", str(width), "-s", "format", "jpeg", "-s", "formatOptions", "80",
+                        str(tmp), "--out", str(dest)], check=True, capture_output=True, timeout=60)
+    except Exception:
+        dest.write_bytes(data)  # sips 없으면 원본 그대로
+    finally:
+        tmp.unlink(missing_ok=True)
+    return dest.exists() and dest.stat().st_size > 1500
 
 
 def slugify(title: str, link: str) -> str:
@@ -98,8 +125,9 @@ def tags_for(title: str, text: str) -> list[str]:
     return tags[:8] or ["공간보감"]
 
 
-def extract_post_html(raw: str, rss_desc: str) -> tuple[str, str]:
+def extract_post_html(raw: str, rss_desc: str) -> tuple[str, str, list[str]]:
     cover = ""
+    images: list[str] = []
     og = re.search(r'<meta property="og:image" content="([^"]+)"', raw)
     if og:
         cover = html.unescape(og.group(1))
@@ -129,6 +157,11 @@ def extract_post_html(raw: str, rss_desc: str) -> tuple[str, str]:
                     continue
                 blocks.append(t)
             text = " ".join(blocks)
+            for im in body_el.select("img"):
+                u = im.get("data-lazy-src") or im.get("src") or ""
+                u = html.unescape(u)
+                if u and "pstatic" in u and u not in images:
+                    images.append(u)
     except Exception:
         text = ""
     if not text:
@@ -150,8 +183,7 @@ def extract_post_html(raw: str, rss_desc: str) -> tuple[str, str]:
     # Homepage-friendly cleanup: remove repeated greetings only lightly; do not invent content.
     text = re.sub(r"안녕하세요[,. ]*사람을 위한 인테리어[,. ]*공간보감 대표 백창석입니다[.]?", "", text).strip()
     text = re.sub(r"안녕하세요[,. ]*사람을 위한 인테리어[,. ]*공간보감입니다[.]?", "", text).strip()
-    text = re.sub(r"(다\\.)\\s+", r"\\1\n", text)
-    text = re.sub(r"([.!?。])\\s+", r"\\1\n", text)
+    text = re.sub(r"([.!?。])\s+", r"\1\n", text)
     sentences = text.split("\n")
     paras = []
     cur = []
@@ -165,29 +197,43 @@ def extract_post_html(raw: str, rss_desc: str) -> tuple[str, str]:
             cur = []
     if cur:
         paras.append(" ".join(cur))
-    paras = [p for p in paras if len(p) > 30][:18]
+    paras = [p for p in paras if len(p) > 30][:90]
     content = "\n".join(f"<p>{html.escape(p)}</p>" for p in paras)
-    return content, cover
+    return content, cover, images
 
 
 def render_listing(posts: list[BlogPost], nested: bool = False) -> str:
     prefix = "../" if nested else ""
-    cards = "\n".join(f'''<article class="post-card"><a href="{prefix}blog/{p.slug}.html"><img src="{html.escape(p.cover or 'https://intm.kr/images/portfolio/ad270e74-a62c-4f19-a25a-c9e0eb91cf34/0bc5f79c-ab61-4780-ab73-6939c7454ec8.webp')}" alt="{html.escape(p.title)}"></a><div><span class="cat">{html.escape(p.category)}</span><h2><a href="{prefix}blog/{p.slug}.html">{html.escape(p.title)}</a></h2><p>{html.escape(p.excerpt)}</p><div class="meta"><span>{p.date}</span><span>{' · '.join(html.escape(t) for t in p.tags[:3])}</span></div></div></article>''' for p in posts)
+    cards = "\n".join(f'''<article class="post-card"><a href="{prefix}blog/{p.slug}.html"><img src="{html.escape(p.cover or 'https://intm.kr/images/portfolio/ad270e74-a62c-4f19-a25a-c9e0eb91cf34/0bc5f79c-ab61-4780-ab73-6939c7454ec8.webp')}" alt="{html.escape(p.title)}" loading="lazy" referrerpolicy="no-referrer"></a><div><span class="cat">{html.escape(p.category)}</span><h2><a href="{prefix}blog/{p.slug}.html">{html.escape(p.title)}</a></h2><p>{html.escape(p.excerpt)}</p><div class="meta"><span>{p.date}</span><span>{' · '.join(html.escape(t) for t in p.tags[:3])}</span></div></div></article>''' for p in posts)
     return page_shell("공간보감 블로그 | 부산 인테리어 이야기", "부산 아파트 인테리어, 견적, 시공 과정, 포트폴리오를 공간보감 블로그에서 확인하세요.", f'''<section class="hero"><div class="wrap"><div class="eyebrow">GONGBANG BLOG</div><h1>공간보감 블로그</h1><p>네이버 블로그에 쌓아온 상담 기록과 현장 이야기를 홈페이지용으로 다시 정리합니다. 견적, 공사 과정, 지역별 사례를 차분히 볼 수 있습니다.</p><div class="actions"><a class="btn dark" href="https://intm.kr/consultation/ggbg">상담 신청</a><a class="btn" href="{NAVER_BLOG}" target="_blank" rel="noopener">네이버 블로그</a><a class="btn" href="{INSTAGRAM}" target="_blank" rel="noopener">Instagram</a></div></div></section><section><div class="wrap"><div class="toolbar"><a href="#all">전체</a><a href="#estimate">견적·상담</a><a href="#area">지역 사례</a><a href="{prefix}feed.xml">RSS</a></div><div class="posts">{cards}</div></div></section>''', canonical=("blog/" if nested else "blog.html"), prefix=prefix)
 
 
 def render_post(p: BlogPost) -> str:
     tag_html = "".join(f"<span>{html.escape(t)}</span>" for t in p.tags)
-    cover = f'<img class="cover" src="{html.escape(p.cover)}" alt="{html.escape(p.title)}">' if p.cover else ""
-    body = f'''<section class="post-hero"><div class="wrap"><a class="back" href="../blog.html">← 블로그 목록</a><div class="eyebrow">{html.escape(p.category)}</div><h1>{html.escape(p.title)}</h1><p>{html.escape(p.excerpt)}</p><div class="meta"><span>{p.date}</span><a href="{html.escape(p.source)}" target="_blank" rel="noopener">네이버 원문</a></div><div class="tags">{tag_html}</div></div></section><section><div class="wrap article">{cover}<div class="notice">이 글은 네이버 블로그 원문을 홈페이지 독자가 읽기 쉽도록 문단과 검색 문맥을 정리한 이전본입니다. 원문은 하단 링크에서 확인할 수 있습니다.</div>{p.html}<div class="source-box"><b>원문 보기</b><p>네이버 블로그 원문과 댓글, 이웃 반응은 아래 링크에서 확인할 수 있습니다.</p><a class="btn dark" href="{html.escape(p.source)}" target="_blank" rel="noopener">네이버 원문 열기</a><a class="btn" href="https://intm.kr/consultation/ggbg">상담 신청</a></div></div></section>'''
+    # 미리보기: 이미지 2장 + 본문 1/3, 나머지는 네이버 원문으로 유도
+    seen: list[str] = []
+    for u in ([p.cover] if p.cover else []) + p.images:
+        if u and u not in seen:
+            seen.append(u)
+    pics = seen[:2]
+    imgs_html = ""
+    if pics:
+        items = "".join(f'<img src="{html.escape(u)}" alt="{html.escape(p.title)}" loading="lazy" referrerpolicy="no-referrer">' for u in pics)
+        imgs_html = f'<div class="post-images cols{len(pics)}">{items}</div>'
+    paras = re.findall(r"<p>.*?</p>", p.html, re.S)
+    keep = max(2, -(-len(paras) // 3))  # 전체 문단의 1/3 (올림)
+    preview = "".join(paras[:keep])
+    body = f'''<section class="post-hero"><div class="wrap"><a class="back" href="../blog.html">← 블로그 목록</a><div class="eyebrow">{html.escape(p.category)}</div><h1>{html.escape(p.title)}</h1><p>{html.escape(p.excerpt)}</p><div class="meta"><span>{p.date}</span><a href="{html.escape(p.source)}" target="_blank" rel="noopener">네이버 원문</a></div><div class="tags">{tag_html}</div></div></section><section><div class="wrap article">{imgs_html}{preview}<div class="source-box"><b>전체 내용은 네이버 블로그에서</b><p>이 페이지는 사진 일부와 글의 앞부분만 담은 미리보기입니다. 전체 사진과 본문, 댓글은 네이버 원문에서 이어 보실 수 있습니다.</p><a class="btn dark" href="{html.escape(p.source)}" target="_blank" rel="noopener">네이버 원문에서 이어 보기</a><a class="btn" href="https://intm.kr/consultation/ggbg">상담 신청</a></div></div></section>'''
     return page_shell(p.title + " | 공간보감 블로그", p.excerpt, body, canonical=f"blog/{p.slug}.html", prefix="../", article=p)
 
 
 def page_shell(title: str, description: str, main: str, canonical: str, prefix: str = "", article: BlogPost | None = None) -> str:
+    cov = (article.cover if article else "") or ""
+    og_image = (SITE_URL + cov) if cov.startswith("/") else (cov or "https://intm.kr/images/portfolio/ad270e74-a62c-4f19-a25a-c9e0eb91cf34/0bc5f79c-ab61-4780-ab73-6939c7454ec8.webp")
     article_schema = ""
     if article:
-        article_schema = f'''<script type="application/ld+json">{json.dumps({"@context":"https://schema.org","@type":"BlogPosting","headline":article.title,"datePublished":article.date,"dateModified":article.date,"image":article.cover,"author":{"@type":"Person","name":"백창석"},"publisher":{"@type":"LocalBusiness","name":"공간보감","url":SITE_URL},"mainEntityOfPage":SITE_URL+"/"+canonical,"description":article.excerpt}, ensure_ascii=False)}</script>'''
-    return f'''<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{html.escape(title)}</title><meta name="description" content="{html.escape(description[:155])}"><meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1"><link rel="canonical" href="{SITE_URL}/{canonical}"><meta property="og:type" content="{'article' if article else 'website'}"><meta property="og:locale" content="ko_KR"><meta property="og:site_name" content="공간보감"><meta property="og:title" content="{html.escape(title)}"><meta property="og:description" content="{html.escape(description[:180])}"><meta property="og:url" content="{SITE_URL}/{canonical}"><meta property="og:image" content="{html.escape((article.cover if article else '') or 'https://intm.kr/images/portfolio/ad270e74-a62c-4f19-a25a-c9e0eb91cf34/0bc5f79c-ab61-4780-ab73-6939c7454ec8.webp')}">{article_schema}<style>:root{{--ink:#24211f;--soft:#756f68;--bg:#fff;--paper:#fbfaf8;--line:#e8e1d8;--brown:#7a604b;--deep:#171411;--max:1120px;--shadow:0 18px 54px rgba(45,32,20,.08)}}*{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Pretendard","Noto Sans KR",sans-serif;line-height:1.75;letter-spacing:-.018em}}a{{text-decoration:none;color:inherit}}.wrap{{width:min(var(--max),calc(100% - 44px));margin:auto}}.top{{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}}.top .wrap{{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px}}.brand{{font-size:23px;font-weight:620}}.nav{{display:flex;gap:16px;flex-wrap:wrap;color:#403933;font-size:14px}}.cta{{background:var(--deep);color:#fff;border-radius:999px;padding:10px 15px;white-space:nowrap}}.hero,.post-hero{{padding:82px 0 54px;border-bottom:1px solid var(--line)}}.eyebrow{{font-size:12px;color:var(--brown);letter-spacing:.15em;text-transform:uppercase;margin-bottom:14px}}h1{{font-size:clamp(36px,5vw,64px);line-height:1.1;letter-spacing:-.045em;font-weight:520;margin:0 0 18px}}.hero p,.post-hero p{{font-size:20px;color:var(--soft);max-width:820px;word-break:keep-all}}.actions,.meta,.tags,.toolbar{{display:flex;gap:10px;flex-wrap:wrap;align-items:center}}.btn,.toolbar a{{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:999px;padding:10px 15px;background:#fff;font-weight:520}}.btn.dark{{background:var(--deep);border-color:var(--deep);color:#fff}}section{{padding:58px 0;border-bottom:1px solid var(--line)}}.posts{{display:grid;gap:18px}}.post-card{{display:grid;grid-template-columns:280px 1fr;gap:24px;border:1px solid var(--line);background:var(--paper);border-radius:28px;padding:18px;box-shadow:0 12px 32px rgba(45,32,20,.045)}}.post-card img{{width:100%;height:190px;object-fit:cover;border-radius:20px;background:#ddd}}.post-card h2{{font-size:27px;line-height:1.25;letter-spacing:-.035em;margin:7px 0 9px;font-weight:560}}.post-card p{{margin:0;color:var(--soft);word-break:keep-all}}.cat{{font-size:12px;color:var(--brown);letter-spacing:.08em}}.meta{{font-size:13px;color:var(--soft);margin-top:12px}}.back{{color:var(--brown);font-size:14px}}.tags span{{border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:#fff;font-size:12px;color:#514a42}}.article{{max-width:860px}}.cover{{width:100%;max-height:520px;object-fit:cover;border-radius:30px;margin-bottom:28px;box-shadow:var(--shadow)}}.article p{{font-size:18px;color:#3f3933;word-break:keep-all;margin:0 0 20px}}.notice,.source-box{{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:20px;margin:22px 0;color:var(--soft)}}.source-box b{{color:var(--ink)}}footer{{background:#8a8178;color:#fff;padding:38px 0}}footer a{{text-decoration:underline}}@media(max-width:760px){{.top .wrap{{min-height:58px;gap:10px}}.brand{{font-size:20px}}.nav{{flex:1;overflow-x:auto;flex-wrap:nowrap;gap:14px;white-space:nowrap}}.cta{{font-size:12px;padding:8px 12px}}.post-card{{grid-template-columns:1fr}}.post-card img{{height:auto;aspect-ratio:16/10}}.wrap{{width:min(var(--max),calc(100% - 28px))}}section{{padding:44px 0}}}}</style></head><body><header class="top"><div class="wrap"><a class="brand" href="{prefix}index.html">공간보감</a><nav class="nav"><a href="{prefix}index.html">메인</a><a href="{prefix}portfolio.html">포트폴리오</a><a href="{prefix}blog.html">블로그</a><a href="{prefix}estimate.html">견적준비</a><a href="{NAVER_BLOG}" target="_blank" rel="noopener">네이버 블로그</a><a href="{INSTAGRAM}" target="_blank" rel="noopener">Instagram</a></nav><a class="cta" href="https://intm.kr/consultation/ggbg">상담 신청</a></div></header><main>{main}</main><footer><div class="wrap">공간보감 · 부산 인테리어 상담 · <a href="{NAVER_BLOG}" target="_blank" rel="noopener">네이버 블로그</a> · <a href="{INSTAGRAM}" target="_blank" rel="noopener">Instagram</a></div></footer></body></html>'''
+        article_schema = f'''<script type="application/ld+json">{json.dumps({"@context":"https://schema.org","@type":"BlogPosting","headline":article.title,"datePublished":article.date,"dateModified":article.date,"image":og_image,"author":{"@type":"Person","name":"백창석"},"publisher":{"@type":"LocalBusiness","name":"공간보감","url":SITE_URL},"mainEntityOfPage":SITE_URL+"/"+canonical,"description":article.excerpt}, ensure_ascii=False)}</script>'''
+    return f'''<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{html.escape(title)}</title><meta name="description" content="{html.escape(description[:155])}"><meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1"><link rel="canonical" href="{SITE_URL}/{canonical}"><meta property="og:type" content="{'article' if article else 'website'}"><meta property="og:locale" content="ko_KR"><meta property="og:site_name" content="공간보감"><meta property="og:title" content="{html.escape(title)}"><meta property="og:description" content="{html.escape(description[:180])}"><meta property="og:url" content="{SITE_URL}/{canonical}"><meta property="og:image" content="{html.escape(og_image)}">{article_schema}<link rel="stylesheet" href="{prefix}assets/blog.css"></head><body><header class="top"><div class="wrap"><a class="brand" href="{prefix}index.html">공간보감</a><nav class="nav"><a href="{prefix}overview.html">회사소개</a><a href="{prefix}process.html">진행과정</a><a href="{prefix}portfolio.html">포트폴리오</a><a href="{prefix}living.html">주거</a><a href="{prefix}commercial.html">상업공간</a><a href="{prefix}estimate.html">견적준비</a></nav><a class="cta" href="https://intm.kr/consultation/ggbg">상담 신청</a></div></header><main>{main}</main><footer><div class="wrap">공간보감 · 부산 인테리어 상담 · <a href="{NAVER_BLOG}" target="_blank" rel="noopener">네이버 블로그</a> · <a href="{INSTAGRAM}" target="_blank" rel="noopener">Instagram</a></div></footer></body></html>'''
 
 
 def load_rss() -> list[dict]:
@@ -226,7 +272,19 @@ def import_posts(limit: int = 50) -> list[BlogPost]:
                 print("  fetch failed", e)
                 raw_path.write_text("", encoding="utf-8")
         raw = raw_path.read_text(encoding="utf-8", errors="ignore")
-        body, cover = extract_post_html(raw, item["description"])
+        body, cover, images = extract_post_html(raw, item["description"])
+        # 미리보기 이미지 2장: 핫링크 회피 위해 받아서 자체 호스팅 (/assets/blog/<slug>-N.jpg)
+        preview_src: list[str] = []
+        for u in ([cover] if cover else []) + images:
+            if u and u not in preview_src:
+                preview_src.append(u)
+        local: list[str] = []
+        for n, u in enumerate(preview_src[:2], 1):
+            dest = ROOT / "assets" / "blog" / f"{slug}-{n}.jpg"
+            if localize_image(u, dest):
+                local.append(f"/assets/blog/{slug}-{n}.jpg")
+        cover = local[0] if local else ""
+        images = local
         desc = clean_text(item["description"])
         excerpt = desc[:180].rstrip() + ("…" if len(desc) > 180 else "")
         try:
@@ -235,7 +293,7 @@ def import_posts(limit: int = 50) -> list[BlogPost]:
             date = "2026-01-01"
         category = category_for(title, desc)
         tags = tags_for(title, desc)
-        posts.append(BlogPost(slug, title, date, category, tags, excerpt, cover, link, body))
+        posts.append(BlogPost(slug, title, date, category, tags, excerpt, cover, link, body, images))
     return posts
 
 
