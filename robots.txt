@@ -4,6 +4,6 @@ Allow: /
 User-agent: Yeti
 Allow: /
 
-Sitemap: https://qurkuid.github.io/spacebogam-homepage/sitemap.xml
-Sitemap: https://qurkuid.github.io/spacebogam-homepage/feed.xml
-# Domain candidate: ggbg.kr. Update sitemap URLs after custom domain is confirmed.
+Sitemap: https://spacebogam.com/sitemap.xml
+Sitemap: https://spacebogam.com/feed.xml
+# Domain: spacebogam.com. Update sitemap URLs with scripts_configure_domain.py if the domain changes.
