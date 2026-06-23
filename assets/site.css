@@ -27,7 +27,7 @@
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Pretendard","Noto Sans KR","Segoe UI",sans-serif;
-  line-height:1.72;letter-spacing:-.018em;font-weight:400;-webkit-font-smoothing:antialiased}
+  line-height:1.62;letter-spacing:-.018em;font-weight:400;-webkit-font-smoothing:antialiased}
 a{text-decoration:none;color:inherit}
 img{max-width:100%}
 .wrap{width:min(var(--max),calc(100% - 44px));margin:auto}
@@ -48,7 +48,7 @@ img{max-width:100%}
 section{padding:84px 0;border-bottom:1px solid var(--line)}
 .head{display:grid;grid-template-columns:220px 1fr;gap:36px;margin-bottom:38px}
 .kicker{font-size:12px;color:var(--terra);font-weight:600;letter-spacing:.13em;text-transform:uppercase}
-.head h2{font-size:clamp(28px,3.2vw,42px);line-height:1.2;letter-spacing:-.035em;margin:0;font-weight:560}
+.head h2{font-size:clamp(21px,2.5vw,30px);line-height:1.2;letter-spacing:-.035em;margin:0;font-weight:560}
 .head p{font-size:18px;color:var(--soft);max-width:760px;word-break:keep-all;margin:18px 0 0;font-weight:350}
 
 /* ── 버튼 ── */
@@ -86,15 +86,15 @@ footer{background:var(--deep);color:#fff;padding:46px 0}
 .local-guide span,.related-guide span{font-size:13px;color:var(--soft)}
 
 /* ════════ 홈(index) 전용 ════════ */
-.home .hero{position:relative;min-height:680px;color:#fff;display:grid;align-items:end;overflow:hidden;background:var(--deep)}
+.home .hero{position:relative;min-height:430px;color:#fff;display:grid;align-items:end;overflow:hidden;background:var(--deep)}
 .home .hero:before{content:"";position:absolute;inset:0;
   background:linear-gradient(90deg,oklch(0.18 0.02 50 / .78),oklch(0.18 0.02 50 / .40),oklch(0.18 0.02 50 / .08)),
   var(--hero-img,none) center/cover}
 .home .hero:after{content:"";position:absolute;left:0;right:0;bottom:0;height:170px;background:linear-gradient(180deg,transparent,var(--bg))}
-.home .hero .wrap{position:relative;z-index:1;padding:124px 0 100px;display:grid;grid-template-columns:1.1fr .9fr;gap:54px;align-items:end}
+.home .hero .wrap{position:relative;z-index:1;padding:70px 0 56px;display:grid;grid-template-columns:1.1fr .9fr;gap:54px;align-items:end}
 .home .eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--sand);font-weight:600;margin-bottom:18px}
-.home h1{font-size:clamp(38px,5.7vw,70px);line-height:1.07;letter-spacing:-.045em;margin:0 0 24px;font-weight:560}
-.home .lead{font-size:clamp(18px,1.8vw,23px);max-width:720px;color:oklch(1 0 0 / .90);word-break:keep-all;margin:0 0 30px;font-weight:350}
+.home h1{font-size:clamp(27px,3.8vw,46px);line-height:1.07;letter-spacing:-.045em;margin:0 0 24px;font-weight:560}
+.home .lead{font-size:clamp(15px,1.3vw,17px);max-width:720px;color:oklch(1 0 0 / .90);word-break:keep-all;margin:0 0 30px;font-weight:350}
 .home .actions{display:flex;gap:12px;flex-wrap:wrap}
 .home .actions .btn.primary{background:#fff;color:var(--deep);border-color:#fff}
 .diagnosis{background:oklch(1 0 0 / .97);color:var(--ink);border-radius:28px;padding:26px;border:1px solid oklch(1 0 0 / .52);box-shadow:var(--shadow)}
@@ -169,7 +169,7 @@ footer{background:var(--deep);color:#fff;padding:46px 0}
 
 .proof{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
 .proof-panel{background:var(--paper-2);color:var(--ink);border:1px solid var(--line);border-radius:30px;padding:34px;box-shadow:var(--shadow-soft)}
-.proof-panel h2{font-size:clamp(28px,3.1vw,40px);line-height:1.2;letter-spacing:-.035em;margin:0 0 16px;font-weight:560}
+.proof-panel h2{font-size:clamp(21px,2.4vw,29px);line-height:1.2;letter-spacing:-.035em;margin:0 0 16px;font-weight:560}
 .proof-panel p{color:var(--soft);font-weight:350;margin:0}
 .proof-list{display:grid;gap:12px}
 .proof-item{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:20px}
@@ -194,8 +194,8 @@ footer{background:var(--deep);color:#fff;padding:46px 0}
 /* ════════ 포트폴리오 전용 ════════ */
 .portfolio .hero{padding:92px 0 60px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--paper),var(--bg))}
 .portfolio .eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--terra);font-weight:600;margin-bottom:18px}
-.portfolio .hero h1{font-size:clamp(38px,5.4vw,68px);line-height:1.08;letter-spacing:-.045em;margin:0 0 22px;font-weight:560}
-.portfolio .hero p{font-size:20px;color:var(--soft);max-width:780px;margin:0;word-break:keep-all;font-weight:350}
+.portfolio .hero h1{font-size:clamp(26px,3.6vw,42px);line-height:1.08;letter-spacing:-.045em;margin:0 0 22px;font-weight:560}
+.portfolio .hero p{font-size:16px;color:var(--soft);max-width:780px;margin:0;word-break:keep-all;font-weight:350}
 .hero-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
 .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 13px;font-size:13px;color:var(--soft)}
 
@@ -242,7 +242,7 @@ footer{background:var(--deep);color:#fff;padding:46px 0}
 .no-result{display:none;padding:40px 0;color:var(--soft);font-size:16px}
 
 .note{background:var(--paper-2);color:var(--ink);border:1px solid var(--line);border-radius:30px;padding:34px;display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:start}
-.note h2{font-size:clamp(28px,3.1vw,40px);line-height:1.2;letter-spacing:-.035em;margin:0;font-weight:560}
+.note h2{font-size:clamp(21px,2.4vw,29px);line-height:1.2;letter-spacing:-.035em;margin:0;font-weight:560}
 .note>div>p{color:var(--soft);font-weight:350;margin:12px 0 0}
 .note-list{display:grid;gap:12px}
 .note-item{border:1px solid var(--line);background:#fff;border-radius:18px;padding:16px}
@@ -281,7 +281,7 @@ footer{background:var(--deep);color:#fff;padding:46px 0}
   .space-grid,.cost-grid,.process,.faq,.blend,
   .grid,.diag-grid,
   .local-guide .links,.related-guide .links{grid-template-columns:1fr}
-  .home .hero h1{font-size:clamp(32px,11vw,46px)}
+  .home .hero h1{font-size:clamp(23px,6.5vw,32px)}
   .home .hero .wrap{padding:64px 0 60px}
   .cost,.process .step,.space{min-height:0}
   .standard{grid-template-columns:1fr;gap:8px;padding:24px}
