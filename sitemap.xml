@@ -2,6 +2,8 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://spacebogam.kr/</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/portfolio.html</loc><priority>0.7</priority></url>
+  <url><loc>https://spacebogam.kr/busan-interior.html</loc><priority>0.85</priority></url>
+  <url><loc>https://spacebogam.kr/busan-interior-company.html</loc><priority>0.85</priority></url>
   <url><loc>https://spacebogam.kr/buk-gu-interior.html</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/busan-30pyeong-apartment-interior.html</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/busan-40pyeong-apartment-remodeling.html</loc><priority>0.7</priority></url>
@@ -30,6 +32,16 @@
   <url><loc>https://spacebogam.kr/geumjeong-gu-interior.html</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/guseo-dong-apartment-interior.html</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/haeundae-interior.html</loc><priority>0.7</priority></url>
+  <url><loc>https://spacebogam.kr/marine-city-interior.html</loc><priority>0.78</priority></url>
+  <url><loc>https://spacebogam.kr/haeundae-lct-interior.html</loc><priority>0.78</priority></url>
+  <url><loc>https://spacebogam.kr/haeundae-ipark-interior.html</loc><priority>0.78</priority></url>
+  <url><loc>https://spacebogam.kr/doosan-zenith-interior.html</loc><priority>0.78</priority></url>
+  <url><loc>https://spacebogam.kr/centum-star-interior.html</loc><priority>0.78</priority></url>
+  <url><loc>https://spacebogam.kr/the-sharp-centum-park-interior.html</loc><priority>0.78</priority></url>
+  <url><loc>https://spacebogam.kr/namcheon-samick-beach-interior.html</loc><priority>0.78</priority></url>
+  <url><loc>https://spacebogam.kr/yongho-w-interior.html</loc><priority>0.78</priority></url>
+  <url><loc>https://spacebogam.kr/lg-metrocity-interior.html</loc><priority>0.78</priority></url>
+  <url><loc>https://spacebogam.kr/daeyeon-hillstate-interior.html</loc><priority>0.78</priority></url>
   <url><loc>https://spacebogam.kr/hwamyeong-interior.html</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/living-20py.html</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/living-30py.html</loc><priority>0.7</priority></url>
@@ -42,7 +54,6 @@
   <url><loc>https://spacebogam.kr/process.html</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/blog.html</loc><priority>0.9</priority></url>
   <url><loc>https://spacebogam.kr/blog/</loc><priority>0.9</priority></url>
-  <url><loc>https://spacebogam.kr/feed.xml</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/blog/224289898461-부산-아파트-인테리어-공간보감-포트폴리오-2025-2026.html</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/blog/224285757703-부산-구축-아파트-인테리어-견적-후회-없는.html</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/blog/224280575103-부산-인테리어-업체-추천-후기만-믿기-불안할.html</loc><priority>0.7</priority></url>
