@@ -7,3 +7,4 @@ Allow: /
 Sitemap: https://spacebogam.kr/sitemap.xml
 Sitemap: https://spacebogam.kr/feed.xml
 # Domain: spacebogam.kr. Update sitemap URLs with scripts_configure_domain.py if the domain changes.
+Host: spacebogam.kr
