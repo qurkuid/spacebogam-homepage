@@ -2,10 +2,65 @@
   var SOURCE = 'spacebogam.kr';
   var MEDIUM = 'homepage';
   var CAMPAIGN = 'spacebogam_site';
+  var NAVER_CTS_ACCOUNT_ID = 's_7702568df18';
+  var NAVER_CTS_DOMAIN = 'spacebogam.kr';
+  var NAVER_CTS_SCRIPT_SRC = 'https://wcs.naver.net/wcslog.js';
   var ATTRIBUTION_KEYS = [
     'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
     'gclid', 'gbraid', 'wbraid', 'fbclid', 'n_keyword', 'ref'
   ];
+
+  function getNaverAccountId(){
+    var meta = document.querySelector('meta[name="naver-cts-account-id"]');
+    var id = meta && meta.getAttribute('content') ? meta.getAttribute('content').trim() : NAVER_CTS_ACCOUNT_ID;
+    return id && id !== 'AccountId값' ? id : '';
+  }
+
+  function loadNaverScript(callback){
+    if (window.wcs) {
+      callback();
+      return;
+    }
+    var existing = document.querySelector('script[data-spacebogam-naver-cts="1"]');
+    if (existing) {
+      existing.addEventListener('load', callback, {once:true});
+      return;
+    }
+    var script = document.createElement('script');
+    script.async = true;
+    script.src = NAVER_CTS_SCRIPT_SRC;
+    script.dataset.spacebogamNaverCts = '1';
+    script.addEventListener('load', callback, {once:true});
+    document.head.appendChild(script);
+  }
+
+  function withNaver(callback){
+    var accountId = getNaverAccountId();
+    if (!accountId) return;
+    loadNaverScript(function(){
+      window.wcs_add = window.wcs_add || {};
+      window.wcs_add.wa = accountId;
+      callback();
+    });
+  }
+
+  function sendNaverPageView(){
+    withNaver(function(){
+      if (!window.__spacebogamNaverPvSent && window.wcs) {
+        window.__spacebogamNaverPvSent = true;
+        if (typeof window.wcs.inflow === 'function') window.wcs.inflow(NAVER_CTS_DOMAIN);
+        if (typeof window.wcs_do === 'function') window.wcs_do();
+      }
+    });
+  }
+
+  function sendNaverLead(){
+    withNaver(function(){
+      if (window.wcs && typeof window.wcs.trans === 'function') {
+        window.wcs.trans({type: 'lead'});
+      }
+    });
+  }
 
   function decorate(url){
     try {
@@ -67,6 +122,7 @@
     });
     sendEvent('generate_lead', payload);
     sendEvent('click_kakao_or_consult', payload);
+    sendNaverLead();
   }
 
   function trackPhoneClick(e){
@@ -100,4 +156,5 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
+  sendNaverPageView();
 })();
