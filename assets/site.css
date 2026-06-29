@@ -146,6 +146,15 @@ footer{background:var(--deep);color:#fff;padding:46px 0}
 .project-link a{border:1px solid var(--line);border-radius:999px;padding:12px 18px;color:var(--terra);background:#fff;font-weight:560;transition:border-color .15s}
 .project-link a:hover{border-color:var(--terra)}
 
+
+.customer-reactions{background:linear-gradient(180deg,var(--bg),var(--paper));}
+.reaction-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.reaction{background:#fff;border:1px solid var(--line);border-radius:26px;padding:24px;min-height:300px;display:flex;flex-direction:column;box-shadow:var(--shadow-soft)}
+.reaction span{font-size:13px;font-weight:700;color:oklch(0.595 0.13 46 / .55);margin-bottom:16px}
+.reaction h3{font-size:21px;line-height:1.25;letter-spacing:-.035em;margin:0 0 14px;font-weight:600;color:var(--ink)}
+.reaction p{margin:0;color:var(--soft);font-size:14.5px;font-weight:350;word-break:keep-all}
+.reaction a{margin-top:auto;color:var(--terra);font-size:13px;font-weight:600;padding-top:18px}
+
 .standards{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .standard{background:var(--paper);border:1px solid var(--line);border-radius:26px;padding:30px;display:grid;grid-template-columns:118px 1fr;gap:24px;align-items:start}
 .std-no{font-size:46px;font-weight:450;letter-spacing:-.05em;color:oklch(0.595 0.130 46 / .32);line-height:1}
@@ -264,8 +273,8 @@ footer{background:var(--deep);color:#fff;padding:46px 0}
   /* 홈 */
   .home .hero{min-height:auto}
   .home .hero .wrap{grid-template-columns:1fr;gap:32px;padding:80px 0 72px}
-  .blend,.standards,.journal,.reviews{grid-template-columns:1fr}
-  .space-grid,.cost-grid,.process,.faq{grid-template-columns:1fr 1fr}
+  .blend,.standards,.journal,.reviews,.reaction-grid{grid-template-columns:1fr}
+  .space-grid,.cost-grid,.process,.faq,.reaction-grid{grid-template-columns:1fr 1fr}
   .projects{grid-template-columns:1fr}
   .local-guide .links,.related-guide .links{grid-template-columns:1fr 1fr}
   /* 포트폴리오 */
@@ -279,7 +288,7 @@ footer{background:var(--deep);color:#fff;padding:46px 0}
   .head p{font-size:16px}
   /* 모바일에서는 빽빽한 다단을 전부 1열로 — 복잡함 제거 */
   .space-grid,.cost-grid,.process,.faq,.blend,
-  .grid,.diag-grid,
+  .grid,.diag-grid,.reaction-grid,
   .local-guide .links,.related-guide .links{grid-template-columns:1fr}
   .home .hero h1{font-size:clamp(23px,6.5vw,32px)}
   .home .hero .wrap{padding:64px 0 60px}
