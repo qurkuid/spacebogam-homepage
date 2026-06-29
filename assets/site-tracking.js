@@ -6,6 +6,8 @@
   var NAVER_ANALYTICS_ACCOUNT_ID = '183d82ef1dd8190';
   var NAVER_CTS_DOMAIN = 'spacebogam.kr';
   var NAVER_WCS_SCRIPT_SRC = 'https://wcs.pstatic.net/wcslog.js';
+  var META_PIXEL_ID = '3118409901697381';
+  var META_PIXEL_SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
   var ATTRIBUTION_KEYS = [
     'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
     'gclid', 'gbraid', 'wbraid', 'fbclid', 'n_keyword', 'ref'
@@ -41,6 +43,42 @@
     script.dataset.spacebogamNaverWcs = '1';
     script.addEventListener('load', callback, {once:true});
     document.head.appendChild(script);
+  }
+
+  function initMetaPixel(){
+    if (!META_PIXEL_ID) return;
+    if (!window.fbq) {
+      var fbq = window.fbq = function(){
+        fbq.callMethod ? fbq.callMethod.apply(fbq, arguments) : fbq.queue.push(arguments);
+      };
+      if (!window._fbq) window._fbq = fbq;
+      fbq.push = fbq;
+      fbq.loaded = true;
+      fbq.version = '2.0';
+      fbq.queue = [];
+    }
+    if (!document.querySelector('script[data-spacebogam-meta-pixel="1"], script[src*="connect.facebook.net/en_US/fbevents.js"]')) {
+      var script = document.createElement('script');
+      script.async = true;
+      script.src = META_PIXEL_SCRIPT_SRC;
+      script.dataset.spacebogamMetaPixel = '1';
+      document.head.appendChild(script);
+    }
+    if (!window.__spacebogamMetaPixelInitialized) {
+      window.__spacebogamMetaPixelInitialized = true;
+      window.fbq('init', META_PIXEL_ID);
+    }
+    if (!window.__spacebogamMetaPixelPvSent) {
+      window.__spacebogamMetaPixelPvSent = true;
+      window.fbq('track', 'PageView');
+    }
+  }
+
+  function sendMetaPixelEvent(eventName, payload){
+    initMetaPixel();
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', eventName, payload || {});
+    }
   }
 
   function withNaverAccount(accountId, callback){
@@ -139,6 +177,7 @@
     });
     sendEvent('generate_lead', payload);
     sendEvent('click_kakao_or_consult', payload);
+    sendMetaPixelEvent('Lead', payload);
     sendNaverLead();
   }
 
@@ -152,6 +191,7 @@
       cta_location: a.dataset.ctaLocation || a.className || 'phone_link'
     });
     sendEvent('click_call', payload);
+    sendMetaPixelEvent('Contact', payload);
   }
 
   function init(){
@@ -173,6 +213,7 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
+  initMetaPixel();
   sendNaverAnalyticsPageView();
   sendNaverCtsPageView();
 })();
