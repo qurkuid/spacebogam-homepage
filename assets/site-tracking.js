@@ -3,17 +3,26 @@
   var MEDIUM = 'homepage';
   var CAMPAIGN = 'spacebogam_site';
   var NAVER_CTS_ACCOUNT_ID = 's_7702568df18';
+  var NAVER_ANALYTICS_ACCOUNT_ID = '183d82ef1dd8190';
   var NAVER_CTS_DOMAIN = 'spacebogam.kr';
-  var NAVER_CTS_SCRIPT_SRC = 'https://wcs.naver.net/wcslog.js';
+  var NAVER_WCS_SCRIPT_SRC = 'https://wcs.pstatic.net/wcslog.js';
   var ATTRIBUTION_KEYS = [
     'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
     'gclid', 'gbraid', 'wbraid', 'fbclid', 'n_keyword', 'ref'
   ];
 
-  function getNaverAccountId(){
-    var meta = document.querySelector('meta[name="naver-cts-account-id"]');
-    var id = meta && meta.getAttribute('content') ? meta.getAttribute('content').trim() : NAVER_CTS_ACCOUNT_ID;
+  function getNaverId(metaName, fallback){
+    var meta = document.querySelector('meta[name="' + metaName + '"]');
+    var id = meta && meta.getAttribute('content') ? meta.getAttribute('content').trim() : fallback;
     return id && id !== 'AccountId값' ? id : '';
+  }
+
+  function getNaverCtsAccountId(){
+    return getNaverId('naver-cts-account-id', NAVER_CTS_ACCOUNT_ID);
+  }
+
+  function getNaverAnalyticsAccountId(){
+    return getNaverId('naver-analytics-account-id', NAVER_ANALYTICS_ACCOUNT_ID);
   }
 
   function loadNaverScript(callback){
@@ -21,21 +30,20 @@
       callback();
       return;
     }
-    var existing = document.querySelector('script[data-spacebogam-naver-cts="1"]');
+    var existing = document.querySelector('script[data-spacebogam-naver-wcs="1"], script[src*="wcslog.js"]');
     if (existing) {
       existing.addEventListener('load', callback, {once:true});
       return;
     }
     var script = document.createElement('script');
     script.async = true;
-    script.src = NAVER_CTS_SCRIPT_SRC;
-    script.dataset.spacebogamNaverCts = '1';
+    script.src = NAVER_WCS_SCRIPT_SRC;
+    script.dataset.spacebogamNaverWcs = '1';
     script.addEventListener('load', callback, {once:true});
     document.head.appendChild(script);
   }
 
-  function withNaver(callback){
-    var accountId = getNaverAccountId();
+  function withNaverAccount(accountId, callback){
     if (!accountId) return;
     loadNaverScript(function(){
       window.wcs_add = window.wcs_add || {};
@@ -44,10 +52,19 @@
     });
   }
 
-  function sendNaverPageView(){
-    withNaver(function(){
-      if (!window.__spacebogamNaverPvSent && window.wcs) {
-        window.__spacebogamNaverPvSent = true;
+  function sendNaverAnalyticsPageView(){
+    withNaverAccount(getNaverAnalyticsAccountId(), function(){
+      if (!window.__spacebogamNaverAnalyticsPvSent && window.wcs && typeof window.wcs_do === 'function') {
+        window.__spacebogamNaverAnalyticsPvSent = true;
+        window.wcs_do();
+      }
+    });
+  }
+
+  function sendNaverCtsPageView(){
+    withNaverAccount(getNaverCtsAccountId(), function(){
+      if (!window.__spacebogamNaverCtsPvSent && window.wcs) {
+        window.__spacebogamNaverCtsPvSent = true;
         if (typeof window.wcs.inflow === 'function') window.wcs.inflow(NAVER_CTS_DOMAIN);
         if (typeof window.wcs_do === 'function') window.wcs_do();
       }
@@ -55,7 +72,7 @@
   }
 
   function sendNaverLead(){
-    withNaver(function(){
+    withNaverAccount(getNaverCtsAccountId(), function(){
       if (window.wcs && typeof window.wcs.trans === 'function') {
         window.wcs.trans({type: 'lead'});
       }
@@ -156,5 +173,6 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
-  sendNaverPageView();
+  sendNaverAnalyticsPageView();
+  sendNaverCtsPageView();
 })();
