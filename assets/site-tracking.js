@@ -6,7 +6,7 @@
   var NAVER_ANALYTICS_ACCOUNT_ID = '183d82ef1dd8190';
   var NAVER_CTS_DOMAIN = 'spacebogam.kr';
   var NAVER_WCS_SCRIPT_SRC = 'https://wcs.pstatic.net/wcslog.js';
-  var META_PIXEL_ID = '3118409901697381';
+  var META_PIXEL_ID = '512750840350337';
   var META_PIXEL_SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
   var ATTRIBUTION_KEYS = [
     'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
@@ -47,6 +47,8 @@
 
   function initMetaPixel(){
     if (!META_PIXEL_ID) return;
+    var alreadyHadFbq = typeof window.fbq === 'function';
+    var existingPixelScript = document.querySelector('script[data-spacebogam-meta-pixel="1"], script[src*="connect.facebook.net/en_US/fbevents.js"]');
     if (!window.fbq) {
       var fbq = window.fbq = function(){
         fbq.callMethod ? fbq.callMethod.apply(fbq, arguments) : fbq.queue.push(arguments);
@@ -57,7 +59,7 @@
       fbq.version = '2.0';
       fbq.queue = [];
     }
-    if (!document.querySelector('script[data-spacebogam-meta-pixel="1"], script[src*="connect.facebook.net/en_US/fbevents.js"]')) {
+    if (!existingPixelScript) {
       var script = document.createElement('script');
       script.async = true;
       script.src = META_PIXEL_SCRIPT_SRC;
@@ -66,11 +68,7 @@
     }
     if (!window.__spacebogamMetaPixelInitialized) {
       window.__spacebogamMetaPixelInitialized = true;
-      window.fbq('init', META_PIXEL_ID);
-    }
-    if (!window.__spacebogamMetaPixelPvSent) {
-      window.__spacebogamMetaPixelPvSent = true;
-      window.fbq('track', 'PageView');
+      if (!alreadyHadFbq || !existingPixelScript) window.fbq('init', META_PIXEL_ID);
     }
   }
 
@@ -117,15 +115,24 @@
     });
   }
 
+  function isIntmConsultationUrl(u){
+    return u.hostname === 'intm.kr' && u.pathname === '/consultation/ggbg';
+  }
+
+  function isLocalConsultationUrl(u){
+    var sameHost = !u.hostname || u.hostname === location.hostname || u.hostname === 'spacebogam.kr' || u.hostname === 'www.spacebogam.kr';
+    return sameHost && (u.pathname === '/consultation/' || u.pathname === '/consultation');
+  }
+
   function decorate(url){
     try {
       var u = new URL(url, location.href);
-      if (u.hostname !== 'intm.kr' || u.pathname !== '/consultation/ggbg') return url;
+      if (!isIntmConsultationUrl(u) && !isLocalConsultationUrl(u)) return url;
 
       var current = new URL(location.href);
       ATTRIBUTION_KEYS.forEach(function(key){
         var value = current.searchParams.get(key);
-        if (value && !u.searchParams.has(key)) u.searchParams.set(key, value);
+        if (value) u.searchParams.set(key, value);
       });
 
       if (!u.searchParams.has('utm_source')) u.searchParams.set('utm_source', SOURCE);
@@ -176,8 +183,10 @@
       cta_location: a.dataset.ctaLocation || a.className || 'consultation_link'
     });
     sendEvent('generate_lead', payload);
+    sendEvent('click_consultation', payload);
     sendEvent('click_kakao_or_consult', payload);
     sendMetaPixelEvent('Lead', payload);
+    sendMetaPixelEvent('SubmitApplication', payload);
     sendNaverLead();
   }
 
@@ -195,7 +204,7 @@
   }
 
   function init(){
-    document.querySelectorAll('a[href^="https://intm.kr/consultation/ggbg"]').forEach(function(a){
+    document.querySelectorAll('a[href^="https://intm.kr/consultation/ggbg"], a[href^="/consultation/"]').forEach(function(a){
       a.setAttribute('href', decorate(a.getAttribute('href')));
       if (!a.dataset.spacebogamTracked) {
         a.addEventListener('click', trackConsultClick, {capture:true});
@@ -213,7 +222,6 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
-  initMetaPixel();
   sendNaverAnalyticsPageView();
   sendNaverCtsPageView();
 })();
