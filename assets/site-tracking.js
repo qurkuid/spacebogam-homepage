@@ -11,7 +11,8 @@
   var KAKAO_CHAT_URL = 'http://pf.kakao.com/_UEUBn/chat';
   var ATTRIBUTION_KEYS = [
     'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
-    'gclid', 'gbraid', 'wbraid', 'fbclid', 'n_keyword', 'ref'
+    'gclid', 'gbraid', 'wbraid', 'fbclid', 'n_keyword', 'ref',
+    'variant', 'page_variant'
   ];
 
   function getNaverId(metaName, fallback){
@@ -80,6 +81,13 @@
     }
   }
 
+  function sendMetaPixelCustomEvent(eventName, payload){
+    initMetaPixel();
+    if (typeof window.fbq === 'function') {
+      window.fbq('trackCustom', eventName, payload || {});
+    }
+  }
+
   function withNaverAccount(accountId, callback){
     if (!accountId) return;
     loadNaverScript(function(){
@@ -125,6 +133,19 @@
     return sameHost && (u.pathname === '/consultation/' || u.pathname === '/consultation');
   }
 
+  function getPageVariant(){
+    try {
+      var current = new URL(location.href);
+      var explicit = current.searchParams.get('page_variant') || current.searchParams.get('variant');
+      if (explicit) return explicit;
+      var content = current.searchParams.get('utm_content');
+      if (content && /^home_[ab]_/i.test(content)) return content;
+    } catch(e) {}
+    var normalizedPath = location.pathname.replace(/\/index\.html$/, '/');
+    if (normalizedPath === '/ab/home-b/' || document.body.classList.contains('home-b')) return 'home_b_visit_stage_standard';
+    return 'home_a_default';
+  }
+
   function decorate(url){
     try {
       var u = new URL(url, location.href);
@@ -140,6 +161,7 @@
       if (!u.searchParams.has('utm_medium')) u.searchParams.set('utm_medium', MEDIUM);
       if (!u.searchParams.has('utm_campaign')) u.searchParams.set('utm_campaign', CAMPAIGN);
       if (!u.searchParams.has('ref')) u.searchParams.set('ref', 'spacebogam');
+      if (!u.searchParams.has('page_variant')) u.searchParams.set('page_variant', getPageVariant());
       return u.toString();
     } catch(e) { return url; }
   }
@@ -150,6 +172,7 @@
       event_label: 'spacebogam',
       page_location: location.href,
       page_path: location.pathname,
+      page_variant: getPageVariant(),
       source_site: SOURCE
     };
     var current = new URL(location.href);
@@ -186,6 +209,7 @@
     sendEvent('generate_lead', payload);
     sendEvent('click_consultation', payload);
     sendEvent('click_kakao_or_consult', payload);
+    sendMetaPixelCustomEvent('click_consultation', payload);
     sendMetaPixelEvent('Lead', payload);
     sendMetaPixelEvent('SubmitApplication', payload);
     sendNaverLead();
@@ -232,6 +256,7 @@
     });
     sendEvent('click_call', payload);
     sendEvent('phone_click', payload);
+    sendMetaPixelCustomEvent('click_call', payload);
     sendMetaPixelEvent('Contact', payload);
   }
 
@@ -270,6 +295,7 @@
     });
     sendEvent('kakao_chat_click', payload);
     sendEvent('click_kakao_or_consult', payload);
+    sendMetaPixelCustomEvent('kakao_chat_click', payload);
     sendMetaPixelEvent('Contact', payload);
     sendNaverLead();
   }
