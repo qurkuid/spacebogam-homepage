@@ -201,11 +201,11 @@
     var isRegion = /interior|remodeling/.test(file) || /dong|gu|busan|haeundae|centum|marine|sajik|jwa|jung|u-|geoje|guseo|hwamyeong|buk/.test(file);
     if (isConsultation) return {key:'consultation', text:'전화로 상담 일정 잡기', location:'consultation_global_call'};
     if (isPortfolio) return {key:'portfolio', text:'비슷한 현장 전화 상담하기', location:'portfolio_global_call'};
-    if (isEstimate) return {key:'estimate', text:'견적 범위 전화로 먼저 확인하기', location:'estimate_global_call'};
     if (isCommercial) return {key:'commercial', text:'상업공간 전화 상담하기', location:'commercial_global_call'};
+    if (isEstimate) return {key:'estimate', text:'견적 범위 전화로 먼저 확인하기', location:'estimate_global_call'};
     if (isLiving) return {key:'living', text:'우리 집 평형 상담하기', location:'living_global_call'};
     if (isRegion) return {key:'region', text:'이 지역 공사 조건 전화 상담하기', location:'region_global_call'};
-    return {key:'general', text:'전화 상담하기 0507-1388-1252', location:'global_call'};
+    return {key:'general', text:'전화 상담하기', location:'global_call'};
   }
 
   function decoratePhoneLink(a, locationName){
