@@ -200,37 +200,37 @@
   </url>
   <url>
     <loc>https://spacebogam.kr/marine-city-interior.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.78</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/haeundae-lct-interior.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.78</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/haeundae-ipark-interior.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.78</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/doosan-zenith-interior.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.78</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/centum-star-interior.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.78</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/the-sharp-centum-park-interior.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.78</priority>
   </url>
@@ -260,9 +260,33 @@
   </url>
   <url>
     <loc>https://spacebogam.kr/hwamyeong-interior.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://spacebogam.kr/jwadong-interior.html</loc>
+    <lastmod>2026-07-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.74</priority>
+  </url>
+  <url>
+    <loc>https://spacebogam.kr/jungdong-interior.html</loc>
+    <lastmod>2026-07-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.74</priority>
+  </url>
+  <url>
+    <loc>https://spacebogam.kr/udong-interior.html</loc>
+    <lastmod>2026-07-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.74</priority>
+  </url>
+  <url>
+    <loc>https://spacebogam.kr/sajik-dong-interior.html</loc>
+    <lastmod>2026-07-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.74</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/living-20py.html</loc>
@@ -629,5 +653,41 @@
     <lastmod>2026-06-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://spacebogam.kr/sajik-lottecastle-the-classic-interior.html</loc>
+    <lastmod>2026-07-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.78</priority>
+  </url>
+  <url>
+    <loc>https://spacebogam.kr/hwamyeong-lottecastle-kaiser-interior.html</loc>
+    <lastmod>2026-07-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.78</priority>
+  </url>
+  <url>
+    <loc>https://spacebogam.kr/marine-city-ipark-interior.html</loc>
+    <lastmod>2026-07-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.78</priority>
+  </url>
+  <url>
+    <loc>https://spacebogam.kr/haeundae-gyeongdong-jade-interior.html</loc>
+    <lastmod>2026-07-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.78</priority>
+  </url>
+  <url>
+    <loc>https://spacebogam.kr/daewoo-worldmark-centum-interior.html</loc>
+    <lastmod>2026-07-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.78</priority>
+  </url>
+  <url>
+    <loc>https://spacebogam.kr/trump-world-centum-interior.html</loc>
+    <lastmod>2026-07-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.78</priority>
   </url>
 </urlset>
