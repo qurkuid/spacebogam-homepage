@@ -244,7 +244,16 @@
     return a;
   }
 
+  function ensurePhoneCtaStyles(){
+    if (document.getElementById('spacebogam-phone-cta-style')) return;
+    var style = document.createElement('style');
+    style.id = 'spacebogam-phone-cta-style';
+    style.textContent = '.spacebogam-header-call{background:#1b1611;color:#fff;border-radius:999px;padding:10px 14px;white-space:nowrap;font-weight:700;border:1px solid #1b1611;text-decoration:none}.spacebogam-mobile-call{display:none;position:fixed;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:9999;min-height:56px;border-radius:999px;background:#b06743;color:#fff;align-items:center;justify-content:center;text-align:center;font-size:17px;font-weight:800;box-shadow:0 18px 45px rgba(45,32,20,.28);border:1px solid rgba(255,255,255,.36);text-decoration:none}.spacebogam-mobile-call:before{content:"☎";font-size:18px;margin-right:8px}@media(max-width:600px){body{padding-bottom:84px}.spacebogam-header-call{display:none}.spacebogam-mobile-call{display:flex}}';
+    document.head.appendChild(style);
+  }
+
   function injectPhoneCtas(){
+    ensurePhoneCtaStyles();
     var context = pagePhoneContext();
     if (!document.querySelector('.spacebogam-header-call')) {
       var headerWrap = document.querySelector('.top .wrap');
