@@ -23,9 +23,13 @@
 .lb-prev{left:16px}.lb-next{right:16px}
 @media(max-width:560px){.lb-nav{width:40px;height:40px;font-size:20px}.lb-prev{left:8px}.lb-next{right:8px}}
 
-/* 전역 전화 CTA — 유입 고객이 즉시 전화할 수 있게 */
+/* 전역 전화/카카오 CTA — 유입 고객이 즉시 상담할 수 있게 */
+.spacebogam-header-call,.spacebogam-header-kakao{display:inline-flex;align-items:center;gap:7px;text-decoration:none}
 .spacebogam-header-call{background:var(--deep);color:#fff;border-radius:999px;padding:10px 14px;white-space:nowrap;font-weight:700;border:1px solid var(--deep)}
-.spacebogam-mobile-call{display:none;position:fixed;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:80;min-height:56px;border-radius:999px;background:var(--brown);color:#fff;align-items:center;justify-content:center;text-align:center;font-size:17px;font-weight:800;box-shadow:0 18px 45px rgba(45,32,20,.28);border:1px solid rgba(255,255,255,.36)}
-.spacebogam-mobile-call:before{content:"☎";font-size:18px;margin-right:8px}
+.spacebogam-header-kakao{background:#fee500;color:#191600;border-radius:999px;padding:10px 14px;white-space:nowrap;font-weight:800;border:1px solid #e5cf00}.kakao-icon{display:inline-flex;width:22px;height:22px;border-radius:50%;background:#191600;color:#fee500;align-items:center;justify-content:center;font-size:11px;font-weight:900;line-height:1}
+.spacebogam-mobile-actions{display:none;position:fixed;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:80;grid-template-columns:1fr 1fr;gap:8px}.spacebogam-mobile-call,.spacebogam-mobile-kakao{display:flex;min-height:56px;border-radius:999px;background:var(--brown);color:#fff;align-items:center;justify-content:center;text-align:center;font-size:17px;font-weight:800;box-shadow:0 18px 45px rgba(45,32,20,.28);border:1px solid rgba(255,255,255,.36)}
+.spacebogam-mobile-call:before{content:"☎";font-size:18px;margin-right:8px}.spacebogam-mobile-kakao{background:#fee500!important;color:#191600!important;gap:7px}
 .button.call,.btn.call{background:var(--deep);color:#fff;border-color:var(--deep)}
-@media(max-width:560px){body{padding-bottom:84px}.spacebogam-header-call{display:none}.spacebogam-mobile-call{display:flex}.top .cta{display:none}}
+@media(max-width:560px){body{padding-bottom:92px}.spacebogam-header-call,.spacebogam-header-kakao{display:none}.spacebogam-mobile-actions{display:grid}.spacebogam-mobile-call{display:flex}.top .cta{display:none}}
+/* Spacebogam phone CTA panel */
+.phone-cta-panel{margin:32px auto;padding:0 20px}.phone-cta-inner{border:1px solid rgba(176,103,67,.24);background:linear-gradient(135deg,#fff8f1,#f4ebe1);border-radius:24px;padding:24px;box-shadow:0 18px 50px rgba(45,32,20,.08)}.phone-cta-kicker{margin:0 0 8px;color:#9b5d3e;font-size:13px;font-weight:800;letter-spacing:.08em}.phone-cta-panel h2{margin:0 0 10px;font-size:clamp(24px,4vw,34px);line-height:1.22}.phone-cta-panel p{margin:0 0 18px;color:#604f42}.phone-cta-link{display:inline-flex;align-items:center;justify-content:center;min-height:48px;border-radius:999px;padding:0 18px;background:#1b1611;color:#fff;text-decoration:none;font-weight:800}.phone-cta-link:before{content:"☎";margin-right:8px}@media(max-width:600px){.phone-cta-panel{margin:24px auto 96px;padding:0 16px}.phone-cta-inner{padding:20px}.phone-cta-link{display:flex;width:100%;box-sizing:border-box}}

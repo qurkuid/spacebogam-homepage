@@ -8,6 +8,7 @@
   var NAVER_WCS_SCRIPT_SRC = 'https://wcs.pstatic.net/wcslog.js';
   var META_PIXEL_ID = '512750840350337';
   var META_PIXEL_SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
+  var KAKAO_CHAT_URL = 'http://pf.kakao.com/_UEUBn/chat';
   var ATTRIBUTION_KEYS = [
     'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
     'gclid', 'gbraid', 'wbraid', 'fbclid', 'n_keyword', 'ref'
@@ -244,11 +245,51 @@
     return a;
   }
 
+  function decorateKakaoLink(a, locationName){
+    var ctaLocation = locationName || a.dataset.ctaLocation || a.dataset.kakaoChatCtaLocation || a.className || 'kakao_chat_link';
+    a.href = KAKAO_CHAT_URL;
+    a.dataset.ctaLocation = ctaLocation;
+    a.dataset.kakaoChatClick = 'kakao_chat_click';
+    a.dataset.kakaoChatPage = window.location.pathname;
+    a.dataset.kakaoChatCtaLocation = ctaLocation;
+    a.dataset.kakaoChatTarget = KAKAO_CHAT_URL;
+  }
+
+  function trackKakaoClick(e){
+    var a = e.currentTarget;
+    decorateKakaoLink(a);
+    var payload = eventPayload({
+      event_label: 'spacebogam_kakao_chat',
+      link_url: a.getAttribute('href') || KAKAO_CHAT_URL,
+      cta_text: (a.textContent || '').trim(),
+      cta_location: a.dataset.ctaLocation || a.className || 'kakao_chat_link',
+      kakao_chat_click: 'kakao_chat_click',
+      kakao_chat_page: location.pathname,
+      kakao_chat_cta_location: a.dataset.ctaLocation || a.className || 'kakao_chat_link',
+      kakao_chat_target: KAKAO_CHAT_URL
+    });
+    sendEvent('kakao_chat_click', payload);
+    sendEvent('click_kakao_or_consult', payload);
+    sendMetaPixelEvent('Contact', payload);
+    sendNaverLead();
+  }
+
+  function buildKakaoLink(className, locationName, text){
+    var a = document.createElement('a');
+    a.className = className;
+    decorateKakaoLink(a, locationName);
+    a.setAttribute('aria-label', '공간보감 카카오톡 상담');
+    a.setAttribute('target', '_blank');
+    a.setAttribute('rel', 'noopener');
+    a.innerHTML = '<span class="kakao-icon" aria-hidden="true">톡</span><span>' + (text || '카카오톡 상담') + '</span>';
+    return a;
+  }
+
   function ensurePhoneCtaStyles(){
     if (document.getElementById('spacebogam-phone-cta-style')) return;
     var style = document.createElement('style');
     style.id = 'spacebogam-phone-cta-style';
-    style.textContent = '.spacebogam-header-call{background:#1b1611;color:#fff;border-radius:999px;padding:10px 14px;white-space:nowrap;font-weight:700;border:1px solid #1b1611;text-decoration:none}.spacebogam-mobile-call{display:none;position:fixed;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:9999;min-height:56px;border-radius:999px;background:#b06743;color:#fff;align-items:center;justify-content:center;text-align:center;font-size:17px;font-weight:800;box-shadow:0 18px 45px rgba(45,32,20,.28);border:1px solid rgba(255,255,255,.36);text-decoration:none}.spacebogam-mobile-call:before{content:"☎";font-size:18px;margin-right:8px}@media(max-width:600px){body{padding-bottom:84px}.spacebogam-header-call{display:none}.spacebogam-mobile-call{display:flex}}';
+    style.textContent = '.spacebogam-header-call,.spacebogam-header-kakao{border-radius:999px;padding:10px 14px;white-space:nowrap;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:7px}.spacebogam-header-call{background:#1b1611;color:#fff;border:1px solid #1b1611}.spacebogam-header-kakao{background:#fee500;color:#191600;border:1px solid #e5cf00}.kakao-icon{display:inline-flex;width:22px;height:22px;border-radius:50%;background:#191600;color:#fee500;align-items:center;justify-content:center;font-size:11px;font-weight:900;line-height:1}.spacebogam-mobile-actions{display:none;position:fixed;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:9999;grid-template-columns:1fr 1fr;gap:8px}.spacebogam-mobile-call,.spacebogam-mobile-kakao{min-height:56px;border-radius:18px;align-items:center;justify-content:center;text-align:center;font-size:16px;font-weight:800;box-shadow:0 18px 45px rgba(45,32,20,.28);border:1px solid rgba(255,255,255,.36);text-decoration:none;display:flex;padding:0 10px}.spacebogam-mobile-call{background:#1b1611;color:#fff}.spacebogam-mobile-call:before{content:"☎";font-size:18px;margin-right:8px}.spacebogam-mobile-kakao{background:#fee500;color:#191600;gap:7px}@media(max-width:600px){body{padding-bottom:92px}.spacebogam-header-call,.spacebogam-header-kakao{display:none}.spacebogam-mobile-actions{display:grid}}';
     document.head.appendChild(style);
   }
 
@@ -256,25 +297,44 @@
     ensurePhoneCtaStyles();
     var context = pagePhoneContext();
     var existingHeaderCall = document.querySelector('.spacebogam-header-call');
+    var headerWrap = document.querySelector('.top .wrap');
     if (existingHeaderCall) {
       existingHeaderCall.setAttribute('href', 'tel:050713881252');
       decoratePhoneLink(existingHeaderCall, existingHeaderCall.dataset.ctaLocation || context.location + '_header');
       if ((existingHeaderCall.textContent || '').indexOf('0507-1388-1252') === -1) {
         existingHeaderCall.textContent = '전화 상담 0507-1388-1252';
       }
-    } else {
-      var headerWrap = document.querySelector('.top .wrap');
-      if (headerWrap) {
-        var headerCall = buildPhoneLink('spacebogam-header-call', context.location + '_header', '전화 상담 0507-1388-1252');
-        var headerConsult = headerWrap.querySelector('.top-cta, .cta');
-        if (headerConsult && headerConsult.parentNode === headerWrap) headerWrap.insertBefore(headerCall, headerConsult.nextSibling);
-        else headerWrap.appendChild(headerCall);
-      }
+    } else if (headerWrap) {
+      existingHeaderCall = buildPhoneLink('spacebogam-header-call', context.location + '_header', '전화 상담 0507-1388-1252');
+      var headerConsult = headerWrap.querySelector('.top-cta, .cta');
+      if (headerConsult && headerConsult.parentNode === headerWrap) headerWrap.insertBefore(existingHeaderCall, headerConsult.nextSibling);
+      else headerWrap.appendChild(existingHeaderCall);
     }
 
-    if (!document.querySelector('.spacebogam-mobile-call')) {
-      document.body.appendChild(buildPhoneLink('spacebogam-mobile-call', context.location + '_mobile_sticky', context.text + ' 0507-1388-1252'));
+    var existingHeaderKakao = document.querySelector('.spacebogam-header-kakao');
+    if (existingHeaderKakao) {
+      decorateKakaoLink(existingHeaderKakao, existingHeaderKakao.dataset.ctaLocation || context.location + '_header_kakao');
+    } else if (headerWrap) {
+      existingHeaderKakao = buildKakaoLink('spacebogam-header-kakao', context.location + '_header_kakao', '카카오톡 상담');
+      if (existingHeaderCall && existingHeaderCall.parentNode === headerWrap) headerWrap.insertBefore(existingHeaderKakao, existingHeaderCall.nextSibling);
+      else headerWrap.appendChild(existingHeaderKakao);
     }
+
+    var mobileActions = document.querySelector('.spacebogam-mobile-actions');
+    if (!mobileActions) {
+      mobileActions = document.createElement('div');
+      mobileActions.className = 'spacebogam-mobile-actions';
+      mobileActions.setAttribute('aria-label', '공간보감 모바일 상담 바로가기');
+      document.body.appendChild(mobileActions);
+    }
+    var mobileCall = mobileActions.querySelector('.spacebogam-mobile-call') || document.querySelector('body > .spacebogam-mobile-call');
+    if (mobileCall && mobileCall.parentNode !== mobileActions) mobileActions.appendChild(mobileCall);
+    if (!mobileCall) mobileActions.appendChild(buildPhoneLink('spacebogam-mobile-call', context.location + '_mobile_sticky_call', '전화 상담'));
+    else decoratePhoneLink(mobileCall, mobileCall.dataset.ctaLocation || context.location + '_mobile_sticky_call');
+
+    var mobileKakao = mobileActions.querySelector('.spacebogam-mobile-kakao');
+    if (!mobileKakao) mobileActions.appendChild(buildKakaoLink('spacebogam-mobile-kakao', context.location + '_mobile_sticky_kakao', '카카오톡 상담'));
+    else decorateKakaoLink(mobileKakao, mobileKakao.dataset.ctaLocation || context.location + '_mobile_sticky_kakao');
   }
 
   function init(){
@@ -293,6 +353,14 @@
       if (!a.dataset.spacebogamCallTracked) {
         a.addEventListener('click', trackPhoneClick, {capture:true});
         a.dataset.spacebogamCallTracked = '1';
+      }
+    });
+
+    document.querySelectorAll('a[href*="pf.kakao.com/_UEUBn/chat"], .spacebogam-header-kakao, .spacebogam-mobile-kakao').forEach(function(a){
+      decorateKakaoLink(a);
+      if (!a.dataset.spacebogamKakaoTracked) {
+        a.addEventListener('click', trackKakaoClick, {capture:true});
+        a.dataset.spacebogamKakaoTracked = '1';
       }
     });
   }
