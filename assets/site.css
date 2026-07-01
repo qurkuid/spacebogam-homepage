@@ -325,3 +325,12 @@ footer{background:var(--deep);color:#fff;padding:46px 0}
 .cost b{display:block;padding-right:30px}
 .cost .num{position:absolute;top:22px;right:22px;font-size:13px;font-weight:700;color:oklch(0.595 0.13 46 / .5)}
 .cost.notice .num{color:var(--sand)}
+
+/* 전역 전화 CTA — 유입 고객이 즉시 전화할 수 있게 */
+.spacebogam-header-call{background:var(--deep);color:#fff;padding:11px 16px;border-radius:999px;font-weight:560;font-size:14px;white-space:nowrap;border:1px solid var(--deep);transition:transform .15s,background .15s}
+.spacebogam-header-call:hover{transform:translateY(-1px);background:var(--terra-deep)}
+.spacebogam-mobile-call{display:none;position:fixed;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:80;min-height:56px;border-radius:999px;background:var(--terra);color:#fff;align-items:center;justify-content:center;text-align:center;font-size:17px;font-weight:700;box-shadow:0 18px 45px oklch(0.30 0.04 50 / .28);border:1px solid oklch(1 0 0 / .36)}
+.spacebogam-mobile-call:before{content:"☎";font-size:18px;margin-right:8px}
+.btn.call{background:var(--deep);color:#fff;border-color:var(--deep)}
+.btn.call:hover{background:var(--terra-deep);border-color:var(--terra-deep)}
+@media(max-width:600px){body{padding-bottom:84px}.spacebogam-header-call{display:none}.spacebogam-mobile-call{display:flex}.top-cta{display:none}.home .actions .btn.call{background:var(--terra);border-color:var(--terra);color:#fff}.cta-actions .btn.call{background:#fff;color:var(--deep);border-color:#fff}}

@@ -5,3 +5,9 @@
 .post-images.cols1{grid-template-columns:1fr}
 .post-images img{width:100%;height:340px;object-fit:cover;border-radius:24px;background:var(--paper);box-shadow:var(--shadow)}
 @media(max-width:760px){.post-images.cols2{grid-template-columns:1fr}.post-images img{height:auto;aspect-ratio:16/11}}
+/* 전역 전화 CTA — 유입 고객이 즉시 전화할 수 있게 */
+.spacebogam-header-call{background:var(--deep);color:#fff;border-radius:999px;padding:10px 14px;white-space:nowrap;font-weight:700;border:1px solid var(--deep)}
+.spacebogam-mobile-call{display:none;position:fixed;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:80;min-height:56px;border-radius:999px;background:var(--brown);color:#fff;align-items:center;justify-content:center;text-align:center;font-size:17px;font-weight:800;box-shadow:0 18px 45px rgba(45,32,20,.28);border:1px solid rgba(255,255,255,.36)}
+.spacebogam-mobile-call:before{content:"☎";font-size:18px;margin-right:8px}
+.button.call,.btn.call,.spacebogam-inline-call{background:var(--deep);color:#fff;border-color:var(--deep)}
+@media(max-width:600px){body{padding-bottom:84px}.spacebogam-header-call{display:none}.spacebogam-mobile-call{display:flex}.top .cta{display:none}}

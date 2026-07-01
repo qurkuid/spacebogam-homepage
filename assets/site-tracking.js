@@ -190,20 +190,80 @@
     sendNaverLead();
   }
 
+  function pagePhoneContext(){
+    var path = location.pathname.replace(/\/index\.html$/, '/');
+    var file = path.split('/').filter(Boolean).pop() || 'index.html';
+    var isConsultation = path === '/consultation/' || file === 'consultation.html';
+    var isPortfolio = file === 'portfolio.html' || path === '/portfolio/';
+    var isEstimate = /^estimate(?:-|\.html|\/)/.test(file) || path.indexOf('/estimate') === 0;
+    var isLiving = /^living(?:-|\.html|\/)/.test(file) || /pyeong|py/.test(file);
+    var isCommercial = /commercial|office|clinic|cafe|shop|hospital/.test(file);
+    var isRegion = /interior|remodeling/.test(file) || /dong|gu|busan|haeundae|centum|marine|sajik|jwa|jung|u-|geoje|guseo|hwamyeong|buk/.test(file);
+    if (isConsultation) return {key:'consultation', text:'전화로 상담 일정 잡기', location:'consultation_global_call'};
+    if (isPortfolio) return {key:'portfolio', text:'비슷한 현장 전화 상담하기', location:'portfolio_global_call'};
+    if (isEstimate) return {key:'estimate', text:'견적 범위 전화로 먼저 확인하기', location:'estimate_global_call'};
+    if (isCommercial) return {key:'commercial', text:'상업공간 전화 상담하기', location:'commercial_global_call'};
+    if (isLiving) return {key:'living', text:'우리 집 평형 상담하기', location:'living_global_call'};
+    if (isRegion) return {key:'region', text:'이 지역 공사 조건 전화 상담하기', location:'region_global_call'};
+    return {key:'general', text:'전화 상담하기 0507-1388-1252', location:'global_call'};
+  }
+
+  function decoratePhoneLink(a, locationName){
+    var ctaLocation = locationName || a.dataset.ctaLocation || a.dataset.phoneClickCtaLocation || a.className || 'phone_link';
+    a.dataset.ctaLocation = ctaLocation;
+    a.dataset.phoneClick = 'phone_click';
+    a.dataset.phoneClickPage = window.location.pathname;
+    a.dataset.phoneClickCtaLocation = ctaLocation;
+  }
+
   function trackPhoneClick(e){
     var a = e.currentTarget;
+    decoratePhoneLink(a);
     var payload = eventPayload({
       event_label: 'spacebogam_call',
       link_url: a.getAttribute('href') || '',
       phone_target: (a.getAttribute('href') || '').replace(/^tel:/, ''),
       cta_text: (a.textContent || '').trim(),
-      cta_location: a.dataset.ctaLocation || a.className || 'phone_link'
+      cta_location: a.dataset.ctaLocation || a.className || 'phone_link',
+      phone_click: 'phone_click',
+      phone_click_page: location.pathname,
+      phone_click_cta_location: a.dataset.ctaLocation || a.className || 'phone_link'
     });
     sendEvent('click_call', payload);
+    sendEvent('phone_click', payload);
     sendMetaPixelEvent('Contact', payload);
   }
 
+  function buildPhoneLink(className, locationName, text){
+    var a = document.createElement('a');
+    a.className = className;
+    a.href = 'tel:050713881252';
+    decoratePhoneLink(a, locationName);
+    a.setAttribute('aria-label', '공간보감 전화 상담 0507-1388-1252');
+    a.textContent = text || '전화 상담하기 0507-1388-1252';
+    return a;
+  }
+
+  function injectPhoneCtas(){
+    var context = pagePhoneContext();
+    if (!document.querySelector('.spacebogam-header-call')) {
+      var headerWrap = document.querySelector('.top .wrap');
+      if (headerWrap) {
+        var headerCall = buildPhoneLink('spacebogam-header-call', context.location + '_header', '전화 상담');
+        var headerConsult = headerWrap.querySelector('.top-cta, .cta');
+        if (headerConsult && headerConsult.parentNode === headerWrap) headerWrap.insertBefore(headerCall, headerConsult.nextSibling);
+        else headerWrap.appendChild(headerCall);
+      }
+    }
+
+    if (!document.querySelector('.spacebogam-mobile-call')) {
+      document.body.appendChild(buildPhoneLink('spacebogam-mobile-call', context.location + '_mobile_sticky', context.text + ' 0507-1388-1252'));
+    }
+  }
+
   function init(){
+    injectPhoneCtas();
+
     document.querySelectorAll('a[href^="https://intm.kr/consultation/ggbg"], a[href^="/consultation/"]').forEach(function(a){
       a.setAttribute('href', decorate(a.getAttribute('href')));
       if (!a.dataset.spacebogamTracked) {
@@ -213,6 +273,7 @@
     });
 
     document.querySelectorAll('a[href^="tel:"]').forEach(function(a){
+      decoratePhoneLink(a);
       if (!a.dataset.spacebogamCallTracked) {
         a.addEventListener('click', trackPhoneClick, {capture:true});
         a.dataset.spacebogamCallTracked = '1';
