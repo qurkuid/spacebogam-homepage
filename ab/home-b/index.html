@@ -75,10 +75,10 @@
     .home-b .consult-box p{color:rgba(255,255,255,.86);}
     .home-b .consult-box .reassurance-chips span{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.10);color:rgba(255,255,255,.90);}
     .home-b footer a{color:inherit;}
-    body.home-b .spacebogam-mobile-actions{display:none!important;}
+    /* sticky-ready 스크롤 리빌과 충돌하던 display:none 제거 (2026-07-03) */
     @media(max-width:900px){.home-b .criteria,.home-b .absence .wrap,.home-b .process-band,.home-b .consult-box{grid-template-columns:1fr}.home-b .proof-grid{grid-template-columns:1fr 1fr}.home-b .consult-box .hero-actions{max-width:none;}}
     @media(max-width:600px){
-      body.home-b{padding-bottom:0!important;}.home-b .wrap{width:min(100% - 28px,var(--max));}.top .wrap{min-height:54px;width:min(100% - 28px,var(--max));}.brand{font-size:18px}.top-cta,.spacebogam-header-call,.nav{display:none!important;}
+      @media(max-width:600px){body.home-b{padding-bottom:92px!important;}}.home-b .wrap{width:min(100% - 28px,var(--max));}.top .wrap{min-height:54px;width:min(100% - 28px,var(--max));}.brand{font-size:18px}.top-cta,.spacebogam-header-call,.nav{display:none!important;}
       .home-b .hero-b{min-height:calc(100svh - 54px);padding:54px 0 42px;align-items:center;}
       .home-b .hero-b:before{background:linear-gradient(90deg,rgba(25,17,11,.93),rgba(25,17,11,.68)),url('/assets/case/f6de6aa0-f321-4f8d-9018-f955585a526e/50fe116e-bc64-4adc-a9d9-dd4574f6a446.webp') center/cover;}
       .home-b .eyebrow-b{font-size:11.5px;letter-spacing:.04em;margin-bottom:12px;}
