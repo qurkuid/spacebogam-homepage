@@ -1,0 +1,29 @@
+{
+  "index.html": {
+    "cta_locations": [
+      "home_contact_call",
+      "home_contact_consult",
+      "home_estimate_consult",
+      "home_footer_call",
+      "home_header_call",
+      "home_hero_call"
+    ],
+    "body_class": "home",
+    "jsonld_count": 6,
+    "canonical": "https://spacebogam.kr/"
+  },
+  "ab/home-b/index.html": {
+    "cta_locations": [
+      "home_b_bottom_call",
+      "home_b_bottom_consult",
+      "home_b_footer_call",
+      "home_b_footer_consult",
+      "home_b_header_call",
+      "home_b_header_consult",
+      "home_b_hero_consult"
+    ],
+    "body_class": "home home-b",
+    "jsonld_count": 1,
+    "canonical": "https://spacebogam.kr/ab/home-b/"
+  }
+}
