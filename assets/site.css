@@ -337,5 +337,76 @@ footer{background:var(--deep);color:#fff;padding:46px 0}
 .btn.call{background:var(--deep);color:#fff;border-color:var(--deep)}
 .btn.call:hover{background:var(--terra-deep);border-color:var(--terra-deep)}
 @media(max-width:600px){body{padding-bottom:92px}.spacebogam-header-call,.spacebogam-header-kakao{display:none}.spacebogam-mobile-actions{display:grid}.spacebogam-mobile-call{display:flex}.top-cta{display:none}.home .actions .btn.call{background:var(--terra);border-color:var(--terra);color:#fff}.cta-actions .btn.call{background:#fff;color:var(--deep);border-color:#fff}}
+/* ════════ 홈 v2 — 사진 중심 설득 구조 ════════ */
+/* 히어로: 단일 컬럼, 사진이 더 보이게 */
+.home .hero .wrap.single{grid-template-columns:1fr;padding:96px 0 64px}
+.home .hero{min-height:520px}
+.home .hero .wrap.single h1{font-size:clamp(30px,4.6vw,56px)}
+.hero-more{display:inline-flex;align-items:center;min-height:52px;padding:0 6px;color:oklch(1 0 0 / .82);font-weight:560;font-size:14px;border-bottom:1px solid oklch(1 0 0 / .35);transition:color .15s,border-color .15s}
+.hero-more:hover{color:#fff;border-color:#fff}
+
+/* 신뢰 스트립: 카드 없이 팩트만 */
+.facts-strip{padding:0;border-bottom:1px solid var(--line)}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;padding:30px 0}
+.fact b{display:block;font-size:clamp(19px,1.9vw,24px);letter-spacing:-.035em;font-weight:650;color:var(--ink)}
+.fact span{display:block;font-size:13px;color:var(--soft);margin-top:6px;line-height:1.55;font-weight:350}
+.fact:not(:first-child){border-left:1px solid var(--line);padding-left:28px}
+
+/* 사례 월: 대표 사례 크게 + 실사진 타일 */
+.case-wall{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:205px;gap:14px}
+.case-tile{position:relative;border-radius:22px;overflow:hidden;background:var(--paper-2) var(--img,none) center/cover;box-shadow:var(--shadow-soft);transition:transform .2s,box-shadow .2s}
+.case-tile:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.case-tile:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,oklch(0 0 0 / 0) 40%,oklch(0 0 0 / .66));transition:background .2s}
+.case-tile.featured{grid-column:span 2;grid-row:span 2}
+.case-tile.wide{grid-column:span 2}
+.tile-body{position:absolute;left:18px;right:18px;bottom:16px;color:#fff}
+.tile-body b{display:block;font-weight:600;font-size:16px;letter-spacing:-.02em;line-height:1.3}
+.case-tile.featured .tile-body b{font-size:clamp(19px,1.9vw,24px)}
+.tile-body span{display:block;font-size:12.5px;color:oklch(1 0 0 / .78);margin-top:4px}
+.tile-badge{position:absolute;left:16px;top:16px;background:oklch(1 0 0 / .92);color:var(--deep);border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:600}
+.case-more{margin-top:20px;display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.quiet-link{color:var(--terra);font-size:14px;font-weight:560}
+.quiet-link:hover{text-decoration:underline}
+
+/* 일하는 방식: 번호 리스트, 카드 없음 */
+.how-list{max-width:860px}
+.how-row{display:grid;grid-template-columns:86px 1fr;gap:26px;padding:30px 0;border-top:1px solid var(--line)}
+.how-row:last-child{border-bottom:1px solid var(--line)}
+.how-no{font-size:38px;font-weight:450;letter-spacing:-.05em;color:oklch(0.595 0.130 46 / .38);line-height:1}
+.how-row h3{font-size:22px;letter-spacing:-.035em;margin:0 0 8px;font-weight:600}
+.how-row p{margin:0;color:var(--soft);font-weight:350;word-break:keep-all;max-width:640px}
+
+/* 견적 기준 패널 보조 */
+.prep-note{font-size:13.5px;color:var(--wood);font-weight:560;margin:14px 0 22px}
+#estimate-guide .proof-panel .cta-actions{justify-content:flex-start}
+#estimate-guide .btn{background:var(--terra);color:#fff;border-color:var(--terra)}
+#estimate-guide .btn.outline{background:#fff;color:var(--ink);border-color:var(--line)}
+
+/* 푸터 링크 그룹: SEO 링크는 푸터로 */
+footer .foot-links{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;padding:44px 0 10px;border-bottom:1px solid oklch(1 0 0 / .10)}
+footer .foot-links b{display:block;font-size:13px;color:oklch(1 0 0 / .92);margin-bottom:12px;font-weight:600}
+footer .foot-links a{display:block;font-size:13px;color:oklch(1 0 0 / .58);padding:3px 0;transition:color .15s}
+footer .foot-links a:hover{color:#fff}
+
+@media(max-width:980px){
+  .facts{grid-template-columns:1fr 1fr;gap:20px}
+  .fact:not(:first-child){border-left:0;padding-left:0}
+  .fact:nth-child(even){border-left:1px solid var(--line);padding-left:20px}
+  .case-wall{grid-template-columns:1fr 1fr;grid-auto-rows:190px}
+  .case-tile.featured{grid-column:span 2;grid-row:span 2}
+  .case-tile.wide{grid-column:span 2}
+  footer .foot-links{grid-template-columns:1fr 1fr;gap:22px}
+}
+@media(max-width:600px){
+  .home .hero .wrap.single{padding:72px 0 56px}
+  .facts{grid-template-columns:1fr 1fr;padding:22px 0}
+  .case-wall{grid-template-columns:1fr;grid-auto-rows:230px}
+  .case-tile.featured,.case-tile.wide{grid-column:span 1;grid-row:span 1}
+  .case-tile.featured{grid-row:span 2}
+  .how-row{grid-template-columns:1fr;gap:8px;padding:24px 0}
+  .how-no{font-size:30px}
+  footer .foot-links{grid-template-columns:1fr 1fr;padding:34px 0 10px}
+}
+
 /* Spacebogam phone CTA panel */
 .phone-cta-panel{margin:32px auto;padding:0 20px}.phone-cta-inner{border:1px solid rgba(176,103,67,.24);background:linear-gradient(135deg,#fff8f1,#f4ebe1);border-radius:24px;padding:24px;box-shadow:0 18px 50px rgba(45,32,20,.08)}.phone-cta-kicker{margin:0 0 8px;color:#9b5d3e;font-size:13px;font-weight:800;letter-spacing:.08em}.phone-cta-panel h2{margin:0 0 10px;font-size:clamp(24px,4vw,34px);line-height:1.22}.phone-cta-panel p{margin:0 0 18px;color:#604f42}.phone-cta-link{display:inline-flex;align-items:center;justify-content:center;min-height:48px;border-radius:999px;padding:0 18px;background:#1b1611;color:#fff;text-decoration:none;font-weight:800}.phone-cta-link:before{content:"☎";margin-right:8px}@media(max-width:600px){.phone-cta-panel{margin:24px auto 96px;padding:0 16px}.phone-cta-inner{padding:20px}.phone-cta-link{display:flex;width:100%;box-sizing:border-box}}
