@@ -58,7 +58,7 @@ fbq('track', 'PageView');
 </script>
 <!-- End Meta Pixel Code -->
 </head>
-<body class="home"><noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=512750840350337&ev=PageView&noscript=1" /></noscript>
+<body class="home"><noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=512750840350337&ev=PageView&noscript=1" / /></noscript>
   <header class="top">
     <div class="wrap">
       <a class="brand" href="index.html">공간보감</a>
@@ -125,7 +125,7 @@ fbq('track', 'PageView');
         <div class="process">
           <div class="step"><h3>1차 미팅</h3><p>원하는 방향과 예산을 듣고, 가능한 범위의 견적을 먼저 봅니다.</p><output>대략 견적서</output></div>
           <div class="step"><h3>유료 현장실측</h3><p>현장에 가서 치수와 상태를 확인합니다.</p><output>현장 보고서</output></div>
-          <div class="step"><h3>실측도면·실측견적</h3><p>실측한 내용을 바탕으로 견적을 다시 씁니다.</p><output>실측도면 + 견적서</output></div>
+          <div class="step"><h3>실측 도면·실측 견적</h3><p>실측한 내용을 바탕으로 견적을 다시 씁니다.</p><output>실측도면 + 견적서</output></div>
           <div class="step"><h3>1차 디자인</h3><p>3D와 자재 리스트로 방향을 보여드립니다.</p><output>3D + 자재 리스트</output></div>
           <div class="step"><h3>2차 디자인 조정</h3><p>수정할 부분을 반영해 디자인과 견적을 다시 맞춥니다.</p><output>디자인/견적 반영</output></div>
           <div class="step"><h3>본계약·시공</h3><p>계약 후에는 공정표, 발주 기록, 현장 사진을 남기며 진행합니다.</p><output>책임시공 관리</output></div>
@@ -140,13 +140,32 @@ fbq('track', 'PageView');
             <div class="kicker">견적 기준</div>
             <h2>견적서는 금액보다<br>항목을 봐야 합니다</h2>
             <p>같은 평수라도 철거 범위, 설비 상태, 마감재에 따라 금액이 달라집니다. 첫 미팅에서 범위를 잡고, 실측 후 빠진 공정과 추가 비용 조건까지 다시 확인합니다.</p>
+            <p>말로만 투명하다고 하지 않고, 실제로 드리는 실측 견적서의 양식을 그대로 보여드립니다. <b>공정별 분리</b>, <b>자재 등급·수량 표기</b>, <b>추가 비용 조건 사전 고지</b> — 이 세 가지가 빠진 견적서는 공사 중에 흔들립니다.</p>
             <p class="prep-note">상담 전 준비물: 도면(또는 평면 사진) · 현재 공간 사진 · 희망 예산 · 일정</p>
             <div class="cta-actions"><a class="btn" data-cta-location="home_estimate_consult" href="/consultation/">상담 신청하기</a><a class="btn outline" href="estimate.html">견적 전 준비 보기</a></div>
           </div>
-          <div class="proof-list">
-            <div class="proof-item"><b>공사 범위</b><span>철거·목공·전기·설비 포함 여부, 주방·욕실 제작 범위, 샷시·중문·시스템에어컨 별도 여부를 나눠 봅니다.</span></div>
-            <div class="proof-item"><b>자재 기준</b><span>브랜드명보다 등급과 수량이 적혀 있는지 봅니다. 마루·타일·필름·도배, 싱크대 상판, 도기류 기준까지.</span></div>
-            <div class="proof-item"><b>추가 비용 조건</b><span>누수·배관·전기 증설 변수, 관리사무소·엘리베이터 사용 조건, 폐기물 반출 조건을 미리 적어둡니다.</span></div>
+          <div class="quote-doc" aria-label="공간보감 실측 견적서 실제 양식">
+            <div class="qd-head"><div><b>실측 견적서</b><span class="qd-badge">실제 견적 데이터</span></div><span class="qd-site">부산 아파트 전체 리모델링 · 공간보감 실제 견적 데이터 기준 (단지·고객 정보 제외)</span></div>
+            <div class="qd-scroll"><table class="qd-table">
+              <thead><tr><th>공정</th><th>자재·기준</th><th>수량</th><th class="num">금액</th></tr></thead>
+              <tbody>
+                <tr><td>철거·폐기물</td><td>마루·바닥타일 철거 · 폐기물 4톤 반출 · 플라베니아 보양재 포함</td><td>33평</td><td class="num">5,559,000</td></tr>
+                <tr><td>가설·보양</td><td>엘리베이터 보양</td><td>3회</td><td class="num">900,000</td></tr>
+                <tr><td>설비</td><td>발코니 확장 2개소 · 도막방수(아쿠아디펜스)+침투방수 · 기본 설비</td><td>확장 2개소</td><td class="num">3,365,000</td></tr>
+                <tr><td>전기</td><td>기본 배선 6식 · 인덕션 전용선 · 콘센트 신설 3개소 · 스위치·콘센트 80개 · 온도조절기(하니웰) 6개 · 조명·인터폰</td><td>6식</td><td class="num">4,698,400</td></tr>
+                <tr><td>목공</td><td>목수 기공 6명 · 천장 단차조정·합판 보강 · 단열 2개소 · 도어 교체 9개 · 몰딩·걸레받이 70개</td><td>기공 6명</td><td class="num">7,195,000</td></tr>
+                <tr><td>문·중문</td><td>문틀·문짝 6개소 · 손잡이·경첩 포함 · 3연동 중문 1개</td><td>6개소</td><td class="num">2,040,000</td></tr>
+                <tr><td>타일</td><td>600각 벽 9㎡·바닥 35㎡ · 기공 6명·조공 3식 · 아덱스 줄눈 4포</td><td>44㎡</td><td class="num">4,532,000</td></tr>
+                <tr><td>욕실</td><td>양변기·세면대(아메리칸스탠다드) · 해바라기 샤워수전 · SMC 천장 · 샤워파티션 — 전 항목 모델명 명기</td><td>2개소</td><td class="num">3,721,994</td></tr>
+                <tr><td>마루</td><td>강마루 · 걸레받이 포함</td><td>33평</td><td class="num">3,630,000</td></tr>
+                <tr><td>도배</td><td>실크벽지(베스띠) 22롤 · 도배공 8팀 · 부자재 33평분</td><td>22롤</td><td class="num">3,626,000</td></tr>
+                <tr><td>주방·가구</td><td>LG·한샘·한솔 자재 · PET 도어 · 18T 속장 · 인조대리석 상판 6m · 깜뽀르테 싱크볼 · 서랍 10개·띄움시공 6개</td><td>상하부장 28자</td><td class="num">13,704,500</td></tr>
+                <tr><td>유리·거울</td><td>유리 방화판 6m · 벽면 거울</td><td>6m</td><td class="num">1,330,000</td></tr>
+                <tr><td>설계·청소</td><td>행위허가 신고 · 입주민 공사 동의 · 준공청소 33평</td><td>33평</td><td class="num">1,100,000</td></tr>
+              </tbody>
+            </table></div>
+            <div class="qd-sum"><span>공정 합계 · 샷시/시스템에어컨/현장관리비/부가세 별도</span><b>55,401,894원</b></div>
+            <div class="qd-note"><b>추가 비용 조건 — 계약 전에 미리 적어드립니다</b><span>철거 후 누수·배관 노후 발견 시 / 관리사무소·엘리베이터 사용 조건 / 폐기물 반출 조건. 발생 시 진행 전 협의합니다. 현장 조건에 따라 금액은 달라집니다.</span></div>
           </div>
         </div>
       </div>

@@ -382,6 +382,34 @@ footer{background:var(--deep);color:#fff;padding:46px 0}
 #estimate-guide .btn{background:var(--terra);color:#fff;border-color:var(--terra)}
 #estimate-guide .btn.outline{background:#fff;color:var(--ink);border-color:var(--line)}
 
+/* 실측 견적서 예시 양식 — 문서 그 자체를 보여준다 */
+.quote-doc{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-soft);padding:22px 22px 18px;align-self:start;min-width:0}
+.qd-head{padding-bottom:14px;border-bottom:2px solid var(--ink)}
+.qd-head b{font-size:19px;letter-spacing:-.03em;font-weight:650}
+.qd-badge{display:inline-block;margin-left:8px;font-size:11px;font-weight:600;color:var(--terra);border:1px solid oklch(0.595 0.13 46 / .4);border-radius:999px;padding:3px 8px;vertical-align:2px}
+.qd-site{display:block;font-size:12px;color:var(--soft);margin-top:6px}
+.qd-scroll{overflow-x:auto}
+.qd-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}
+.qd-table th{font-size:11.5px;font-weight:600;color:var(--soft);text-align:left;padding:9px 8px 7px;border-bottom:1px solid var(--line);letter-spacing:.02em}
+.qd-table td{padding:8px;border-bottom:1px solid oklch(0.93 0.01 78);color:var(--ink);vertical-align:top}
+.qd-table td:first-child{font-weight:600;white-space:nowrap}
+.qd-table td:nth-child(2){color:oklch(0.40 0.018 60)}
+.qd-table td:nth-child(3){white-space:nowrap;color:var(--soft)}
+.qd-table .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.qd-table .qd-sep td{color:var(--soft);background:var(--paper)}
+.qd-table .qd-sep td:first-child{font-weight:560}
+.qd-sum{display:flex;justify-content:space-between;align-items:baseline;padding:12px 8px 4px}
+.qd-sum span{font-size:12.5px;color:var(--soft)}
+.qd-sum b{font-size:18px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.qd-note{margin-top:12px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:13px 14px}
+.qd-note b{display:block;font-size:12.5px;color:var(--wood);margin-bottom:4px;font-weight:600}
+.qd-note span{font-size:12.5px;color:var(--soft);line-height:1.6}
+@media(max-width:600px){
+  .quote-doc{padding:16px 14px 14px}
+  .qd-table{font-size:12px;min-width:430px}
+  .qd-table td:nth-child(2){min-width:150px}
+}
+
 /* 푸터 링크 그룹: SEO 링크는 푸터로 */
 footer .foot-links{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;padding:44px 0 10px;border-bottom:1px solid oklch(1 0 0 / .10)}
 footer .foot-links b{display:block;font-size:13px;color:oklch(1 0 0 / .92);margin-bottom:12px;font-weight:600}
