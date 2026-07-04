@@ -15,7 +15,10 @@ REQUIRED_MARKERS = [
     "512750840350337",         # Meta Pixel
     "site-tracking.js",        # 공용 트래킹 (전화/카카오/상담 CTA 계측)
 ]
-FORBIDDEN = ["images.unsplash.com"]  # 스톡 이미지 금지
+FORBIDDEN = [
+    "images.unsplash.com",  # 스톡 이미지 금지
+    "/ />",                 # 2026-07-04 원인불명 일괄 변형 재발 감지 (픽셀 noscript 태그 오염)
+]
 
 CTA_RE = re.compile(r'data-cta-location="([^"]+)"')
 BODY_RE = re.compile(r'<body class="([^"]*)"')
