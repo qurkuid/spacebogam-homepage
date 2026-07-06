@@ -14,6 +14,7 @@ REQUIRED_MARKERS = [
     "G-EJGXDD5C1T",            # GA4
     "512750840350337",         # Meta Pixel
     "site-tracking.js",        # 공용 트래킹 (전화/카카오/상담 CTA 계측)
+    "GTM-PW8GLP8S",            # Google Tag Manager (2026-07-06 도입)
 ]
 FORBIDDEN = [
     "images.unsplash.com",  # 스톡 이미지 금지
