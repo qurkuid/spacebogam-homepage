@@ -64,6 +64,9 @@
   <url><loc>https://spacebogam.kr/daewoo-worldmark-centum-interior.html</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/trump-world-centum-interior.html</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/insights/</loc><priority>0.9</priority></url>
+  <url><loc>https://spacebogam.kr/guide/</loc><priority>0.7</priority></url>
+  <url><loc>https://spacebogam.kr/qna/</loc><priority>0.7</priority></url>
+  <url><loc>https://spacebogam.kr/author/baek-changseok/</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/feed.xml</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/insights/224289898461-부산-아파트-인테리어-공간보감-포트폴리오-2025-2026.html</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/insights/224285757703-부산-구축-아파트-인테리어-견적-후회-없는.html</loc><priority>0.7</priority></url>
@@ -115,4 +118,10 @@
   <url><loc>https://spacebogam.kr/insights/223935811996-동래-인테리어-사직쌍용예가-42평-세-아이와-부부의.html</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/insights/223932762831-부산-사직동-인테리어-쌍용예가-1차-아파트-42평.html</loc><priority>0.7</priority></url>
   <url><loc>https://spacebogam.kr/insights/223926227328-신혼부부-인테리어-호텔같은-20평대-아파트.html</loc><priority>0.7</priority></url>
+
+  <url><loc>https://spacebogam.kr/guides/</loc><lastmod>2026-07-06</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://spacebogam.kr/guides/interior-estimate-checklist.html</loc><lastmod>2026-07-06</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://spacebogam.kr/guides/interior-contract-checklist.html</loc><lastmod>2026-07-06</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://spacebogam.kr/guides/busan-haeundae-interior-checklist.html</loc><lastmod>2026-07-06</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://spacebogam.kr/guides/apartment-interior-process.html</loc><lastmod>2026-07-06</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
 </urlset>
