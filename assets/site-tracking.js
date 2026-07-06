@@ -266,7 +266,7 @@
     a.href = 'tel:050713881252';
     decoratePhoneLink(a, locationName);
     a.setAttribute('aria-label', '공간보감 전화 상담 0507-1388-1252');
-    a.textContent = text || '전화 상담하기 0507-1388-1252';
+    a.textContent = text || '전화 상담하기';
     return a;
   }
 
@@ -327,11 +327,12 @@
     if (existingHeaderCall) {
       existingHeaderCall.setAttribute('href', 'tel:050713881252');
       decoratePhoneLink(existingHeaderCall, existingHeaderCall.dataset.ctaLocation || context.location + '_header');
-      if ((existingHeaderCall.textContent || '').indexOf('0507-1388-1252') === -1) {
-        existingHeaderCall.textContent = '전화 상담 0507-1388-1252';
+      // 전화번호는 노출하지 않는다 — 버튼 라벨만 유지 (2026-07-04 사장님 지시)
+      if ((existingHeaderCall.textContent || '').indexOf('0507-1388-1252') !== -1 || !(existingHeaderCall.textContent || '').trim()) {
+        existingHeaderCall.textContent = '전화 상담';
       }
     } else if (headerWrap) {
-      existingHeaderCall = buildPhoneLink('spacebogam-header-call', context.location + '_header', '전화 상담 0507-1388-1252');
+      existingHeaderCall = buildPhoneLink('spacebogam-header-call', context.location + '_header', '전화 상담');
       var headerConsult = headerWrap.querySelector('.top-cta, .cta');
       if (headerConsult && headerConsult.parentNode === headerWrap) headerWrap.insertBefore(existingHeaderCall, headerConsult.nextSibling);
       else headerWrap.appendChild(existingHeaderCall);
