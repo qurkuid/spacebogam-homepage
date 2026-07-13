@@ -5,7 +5,7 @@
   var NAVER_CTS_ACCOUNT_ID = 's_7702568df18';
   var NAVER_ANALYTICS_ACCOUNT_ID = '183d82ef1dd8190';
   var NAVER_CTS_DOMAIN = 'spacebogam.kr';
-  var NAVER_WCS_SCRIPT_SRC = 'https://wcs.pstatic.net/wcslog.js';
+  var NAVER_WCS_SCRIPT_SRC = 'https://wcs.naver.net/wcslog.js';
   var META_PIXEL_ID = '512750840350337';
   var META_PIXEL_SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
   var KAKAO_CHAT_URL = 'http://pf.kakao.com/_UEUBn/chat';

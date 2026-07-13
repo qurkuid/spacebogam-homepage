@@ -57,6 +57,18 @@ fbq('init', '512750840350337');
 fbq('track', 'PageView');
 </script>
 <!-- End Meta Pixel Code -->
+<!-- Naver WCS / CTS common tracking -->
+<script type="text/javascript" src="//wcs.naver.net/wcslog.js" data-spacebogam-naver-wcs="1"></script>
+<script type="text/javascript">
+if (!window.wcs_add) window.wcs_add = {};
+window.wcs_add["wa"] = "s_7702568df18";
+if (!window._nasa) window._nasa = {};
+if (window.wcs) {
+  window.wcs.inflow("spacebogam.kr");
+  window.wcs_do();
+  window.__spacebogamNaverCtsPvSent = true;
+}
+</script>
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->

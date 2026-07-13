@@ -15,6 +15,7 @@ REQUIRED_MARKERS = [
     "512750840350337",         # Meta Pixel
     "site-tracking.js",        # 공용 트래킹 (전화/카카오/상담 CTA 계측)
     "GTM-PW8GLP8S",            # Google Tag Manager (2026-07-06 도입)
+    "data-spacebogam-naver-wcs",  # Naver WCS/CTS (2026-07-14 서버 설치분 import)
 ]
 FORBIDDEN = [
     "images.unsplash.com",  # 스톡 이미지 금지
@@ -45,7 +46,7 @@ def analyze(rel):
     missing_assets = []
     for m in ASSET_RE.finditer(html):
         ref = m.group(1) or m.group(2)
-        if not ref or ref.startswith(("http", "mailto:", "tel:", "#", "data:")):
+        if not ref or ref.startswith(("http", "mailto:", "tel:", "#", "data:", "//")):
             continue
         ref_path = ref.split("?")[0].split("#")[0]
         if not ref_path or ref_path.endswith("/"):  # 디렉토리 링크 (/consultation/ 등)

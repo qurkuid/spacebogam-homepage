@@ -19,7 +19,7 @@ import json, re, sys, pathlib
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BASELINE = pathlib.Path(__file__).resolve().parent / "seo-baseline.json"
 
-TRACKING = ["GTM-PW8GLP8S", "G-EJGXDD5C1T", "512750840350337", "site-tracking.js"]
+TRACKING = ["GTM-PW8GLP8S", "G-EJGXDD5C1T", "512750840350337", "site-tracking.js", "data-spacebogam-naver-wcs"]
 SITE_FILES = ["robots.txt", "feed.xml", "CNAME", ".nojekyll", "214395339aba481e8c39a54d80578afd.txt"]
 
 TITLE_RE = re.compile(r"<title>(.*?)</title>", re.S)
