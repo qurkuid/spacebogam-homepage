@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://spacebogam.kr/</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
@@ -17,6 +17,30 @@
     <lastmod>2026-06-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://spacebogam.kr/qna.html</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://spacebogam.kr/guides.html</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://spacebogam.kr/guide-apartment-cost.html</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.78</priority>
+  </url>
+  <url>
+    <loc>https://spacebogam.kr/guide-old-apartment-checklist.html</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.78</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/busan-interior.html</loc>
@@ -80,55 +104,55 @@
   </url>
   <url>
     <loc>https://spacebogam.kr/case-daewoo-ian-35py.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/case-geoje-hyundai-hometown.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/case-guseo-ssangyong.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/case-sajik-ssangyong.html</loc>
-    <lastmod>2026-07-03</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/case-hwamyeong-kolong.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/case-hwamyeong-lottecastle.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/case-mega-centum-49py.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/case-oryukdo-sk-view.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/case-samhan-goldenview.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
@@ -296,31 +320,31 @@
   </url>
   <url>
     <loc>https://spacebogam.kr/living-20py.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/living-30py.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/living-40py.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/living-50py.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
   <url>
     <loc>https://spacebogam.kr/living-60py.html</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>

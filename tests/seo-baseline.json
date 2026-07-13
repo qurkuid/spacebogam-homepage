@@ -1,0 +1,3108 @@
+{
+ "site": {
+  "sitemap_urls": [
+   "https://spacebogam.kr/",
+   "https://spacebogam.kr/blog.html",
+   "https://spacebogam.kr/blog/",
+   "https://spacebogam.kr/blog/223926227328-신혼부부-인테리어-호텔같은-20평대-아파트.html",
+   "https://spacebogam.kr/blog/223932762831-부산-사직동-인테리어-쌍용예가-1차-아파트-42평.html",
+   "https://spacebogam.kr/blog/223935811996-동래-인테리어-사직쌍용예가-42평-세-아이와-부부의.html",
+   "https://spacebogam.kr/blog/223940283554-40평대아파트리모델링-5인가족-안성맞춤-인테리어-완성.html",
+   "https://spacebogam.kr/blog/223947716639-구서동-인테리어-쌍용예가-2차-58평-상담-이야기.html",
+   "https://spacebogam.kr/blog/223950157821-금정구-50평대-인테리어-구서쌍용예가-2단지.html",
+   "https://spacebogam.kr/blog/223952461043-부산아파트인테리어-구서쌍용예가-2차-58평.html",
+   "https://spacebogam.kr/blog/223964860710-해운대-인테리어-두산-2차-22평-신혼부부-계약완료.html",
+   "https://spacebogam.kr/blog/223970324989-부산북구인테리어-업체-12군데-비교-후-함께-한.html",
+   "https://spacebogam.kr/blog/223973094721-화명동-인테리어업체-화명롯데캐슬멤버스-45평-리모델링.html",
+   "https://spacebogam.kr/blog/223982545239-동래-인테리어업체-5가지-요청사항을-빠짐없이-구현해-낸.html",
+   "https://spacebogam.kr/blog/223982552548-사직-인테리어업체-롯데캐슬더클래식-33평-tv-없는-집.html",
+   "https://spacebogam.kr/blog/224005033357-사직-쌍용예가-1차-42평-인테리어-다섯-식구.html",
+   "https://spacebogam.kr/blog/224010253704-부산-아파트-리모델링-사직롯데캐슬더클래식-33평-호텔-분위기.html",
+   "https://spacebogam.kr/blog/224015797038-부산-인테리어-견적-제대로-이해하는-4가지-기준.html",
+   "https://spacebogam.kr/blog/224022947548-금정구-인테리어-구서쌍용예가2차-58평-내추럴톤-리모델링.html",
+   "https://spacebogam.kr/blog/224023019330-부산-리모델링-업체-선택-가이드-믿을-수.html",
+   "https://spacebogam.kr/blog/224049042932-부산-인테리어-업체-연제구-거제동-유림아시아드-47평.html",
+   "https://spacebogam.kr/blog/224051562085-사직동인테리어-거제유림아시아드-아파트-47평-모던우드-리모델링.html",
+   "https://spacebogam.kr/blog/224052961107-부산-인테리어-자재-합리적인-선택-가이드-후회.html",
+   "https://spacebogam.kr/blog/224068445396-부산-인테리어-업체-상담-시-꼭-확인해야.html",
+   "https://spacebogam.kr/blog/224070102716-해운대-인테리어-업체-상담부터-공사-과정까지-실패하지.html",
+   "https://spacebogam.kr/blog/224071444248-부산-아파트-인테리어-구축-리모델링-비포-애프터.html",
+   "https://spacebogam.kr/blog/224073600410-공간보감-인테리어-공간보다-사람을-먼저-봅니다.html",
+   "https://spacebogam.kr/blog/224088926183-부산-해운대-인테리어-메가센텀-한화꿈에그린-49평-3개월.html",
+   "https://spacebogam.kr/blog/224096886339-해운대-메가센텀-한화꿈에그린-49평-구축-아파트-미니멀.html",
+   "https://spacebogam.kr/blog/224114449260-부산-아파트-인테리어-해운대-메가센텀-한화꿈에그린-49평.html",
+   "https://spacebogam.kr/blog/224116742469-부산-사직동-인테리어-신뢰로-진행된-사직-쌍용예가.html",
+   "https://spacebogam.kr/blog/224122191089-사직-쌍용예가-1차-32평-수많은-시공-경험이.html",
+   "https://spacebogam.kr/blog/224136390525-부산-사직쌍용예가-1차-인테리어-32평-iot와-공조.html",
+   "https://spacebogam.kr/blog/224156072501-구서동-쌍용스윗닷홈50평-인테리어-공간에-취향을-담아-내는.html",
+   "https://spacebogam.kr/blog/224161251315-구서동-인테리어-구서쌍용스윗닷홈-50평대-구축-아파트-공간.html",
+   "https://spacebogam.kr/blog/224182980295-부산-해운대-아파트-인테리어-개방감을-살리는-24평.html",
+   "https://spacebogam.kr/blog/224185650527-부산-해운대-좌동-아파트-인테리어-4베이-구조의.html",
+   "https://spacebogam.kr/blog/224192971796-부산-턴키-인테리어-해운대-구축-메가센텀꿈에그린-아파트.html",
+   "https://spacebogam.kr/blog/224195906561-화명동-대우이안-35평-인테리어-구축-아파트-변수를.html",
+   "https://spacebogam.kr/blog/224204272116-부산-진구-연지-유림노르웨이숲-30평대-아파트-인테리어.html",
+   "https://spacebogam.kr/blog/224211725948-구서동인테리어-금정구-구서쌍용스윗닷홈-50평-반려견을-위한-배려가.html",
+   "https://spacebogam.kr/blog/224219286226-부산-해운대구-인테리어-고민-중이신가요-30평대-아파트.html",
+   "https://spacebogam.kr/blog/224227103387-부산-30평대-아파트-인테리어-연지-유림노르웨이숲-우드.html",
+   "https://spacebogam.kr/blog/224228168633-부산-아파트-인테리어-반려동물과-보호자의-일상을-배려한.html",
+   "https://spacebogam.kr/blog/224237135940-화명동-인테리어-대우이안-35평-공간을-넓어-보이게.html",
+   "https://spacebogam.kr/blog/224249736922-부산-아파트-인테리어-화려한-포트폴리오보다-값진-공간보감의.html",
+   "https://spacebogam.kr/blog/224254948259-부산-화명동-대우이안-35평-화이트-앤-우드.html",
+   "https://spacebogam.kr/blog/224259674942-부산-인테리어-업체-상담-계약-이후에는-어떤.html",
+   "https://spacebogam.kr/blog/224273223528-부산-남구-구축-40평대-아파트-인테리어-시작.html",
+   "https://spacebogam.kr/blog/224277991193-부산-인테리어-비용-똑같은-아파트인데-왜-견적은.html",
+   "https://spacebogam.kr/blog/224280575103-부산-인테리어-업체-추천-후기만-믿기-불안할.html",
+   "https://spacebogam.kr/blog/224285757703-부산-구축-아파트-인테리어-견적-후회-없는.html",
+   "https://spacebogam.kr/blog/224289898461-부산-아파트-인테리어-공간보감-포트폴리오-2025-2026.html",
+   "https://spacebogam.kr/buk-gu-interior.html",
+   "https://spacebogam.kr/busan-30pyeong-apartment-interior.html",
+   "https://spacebogam.kr/busan-40pyeong-apartment-remodeling.html",
+   "https://spacebogam.kr/busan-apartment-interior.html",
+   "https://spacebogam.kr/busan-cafe-interior.html",
+   "https://spacebogam.kr/busan-commercial-interior.html",
+   "https://spacebogam.kr/busan-interior-company.html",
+   "https://spacebogam.kr/busan-interior.html",
+   "https://spacebogam.kr/busan-office-hospital-interior.html",
+   "https://spacebogam.kr/busan-remodeling.html",
+   "https://spacebogam.kr/case-daewoo-ian-35py.html",
+   "https://spacebogam.kr/case-geoje-hyundai-hometown.html",
+   "https://spacebogam.kr/case-guseo-ssangyong.html",
+   "https://spacebogam.kr/case-hwamyeong-kolong.html",
+   "https://spacebogam.kr/case-hwamyeong-lottecastle.html",
+   "https://spacebogam.kr/case-mega-centum-49py.html",
+   "https://spacebogam.kr/case-oryukdo-sk-view.html",
+   "https://spacebogam.kr/case-sajik-ssangyong.html",
+   "https://spacebogam.kr/case-samhan-goldenview.html",
+   "https://spacebogam.kr/centum-apartment-interior.html",
+   "https://spacebogam.kr/centum-star-interior.html",
+   "https://spacebogam.kr/commercial-clinic.html",
+   "https://spacebogam.kr/commercial-shop.html",
+   "https://spacebogam.kr/commercial.html",
+   "https://spacebogam.kr/consultation/",
+   "https://spacebogam.kr/daewoo-worldmark-centum-interior.html",
+   "https://spacebogam.kr/daeyeon-hillstate-interior.html",
+   "https://spacebogam.kr/dongnae-interior.html",
+   "https://spacebogam.kr/doosan-zenith-interior.html",
+   "https://spacebogam.kr/estimate-commercial.html",
+   "https://spacebogam.kr/estimate-living.html",
+   "https://spacebogam.kr/estimate.html",
+   "https://spacebogam.kr/geoje-dong-apartment-remodeling.html",
+   "https://spacebogam.kr/geumjeong-gu-interior.html",
+   "https://spacebogam.kr/guseo-dong-apartment-interior.html",
+   "https://spacebogam.kr/haeundae-gyeongdong-jade-interior.html",
+   "https://spacebogam.kr/haeundae-interior.html",
+   "https://spacebogam.kr/haeundae-ipark-interior.html",
+   "https://spacebogam.kr/haeundae-lct-interior.html",
+   "https://spacebogam.kr/hwamyeong-interior.html",
+   "https://spacebogam.kr/hwamyeong-lottecastle-kaiser-interior.html",
+   "https://spacebogam.kr/jungdong-interior.html",
+   "https://spacebogam.kr/jwadong-interior.html",
+   "https://spacebogam.kr/lg-metrocity-interior.html",
+   "https://spacebogam.kr/living-20py.html",
+   "https://spacebogam.kr/living-30py.html",
+   "https://spacebogam.kr/living-40py.html",
+   "https://spacebogam.kr/living-50py.html",
+   "https://spacebogam.kr/living-60py.html",
+   "https://spacebogam.kr/living.html",
+   "https://spacebogam.kr/marine-city-interior.html",
+   "https://spacebogam.kr/marine-city-ipark-interior.html",
+   "https://spacebogam.kr/namcheon-samick-beach-interior.html",
+   "https://spacebogam.kr/office.html",
+   "https://spacebogam.kr/overview.html",
+   "https://spacebogam.kr/portfolio.html",
+   "https://spacebogam.kr/process.html",
+   "https://spacebogam.kr/sajik-dong-interior.html",
+   "https://spacebogam.kr/sajik-lottecastle-the-classic-interior.html",
+   "https://spacebogam.kr/the-sharp-centum-park-interior.html",
+   "https://spacebogam.kr/trump-world-centum-interior.html",
+   "https://spacebogam.kr/udong-interior.html",
+   "https://spacebogam.kr/yongho-w-interior.html"
+  ],
+  "site_files": [
+   ".nojekyll",
+   "214395339aba481e8c39a54d80578afd.txt",
+   "CNAME",
+   "feed.xml",
+   "robots.txt"
+  ]
+ },
+ "pages": {
+  "404.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": null,
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog-admin.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": null,
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "buk-gu-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/buk-gu-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "busan-30pyeong-apartment-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/busan-30pyeong-apartment-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "busan-40pyeong-apartment-remodeling.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/busan-40pyeong-apartment-remodeling.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "busan-apartment-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/busan-apartment-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "busan-cafe-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/busan-cafe-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "busan-commercial-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/busan-commercial-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "busan-interior-company.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/busan-interior-company.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "busan-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/busan-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "busan-office-hospital-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/busan-office-hospital-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "busan-remodeling.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/busan-remodeling.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "case-daewoo-ian-35py.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/case-daewoo-ian-35py.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "CreativeWork"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "case-geoje-hyundai-hometown.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/case-geoje-hyundai-hometown.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "CreativeWork"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "case-guseo-ssangyong.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/case-guseo-ssangyong.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "CreativeWork"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "case-hwamyeong-kolong.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/case-hwamyeong-kolong.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "CreativeWork"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "case-hwamyeong-lottecastle.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/case-hwamyeong-lottecastle.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "CreativeWork"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "case-mega-centum-49py.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/case-mega-centum-49py.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "CreativeWork"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "case-oryukdo-sk-view.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/case-oryukdo-sk-view.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "CreativeWork"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "case-sajik-ssangyong.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/case-sajik-ssangyong.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "CreativeWork"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "case-samhan-goldenview.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/case-samhan-goldenview.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "CreativeWork"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "centum-apartment-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/centum-apartment-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "centum-star-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/centum-star-interior.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "commercial-clinic.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/commercial-clinic.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "WebPage"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "commercial-shop.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/commercial-shop.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "WebPage"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "commercial.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/commercial.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "WebPage"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "consultation.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/consultation/",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 3,
+   "jsonld_types": [
+    "BreadcrumbList",
+    "Service",
+    "WebPage"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "daewoo-worldmark-centum-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/daewoo-worldmark-centum-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "daeyeon-hillstate-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/daeyeon-hillstate-interior.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "dongnae-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/dongnae-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "doosan-zenith-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/doosan-zenith-interior.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "estimate-commercial.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/estimate-commercial.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "WebPage"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "estimate-living.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/estimate-living.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "WebPage"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "estimate.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/estimate.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "WebPage"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "geoje-dong-apartment-remodeling.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/geoje-dong-apartment-remodeling.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "geumjeong-gu-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/geumjeong-gu-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "guseo-dong-apartment-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/guseo-dong-apartment-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "haeundae-gyeongdong-jade-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/haeundae-gyeongdong-jade-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "haeundae-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/haeundae-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "haeundae-ipark-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/haeundae-ipark-interior.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "haeundae-lct-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/haeundae-lct-interior.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "hwamyeong-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/hwamyeong-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "hwamyeong-lottecastle-kaiser-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/hwamyeong-lottecastle-kaiser-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "index.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 6,
+   "jsonld_types": [
+    "FAQPage",
+    "HomeAndConstructionBusiness",
+    "ItemList",
+    "LocalBusiness",
+    "ProfessionalService",
+    "Service",
+    "WebSite"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "jungdong-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/jungdong-interior.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "jwadong-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/jwadong-interior.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "lg-metrocity-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/lg-metrocity-interior.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "living-20py.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/living-20py.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "WebPage"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "living-30py.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/living-30py.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "WebPage"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "living-40py.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/living-40py.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "WebPage"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "living-50py.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/living-50py.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "WebPage"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "living-60py.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/living-60py.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "WebPage"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "living.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/living.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "WebPage"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "marine-city-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/marine-city-interior.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "marine-city-ipark-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/marine-city-ipark-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "namcheon-samick-beach-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/namcheon-samick-beach-interior.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "naver-geo-audit.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": null,
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "office.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/office.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "WebPage"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "overview.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/overview.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 2,
+   "jsonld_types": [
+    "AboutPage",
+    "BreadcrumbList"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "portfolio.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/portfolio.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "CollectionPage"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "process.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/process.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 2,
+   "jsonld_types": [
+    "BreadcrumbList",
+    "HowTo"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "sajik-dong-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/sajik-dong-interior.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "sajik-lottecastle-the-classic-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/sajik-lottecastle-the-classic-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "search-registration.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": null,
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "the-sharp-centum-park-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/the-sharp-centum-park-interior.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "trump-world-centum-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/trump-world-centum-interior.html",
+   "og_title": true,
+   "og_image": false,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "udong-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/udong-interior.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "yongho-w-interior.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/yongho-w-interior.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/index.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "buk-gu-interior/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/buk-gu-interior.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "busan-30pyeong-apartment-interior/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/busan-30pyeong-apartment-interior.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "busan-40pyeong-apartment-remodeling/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/busan-40pyeong-apartment-remodeling.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "busan-apartment-interior/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/busan-apartment-interior.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "busan-cafe-interior/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/busan-cafe-interior.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "busan-commercial-interior/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/busan-commercial-interior.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "busan-office-hospital-interior/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/busan-office-hospital-interior.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "busan-remodeling/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/busan-remodeling.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "case-daewoo-ian-35py/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/case-daewoo-ian-35py.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "case-geoje-hyundai-hometown/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/case-geoje-hyundai-hometown.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "case-guseo-ssangyong/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/case-guseo-ssangyong.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "case-hwamyeong-kolong/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/case-hwamyeong-kolong.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "case-hwamyeong-lottecastle/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/case-hwamyeong-lottecastle.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "case-mega-centum-49py/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/case-mega-centum-49py.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "case-oryukdo-sk-view/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/case-oryukdo-sk-view.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "case-samhan-goldenview/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/case-samhan-goldenview.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "centum-apartment-interior/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/centum-apartment-interior.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "commercial/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/commercial.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "commercial-clinic/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/commercial-clinic.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "commercial-shop/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/commercial-shop.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "consultation/index.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/consultation/",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 3,
+   "jsonld_types": [
+    "BreadcrumbList",
+    "Service",
+    "WebPage"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "dongnae-interior/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/dongnae-interior.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "estimate/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/estimate.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "estimate-commercial/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/estimate-commercial.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "estimate-living/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/estimate-living.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "geoje-dong-apartment-remodeling/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/geoje-dong-apartment-remodeling.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "geumjeong-gu-interior/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/geumjeong-gu-interior.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "guseo-dong-apartment-interior/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/guseo-dong-apartment-interior.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "haeundae-interior/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/haeundae-interior.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "hwamyeong-interior/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/hwamyeong-interior.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "living/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/living.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "living-20py/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/living-20py.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "living-30py/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/living-30py.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "living-40py/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/living-40py.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "living-50py/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/living-50py.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "living-60py/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/living-60py.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "office/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/office.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "overview/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/overview.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "p/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "GTM-PW8GLP8S"
+   ]
+  },
+  "portfolio/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/portfolio.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "process/index.html": {
+   "title": true,
+   "description": false,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/process.html",
+   "og_title": false,
+   "og_image": false,
+   "jsonld_count": 0,
+   "jsonld_types": [],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/223926227328-신혼부부-인테리어-호텔같은-20평대-아파트.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/223926227328-신혼부부-인테리어-호텔같은-20평대-아파트.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/223932762831-부산-사직동-인테리어-쌍용예가-1차-아파트-42평.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/223932762831-부산-사직동-인테리어-쌍용예가-1차-아파트-42평.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/223935811996-동래-인테리어-사직쌍용예가-42평-세-아이와-부부의.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/223935811996-동래-인테리어-사직쌍용예가-42평-세-아이와-부부의.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/223940283554-40평대아파트리모델링-5인가족-안성맞춤-인테리어-완성.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/223940283554-40평대아파트리모델링-5인가족-안성맞춤-인테리어-완성.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/223947716639-구서동-인테리어-쌍용예가-2차-58평-상담-이야기.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/223947716639-구서동-인테리어-쌍용예가-2차-58평-상담-이야기.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/223950157821-금정구-50평대-인테리어-구서쌍용예가-2단지.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/223950157821-금정구-50평대-인테리어-구서쌍용예가-2단지.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/223952461043-부산아파트인테리어-구서쌍용예가-2차-58평.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/223952461043-부산아파트인테리어-구서쌍용예가-2차-58평.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/223964860710-해운대-인테리어-두산-2차-22평-신혼부부-계약완료.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/223964860710-해운대-인테리어-두산-2차-22평-신혼부부-계약완료.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/223970324989-부산북구인테리어-업체-12군데-비교-후-함께-한.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/223970324989-부산북구인테리어-업체-12군데-비교-후-함께-한.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/223973094721-화명동-인테리어업체-화명롯데캐슬멤버스-45평-리모델링.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/223973094721-화명동-인테리어업체-화명롯데캐슬멤버스-45평-리모델링.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/223982545239-동래-인테리어업체-5가지-요청사항을-빠짐없이-구현해-낸.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/223982545239-동래-인테리어업체-5가지-요청사항을-빠짐없이-구현해-낸.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/223982552548-사직-인테리어업체-롯데캐슬더클래식-33평-tv-없는-집.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/223982552548-사직-인테리어업체-롯데캐슬더클래식-33평-tv-없는-집.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224005033357-사직-쌍용예가-1차-42평-인테리어-다섯-식구.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224005033357-사직-쌍용예가-1차-42평-인테리어-다섯-식구.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224010253704-부산-아파트-리모델링-사직롯데캐슬더클래식-33평-호텔-분위기.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224010253704-부산-아파트-리모델링-사직롯데캐슬더클래식-33평-호텔-분위기.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224015797038-부산-인테리어-견적-제대로-이해하는-4가지-기준.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224015797038-부산-인테리어-견적-제대로-이해하는-4가지-기준.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224022947548-금정구-인테리어-구서쌍용예가2차-58평-내추럴톤-리모델링.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224022947548-금정구-인테리어-구서쌍용예가2차-58평-내추럴톤-리모델링.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224023019330-부산-리모델링-업체-선택-가이드-믿을-수.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224023019330-부산-리모델링-업체-선택-가이드-믿을-수.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224049042932-부산-인테리어-업체-연제구-거제동-유림아시아드-47평.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224049042932-부산-인테리어-업체-연제구-거제동-유림아시아드-47평.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224051562085-사직동인테리어-거제유림아시아드-아파트-47평-모던우드-리모델링.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224051562085-사직동인테리어-거제유림아시아드-아파트-47평-모던우드-리모델링.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224052961107-부산-인테리어-자재-합리적인-선택-가이드-후회.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224052961107-부산-인테리어-자재-합리적인-선택-가이드-후회.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224068445396-부산-인테리어-업체-상담-시-꼭-확인해야.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224068445396-부산-인테리어-업체-상담-시-꼭-확인해야.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224070102716-해운대-인테리어-업체-상담부터-공사-과정까지-실패하지.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224070102716-해운대-인테리어-업체-상담부터-공사-과정까지-실패하지.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224071444248-부산-아파트-인테리어-구축-리모델링-비포-애프터.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224071444248-부산-아파트-인테리어-구축-리모델링-비포-애프터.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224073600410-공간보감-인테리어-공간보다-사람을-먼저-봅니다.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224073600410-공간보감-인테리어-공간보다-사람을-먼저-봅니다.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224088926183-부산-해운대-인테리어-메가센텀-한화꿈에그린-49평-3개월.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224088926183-부산-해운대-인테리어-메가센텀-한화꿈에그린-49평-3개월.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224096886339-해운대-메가센텀-한화꿈에그린-49평-구축-아파트-미니멀.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224096886339-해운대-메가센텀-한화꿈에그린-49평-구축-아파트-미니멀.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224114449260-부산-아파트-인테리어-해운대-메가센텀-한화꿈에그린-49평.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224114449260-부산-아파트-인테리어-해운대-메가센텀-한화꿈에그린-49평.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224116742469-부산-사직동-인테리어-신뢰로-진행된-사직-쌍용예가.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224116742469-부산-사직동-인테리어-신뢰로-진행된-사직-쌍용예가.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224122191089-사직-쌍용예가-1차-32평-수많은-시공-경험이.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224122191089-사직-쌍용예가-1차-32평-수많은-시공-경험이.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224136390525-부산-사직쌍용예가-1차-인테리어-32평-iot와-공조.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224136390525-부산-사직쌍용예가-1차-인테리어-32평-iot와-공조.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224156072501-구서동-쌍용스윗닷홈50평-인테리어-공간에-취향을-담아-내는.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224156072501-구서동-쌍용스윗닷홈50평-인테리어-공간에-취향을-담아-내는.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224161251315-구서동-인테리어-구서쌍용스윗닷홈-50평대-구축-아파트-공간.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224161251315-구서동-인테리어-구서쌍용스윗닷홈-50평대-구축-아파트-공간.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224182980295-부산-해운대-아파트-인테리어-개방감을-살리는-24평.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224182980295-부산-해운대-아파트-인테리어-개방감을-살리는-24평.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224185650527-부산-해운대-좌동-아파트-인테리어-4베이-구조의.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224185650527-부산-해운대-좌동-아파트-인테리어-4베이-구조의.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224192971796-부산-턴키-인테리어-해운대-구축-메가센텀꿈에그린-아파트.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224192971796-부산-턴키-인테리어-해운대-구축-메가센텀꿈에그린-아파트.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224195906561-화명동-대우이안-35평-인테리어-구축-아파트-변수를.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224195906561-화명동-대우이안-35평-인테리어-구축-아파트-변수를.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224204272116-부산-진구-연지-유림노르웨이숲-30평대-아파트-인테리어.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224204272116-부산-진구-연지-유림노르웨이숲-30평대-아파트-인테리어.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224211725948-구서동인테리어-금정구-구서쌍용스윗닷홈-50평-반려견을-위한-배려가.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224211725948-구서동인테리어-금정구-구서쌍용스윗닷홈-50평-반려견을-위한-배려가.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224219286226-부산-해운대구-인테리어-고민-중이신가요-30평대-아파트.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224219286226-부산-해운대구-인테리어-고민-중이신가요-30평대-아파트.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224227103387-부산-30평대-아파트-인테리어-연지-유림노르웨이숲-우드.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224227103387-부산-30평대-아파트-인테리어-연지-유림노르웨이숲-우드.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224228168633-부산-아파트-인테리어-반려동물과-보호자의-일상을-배려한.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224228168633-부산-아파트-인테리어-반려동물과-보호자의-일상을-배려한.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224237135940-화명동-인테리어-대우이안-35평-공간을-넓어-보이게.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224237135940-화명동-인테리어-대우이안-35평-공간을-넓어-보이게.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224249736922-부산-아파트-인테리어-화려한-포트폴리오보다-값진-공간보감의.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224249736922-부산-아파트-인테리어-화려한-포트폴리오보다-값진-공간보감의.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224254948259-부산-화명동-대우이안-35평-화이트-앤-우드.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224254948259-부산-화명동-대우이안-35평-화이트-앤-우드.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224259674942-부산-인테리어-업체-상담-계약-이후에는-어떤.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224259674942-부산-인테리어-업체-상담-계약-이후에는-어떤.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224273223528-부산-남구-구축-40평대-아파트-인테리어-시작.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224273223528-부산-남구-구축-40평대-아파트-인테리어-시작.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224277991193-부산-인테리어-비용-똑같은-아파트인데-왜-견적은.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224277991193-부산-인테리어-비용-똑같은-아파트인데-왜-견적은.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224280575103-부산-인테리어-업체-추천-후기만-믿기-불안할.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224280575103-부산-인테리어-업체-추천-후기만-믿기-불안할.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224285757703-부산-구축-아파트-인테리어-견적-후회-없는.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224285757703-부산-구축-아파트-인테리어-견적-후회-없는.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "blog/224289898461-부산-아파트-인테리어-공간보감-포트폴리오-2025-2026.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/blog/224289898461-부산-아파트-인테리어-공간보감-포트폴리오-2025-2026.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "BlogPosting"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  }
+ }
+}
