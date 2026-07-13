@@ -37,10 +37,8 @@ def pages():
     for p in sorted(ROOT.glob("*.html")):
         out.append(p)
     for sub in sorted(ROOT.iterdir()):
-        if sub.is_dir() and sub.name not in {".git", ".claude", "assets", "tests", "logs", "data", "node_modules"}:
-            idx = sub / "index.html"
-            if idx.exists():
-                out.append(idx)
+        if sub.is_dir() and sub.name not in {".git", ".claude", "assets", "tests", "tools", "logs", "data", "node_modules", ".context"}:
+            out.extend(sorted(sub.rglob("index.html")))
     for p in sorted((ROOT / "blog").glob("*.html")):
         out.append(p)
     return out

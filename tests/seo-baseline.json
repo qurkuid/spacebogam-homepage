@@ -88,6 +88,9 @@
    "https://spacebogam.kr/estimate.html",
    "https://spacebogam.kr/geoje-dong-apartment-remodeling.html",
    "https://spacebogam.kr/geumjeong-gu-interior.html",
+   "https://spacebogam.kr/guide-apartment-cost.html",
+   "https://spacebogam.kr/guide-old-apartment-checklist.html",
+   "https://spacebogam.kr/guides.html",
    "https://spacebogam.kr/guseo-dong-apartment-interior.html",
    "https://spacebogam.kr/haeundae-gyeongdong-jade-interior.html",
    "https://spacebogam.kr/haeundae-interior.html",
@@ -111,6 +114,7 @@
    "https://spacebogam.kr/overview.html",
    "https://spacebogam.kr/portfolio.html",
    "https://spacebogam.kr/process.html",
+   "https://spacebogam.kr/qna.html",
    "https://spacebogam.kr/sajik-dong-interior.html",
    "https://spacebogam.kr/sajik-lottecastle-the-classic-interior.html",
    "https://spacebogam.kr/the-sharp-centum-park-interior.html",
@@ -375,8 +379,9 @@
    "canonical": "https://spacebogam.kr/case-daewoo-ian-35py.html",
    "og_title": true,
    "og_image": false,
-   "jsonld_count": 1,
+   "jsonld_count": 2,
    "jsonld_types": [
+    "BreadcrumbList",
     "CreativeWork"
    ],
    "jsonld_parse_errors": 0,
@@ -394,8 +399,9 @@
    "canonical": "https://spacebogam.kr/case-geoje-hyundai-hometown.html",
    "og_title": true,
    "og_image": false,
-   "jsonld_count": 1,
+   "jsonld_count": 2,
    "jsonld_types": [
+    "BreadcrumbList",
     "CreativeWork"
    ],
    "jsonld_parse_errors": 0,
@@ -413,8 +419,9 @@
    "canonical": "https://spacebogam.kr/case-guseo-ssangyong.html",
    "og_title": true,
    "og_image": false,
-   "jsonld_count": 1,
+   "jsonld_count": 2,
    "jsonld_types": [
+    "BreadcrumbList",
     "CreativeWork"
    ],
    "jsonld_parse_errors": 0,
@@ -432,8 +439,9 @@
    "canonical": "https://spacebogam.kr/case-hwamyeong-kolong.html",
    "og_title": true,
    "og_image": false,
-   "jsonld_count": 1,
+   "jsonld_count": 2,
    "jsonld_types": [
+    "BreadcrumbList",
     "CreativeWork"
    ],
    "jsonld_parse_errors": 0,
@@ -451,8 +459,9 @@
    "canonical": "https://spacebogam.kr/case-hwamyeong-lottecastle.html",
    "og_title": true,
    "og_image": false,
-   "jsonld_count": 1,
+   "jsonld_count": 2,
    "jsonld_types": [
+    "BreadcrumbList",
     "CreativeWork"
    ],
    "jsonld_parse_errors": 0,
@@ -470,8 +479,9 @@
    "canonical": "https://spacebogam.kr/case-mega-centum-49py.html",
    "og_title": true,
    "og_image": false,
-   "jsonld_count": 1,
+   "jsonld_count": 2,
    "jsonld_types": [
+    "BreadcrumbList",
     "CreativeWork"
    ],
    "jsonld_parse_errors": 0,
@@ -489,8 +499,9 @@
    "canonical": "https://spacebogam.kr/case-oryukdo-sk-view.html",
    "og_title": true,
    "og_image": false,
-   "jsonld_count": 1,
+   "jsonld_count": 2,
    "jsonld_types": [
+    "BreadcrumbList",
     "CreativeWork"
    ],
    "jsonld_parse_errors": 0,
@@ -508,8 +519,9 @@
    "canonical": "https://spacebogam.kr/case-sajik-ssangyong.html",
    "og_title": true,
    "og_image": false,
-   "jsonld_count": 1,
+   "jsonld_count": 2,
    "jsonld_types": [
+    "BreadcrumbList",
     "CreativeWork"
    ],
    "jsonld_parse_errors": 0,
@@ -527,8 +539,9 @@
    "canonical": "https://spacebogam.kr/case-samhan-goldenview.html",
    "og_title": true,
    "og_image": false,
-   "jsonld_count": 1,
+   "jsonld_count": 2,
    "jsonld_types": [
+    "BreadcrumbList",
     "CreativeWork"
    ],
    "jsonld_parse_errors": 0,
@@ -817,6 +830,66 @@
    "jsonld_count": 1,
    "jsonld_types": [
     "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "guide-apartment-cost.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/guide-apartment-cost.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 2,
+   "jsonld_types": [
+    "Article",
+    "BreadcrumbList"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "guide-old-apartment-checklist.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/guide-old-apartment-checklist.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 2,
+   "jsonld_types": [
+    "Article",
+    "BreadcrumbList"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "guides.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/guides.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 2,
+   "jsonld_types": [
+    "BreadcrumbList",
+    "CollectionPage"
    ],
    "jsonld_parse_errors": 0,
    "tracking": [
@@ -1307,6 +1380,26 @@
     "site-tracking.js"
    ]
   },
+  "qna.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/qna.html",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 2,
+   "jsonld_types": [
+    "BreadcrumbList",
+    "FAQPage"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
   "sajik-dong-interior.html": {
    "title": true,
    "description": true,
@@ -1429,6 +1522,27 @@
    "jsonld_count": 1,
    "jsonld_types": [
     "Service"
+   ],
+   "jsonld_parse_errors": 0,
+   "tracking": [
+    "512750840350337",
+    "G-EJGXDD5C1T",
+    "GTM-PW8GLP8S",
+    "site-tracking.js"
+   ]
+  },
+  "ab/home-b/index.html": {
+   "title": true,
+   "description": true,
+   "robots_meta": true,
+   "canonical": "https://spacebogam.kr/ab/home-b/",
+   "og_title": true,
+   "og_image": true,
+   "jsonld_count": 1,
+   "jsonld_types": [
+    "HomeAndConstructionBusiness",
+    "LocalBusiness",
+    "ProfessionalService"
    ],
    "jsonld_parse_errors": 0,
    "tracking": [
