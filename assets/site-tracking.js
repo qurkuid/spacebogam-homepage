@@ -116,14 +116,6 @@
     });
   }
 
-  function sendNaverLead(){
-    withNaverAccount(getNaverCtsAccountId(), function(){
-      if (window.wcs && typeof window.wcs.trans === 'function') {
-        window.wcs.trans({type: 'lead'});
-      }
-    });
-  }
-
   function isIntmConsultationUrl(u){
     return u.hostname === 'intm.kr' && u.pathname === '/consultation/ggbg';
   }
@@ -206,13 +198,10 @@
       cta_text: (a.textContent || '').trim(),
       cta_location: a.dataset.ctaLocation || a.className || 'consultation_link'
     });
-    sendEvent('generate_lead', payload);
     sendEvent('click_consultation', payload);
     sendEvent('click_kakao_or_consult', payload);
     sendMetaPixelCustomEvent('click_consultation', payload);
-    sendMetaPixelEvent('Lead', payload);
-    sendMetaPixelEvent('SubmitApplication', payload);
-    sendNaverLead();
+    sendMetaPixelEvent('Contact', payload);
   }
 
   function pagePhoneContext(){
@@ -297,7 +286,6 @@
     sendEvent('click_kakao_or_consult', payload);
     sendMetaPixelCustomEvent('kakao_chat_click', payload);
     sendMetaPixelEvent('Contact', payload);
-    sendNaverLead();
   }
 
   function buildKakaoLink(className, locationName, text){
@@ -365,6 +353,12 @@
   }
 
   function init(){
+    if (!document.querySelector('script[data-spacebogam-funnel="1"]')) {
+      var funnelScript = document.createElement('script');
+      funnelScript.src = '/assets/funnel-tracking.js';
+      funnelScript.dataset.spacebogamFunnel = '1';
+      document.head.appendChild(funnelScript);
+    }
     injectPhoneCtas();
 
     document.querySelectorAll('a[href^="https://intm.kr/consultation/ggbg"], a[href^="/consultation/"]').forEach(function(a){
