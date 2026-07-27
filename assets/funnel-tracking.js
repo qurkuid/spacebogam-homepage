@@ -3,12 +3,29 @@
   var CLIENT_KEY = 'spacebogam_funnel_client_id';
   var SESSION_KEY = 'spacebogam_funnel_session_id';
   var ATTRIBUTION_KEY = 'spacebogam_funnel_attribution';
+  var EXPERIMENT_ID = 'homepage_headline_v1';
+  var EXPERIMENT_KEY = 'spacebogam_homepage_headline_v1_variant';
+  var FORCE_VARIANT_KEY = 'spacebogam_headline_v1_force_variant';
   var ATTRIBUTION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
   var UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
 
   function uuid(){
     if (window.crypto && typeof window.crypto.randomUUID === 'function') {
       return window.crypto.randomUUID();
+    }
+    if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
+      var bytes = new Uint8Array(16);
+      window.crypto.getRandomValues(bytes);
+      bytes[6] = (bytes[6] & 15) | 64;
+      bytes[8] = (bytes[8] & 63) | 128;
+      var hex = Array.prototype.map.call(bytes, function(byte){
+        return byte.toString(16).padStart(2, '0');
+      });
+      return hex.slice(0, 4).join('') + '-' +
+        hex.slice(4, 6).join('') + '-' +
+        hex.slice(6, 8).join('') + '-' +
+        hex.slice(8, 10).join('') + '-' +
+        hex.slice(10, 16).join('');
     }
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(character){
       var random = Math.random() * 16 | 0;
@@ -70,13 +87,115 @@
   var clientId = storedId(local, CLIENT_KEY);
   var sessionId = storedId(session, SESSION_KEY);
   var attribution = currentAttribution(local);
+  var isHomepage = location.pathname === '/' || location.pathname === '/index.html';
+  var variantFromQuery = null;
+  var forceVariant = null;
+
+  function readForcedVariant(){
+    if (forceVariant !== null) return forceVariant;
+    forceVariant = '';
+    try {
+      var params = new URLSearchParams(location.search);
+      forceVariant = normalizeExperimentVariant(
+        params.get('experiment_force') ||
+        params.get('force_experiment') ||
+        params.get('experiment_variant_force')
+      );
+      if (!forceVariant && local) {
+        forceVariant = normalizeExperimentVariant(local.getItem(FORCE_VARIANT_KEY));
+      }
+      if (forceVariant && local) {
+        local.setItem(FORCE_VARIANT_KEY, forceVariant);
+      }
+    } catch(error) {}
+    return forceVariant;
+  }
+
+  function normalizeExperimentVariant(value){
+    if (!value) return '';
+    var valueLower = String(value).toLowerCase();
+    if (valueLower === 'a' || valueLower === 'home_a' || valueLower === 'home_a_default' || valueLower === 'home_a_current') return 'A';
+    if (valueLower === 'b' || valueLower === 'home_b' || valueLower === 'home_b_visit_stage_standard' || valueLower === 'home_b_current') return 'B';
+    return '';
+  }
+
+  function readStoredExperimentVariant(){
+    try {
+      if (!session) return '';
+      return normalizeExperimentVariant(session.getItem(EXPERIMENT_KEY));
+    } catch(error) {
+      return '';
+    }
+  }
+
+  function writeStoredExperimentVariant(value){
+    if (!session) return;
+    try {
+      session.setItem(EXPERIMENT_KEY, value);
+    } catch(error) {}
+  }
+
+  function resolveExperimentVariant(){
+    var globalVariant = normalizeExperimentVariant(window.__spacebogamHomepageHeadlineVariant);
+    if (globalVariant) {
+      writeStoredExperimentVariant(globalVariant);
+      return globalVariant;
+    }
+    var forcedVariant = readForcedVariant();
+    if (forcedVariant) {
+      writeStoredExperimentVariant(forcedVariant);
+      return forcedVariant;
+    }
+    if (variantFromQuery === null) {
+      try {
+        var params = new URLSearchParams(location.search);
+        variantFromQuery = normalizeExperimentVariant(params.get('experiment_variant'));
+        if (!variantFromQuery) variantFromQuery = normalizeExperimentVariant(params.get('variant'));
+        if (!variantFromQuery) variantFromQuery = normalizeExperimentVariant(params.get('page_variant'));
+      } catch(error) {
+        variantFromQuery = '';
+      }
+    }
+    if (variantFromQuery) {
+      writeStoredExperimentVariant(variantFromQuery);
+      return variantFromQuery;
+    }
+
+    if (location.pathname.indexOf('/ab/home-b/') === 0) {
+      writeStoredExperimentVariant('B');
+      return 'B';
+    }
+
+    if (isHomepage) {
+      var stored = readStoredExperimentVariant();
+      if (stored) return stored;
+      var randomValue = Math.random();
+      if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
+        var randomBytes = new Uint32Array(1);
+        window.crypto.getRandomValues(randomBytes);
+        randomValue = randomBytes[0] / 4294967296;
+      }
+      var assigned = randomValue < 0.5 ? 'A' : 'B';
+      writeStoredExperimentVariant(assigned);
+      return assigned;
+    }
+
+    return readStoredExperimentVariant() || 'A';
+  }
+
+  var experimentVariant = resolveExperimentVariant();
 
   function pageVariant(){
-    var params = new URLSearchParams(location.search);
-    var explicit = params.get('page_variant') || params.get('variant');
-    if (explicit) return explicit;
-    if (location.pathname.indexOf('/ab/home-b/') === 0) return 'home_b_visit_stage_standard';
+    if (experimentVariant === 'B') return 'home_b_visit_stage_standard';
     return 'home_a_default';
+  }
+
+  function applyHomeHeadline(){
+    if (!isHomepage) return;
+    if (experimentVariant !== 'B') return;
+    var heroHeadline = document.querySelector('main .hero h1');
+    if (!heroHeadline) return;
+    heroHeadline.innerHTML = '부산 프리미엄 아파트,<br>우리 집에 맞는<br>완성도부터 잡습니다';
   }
 
   function deviceType(){
@@ -99,6 +218,10 @@
       utmCampaign: attribution.utm_campaign || '',
       utmContent: attribution.utm_content || '',
       utmTerm: attribution.utm_term || '',
+      experiment_id: EXPERIMENT_ID,
+      experimentId: EXPERIMENT_ID,
+      experiment_variant: experimentVariant,
+      experimentVariant: experimentVariant,
       ctaLocation: detail && detail.ctaLocation || '',
       ctaText: detail && detail.ctaText || '',
       pageVariant: pageVariant(),
@@ -133,6 +256,8 @@
       });
       url.searchParams.set('sbClientId', clientId);
       url.searchParams.set('sbSessionId', sessionId);
+      url.searchParams.set('experiment_id', EXPERIMENT_ID);
+      url.searchParams.set('experiment_variant', experimentVariant);
       anchor.setAttribute('href', url.toString());
     } catch(error) {}
   }
@@ -179,6 +304,7 @@
     document.querySelectorAll('a[href]').forEach(decorateConsultationLink);
     document.addEventListener('click', handleClick, true);
     send('page_view');
+    applyHomeHeadline();
 
     window.setTimeout(function(){
       if (document.visibilityState === 'visible') {
