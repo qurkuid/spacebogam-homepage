@@ -29,7 +29,10 @@ const FIXTURE = {
   date: '2026-08-31',
   number: '34',
   // 공공건물 주소만 사용한다 — 개인 주소를 운영 DB에 남기지 않기 위함.
-  address: '부산광역시청',
+  address: '부산광역시 연제구 중앙대로 1001',
+  buildingName: '[QA] 부산광역시청',
+  // 상담 수정용 확인값이며 계정 자격증명이 아니다. 공개 테스트 레코드용 고정값.
+  password: 'qa137test',
 };
 
 const log = (...a) => console.log(...a);
@@ -42,8 +45,60 @@ const browser = await puppeteer.launch({
 });
 const page = await browser.newPage();
 
+// ---- 주소 위젯 자동화 훅 -------------------------------------------------
+// 상담 폼의 주소 필드는 react-daum-postcode `DaumPostcodeEmbed` 로만 채워진다.
+// 라이브러리는 CDN 스크립트가 올려둔 `window.daum.Postcode` 를
+// `new Postcode({ ...props, oncomplete })` 형태로 생성하므로,
+// 문서 생성 시점에 `window.daum` 접근을 프록시로 감싸 그 `oncomplete` 를 잡아둔다.
+// 잡아둔 콜백을 직접 호출하면 사용자가 검색 결과를 고른 것과 동일한 경로로
+// 폼 상태가 갱신된다(ConsultationForm.handleAddressComplete → handleAnswerChange).
+// 헤드리스에서 우편번호 iframe 의 검색 결과 렌더링에 의존하지 않으므로 결정적이다.
+await page.evaluateOnNewDocument(() => {
+  let real;
+  let wrapped;
+  Object.defineProperty(window, 'daum', {
+    configurable: true,
+    get() {
+      if (!real) return real;
+      return new Proxy(real, {
+        get(target, prop, receiver) {
+          if (prop !== 'Postcode') return Reflect.get(target, prop, receiver);
+          const Orig = Reflect.get(target, prop, receiver);
+          if (typeof Orig !== 'function') return Orig;
+          if (!wrapped || wrapped.__orig !== Orig) {
+            const Wrapper = function (options) {
+              window.__qaPostcodeComplete = options && options.oncomplete;
+              return new Orig(options);
+            };
+            Wrapper.__orig = Orig;
+            Wrapper.prototype = Orig.prototype;
+            wrapped = Wrapper;
+          }
+          return wrapped;
+        },
+      });
+    },
+    set(value) {
+      real = value;
+    },
+  });
+});
+
 // 퍼널 ingest 와 상담 저장 요청을 모두 기록한다.
 const netlog = [];
+// DB read-back 이 막혀 있으므로 클라이언트가 보낸 이벤트 이름을 직접 센다.
+// `consultation_submit` 단건 판정의 1차 증거.
+const eventsSent = [];
+page.on('request', (req) => {
+  if (!/funnel-events/.test(req.url()) || req.method() === 'GET') return;
+  try {
+    const payload = JSON.parse(req.postData() || '{}');
+    const list = Array.isArray(payload.events) ? payload.events : [payload];
+    list.forEach((e) => {
+      if (e && e.eventName) eventsSent.push(e.eventName);
+    });
+  } catch {}
+});
 page.on('response', async (res) => {
   const url = res.url();
   if (/funnel-events|consultation|api\//.test(url) && res.request().method() !== 'GET') {
@@ -153,7 +208,9 @@ for (let round = 1; round <= 20; round += 1) {
           done.push(`${el.id}=select:${opt.text.slice(0, 20)}`);
         }
       } else if (t === 'radio' || t === 'checkbox') {
-        const key = el.name || el.id;
+        // 체크박스는 name 이 없고 id 가 `question_N_option_M` 이라 접미사를 떼야
+        // 한 질문당 한 개만 선택된다. 그러지 않으면 모든 보기가 켜진 레코드가 남는다.
+        const key = el.name || el.id.replace(/_option_\d+$/, '');
         if (groups.has(key)) return;
         groups.add(key);
         if (!el.checked) el.click();
@@ -167,6 +224,10 @@ for (let round = 1; round <= 20; round += 1) {
       } else if (t === 'number') {
         setNative(el, fx.number);
         done.push(`${el.id}=number`);
+      } else if (t === 'password') {
+        // question_16 "비밀번호(수정시 사용)" — 필수. 자격증명이 아니라 상담 수정용 확인값이다.
+        setNative(el, fx.password);
+        done.push(`${el.id}=password`);
       } else if (t === 'text') {
         const isName = /성함|이름/.test(form.innerText.slice(0, 4000)) && el.id === 'question_13';
         setNative(el, isName ? fx.name : fx.text);
@@ -194,49 +255,52 @@ for (let round = 1; round <= 20; round += 1) {
         .find((b) => /검색/.test(b.textContent))
         .click()
     );
-    await sleep(3000);
-    const frame = page
-      .frames()
-      .find((f) => /daum|postcode/i.test(f.url()));
-    if (frame) {
-      // 보이는 검색 입력창에 질의를 넣고 .btn_search 로 조회한다.
-      await frame.waitForSelector('.btn_search', { timeout: 15000 });
-      await frame.evaluate((query) => {
-        const input = [...document.querySelectorAll('input')].find(
-          (e) => e.type !== 'hidden' && (e.offsetParent || e.getClientRects().length)
-        );
-        if (input) {
-          const setter = Object.getOwnPropertyDescriptor(
-            HTMLInputElement.prototype,
-            'value'
-          ).set;
-          setter.call(input, query);
-          input.dispatchEvent(new Event('input', { bubbles: true }));
-          input.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        document.querySelector('.btn_search')?.click();
-      }, FIXTURE.address);
-      await sleep(3000);
-      // 첫 번째 검색 결과(도로명 주소) 선택
-      const picked = await frame.evaluate(() => {
-        const vis = (e) => !!(e.offsetParent || e.getClientRects().length);
-        const link = [...document.querySelectorAll('a')].find(
-          (a) => vis(a) && /[시도].*[구군시].*\d/.test(a.textContent || '')
-        );
-        if (link) {
-          link.click();
-          return (link.textContent || '').trim().slice(0, 60);
-        }
-        return null;
+    // 위젯이 마운트되며 `new daum.Postcode({ oncomplete })` 가 실행되기를 기다린다.
+    try {
+      await page.waitForFunction(() => typeof window.__qaPostcodeComplete === 'function', {
+        timeout: 20000,
       });
-      log(`  검색 결과 선택 = ${picked || '(없음)'}`);
-      await sleep(2500);
-    } else {
-      log('  !! 우편번호 iframe 을 찾지 못함');
+      await page.evaluate(
+        (addr) => window.__qaPostcodeComplete({ address: addr.address, buildingName: addr.buildingName }),
+        FIXTURE
+      );
+      log(`  oncomplete 훅 호출 = ${FIXTURE.address} / ${FIXTURE.buildingName}`);
+    } catch {
+      log('  !! daum.Postcode oncomplete 훅을 확보하지 못함');
     }
+    await sleep(1200);
     const addrVal = await page.evaluate(() => document.querySelector('#question_15')?.value || '');
     log(`  주소 입력 결과 = "${addrVal}"`);
     continue; // 같은 카테고리를 다시 돌며 나머지 필드를 채운다
+  }
+
+  // 날짜 질문은 `<input type=date>` 가 아니라 Radix Popover + react-day-picker 달력이다.
+  // 트리거는 `button#question_N` 이고, 값은 팝오버 안의 활성 날짜 버튼 클릭으로만 들어간다.
+  // 상담 날짜에는 오늘 이전이 disabled 인 최소일 제약이 있어 활성 날짜 중 마지막 날을 고른다.
+  const dateTriggers = await page.evaluate(() =>
+    [...document.querySelectorAll('#consultation-form button[id^="question_"]')]
+      .filter((b) => (b.offsetParent || b.getClientRects().length) && /선택해 주세요/.test(b.textContent))
+      .map((b) => b.id)
+  );
+  for (const triggerId of dateTriggers) {
+    await page.evaluate((id) => document.getElementById(id)?.click(), triggerId);
+    await sleep(700);
+    const pickedDate = await page.evaluate(() => {
+      const days = [...document.querySelectorAll('button[name="day"], .rdp-day')].filter(
+        (b) => !b.disabled && b.getAttribute('aria-disabled') !== 'true'
+      );
+      const day = days[days.length - 1];
+      if (!day) return null;
+      day.click();
+      return (day.getAttribute('aria-label') || day.textContent || '').trim();
+    });
+    await sleep(700);
+    const label = await page.evaluate((id) => document.getElementById(id)?.textContent?.trim(), triggerId);
+    log(`  날짜 위젯 ${triggerId} → 선택 "${pickedDate}" / 표시 "${label}"`);
+  }
+  if (dateTriggers.length) {
+    await sleep(500);
+    continue; // 날짜 반영 후 같은 카테고리를 다시 돌며 진행 상태를 재확인한다
   }
 
   log(`  [round ${round}] CATEGORY ${step.category} ${step.title} — 채움: ${step.filled.join(', ') || '(없음)'} | 필수진행 ${step.progress}`);
@@ -275,6 +339,13 @@ await page.evaluate(() => {
 const readiness = await page.evaluate(() => {
   const form = document.querySelector('#consultation-form');
   return {
+    // 카테고리별 진행 칩 — 미충족 필수 항목이 어느 카테고리에 남았는지 판별한다.
+    sections: (form.innerText.match(/CATEGORY 0\d[\s\S]*?(?=\n\n)/) ? [] : []).concat(
+      [...form.querySelectorAll('nav, [class*="section"]')]
+        .map((n) => (n.innerText || '').replace(/\s+/g, ' ').trim())
+        .filter((t) => /0[1-6]/.test(t) && t.length < 400)
+        .slice(0, 3)
+    ),
     required: (form.innerText.match(/필수 (\d+)\/(\d+)/) || []).slice(1).join('/'),
     privacy: !!document.querySelector('#privacy_agreement')?.checked,
     submitDisabled: !![...form.querySelectorAll('button')].find((b) => b.type === 'submit')?.disabled,
@@ -311,6 +382,8 @@ log(
       landedUrl,
       carried,
       readiness,
+      eventsSent,
+      consultationSubmitCount: eventsSent.filter((e) => e === 'consultation_submit').length,
       netlog,
     },
     null,
