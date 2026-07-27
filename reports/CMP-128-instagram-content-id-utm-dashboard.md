@@ -88,12 +88,12 @@ CMP-123 §7에서 승인된 규칙을 그대로 운영 규칙으로 확정한다
 | `utm_content` GA4/Meta 이벤트 전달 | 확인됨 | `assets/site-tracking.js:19,225` UTM 5종에 `utm_content` 포함 |
 | 상담 링크에 UTM 보존 전달 | 확인됨(CMP-14 §1.1 재확인) | `sbClientId`, `sbSessionId`, UTM을 INTM 상담 링크에 부착 |
 | 폼 제출 시 서버 저장값에 `utm_content`(=`content_id`) 일치 여부 | **확인됨** ([CMP-129](../reports/CMP-129-utm-content-lead-ledger-verification.md), 2026-07-27) | 랜딩→`funnel-tracking.js` 30일 attribution→상담 링크→INTM 폼 `marketingAttribution`→`consult_req.utm_content` 경로 실측 확인(UTM 있음/없음 2건 + 경계 3건). 자기참조 UTM이 저장된 attribution을 덮어쓰지 못하던 결함 1건 발견·수정(`assets/funnel-tracking.js`, 커밋 9b56dab) |
-| Instagram Insights 지표 수집 절차(도달/저장/공유/프로필방문) | 미착수 | 콘텐츠 매니저/퍼포먼스 분석가가 게시 후 주 1회 수동 기록 필요 — 별도 SOP 확정을 CMP-130으로 위임 |
+| Instagram Insights 지표 수집 절차(도달/저장/공유/프로필방문) | 미착수 | 콘텐츠 매니저/퍼포먼스 분석가가 게시 후 주 1회 수동 기록 필요 — 별도 SOP 확정을 CMP-134으로 위임 |
 
 **결론**: 식별 규칙, 대시보드 정의, 측정 준비 상태(폼→리드 원장 UTM 도달 포함)가 모두 확정됐다. §3의 `qualified_consultations` 행은 이제 `content_id`로 정상 귀속될 준비가 됐다. 남은 공백은 이 이슈 범위 밖의 두 가지뿐이다: (1) 영구 `lead_id`↔`sbClientId`/`sbSessionId` 매핑(CMP-14 §1.1, INTM 서버 소유), (2) 전화·카카오 경유 리드는 UTM이 붙지 않아 `content_id` 귀속이 원천적으로 불가능(대시보드에 "귀속 불가" 구간으로 별도 표기 필요).
 
 ## 6. 다음 행동
 
 - [x] 웹 전환 엔지니어가 랜딩→폼 제출 경로 UTM 손실 없음을 검증 — [CMP-129](../reports/CMP-129-utm-content-lead-ledger-verification.md) 완료, 결함 1건 수정
-- [ ] 콘텐츠 매니저/퍼포먼스 분석가가 게시 후 Instagram Insights 지표(도달·3초 유지율·저장·공유·프로필 방문) 주 1회 수동 기록 SOP를 확정 — CMP-130으로 위임
+- [ ] 콘텐츠 매니저/퍼포먼스 분석가가 게시 후 Instagram Insights 지표(도달·3초 유지율·저장·공유·프로필 방문) 주 1회 수동 기록 SOP를 확정 — CMP-134으로 위임
 - [ ] 첫 실제 게시물에 이 규칙을 적용해 §3 표를 1회 채워보고 표본 부족 여부를 표시(콘텐츠 실제 게시 후 진행, 이 이슈 범위 밖)
