@@ -339,3 +339,8 @@ footer .foot-links a:hover{color:#fff}
 
 /* Spacebogam phone CTA panel */
 .phone-cta-panel{margin:32px auto;padding:0 20px}.phone-cta-inner{border:1px solid rgba(176,103,67,.24);background:linear-gradient(135deg,#fff8f1,#f4ebe1);border-radius:24px;padding:24px;box-shadow:0 18px 50px rgba(45,32,20,.08)}.phone-cta-kicker{margin:0 0 8px;color:#9b5d3e;font-size:13px;font-weight:800;letter-spacing:.08em}.phone-cta-panel h2{margin:0 0 10px;font-size:clamp(24px,4vw,34px);line-height:1.22}.phone-cta-panel p{margin:0 0 18px;color:#604f42}.phone-cta-link{display:inline-flex;align-items:center;justify-content:center;min-height:48px;border-radius:999px;padding:0 18px;background:#1b1611;color:#fff;text-decoration:none;font-weight:800}.phone-cta-link:before{content:"☎";margin-right:8px}@media(max-width:600px){.phone-cta-panel{margin:24px auto 96px;padding:0 16px}.phone-cta-inner{padding:20px}.phone-cta-link{display:flex;width:100%;box-sizing:border-box}}
+
+/* CMP-149 footer legal link */
+footer .foot-legal{margin-top:14px;font-size:13px;color:oklch(1 0 0 / .72)}
+footer .foot-legal a{color:oklch(1 0 0 / .82);text-decoration:underline;text-underline-offset:3px}
+footer .foot-legal a:hover{color:#fff}
