@@ -9,6 +9,12 @@
   var META_PIXEL_ID = '512750840350337';
   var META_PIXEL_SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
   var KAKAO_CHAT_URL = 'http://pf.kakao.com/_UEUBn/chat';
+  var EXPERIMENT_ID = 'homepage_headline_v1';
+  var EXPERIMENT_KEY = 'spacebogam_homepage_headline_v1_variant';
+  var FORCE_VARIANT_KEY = 'spacebogam_headline_v1_force_variant';
+  // Emergency rollback: set to 'A' and deploy this one file. Empty keeps 50:50 assignment.
+  var GLOBAL_EXPERIMENT_VARIANT = '';
+  window.__spacebogamHomepageHeadlineVariant = GLOBAL_EXPERIMENT_VARIANT;
   var ATTRIBUTION_KEYS = [
     'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
     'gclid', 'gbraid', 'wbraid', 'fbclid', 'n_keyword', 'ref',
@@ -116,6 +122,90 @@
     });
   }
 
+  function normalizeExperimentVariant(value){
+    if (!value) return '';
+    var valueLower = String(value).toLowerCase();
+    if (valueLower === 'a' || valueLower === 'home_a' || valueLower === 'home_a_default' || valueLower === 'home_a_current') return 'A';
+    if (valueLower === 'b' || valueLower === 'home_b' || valueLower === 'home_b_visit_stage_standard' || valueLower === 'home_b_current') return 'B';
+    return '';
+  }
+
+  function currentExperimentVariant(storage){
+    try {
+      if (!storage) return '';
+      var stored = storage.getItem(EXPERIMENT_KEY);
+      return normalizeExperimentVariant(stored);
+    } catch(error) {
+      return '';
+    }
+  }
+
+  function writeExperimentVariant(storage, value){
+    if (!storage) return;
+    try {
+      storage.setItem(EXPERIMENT_KEY, value);
+    } catch(error) {}
+  }
+
+  function resolveExperimentVariant(storage){
+    var globalVariant = normalizeExperimentVariant(GLOBAL_EXPERIMENT_VARIANT);
+    if (globalVariant) {
+      writeExperimentVariant(storage, globalVariant);
+      return globalVariant;
+    }
+    var forced = '';
+    try {
+      var forcedParams = new URLSearchParams(location.search);
+      forced = normalizeExperimentVariant(
+        forcedParams.get('experiment_force') ||
+        forcedParams.get('force_experiment') ||
+        forcedParams.get('experiment_variant_force')
+      );
+      if (!forced) {
+        forced = normalizeExperimentVariant(localStorage.getItem(FORCE_VARIANT_KEY));
+      }
+      if (forced) {
+        writeExperimentVariant(storage, forced);
+        try { localStorage.setItem(FORCE_VARIANT_KEY, forced); } catch(error) {}
+      }
+    } catch(error) {
+      forced = '';
+    }
+    if (forced) return forced;
+
+    var isHomepage = location.pathname === '/' || location.pathname === '/index.html';
+    var params = new URLSearchParams(location.search);
+    var variantFromQuery = normalizeExperimentVariant(params.get('experiment_variant'));
+    if (!variantFromQuery) variantFromQuery = normalizeExperimentVariant(params.get('variant'));
+    if (!variantFromQuery) variantFromQuery = normalizeExperimentVariant(params.get('page_variant'));
+    if (variantFromQuery) {
+      writeExperimentVariant(storage, variantFromQuery);
+      return variantFromQuery;
+    }
+    if (location.pathname.indexOf('/ab/home-b/') === 0) {
+      writeExperimentVariant(storage, 'B');
+      return 'B';
+    }
+    var stored = currentExperimentVariant(storage);
+    if (stored) return stored;
+    if (isHomepage) {
+      var randomValue = Math.random();
+      if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
+        var randomBytes = new Uint32Array(1);
+        window.crypto.getRandomValues(randomBytes);
+        randomValue = randomBytes[0] / 4294967296;
+      }
+      var assigned = randomValue < 0.5 ? 'A' : 'B';
+      writeExperimentVariant(storage, assigned);
+      return assigned;
+    }
+    return 'A';
+  }
+
+  function getExperimentVariant(){
+    return resolveExperimentVariant(sessionStorage);
+  }
+
   function isIntmConsultationUrl(u){
     return u.hostname === 'intm.kr' && u.pathname === '/consultation/ggbg';
   }
@@ -126,6 +216,8 @@
   }
 
   function getPageVariant(){
+    var experimentVariant = getExperimentVariant();
+    if (experimentVariant === 'B') return 'home_b_visit_stage_standard';
     try {
       var current = new URL(location.href);
       var explicit = current.searchParams.get('page_variant') || current.searchParams.get('variant');
@@ -153,6 +245,8 @@
       if (!u.searchParams.has('utm_medium')) u.searchParams.set('utm_medium', MEDIUM);
       if (!u.searchParams.has('utm_campaign')) u.searchParams.set('utm_campaign', CAMPAIGN);
       if (!u.searchParams.has('ref')) u.searchParams.set('ref', 'spacebogam');
+      if (!u.searchParams.has('experiment_id')) u.searchParams.set('experiment_id', EXPERIMENT_ID);
+      if (!u.searchParams.has('experiment_variant')) u.searchParams.set('experiment_variant', getExperimentVariant());
       if (!u.searchParams.has('page_variant')) u.searchParams.set('page_variant', getPageVariant());
       return u.toString();
     } catch(e) { return url; }
@@ -162,6 +256,8 @@
     var payload = {
       event_category: 'lead',
       event_label: 'spacebogam',
+      experiment_id: EXPERIMENT_ID,
+      experiment_variant: getExperimentVariant(),
       page_location: location.href,
       page_path: location.pathname,
       page_variant: getPageVariant(),
