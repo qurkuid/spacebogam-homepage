@@ -67,10 +67,27 @@ for (const v of ['A', 'B']) {
   console.log(`outbound href: ${r.outbound}`);
   console.log(`form url: ${r.formUrl}`);
   for (const e of r.events) {
-    console.log(`  ${String(e.name).padEnd(20)} HTTP ${e.status}  exp=${e.payload?.experimentId}/${e.payload?.experimentVariant}  keys=${e.keys.join(',')}`);
+    console.log(`  ${String(e.name).padEnd(20)} HTTP ${e.status}  ${String(e.origin).padEnd(16)} exp=${e.payload?.experimentId}/${e.payload?.experimentVariant} page=${JSON.stringify(e.payload?.pageVariant)}  keys=${e.keys.join(',')}`);
   }
   console.log(`  console errors/warnings: ${r.consoleMsgs.length}`);
   r.consoleMsgs.forEach((m) => console.log(`    ${m}`));
+
+  // CMP-144 재검증 판정 (산출물 4). 홈 세션의 실험 3필드가 상담 폼까지 그대로 계승되어야 한다.
+  const triple = (e) => [e?.payload?.experimentId, e?.payload?.experimentVariant, e?.payload?.pageVariant];
+  const home = r.events.find((e) => e.origin?.includes('spacebogam.kr'));
+  const formEvents = r.events.filter(
+    (e) => e.origin?.includes('intm.kr') && ['lead_form_view', 'lead_form_start'].includes(e.name),
+  );
+  const expected = triple(home);
+  console.log(`  -- 판정 (기대=홈 ${JSON.stringify(expected)}) --`);
+  if (!home) console.log('    FAIL: 홈 기준 이벤트 없음 — 판정 불가');
+  else if (expected.some((v) => !v)) console.log(`    FAIL: 홈 기준값 자체가 비어 있음 ${JSON.stringify(expected)}`);
+  else if (formEvents.length === 0) console.log('    FAIL: lead_form_view/lead_form_start 미발생 — 판정 불가');
+  for (const e of formEvents) {
+    const got = triple(e);
+    const match = JSON.stringify(got) === JSON.stringify(expected);
+    console.log(`    ${match ? 'PASS' : 'FAIL'} ${e.name}: ${JSON.stringify(got)}${match ? '' : ` != ${JSON.stringify(expected)}`}`);
+  }
 }
 await browser.close();
 writeFileSync(`${OUT}/cmp96-formstart-raw.json`, JSON.stringify(results, null, 2));
