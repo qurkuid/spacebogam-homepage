@@ -79,13 +79,27 @@ pass 6 / fail 0
 세션 스크립트 실행 전후로 `visits 168→169`, `engagedVisits 47→48`,
 `consultationClicks 4→5`. 한 세션이 세 단계에 모두 반영됐다.
 
+## 실브라우저 재현 (이슈의 재현 절차 그대로)
+
+헤드리스 Chrome(puppeteer-core 전역 + playwright chromium 캐시)으로 신규 컨텍스트를 열어
+`https://spacebogam.kr/?utm_source=qa&utm_medium=qa_test&utm_campaign=cmp141-browser2` 로드 →
+12초 대기 → 하단 스크롤 → 상담 CTA 클릭. 네트워크 요청을 직접 캡처했다.
+
+| 이벤트 | 응답 | sessionId | experimentId | 변형 | 미지 키 |
+|---|---|---|---|---|---|
+| `page_view` | **202** | `0256e776…` | `homepage_headline_v1` | B | 없음 |
+| `engaged_session` | **202** | 동일 | 동일 | B | 없음 |
+| `scroll_50` | **202** | 동일 | 동일 | B | 없음 |
+| `consultation_click` | **202** | 동일 | 동일 | B | 없음 |
+
+`window.__spacebogamFunnelFailures` = `[]` (실패 0건).
+이슈 기대표의 4개 이벤트가 모두 기대값과 일치한다.
+
 ## 남은 불확실성
 
 - 원장 행의 `experimentId`/`experimentVariant` **컬럼 값** 자체는 집계 MCP 가 노출하지 않아
-  직접 확인하지 못했다. 서버가 해당 필드를 포함한 payload 를 202 로 수락한 것까지가 확인 범위다.
+  직접 조회하지 못했다. 확인된 범위는 (a) 브라우저가 해당 필드를 담아 전송했고
+  (b) 서버가 202 로 수락했으며 (c) 세션이 원장 단계 집계에 반영됐다는 것이다.
   컬럼 단위 확인은 `DATABASE_URL` 을 가진 운영자가
   `scripts/qa/cmp137-consultation-submit-readback.sh <sessionId>` 패턴으로 수행할 수 있다.
-- 실제 브라우저 세션 QA(incognito 로드 → 12초 → 스크롤 → CTA 클릭)는 이 환경에
-  헤드리스 브라우저(Stagehand/Playwright)가 없어 실행하지 못했다.
-  라이브 자산이 수정본을 서빙하는 것과 동일 payload 의 왕복 202 는 확인됐다.
-- 자연 유입 회복 여부는 2026-07-28 일별 수치로 판정해야 한다(현재 5건 중 4건이 QA 세션).
+- 자연 유입 회복 여부는 2026-07-28 일별 수치로 판정해야 한다(현재 수치에는 QA 세션이 섞여 있다).
