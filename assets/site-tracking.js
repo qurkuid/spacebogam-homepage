@@ -16,10 +16,21 @@
   var GLOBAL_EXPERIMENT_VARIANT = '';
   window.__spacebogamHomepageHeadlineVariant = GLOBAL_EXPERIMENT_VARIANT;
   var ATTRIBUTION_KEYS = [
-    'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+    'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id',
+    'campaign_id', 'adset_id', 'ad_id', 'asset_id',
     'gclid', 'gbraid', 'wbraid', 'fbclid', 'n_keyword', 'ref',
-    'variant', 'page_variant'
+    'variant', 'page_variant', 'is_test'
   ];
+  // Presence of any of these on the landing URL means the visit carries its own
+  // campaign attribution, so the CTA's hardcoded utm_* fallbacks must not blend in.
+  var INBOUND_CAMPAIGN_KEYS = [
+    'utm_source', 'utm_medium', 'utm_campaign', 'utm_id',
+    'campaign_id', 'adset_id', 'ad_id', 'asset_id',
+    'gclid', 'gbraid', 'wbraid', 'fbclid'
+  ];
+  // Channel fields the CTA hardcodes; cleared before relay when inbound attribution exists.
+  // 'ref' is deliberately kept: it marks CTA placement, not the acquisition channel.
+  var STATIC_CHANNEL_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
 
   function getNaverId(metaName, fallback){
     var meta = document.querySelector('meta[name="' + metaName + '"]');
@@ -230,24 +241,41 @@
     return 'home_a_default';
   }
 
+  function hasInboundCampaign(current){
+    for (var i = 0; i < INBOUND_CAMPAIGN_KEYS.length; i++) {
+      if (current.searchParams.get(INBOUND_CAMPAIGN_KEYS[i])) return true;
+    }
+    return false;
+  }
+
   function decorate(url){
     try {
       var u = new URL(url, location.href);
       if (!isIntmConsultationUrl(u) && !isLocalConsultationUrl(u)) return url;
 
       var current = new URL(location.href);
+      var inbound = hasInboundCampaign(current);
+      if (inbound) {
+        STATIC_CHANNEL_KEYS.forEach(function(key){ u.searchParams.delete(key); });
+      }
       ATTRIBUTION_KEYS.forEach(function(key){
         var value = current.searchParams.get(key);
         if (value) u.searchParams.set(key, value);
       });
 
-      if (!u.searchParams.has('utm_source')) u.searchParams.set('utm_source', SOURCE);
-      if (!u.searchParams.has('utm_medium')) u.searchParams.set('utm_medium', MEDIUM);
-      if (!u.searchParams.has('utm_campaign')) u.searchParams.set('utm_campaign', CAMPAIGN);
+      if (!inbound) {
+        if (!u.searchParams.has('utm_source')) u.searchParams.set('utm_source', SOURCE);
+        if (!u.searchParams.has('utm_medium')) u.searchParams.set('utm_medium', MEDIUM);
+        if (!u.searchParams.has('utm_campaign')) u.searchParams.set('utm_campaign', CAMPAIGN);
+      }
       if (!u.searchParams.has('ref')) u.searchParams.set('ref', 'spacebogam');
-      if (!u.searchParams.has('experiment_id')) u.searchParams.set('experiment_id', EXPERIMENT_ID);
-      if (!u.searchParams.has('experiment_variant')) u.searchParams.set('experiment_variant', getExperimentVariant());
-      if (!u.searchParams.has('page_variant')) u.searchParams.set('page_variant', getPageVariant());
+      // Experiment enrichment is best-effort: it must never discard the relayed
+      // ad attribution above by throwing out of the outer catch.
+      try {
+        if (!u.searchParams.has('experiment_id')) u.searchParams.set('experiment_id', EXPERIMENT_ID);
+        if (!u.searchParams.has('experiment_variant')) u.searchParams.set('experiment_variant', getExperimentVariant());
+        if (!u.searchParams.has('page_variant')) u.searchParams.set('page_variant', getPageVariant());
+      } catch(e) {}
       return u.toString();
     } catch(e) { return url; }
   }
