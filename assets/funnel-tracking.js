@@ -9,6 +9,9 @@
   var ATTRIBUTION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
   var UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
   var SELF_REFERRAL_SOURCE = 'spacebogam.kr';
+  var RETRY_DELAY_MS = 1500;
+  // 콘솔/QA 에서 읽을 수 있는 전송 실패 버퍼 (window.__spacebogamFunnelFailures)
+  var FAILURES = window.__spacebogamFunnelFailures || (window.__spacebogamFunnelFailures = []);
 
   function uuid(){
     if (window.crypto && typeof window.crypto.randomUUID === 'function') {
@@ -219,9 +222,9 @@
       utmCampaign: attribution.utm_campaign || '',
       utmContent: attribution.utm_content || '',
       utmTerm: attribution.utm_term || '',
-      experiment_id: EXPERIMENT_ID,
+      // 수신 스키마(intm funnelEventInputSchema)는 .strict() 다.
+      // camelCase 키만 허용하므로 snake_case 별칭을 추가하면 전량 400 이 된다. (CMP-141)
       experimentId: EXPERIMENT_ID,
-      experiment_variant: experimentVariant,
       experimentVariant: experimentVariant,
       ctaLocation: detail && detail.ctaLocation || '',
       ctaText: detail && detail.ctaText || '',
@@ -230,12 +233,56 @@
     };
     if (detail && typeof detail.scrollDepth === 'number') payload.scrollDepth = detail.scrollDepth;
     if (detail && typeof detail.engagedSeconds === 'number') payload.engagedSeconds = detail.engagedSeconds;
+    post(payload, 0);
+  }
+
+  // 전송 실패를 조용히 삼키지 않는다. 재시도 1회 + 관측 가능한 신호를 남긴다. (CMP-141)
+  function reportFailure(payload, reason){
+    var record = {
+      eventName: payload.eventName,
+      sessionId: payload.sessionId,
+      reason: String(reason).slice(0, 200),
+      at: new Date().toISOString()
+    };
+    FAILURES.push(record);
+    if (FAILURES.length > 20) FAILURES.shift();
+    try {
+      if (window.console && typeof window.console.warn === 'function') {
+        window.console.warn('[spacebogam-funnel] ingest 실패', record);
+      }
+    } catch(error) {}
+    try {
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'funnel_ingest_error', {
+          failed_event_name: record.eventName,
+          failure_reason: record.reason
+        });
+      }
+    } catch(error) {}
+  }
+
+  function post(payload, attempt){
     fetch(ENDPOINT, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload),
       keepalive: true
-    }).catch(function(){});
+    }).then(function(response){
+      if (response.ok) return;
+      // 4xx 는 계약 불일치라 재시도해도 낫지 않는다. 즉시 신호만 남긴다.
+      // 429/5xx 는 일시적이므로 1회 재시도한다. eventId 가 동일해 원장에서 dedup 된다.
+      if ((response.status === 429 || response.status >= 500) && attempt < 1) {
+        window.setTimeout(function(){ post(payload, attempt + 1); }, RETRY_DELAY_MS);
+        return;
+      }
+      reportFailure(payload, 'HTTP ' + response.status);
+    }).catch(function(error){
+      if (attempt < 1) {
+        window.setTimeout(function(){ post(payload, attempt + 1); }, RETRY_DELAY_MS);
+        return;
+      }
+      reportFailure(payload, (error && error.message) || 'network error');
+    });
   }
 
   function isConsultationUrl(url){

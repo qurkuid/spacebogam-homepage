@@ -130,7 +130,7 @@ test('assignment uses the contract key and crypto.getRandomValues when available
   assert.equal(sessionStorage.getItem('spacebogam_funnel_experiment_homepage_headline_v1'), null);
   assert.ok(cryptoCalls.includes(1), 'assignment should request a Uint32 random value');
   assert.ok(cryptoCalls.includes(16), 'UUID fallback should request 16 random bytes');
-  assert.equal(requests[0].experiment_variant, 'B');
+  assert.equal(requests[0].experimentVariant, 'B');
 });
 
 test('global rollback wins over query, local override, and stored assignment', () => {
@@ -143,7 +143,7 @@ test('global rollback wins over query, local override, and stored assignment', (
   });
 
   assert.equal(sessionStorage.getItem('spacebogam_homepage_headline_v1_variant'), 'A');
-  assert.equal(requests[0].experiment_variant, 'A');
+  assert.equal(requests[0].experimentVariant, 'A');
 });
 
 test('site loader exposes one global rollback flag before loading funnel tracking', () => {
