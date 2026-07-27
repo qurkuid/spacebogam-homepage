@@ -8,6 +8,7 @@
   var FORCE_VARIANT_KEY = 'spacebogam_headline_v1_force_variant';
   var ATTRIBUTION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
   var UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+  var SELF_REFERRAL_SOURCE = 'spacebogam.kr';
 
   function uuid(){
     if (window.crypto && typeof window.crypto.randomUUID === 'function') {
@@ -245,12 +246,21 @@
     );
   }
 
+  // 상담 링크에 하드코딩된 자기참조 UTM(utm_source=spacebogam.kr)은 광고 소스가 아니라
+  // 자리표시자다. 저장된 유입 attribution 이 있으면 그쪽이 우선한다.
+  function hasSelfReferralUtm(url){
+    var source = url.searchParams.get('utm_source') || '';
+    return source === SELF_REFERRAL_SOURCE;
+  }
+
   function decorateConsultationLink(anchor){
     try {
       var url = new URL(anchor.getAttribute('href') || '', location.href);
       if (!isConsultationUrl(url)) return;
+      var overrideSelfReferral = attribution.utm_source && hasSelfReferralUtm(url);
       UTM_KEYS.forEach(function(key){
-        if (attribution[key] && !url.searchParams.has(key)) {
+        if (!attribution[key]) return;
+        if (!url.searchParams.has(key) || overrideSelfReferral) {
           url.searchParams.set(key, attribution[key]);
         }
       });
