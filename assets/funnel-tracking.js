@@ -102,7 +102,9 @@
   }
 
   var TEST_SESSION_KEY = 'spacebogam_funnel_is_test';
-  var TEST_TRUTHY = ['1', 'true', 'yes', 'on'];
+  // consultation-form.js 의 TEST_TRUTHY 와 같은 목록이어야 한다.
+  // 'y' 가 빠져 있으면 ?is_test=y 세션이 상담 폼에서만 걸리고 상단 단계는 실유입으로 샌다. (CMP-225)
+  var TEST_TRUTHY = ['1', 'true', 'yes', 'y', 'on'];
 
   function resolveTestSession(storage){
     var fromQuery = false;
@@ -270,7 +272,10 @@
       ctaLocation: detail && detail.ctaLocation || '',
       ctaText: detail && detail.ctaText || '',
       pageVariant: pageVariant(),
-      deviceType: deviceType()
+      deviceType: deviceType(),
+      // CMP-225: 이 표식이 없으면 검증 세션의 page_view·scroll_50·*_click 이
+      // 실유입으로 집계돼 퍼널 visits 를 부풀린다. 수신 스키마는 boolean 을 받는다.
+      isTest: testSession
     };
     if (detail && typeof detail.scrollDepth === 'number') payload.scrollDepth = detail.scrollDepth;
     if (detail && typeof detail.engagedSeconds === 'number') payload.engagedSeconds = detail.engagedSeconds;

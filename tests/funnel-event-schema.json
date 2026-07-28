@@ -1,7 +1,7 @@
 {
   "_source": "qurkuid/intm — src/lib/spacebogam-funnel/contracts.ts :: funnelEventInputSchema (z.object(...).strict())",
   "_verified_at": "2026-07-28",
-  "_verified_commit": "9071f8a7",
+  "_verified_commit": "f4c473e8",
   "_note": "수신 스키마가 .strict() 이므로 목록에 없는 키가 하나라도 있으면 HTTP 400 'Invalid funnel event.' 로 전량 거부된다. intm 쪽 스키마를 바꾸면 이 파일도 함께 갱신할 것. (CMP-141)",
   "endpoint": "https://intm.kr/api/marketing/funnel-events",
   "required": [
@@ -27,7 +27,8 @@
     "deviceType",
     "scrollDepth",
     "engagedSeconds",
-    "formId"
+    "formId",
+    "isTest"
   ],
   "event_names": [
     "page_view",
