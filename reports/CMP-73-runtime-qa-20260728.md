@@ -57,7 +57,24 @@
 - **전역 단일 롤백(정답)**: `assets/site-tracking.js:16`의 `var GLOBAL_EXPERIMENT_VARIANT = '';` → `'A'`로 바꾸고 그 파일 하나만 배포. 위 QA에서 신규 세션 20/20 전부 A 고정 확인.
 - 기존 기록의 `localStorage.setItem('spacebogam_headline_v1_force_variant','A')` 콘솔 명령은 **실행한 브라우저에만 적용**되는 점검용 수단이다. 전역 롤백 수단이 아니므로 롤백 절차로 쓰면 안 된다.
 
-## 배포 상태
+## 배포 상태 — 전역 롤백 실행 완료 (2026-07-28)
 
-- 운영 사이트에는 실험 코드가 이미 배포되어 동작 중이다(위 QA는 운영 배포본 대상).
-- 로컬 `main`은 `origin/main` 대비 **2 커밋 미배포** 상태다(`de5b556` CMP-151, `fe32add` CMP-146). 따라서 지금 push하면 롤백 외 변경분도 함께 배포된다 — 롤백 배포 시 이 점을 분리해서 판단해야 한다.
+보드가 확인 카드 "전역 롤백 배포 승인"을 **수락**하여 롤백을 배포했다.
+
+- 커밋 `1ea86ea`, `origin/main` push 완료 → GitHub Pages 반영 확인.
+- 변경: `assets/site-tracking.js:16` `GLOBAL_EXPERIMENT_VARIANT` `''` → `'A'`.
+- 함께 배포된 미배포 커밋 6건 중 **운영 자산을 건드리는 것은 `de5b556`(CMP-151, `assets/site-tracking.js`) 하나**뿐이며 승인 카드에 명시돼 있었다. 나머지(`fe32add`, `92d0974`, `0f98d2c`, `fcd7b5a`, `25d805c`)는 `scripts/qa/**`·`reports/**`·`tests/**`로 런타임 영향이 없다.
+
+### 롤백 후 운영 재검증 (`CMP73_SESSIONS=40`, 운영 대상)
+
+- **신규 세션 40/40 전부 A, B=0, 미배정 0** — 미승인 카피 노출 중단 확인.
+- 세션 고정성 A, 헤드라인=대조군 카피, 이벤트 3종 귀속 `A`, UTM 보존, 클라이언트 `consultation_submit` 미발생 유지.
+- 하네스가 보고하는 FAIL 5건(`distribution`, `dom_invariant_*`, `events_..._B`, `consultation_link_params_B`)은 **하네스가 50:50 실험 진행을 전제로 단언**하기 때문이며, 롤백 상태에서는 기대값이 뒤집힌 것이다. 각 실패 상세가 오히려 롤백 성공 증거다(B 세션도 `experiment_variant=A`, 두 변형 H1 동일 → `h1Differs=false`). `htmlSame/ctaSame/styleSame`은 계속 true다.
+
+### 되돌리기(실험 재개)
+
+`GLOBAL_EXPERIMENT_VARIANT`를 `''`로 되돌리고 배포하면 50:50이 복원된다. 단 **재개 전에 P0(카피 승인)이 먼저 해소돼야 한다.**
+
+### 부수 수정
+
+`tests/cmp98-funnel-tracking.test.js`의 로더 테스트가 플래그 리터럴 `''`를 그대로 pin하고 있어, 이 플래그가 존재하는 목적인 롤백을 수행하면 스위트가 깨졌다. 선언 순서·단일 선언 보장은 유지한 채 값만 비의존(`'[AB]?'`)으로 바꿨다. 관련 스위트 12/12 PASS.
