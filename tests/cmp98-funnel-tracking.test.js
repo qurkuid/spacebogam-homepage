@@ -147,7 +147,9 @@ test('global rollback wins over query, local override, and stored assignment', (
 });
 
 test('site loader exposes one global rollback flag before loading funnel tracking', () => {
-  const flagDeclaration = siteSource.indexOf("var GLOBAL_EXPERIMENT_VARIANT = '';");
+  // Value-agnostic on purpose: '' is 50:50, 'A' is the emergency rollback. Pinning
+  // the literal here would make the rollback this flag exists for fail the suite.
+  const flagDeclaration = siteSource.search(/var GLOBAL_EXPERIMENT_VARIANT = '[AB]?';/);
   const flagExport = siteSource.indexOf('window.__spacebogamHomepageHeadlineVariant = GLOBAL_EXPERIMENT_VARIANT;');
   const funnelLoad = siteSource.indexOf("funnelScript.src = '/assets/funnel-tracking.js';");
 

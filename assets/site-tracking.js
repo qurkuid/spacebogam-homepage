@@ -13,7 +13,7 @@
   var EXPERIMENT_KEY = 'spacebogam_homepage_headline_v1_variant';
   var FORCE_VARIANT_KEY = 'spacebogam_headline_v1_force_variant';
   // Emergency rollback: set to 'A' and deploy this one file. Empty keeps 50:50 assignment.
-  var GLOBAL_EXPERIMENT_VARIANT = '';
+  var GLOBAL_EXPERIMENT_VARIANT = 'A';
   window.__spacebogamHomepageHeadlineVariant = GLOBAL_EXPERIMENT_VARIANT;
   var ATTRIBUTION_KEYS = [
     'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id',
