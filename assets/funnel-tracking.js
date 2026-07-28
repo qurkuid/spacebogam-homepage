@@ -240,7 +240,7 @@
     if (experimentVariant !== 'B') return;
     var heroHeadline = document.querySelector('main .hero h1');
     if (!heroHeadline) return;
-    heroHeadline.innerHTML = '부산 프리미엄 아파트,<br>우리 집에 맞는<br>완성도부터 잡습니다';
+    heroHeadline.innerHTML = '부산 아파트 인테리어,<br>비용·기간·사례<br>먼저 확인하세요';
   }
 
   function deviceType(){
