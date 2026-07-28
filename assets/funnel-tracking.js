@@ -101,12 +101,37 @@
     return fallback;
   }
 
+  var TEST_SESSION_KEY = 'spacebogam_funnel_is_test';
+  var TEST_TRUTHY = ['1', 'true', 'yes', 'on'];
+
+  function resolveTestSession(storage){
+    var fromQuery = false;
+    try {
+      var params = new URLSearchParams(location.search);
+      var raw = String(params.get('is_test') || '').trim().toLowerCase();
+      fromQuery = TEST_TRUTHY.indexOf(raw) !== -1;
+    } catch(error) {}
+    if (!storage) return fromQuery;
+    try {
+      if (fromQuery) {
+        storage.setItem(TEST_SESSION_KEY, 'true');
+        return true;
+      }
+      return storage.getItem(TEST_SESSION_KEY) === 'true';
+    } catch(error) {
+      return fromQuery;
+    }
+  }
+
   var local = browserStorage('localStorage');
   var session = browserStorage('sessionStorage');
   var clientId = storedId(local, CLIENT_KEY);
   var sessionId = storedId(session, SESSION_KEY);
   var attribution = currentAttribution(local);
   var journey = sessionJourney(session);
+  // CMP-191: 검증 세션 표식. 유입 URL 의 is_test 를 세션 내내 끌고 간다.
+  // 표식이 없으면 QA 가 실유입과 구분되지 않고 퍼널 상단 단계를 부풀린다.
+  var testSession = resolveTestSession(session);
   var isHomepage = location.pathname === '/' || location.pathname === '/index.html';
   var variantFromQuery = null;
   var forceVariant = null;
@@ -345,6 +370,11 @@
       setIfPresent(url, 'source_page', location.href);
       url.searchParams.set('experiment_id', EXPERIMENT_ID);
       url.searchParams.set('experiment_variant', experimentVariant);
+      // CMP-191: 검증 세션 표식은 도메인을 건너면서 이름이 바뀐다. spacebogam 은
+      // is_test, intm 은 n 을 읽는다. 여기서 옮겨 싣지 않으면 QA 세션이 상담
+      // 페이지로 넘어가는 순간 실유입으로 기록되고 퍼널 form_start 가 부풀어 오른다.
+      if (testSession) url.searchParams.set('n', '1');
+      else url.searchParams.delete('n');
       anchor.setAttribute('href', url.toString());
     } catch(error) {}
   }
