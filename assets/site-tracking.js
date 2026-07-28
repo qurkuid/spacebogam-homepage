@@ -221,9 +221,14 @@
     return u.hostname === 'intm.kr' && u.pathname === '/consultation/ggbg';
   }
 
+  // CMP-173: /consultation/apply/ 는 spacebogam 도메인 안에서 제출까지 끝내는 신규 폼이다.
+  // 여기에 attribution 을 릴레이하지 않으면 플랫폼 식별자 5종이 랜딩→폼 이동에서 사라진다.
+  // localStorage 스냅샷은 UTM 만 보관하므로 URL 릴레이가 유일한 경로다.
+  var LOCAL_CONSULTATION_PATHS = ['/consultation/', '/consultation', '/consultation/apply/', '/consultation/apply'];
+
   function isLocalConsultationUrl(u){
     var sameHost = !u.hostname || u.hostname === location.hostname || u.hostname === 'spacebogam.kr' || u.hostname === 'www.spacebogam.kr';
-    return sameHost && (u.pathname === '/consultation/' || u.pathname === '/consultation');
+    return sameHost && LOCAL_CONSULTATION_PATHS.indexOf(u.pathname) !== -1;
   }
 
   function getPageVariant(){

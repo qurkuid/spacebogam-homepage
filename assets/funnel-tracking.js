@@ -285,11 +285,15 @@
     });
   }
 
+  // CMP-173: 신규 폼 /consultation/apply/ 도 상담 링크로 센다. 빠지면 그 클릭이
+  // consultation_click 으로 수집되지 않아 퍼널에서 상담 단계가 통째로 비어 보인다.
+  var CONSULTATION_PATHS = ['/consultation/', '/consultation', '/consultation/apply/', '/consultation/apply'];
+
   function isConsultationUrl(url){
     return (
       (url.hostname === 'intm.kr' && url.pathname === '/consultation/ggbg') ||
       ((url.hostname === location.hostname || !url.hostname) &&
-        (url.pathname === '/consultation/' || url.pathname === '/consultation'))
+        CONSULTATION_PATHS.indexOf(url.pathname) !== -1)
     );
   }
 
