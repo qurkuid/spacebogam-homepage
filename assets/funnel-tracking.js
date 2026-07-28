@@ -3,6 +3,8 @@
   var CLIENT_KEY = 'spacebogam_funnel_client_id';
   var SESSION_KEY = 'spacebogam_funnel_session_id';
   var ATTRIBUTION_KEY = 'spacebogam_funnel_attribution';
+  var JOURNEY_KEY = 'spacebogam_funnel_journey';
+  var JOURNEY_MAX_LENGTH = 1000;
   var EXPERIMENT_ID = 'homepage_headline_v1';
   var EXPERIMENT_KEY = 'spacebogam_homepage_headline_v1_variant';
   var FORCE_VARIANT_KEY = 'spacebogam_headline_v1_force_variant';
@@ -86,11 +88,25 @@
     return values;
   }
 
+  // CMP-171: landing_page / referrer 는 상담 링크에 실려야만 consult_req 에 남는다.
+  // 세션 첫 페이지에서 한 번 굳혀두고 내부 이동 뒤에도 같은 값을 쓴다.
+  function sessionJourney(storage){
+    var fallback = { landing_page: location.href, referrer: document.referrer || '' };
+    if (!storage) return fallback;
+    try {
+      var stored = JSON.parse(storage.getItem(JOURNEY_KEY) || 'null');
+      if (stored && stored.landing_page) return stored;
+      storage.setItem(JOURNEY_KEY, JSON.stringify(fallback));
+    } catch(error) {}
+    return fallback;
+  }
+
   var local = browserStorage('localStorage');
   var session = browserStorage('sessionStorage');
   var clientId = storedId(local, CLIENT_KEY);
   var sessionId = storedId(session, SESSION_KEY);
   var attribution = currentAttribution(local);
+  var journey = sessionJourney(session);
   var isHomepage = location.pathname === '/' || location.pathname === '/index.html';
   var variantFromQuery = null;
   var forceVariant = null;
@@ -300,6 +316,11 @@
     return source === SELF_REFERRAL_SOURCE;
   }
 
+  function setIfPresent(url, key, value){
+    var text = (value || '').slice(0, JOURNEY_MAX_LENGTH);
+    if (text) url.searchParams.set(key, text);
+  }
+
   function decorateConsultationLink(anchor){
     try {
       var url = new URL(anchor.getAttribute('href') || '', location.href);
@@ -313,6 +334,11 @@
       });
       url.searchParams.set('sbClientId', clientId);
       url.searchParams.set('sbSessionId', sessionId);
+      // 유입 랜딩·외부 리퍼러·상담 링크를 누른 페이지. 상담 저장 시 그대로 귀속에 들어간다.
+      // 빈 값은 붙이지 않는다. 링크 길이를 늘리기만 하고 원천에는 ''로 남는다.
+      setIfPresent(url, 'landing_page', journey.landing_page);
+      setIfPresent(url, 'referrer', journey.referrer);
+      setIfPresent(url, 'source_page', location.href);
       url.searchParams.set('experiment_id', EXPERIMENT_ID);
       url.searchParams.set('experiment_variant', experimentVariant);
       anchor.setAttribute('href', url.toString());
