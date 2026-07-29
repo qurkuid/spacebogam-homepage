@@ -7,13 +7,16 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 STAGEHAND="$HOME/Documents/intm-stagehand"
 PORT="${1:-4890}"
 
-echo "── 1/3 정적 검사 (트래킹 마커·CTA baseline·JSON-LD·자산) ──"
+echo "── 1/4 캐시 버스팅 스탬프 (CMP-255 — 자산 내용 ↔ ?v= 해시 일치) ──"
+python3 "$ROOT/scripts/version_assets.py" --check
+
+echo "── 2/4 정적 검사 (트래킹 마커·CTA baseline·JSON-LD·자산) ──"
 python3 "$ROOT/tests/landing_check.py"
 
-echo "── 2/3 퍼널 ingest 계약 (클라이언트 payload ↔ intm .strict() 스키마) ──"
+echo "── 3/4 퍼널 ingest 계약 (클라이언트 payload ↔ intm .strict() 스키마) ──"
 python3 "$ROOT/tests/funnel_contract_check.py"
 
-echo "── 3/3 런타임 회귀 (Stagehand) ──"
+echo "── 4/4 런타임 회귀 (Stagehand) ──"
 if [ -n "$SPACEBOGAM_URL" ]; then
   URL="$SPACEBOGAM_URL"; SERVER_PID=""
 else

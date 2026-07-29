@@ -151,7 +151,8 @@ test('site loader exposes one global rollback flag before loading funnel trackin
   // the literal here would make the rollback this flag exists for fail the suite.
   const flagDeclaration = siteSource.search(/var GLOBAL_EXPERIMENT_VARIANT = '[AB]?';/);
   const flagExport = siteSource.indexOf('window.__spacebogamHomepageHeadlineVariant = GLOBAL_EXPERIMENT_VARIANT;');
-  const funnelLoad = siteSource.indexOf("funnelScript.src = '/assets/funnel-tracking.js';");
+  // CMP-255: src 에 캐시 버스팅 해시(?v=…)가 붙으므로 리터럴 대신 패턴으로 찾는다.
+  const funnelLoad = siteSource.search(/funnelScript\.src = '\/assets\/funnel-tracking\.js(\?v=[0-9a-f]+)?';/);
 
   assert.ok(flagDeclaration >= 0);
   assert.ok(flagExport > flagDeclaration);
