@@ -7,11 +7,13 @@
 //   기본 base = http://127.0.0.1:3023 (작업 트리 프리뷰)
 
 import puppeteer from '/Users/baegchangseog/.nvm/versions/node/v24.15.0/lib/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js';
+import { qaEntryUrl } from './lib/qa-entry-url.mjs';
 
 const CHROME = '/Users/baegchangseog/Library/Caches/ms-playwright/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing';
 const BASE = (process.argv[2] || 'http://127.0.0.1:3023').replace(/\/$/, '');
 const BASE_URL = BASE;
-const ENTRY = `${BASE}/?utm_source=meta&utm_medium=cpc&utm_campaign=cmp196_reach&utm_content=reach_probe`;
+// CMP-267: base 를 라이브로 넘기면 utm_source=meta 세션이 실유입으로 잡혔다. qaEntryUrl 이 is_test=1 을 강제한다.
+const ENTRY = qaEntryUrl(`${BASE}/`, 'utm_source=meta&utm_medium=cpc&utm_campaign=cmp196_reach&utm_content=reach_probe');
 
 const results = [];
 function check(name, ok, detail) {
@@ -73,6 +75,7 @@ try {
     { timeout: 15000 }
   ).catch(() => {});
   const fields = await page.$$eval('#consult-form-root input, #consult-form-root textarea, #consult-form-root select', (els) => els.length);
+  // qa-entry-url-allow: CMP-267 — 유입 URL 이 아니라 호스트 비교식이다. 진입은 위 ENTRY(qaEntryUrl) 로만 한다.
   const liveOrigin = new URL(BASE_URL).hostname === 'spacebogam.kr';
   if (liveOrigin) {
     check('폼 입력 필드 렌더', fields > 0, `${fields}개`);

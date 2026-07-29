@@ -13,7 +13,10 @@ import puppeteer from '/Users/baegchangseog/.nvm/versions/node/v24.15.0/lib/node
 const CHROME = '/Users/baegchangseog/Library/Caches/ms-playwright/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing';
 const ORIGIN = process.env.CMP73_ORIGIN || 'https://spacebogam.kr';
 const INGEST = 'intm.kr/api/marketing/funnel-events';
-const UTM = 'utm_source=cmp73&utm_medium=qa&utm_campaign=headline_v1_runtime&utm_content=qa_probe';
+// CMP-267: is_test=1 은 유입 URL 에만 있어야 표식이 켜진다. 이 프로브는 ingest 를 abort 하지만,
+// abort 가 깨져도 세션이 실유입으로 잡히지 않도록 진입 쿼리에 표식을 고정해 둔다.
+// 이후 ${ORIGIN}/ 로만 이동하는 지점들은 sessionStorage 표식이 세션 내내 유지되므로 덮인다.
+const UTM = 'utm_source=cmp73&utm_medium=qa&utm_campaign=headline_v1_runtime&utm_content=qa_probe&is_test=1';
 const SESSION_COUNT = Number(process.env.CMP73_SESSIONS || 100);
 const EXPERIMENT_ID = 'homepage_headline_v1';
 

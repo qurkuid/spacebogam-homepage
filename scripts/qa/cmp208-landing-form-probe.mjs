@@ -10,9 +10,12 @@
 // 운영 오염 방지: 퍼널 ingest POST 와 상담 제출 POST 는 전부 abort 한다.
 // 제출은 "요청이 올바른 payload 로 나갔는가" 까지만 판정한다.
 import puppeteer from '/Users/baegchangseog/.nvm/versions/node/v24.15.0/lib/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js';
+import { qaEntryUrl } from './lib/qa-entry-url.mjs';
 
 const CHROME = '/Users/baegchangseog/Library/Caches/ms-playwright/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing';
-const HOME = 'https://spacebogam.kr/?utm_source=meta&utm_medium=paid_social&utm_campaign=cmp208_probe';
+// CMP-267: utm_source=meta 라 표식이 없으면 유료 Meta 유입으로 오인된다. qaEntryUrl 이 is_test=1 을 강제한다.
+// (ingest 는 아래 BLOCK_POST 로도 막지만, abort 가 깨지는 날을 대비한 이중 방어다.)
+const HOME = qaEntryUrl('https://spacebogam.kr/', 'utm_source=meta&utm_medium=paid_social&utm_campaign=cmp208_probe');
 
 const UA_MOBILE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 const UA_INAPP = UA_MOBILE + ' Instagram 340.0.0.20.107 (iPhone14,3; iOS 17_5; ko_KR; ko-KR; scale=3.00; 1170x2532; 600487835)';

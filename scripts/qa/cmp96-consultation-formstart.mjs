@@ -8,6 +8,7 @@
 // 사용: node scripts/qa/cmp96-consultation-formstart.mjs <출력디렉터리>
 import puppeteer from '/Users/baegchangseog/.nvm/versions/node/v24.15.0/lib/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js';
 import { writeFileSync } from 'node:fs';
+import { qaEntryUrl } from './lib/qa-entry-url.mjs';
 
 const CHROME = '/Users/baegchangseog/Library/Caches/ms-playwright/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing';
 const OUT = process.argv[2] || '.';
@@ -41,7 +42,8 @@ async function journey(browser, variant) {
   });
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') consoleMsgs.push(`[${m.type()}] ${m.text().slice(0, 240)}`); });
 
-  await page.goto(`https://spacebogam.kr/?${UTM}&experiment_force=${variant}`, { waitUntil: 'networkidle2', timeout: 60000 });
+  // CMP-267: qaEntryUrl 이 is_test=1 을 강제한다. 이게 없으면 이 프로브의 세션이 실유입으로 집계된다.
+  await page.goto(qaEntryUrl('https://spacebogam.kr/', `${UTM}&experiment_force=${variant}`), { waitUntil: 'networkidle2', timeout: 60000 });
   await sleep(1000);
   // 홈 → /consultation/
   await page.evaluate(() => document.querySelector('a[href*="/consultation/"]').click());

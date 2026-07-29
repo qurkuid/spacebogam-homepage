@@ -1,7 +1,10 @@
-// CMP-96 재검증: CMP-141 수정 후 운영 런타임 이벤트 품질 QA (읽기 전용)
+// CMP-96 재검증: CMP-141 수정 후 운영 런타임 이벤트 품질 QA
+// 주의: 이 프로브는 ingest 를 가로막지 않으므로 실행할 때마다 운영 퍼널에 이벤트를 남긴다.
+//       CMP-267 이후 유입 URL 에 is_test=1 이 강제되어 그 이벤트는 is_test=t 로 저장된다.
 // 사용: node scripts/qa/cmp96-runtime-recheck.mjs <출력디렉터리>
 import puppeteer from '/Users/baegchangseog/.nvm/versions/node/v24.15.0/lib/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js';
 import { writeFileSync } from 'node:fs';
+import { qaEntryUrl } from './lib/qa-entry-url.mjs';
 
 const CHROME = '/Users/baegchangseog/Library/Caches/ms-playwright/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing';
 const OUT = process.argv[2] || '.';
@@ -41,7 +44,7 @@ async function runSession(browser, variant, viewport, label) {
   });
   page.on('pageerror', (e) => pageErrors.push(String(e).slice(0, 300)));
 
-  const url = `https://spacebogam.kr/?${UTM}&experiment_force=${variant}`;
+  const url = qaEntryUrl('https://spacebogam.kr/', `${UTM}&experiment_force=${variant}`);
   await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
   const h1 = await page.$eval('h1', (el) => el.innerText.replace(/\s+/g, ' ').trim()).catch(() => null);

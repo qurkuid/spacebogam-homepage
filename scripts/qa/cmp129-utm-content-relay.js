@@ -103,6 +103,9 @@ const IG_ATTRIBUTION = {
   utm_term: ''
 };
 
+// qa-entry-url-allow-file: CMP-267 — 아래 URL 들은 JSDOM 안에서만 쓰이는 가짜 랜딩 주소다.
+// runCase 가 fetch 를 전부 스텁으로 가로채므로 실제 요청이 나가지 않고 운영 퍼널에 행이 남지 않는다.
+// 따라서 is_test 표식이 필요 없다(붙이면 오히려 utm 릴레이 판정 대상이 달라진다).
 (async function main(){
   const results = [];
   // 1홉: IG 랜딩(홈) → 상담 링크

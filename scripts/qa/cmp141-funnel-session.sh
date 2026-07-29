@@ -10,10 +10,15 @@
 #
 # 원장에 utm_source=qa / utm_medium=qa_test / utm_campaign=cmp141 로 표시되는
 # QA 행이 3건 생긴다. 개인정보·자유서술 필드는 보내지 않는다.
+#
+# CMP-267: 이 스크립트는 브라우저를 거치지 않고 ingest 로 직접 POST 하므로 유입 URL 의
+# is_test 파라미터가 개입할 여지가 없다. 표식은 payload 의 isTest 필드로 직접 실어야 한다
+# (assets/funnel-tracking.js 가 보내는 것과 같은 필드).
 
 set -euo pipefail
 
 ENDPOINT="https://intm.kr/api/marketing/funnel-events"
+# qa-entry-url-allow: CMP-267 — 유입 URL 이 아니라 CORS Origin 헤더 값이다. 표식은 payload 의 isTest 로 싣는다.
 ORIGIN="https://spacebogam.kr"
 EXPERIMENT_ID="homepage_headline_v1"
 VARIANT="${1:-A}"
@@ -31,7 +36,7 @@ send() {
   local event_name="$1" extra="$2" cta_location="$3" cta_text="$4"
   local body
   body="$(cat <<EOF
-{"eventId":"$(lower_uuid)","clientId":"$CLIENT_ID","sessionId":"$SESSION_ID","eventName":"$event_name","pagePath":"/","pageTitle":"공간보감 | CMP-141 ingest check","occurredAt":"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)","utmSource":"qa","utmMedium":"qa_test","utmCampaign":"cmp141","utmContent":"","utmTerm":"","experimentId":"$EXPERIMENT_ID","experimentVariant":"$VARIANT","ctaLocation":"$cta_location","ctaText":"$cta_text","pageVariant":"$PAGE_VARIANT","deviceType":"desktop"$extra}
+{"eventId":"$(lower_uuid)","clientId":"$CLIENT_ID","sessionId":"$SESSION_ID","eventName":"$event_name","pagePath":"/","pageTitle":"공간보감 | CMP-141 ingest check","occurredAt":"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)","utmSource":"qa","utmMedium":"qa_test","utmCampaign":"cmp141","utmContent":"","utmTerm":"","experimentId":"$EXPERIMENT_ID","experimentVariant":"$VARIANT","ctaLocation":"$cta_location","ctaText":"$cta_text","pageVariant":"$PAGE_VARIANT","deviceType":"desktop","isTest":true$extra}
 EOF
 )"
   local out code
