@@ -31,6 +31,40 @@
   // Channel fields the CTA hardcodes; cleared before relay when inbound attribution exists.
   // 'ref' is deliberately kept: it marks CTA placement, not the acquisition channel.
   var STATIC_CHANNEL_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+  var FIRST_TOUCH_KEY = 'spacebogam_first_touch_attribution_v1';
+
+  function storedFirstTouch(){
+    try {
+      var parsed = JSON.parse(sessionStorage.getItem(FIRST_TOUCH_KEY) || 'null');
+      return parsed && parsed.version === 1 && parsed.values ? parsed.values : {};
+    } catch(e) { return {}; }
+  }
+
+  function captureFirstTouch(){
+    var stored = storedFirstTouch();
+    if (INBOUND_CAMPAIGN_KEYS.some(function(key){ return stored[key]; })) return stored;
+    var params = new URLSearchParams(location.search);
+    var values = {};
+    ATTRIBUTION_KEYS.forEach(function(key){
+      var value = (params.get(key) || '').trim();
+      if (value) values[key] = value;
+    });
+    var source = (values.utm_source || '').toLowerCase();
+    var isOnlySelfReferral =
+      (source === 'spacebogam' || source === 'spacebogam.kr' || source === 'www.spacebogam.kr') &&
+      !INBOUND_CAMPAIGN_KEYS.some(function(key){ return key !== 'utm_source' && values[key]; });
+    if (!INBOUND_CAMPAIGN_KEYS.some(function(key){ return values[key]; }) || isOnlySelfReferral) return {};
+    try {
+      sessionStorage.setItem(FIRST_TOUCH_KEY, JSON.stringify({
+        version: 1,
+        capturedAt: new Date().toISOString(),
+        values: values
+      }));
+    } catch(e) {}
+    return values;
+  }
+
+  var firstTouchAttribution = captureFirstTouch();
 
   function getNaverId(metaName, fallback){
     var meta = document.querySelector('meta[name="' + metaName + '"]');
@@ -259,12 +293,13 @@
       if (!isIntmConsultationUrl(u) && !isLocalConsultationUrl(u)) return url;
 
       var current = new URL(location.href);
-      var inbound = hasInboundCampaign(current);
+      var hasFirstTouch = INBOUND_CAMPAIGN_KEYS.some(function(key){ return firstTouchAttribution[key]; });
+      var inbound = hasFirstTouch || hasInboundCampaign(current);
       if (inbound) {
         STATIC_CHANNEL_KEYS.forEach(function(key){ u.searchParams.delete(key); });
       }
       ATTRIBUTION_KEYS.forEach(function(key){
-        var value = current.searchParams.get(key);
+        var value = firstTouchAttribution[key] || current.searchParams.get(key);
         if (value) u.searchParams.set(key, value);
       });
 
@@ -298,7 +333,7 @@
     };
     var current = new URL(location.href);
     ATTRIBUTION_KEYS.forEach(function(key){
-      var value = current.searchParams.get(key);
+      var value = firstTouchAttribution[key] || current.searchParams.get(key);
       if (value) payload[key] = value;
     });
     Object.keys(extra || {}).forEach(function(key){ payload[key] = extra[key]; });

@@ -26,6 +26,7 @@
   var CLIENT_KEY = 'spacebogam_funnel_client_id';
   var SESSION_KEY = 'spacebogam_funnel_session_id';
   var ATTRIBUTION_KEY = 'spacebogam_funnel_attribution';
+  var FIRST_TOUCH_KEY = 'spacebogam_first_touch_attribution_v1';
   var EXPERIMENT_KEY = 'spacebogam_homepage_headline_v1_variant';
   // lead 단계 event_id 는 세션 내내 고정이어야 한다. 새로 뽑으면 새로고침마다 폼 조회가
   // 중복 집계되고, 무엇보다 lead_submit_success 는 서버 recordSubmittedLead 가
@@ -123,6 +124,8 @@
    */
   function storedUtm(){
     try {
+      var first = session ? JSON.parse(session.getItem(FIRST_TOUCH_KEY) || 'null') : null;
+      if (first && first.version === 1 && first.values) return first.values;
       var stored = local ? JSON.parse(local.getItem(ATTRIBUTION_KEY) || 'null') : null;
       if (stored && stored.expiresAt > Date.now() && stored.values) return stored.values;
     } catch(e) {}

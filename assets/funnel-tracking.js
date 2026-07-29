@@ -3,6 +3,7 @@
   var CLIENT_KEY = 'spacebogam_funnel_client_id';
   var SESSION_KEY = 'spacebogam_funnel_session_id';
   var ATTRIBUTION_KEY = 'spacebogam_funnel_attribution';
+  var FIRST_TOUCH_KEY = 'spacebogam_first_touch_attribution_v1';
   var JOURNEY_KEY = 'spacebogam_funnel_journey';
   var JOURNEY_MAX_LENGTH = 1000;
   var EXPERIMENT_ID = 'homepage_headline_v1';
@@ -61,7 +62,7 @@
     }
   }
 
-  function currentAttribution(storage){
+  function currentAttribution(sessionStorage, legacyStorage){
     var params = new URLSearchParams(location.search);
     var values = {};
     var hasCampaignValue = false;
@@ -70,19 +71,26 @@
       values[key] = value;
       if (value) hasCampaignValue = true;
     });
-    if (hasCampaignValue) {
-      if (storage) {
+    var source = (values.utm_source || '').toLowerCase();
+    var isSelfReferral = source === 'spacebogam' || source === 'spacebogam.kr' || source === 'www.spacebogam.kr';
+    try {
+      var first = sessionStorage ? JSON.parse(sessionStorage.getItem(FIRST_TOUCH_KEY) || 'null') : null;
+      if (first && first.version === 1 && first.values) return first.values;
+    } catch(error) {}
+    if (hasCampaignValue && !isSelfReferral) {
+      if (sessionStorage) {
         try {
-          storage.setItem(ATTRIBUTION_KEY, JSON.stringify({
-            values: values,
-            expiresAt: Date.now() + ATTRIBUTION_TTL_MS
+          sessionStorage.setItem(FIRST_TOUCH_KEY, JSON.stringify({
+            version: 1,
+            capturedAt: new Date().toISOString(),
+            values: values
           }));
         } catch(error) {}
       }
       return values;
     }
     try {
-      var stored = storage ? JSON.parse(storage.getItem(ATTRIBUTION_KEY) || 'null') : null;
+      var stored = legacyStorage ? JSON.parse(legacyStorage.getItem(ATTRIBUTION_KEY) || 'null') : null;
       if (stored && stored.expiresAt > Date.now() && stored.values) return stored.values;
     } catch(error) {}
     return values;
@@ -129,7 +137,7 @@
   var session = browserStorage('sessionStorage');
   var clientId = storedId(local, CLIENT_KEY);
   var sessionId = storedId(session, SESSION_KEY);
-  var attribution = currentAttribution(local);
+  var attribution = currentAttribution(session, local);
   var journey = sessionJourney(session);
   // CMP-191: 검증 세션 표식. 유입 URL 의 is_test 를 세션 내내 끌고 간다.
   // 표식이 없으면 QA 가 실유입과 구분되지 않고 퍼널 상단 단계를 부풀린다.
