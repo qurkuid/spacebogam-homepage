@@ -12,6 +12,7 @@ import { qaEntryUrl } from './lib/qa-entry-url.mjs';
 const CHROME = '/Users/baegchangseog/Library/Caches/ms-playwright/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing';
 const BASE = (process.argv[2] || 'http://127.0.0.1:3023').replace(/\/$/, '');
 const BASE_URL = BASE;
+const MAX_RELAY_URL_LENGTH = 1500;
 // CMP-267: base 를 라이브로 넘기면 utm_source=meta 세션이 실유입으로 잡혔다. qaEntryUrl 이 is_test=1 을 강제한다.
 const ENTRY = qaEntryUrl(`${BASE}/`, 'utm_source=meta&utm_medium=cpc&utm_campaign=cmp196_reach&utm_content=reach_probe');
 
@@ -45,6 +46,7 @@ await page.setViewport({ width: 390, height: 844, isMobile: true });
 try {
   await page.goto(ENTRY, { waitUntil: 'domcontentloaded' });
   check('홈 200', true, page.url());
+  const firstTouchUrl = page.url();
 
   // 홈 → 상담 안내 페이지
   // href 는 런타임에 절대 URL 로 다시 쓰일 수 있으므로 pathname 으로 고른다.
@@ -53,6 +55,7 @@ try {
   if (!toConsultation) throw new Error('홈에서 상담 링크를 찾지 못했다');
   await Promise.all([page.waitForNavigation({ waitUntil: 'domcontentloaded' }), toConsultation.click()]);
   check('상담 안내 페이지 도달', /\/consultation\//.test(page.url()), page.url());
+  const firstHopUrl = page.url();
 
   // 상담 안내 페이지의 CTA 가 외부 도메인으로 나가지 않는지
   const ctas = await page.$$eval('a[href]', (as) =>
@@ -66,6 +69,25 @@ try {
   if (!toForm) throw new Error('상담 안내 페이지에서 /consultation/apply/ 링크를 찾지 못했다');
   await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle2' }), toForm.click()]);
   check('상담 폼 페이지 도달', /\/consultation\/apply\//.test(page.url()), page.url());
+  const finalUrl = page.url();
+
+  function relayContract(name, value) {
+    const url = new URL(value);
+    const sourcePage = url.searchParams.get('source_page') || '';
+    check(`${name}: landing_page 없음`, !url.searchParams.has('landing_page'), value);
+    check(
+      `${name}: source_page pathname-only`,
+      sourcePage.startsWith('/') && !/[?#]/.test(sourcePage) && !sourcePage.includes('://'),
+      sourcePage
+    );
+  }
+  relayContract('1차 이동', firstHopUrl);
+  relayContract('2차 이동', finalUrl);
+  check(
+    '최종 URL 길이 제한',
+    finalUrl.length < MAX_RELAY_URL_LENGTH,
+    `${finalUrl.length}자 (기준 < ${MAX_RELAY_URL_LENGTH})`
+  );
 
   // 폼이 실제로 렌더됐는지.
   // 주의: 질문 목록은 intm.kr API 에서 가져오고 그 CORS 허용 오리진은 https://spacebogam.kr 뿐이다.
@@ -110,6 +132,14 @@ try {
   });
   const utmBlob = JSON.stringify(utm);
   check('첫 터치 utm_campaign 보존', utmBlob.includes('cmp196_reach'), utmBlob.slice(0, 300));
+  const journey = await page.evaluate(() => {
+    try {
+      return JSON.parse(sessionStorage.getItem('spacebogam_funnel_journey') || 'null');
+    } catch {
+      return null;
+    }
+  });
+  check('세션 첫 터치 landing_page 보존', journey?.landing_page === firstTouchUrl, journey?.landing_page || '');
 } finally {
   await browser.close();
 }

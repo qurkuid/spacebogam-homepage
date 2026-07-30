@@ -25,6 +25,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 VERSIONED = [
     "assets/site-tracking.js",
     "assets/funnel-tracking.js",
+    "assets/consultation-form.js",
     "assets/site-canonical.js",
     "assets/site.css",
 ]

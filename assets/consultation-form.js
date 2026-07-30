@@ -201,15 +201,58 @@
     return {};
   }
 
+  function unwrapLandingPage(value){
+    var current = String(value || '').trim();
+    for (var depth = 0; current && depth < 10; depth += 1) {
+      try {
+        var nested = new URL(current, location.href).searchParams.get('landing_page');
+        if (!nested || nested === current) break;
+        current = nested.trim();
+      } catch(e) {
+        break;
+      }
+    }
+    return current;
+  }
+
+  function boundedLandingPage(value){
+    var unwrapped = unwrapLandingPage(value);
+    try {
+      var url = new URL(unwrapped || value, location.href);
+      url.searchParams.delete('landing_page');
+      url.searchParams.delete('source_page');
+      url.searchParams.delete('referrer');
+      return url.toString().slice(0, 1000);
+    } catch(e) {
+      return String(unwrapped || value || '').slice(0, 1000);
+    }
+  }
+
   function storedJourney(){
+    var legacyLandingPage = unwrapLandingPage(params.get('landing_page'));
     var fallback = {
-      landing_page: params.get('landing_page') || location.href,
+      landing_page: boundedLandingPage(legacyLandingPage || location.href),
       referrer: params.get('referrer') || document.referrer || ''
     };
     if (!session) return fallback;
     try {
       var stored = JSON.parse(session.getItem(JOURNEY_KEY) || 'null');
-      if (stored && stored.landing_page) return stored;
+      if (stored && stored.landing_page) {
+        // 구형 funnel 자산이 먼저 실행돼 현재 relay URL 자체를 journey 로 굳힌
+        // 혼합 캐시도 복구한다. 이미 있던 세션 첫 터치는 항상 우선한다.
+        var bootstrappedFromLegacyUrl =
+          legacyLandingPage && stored.landing_page === location.href;
+        return {
+          landing_page: bootstrappedFromLegacyUrl
+            ? boundedLandingPage(legacyLandingPage)
+            : boundedLandingPage(stored.landing_page),
+          referrer: String(
+            bootstrappedFromLegacyUrl
+              ? params.get('referrer') || stored.referrer || ''
+              : stored.referrer || ''
+          ).slice(0, 1000)
+        };
+      }
     } catch(e) {}
     return fallback;
   }

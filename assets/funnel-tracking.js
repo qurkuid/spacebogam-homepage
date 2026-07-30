@@ -114,23 +114,45 @@
     return stored;
   }
 
+  function unwrapLandingPage(value){
+    var current = String(value || '').trim();
+    for (var depth = 0; current && depth < 10; depth += 1) {
+      try {
+        var nested = new URL(current, location.href).searchParams.get('landing_page');
+        if (!nested || nested === current) break;
+        current = nested.trim();
+      } catch(error) {
+        break;
+      }
+    }
+    return current;
+  }
+
   function boundedLandingPage(value){
+    var unwrapped = unwrapLandingPage(value);
     try {
-      var url = new URL(value, location.href);
+      var url = new URL(unwrapped || value, location.href);
       url.searchParams.delete('landing_page');
       url.searchParams.delete('source_page');
+      url.searchParams.delete('referrer');
       return url.toString().slice(0, JOURNEY_MAX_LENGTH);
     } catch(error) {
-      return String(value || '').slice(0, JOURNEY_MAX_LENGTH);
+      return String(unwrapped || value || '').slice(0, JOURNEY_MAX_LENGTH);
     }
   }
 
   // 세션 첫 페이지에서 한 번 굳혀두고 내부 이동 뒤에도 같은 값을 쓴다. 같은 도메인의
   // 신규 폼은 이 저장값을 직접 읽으므로 URL 에 다시 중첩해 실을 필요가 없다.
   function sessionJourney(storage){
+    var params = new URLSearchParams(location.search);
+    var legacyLandingPage = unwrapLandingPage(params.get('landing_page'));
     var fallback = {
-      landing_page: boundedLandingPage(location.href),
-      referrer: (document.referrer || '').slice(0, JOURNEY_MAX_LENGTH)
+      landing_page: boundedLandingPage(legacyLandingPage || location.href),
+      referrer: (
+        (legacyLandingPage ? params.get('referrer') : '') ||
+        document.referrer ||
+        ''
+      ).slice(0, JOURNEY_MAX_LENGTH)
     };
     if (!storage) return fallback;
     try {

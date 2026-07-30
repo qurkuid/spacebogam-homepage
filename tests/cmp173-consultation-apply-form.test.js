@@ -39,7 +39,7 @@ const LANDING_QUERY =
   '?utm_source=meta&utm_medium=paid_social&utm_campaign=busan_remodeling' +
   '&utm_id=CMP173&campaign_id=111&adset_id=222&ad_id=333&asset_id=444&is_test=1';
 
-function bootstrap({ search = '', submitResponse } = {}) {
+function bootstrap({ search = '', submitResponse, sessionValues = {} } = {}) {
   const dom = new JSDOM(pageSource.replace(/<script[\s\S]*?<\/script>/g, ''), {
     url: 'https://spacebogam.kr/consultation/apply/' + search,
     runScripts: 'outside-only',
@@ -81,6 +81,9 @@ function bootstrap({ search = '', submitResponse } = {}) {
 
   window.fbq = (...args) => calls.pixel.push(args);
   window.gtag = (...args) => calls.gtag.push(args);
+  for (const [key, value] of Object.entries(sessionValues)) {
+    window.sessionStorage.setItem(key, value);
+  }
 
   window.eval(formSource);
   return { window, calls, document: window.document };
@@ -207,6 +210,66 @@ test('제출 payload 가 intm 계약과 플랫폼 식별자·is_test 를 그대�
   for (const key of Object.keys(attribution)) {
     assert.ok(ALLOWED.has(key), '서버 허용목록에 없는 키: ' + key);
   }
+});
+
+test('상담 제출은 URL 대신 세션에 저장된 첫 터치 landing_page 를 사용한다', async () => {
+  const journey = {
+    landing_page: 'https://spacebogam.kr/?utm_source=meta&utm_campaign=first_touch',
+    referrer: 'https://www.instagram.com/',
+  };
+  const { document, calls } = bootstrap({
+    search: '?source_page=%2Fconsultation%2F&utm_source=meta',
+    sessionValues: {
+      spacebogam_funnel_journey: JSON.stringify(journey),
+    },
+  });
+  await settle();
+
+  fillRequired(document);
+  document.querySelector('form').dispatchEvent(
+    new document.defaultView.Event('submit', { bubbles: true, cancelable: true }),
+  );
+  await settle();
+
+  const attribution = calls.submit[0].marketingAttribution;
+  assert.equal(attribution.landing_page, journey.landing_page);
+  assert.equal(attribution.referrer, journey.referrer);
+  assert.equal(attribution.source_page, '/consultation/');
+  assert.doesNotMatch(attribution.landing_page, /source_page=/);
+});
+
+test('배포 전 중첩 landing_page 링크도 가장 안쪽 첫 터치와 pathname source_page 로 복구한다', async () => {
+  const firstTouch = 'https://spacebogam.kr/?utm_source=naver&utm_campaign=legacy';
+  const nestedOnce =
+    `https://spacebogam.kr/consultation/?landing_page=${encodeURIComponent(firstTouch)}`;
+  const search =
+    `?landing_page=${encodeURIComponent(nestedOnce)}` +
+    `&source_page=${encodeURIComponent('https://spacebogam.kr/consultation/?landing_page=stale#cta')}` +
+    `&referrer=${encodeURIComponent('https://search.naver.com/')}`;
+  const currentUrl = `https://spacebogam.kr/consultation/apply/${search}`;
+  const { document, calls } = bootstrap({
+    search,
+    // 구형 funnel-tracking.js 가 현재 relay URL 을 먼저 journey 로 굳힌 혼합 캐시.
+    sessionValues: {
+      spacebogam_funnel_journey: JSON.stringify({
+        landing_page: currentUrl,
+        referrer: 'https://spacebogam.kr/consultation/',
+      }),
+    },
+  });
+  await settle();
+
+  fillRequired(document);
+  document.querySelector('form').dispatchEvent(
+    new document.defaultView.Event('submit', { bubbles: true, cancelable: true }),
+  );
+  await settle();
+
+  const attribution = calls.submit[0].marketingAttribution;
+  assert.equal(attribution.landing_page, firstTouch);
+  assert.equal(attribution.referrer, 'https://search.naver.com/');
+  assert.equal(attribution.source_page, '/consultation/');
+  assert.ok(attribution.landing_page.length < 1000);
 });
 
 test('Pixel Lead 의 eventID 와 서버가 돌려준 leadEventId 가 같은 값이다', async () => {

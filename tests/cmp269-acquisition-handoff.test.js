@@ -291,6 +291,33 @@ test('self-hop submission uses one paid first-touch snapshot for every acquisiti
   dom.window.close();
 });
 
+test('legacy nested relay bootstraps the innermost first-touch journey', async () => {
+  const firstTouch = 'https://spacebogam.kr/?utm_source=naver&utm_campaign=legacy';
+  const nestedOnce =
+    `https://spacebogam.kr/consultation/?landing_page=${encodeURIComponent(firstTouch)}`;
+  const search =
+    `?landing_page=${encodeURIComponent(nestedOnce)}` +
+    `&source_page=${encodeURIComponent('https://spacebogam.kr/consultation/?landing_page=stale')}` +
+    `&referrer=${encodeURIComponent('https://search.naver.com/')}`;
+  const localStorage = storage();
+  const sessionStorage = storage();
+  const page = await trackerPage({
+    pathname: '/consultation/apply/',
+    search,
+    anchorHref: '/consultation/',
+    localStorage,
+    sessionStorage,
+    referrer: 'https://spacebogam.kr/consultation/',
+  });
+
+  const journey = JSON.parse(sessionStorage.getItem(JOURNEY_KEY));
+  assert.equal(journey.landing_page, firstTouch);
+  assert.equal(journey.referrer, 'https://search.naver.com/');
+  assert.doesNotMatch(journey.landing_page, /landing_page=|source_page=|referrer=/);
+
+  page.dom.window.close();
+});
+
 test('same-origin and legacy cross-domain decoration stays bounded across repeated hops', async () => {
   const { localStorage, sessionStorage, landing } = await paidLanding();
   const recursive =

@@ -70,21 +70,43 @@
     return values;
   }
 
+  function unwrapLandingPage(value){
+    var current = String(value || '').trim();
+    for (var depth = 0; current && depth < 10; depth += 1) {
+      try {
+        var nested = new URL(current, location.href).searchParams.get('landing_page');
+        if (!nested || nested === current) break;
+        current = nested.trim();
+      } catch(error) {
+        break;
+      }
+    }
+    return current;
+  }
+
   function boundedLandingPage(value){
+    var unwrapped = unwrapLandingPage(value);
     try {
-      var url = new URL(value, location.href);
+      var url = new URL(unwrapped || value, location.href);
       url.searchParams.delete('landing_page');
       url.searchParams.delete('source_page');
+      url.searchParams.delete('referrer');
       return url.toString().slice(0, JOURNEY_MAX_LENGTH);
     } catch(error) {
-      return String(value || '').slice(0, JOURNEY_MAX_LENGTH);
+      return String(unwrapped || value || '').slice(0, JOURNEY_MAX_LENGTH);
     }
   }
 
   function sessionJourney(){
+    var params = new URLSearchParams(location.search);
+    var legacyLandingPage = unwrapLandingPage(params.get('landing_page'));
     var fallback = {
-      landing_page: boundedLandingPage(location.href),
-      referrer: (document.referrer || '').slice(0, JOURNEY_MAX_LENGTH)
+      landing_page: boundedLandingPage(legacyLandingPage || location.href),
+      referrer: (
+        (legacyLandingPage ? params.get('referrer') : '') ||
+        document.referrer ||
+        ''
+      ).slice(0, JOURNEY_MAX_LENGTH)
     };
     try {
       var stored = JSON.parse(sessionStorage.getItem(JOURNEY_KEY) || 'null');
@@ -559,7 +581,7 @@
   function init(){
     if (!document.querySelector('script[data-spacebogam-funnel="1"]')) {
       var funnelScript = document.createElement('script');
-      funnelScript.src = '/assets/funnel-tracking.js?v=c17e5943';
+      funnelScript.src = '/assets/funnel-tracking.js?v=28ec9fd7';
       funnelScript.dataset.spacebogamFunnel = '1';
       document.head.appendChild(funnelScript);
     }
