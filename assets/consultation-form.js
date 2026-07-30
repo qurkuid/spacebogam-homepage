@@ -238,10 +238,7 @@
 
   function attributionValue(key){
     var current = (params.get(key) || '').trim();
-    if (currentIsSelfReferral && STATIC_CHANNEL_KEYS.indexOf(key) !== -1) {
-      current = '';
-      return current || (firstTouchAttribution[key] || '');
-    }
+    if (currentIsSelfReferral) return firstTouchAttribution[key] || '';
     if (!current && hasFirstTouchAttribution) return firstTouchAttribution[key] || '';
     return current || (fallbackAttribution[key] || '');
   }

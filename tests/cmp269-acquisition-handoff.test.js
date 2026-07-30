@@ -19,6 +19,7 @@ const formSource = fs.readFileSync(path.join(root, 'assets/consultation-form.js'
 const applySource = fs.readFileSync(path.join(root, 'consultation/apply/index.html'), 'utf8');
 
 const ATTRIBUTION_KEY = 'spacebogam_funnel_attribution';
+const FIRST_TOUCH_ATTRIBUTION_KEY = 'spacebogam_funnel_first_touch_attribution';
 const JOURNEY_KEY = 'spacebogam_funnel_journey';
 const ACQUISITION = {
   utm_source: 'meta',
@@ -119,9 +120,9 @@ function assertAcquisition(url, message) {
   }
 }
 
-async function submitStoredForm(localStorage, sessionStorage) {
+async function submitStoredForm(localStorage, sessionStorage, search = '?source_page=%2Fconsultation%2F') {
   const dom = new JSDOM(applySource.replace(/<script[\s\S]*?<\/script>/g, ''), {
-    url: 'https://spacebogam.kr/consultation/apply/?source_page=%2Fconsultation%2F',
+    url: `https://spacebogam.kr/consultation/apply/${search}`,
     runScripts: 'outside-only',
     pretendToBeVisual: true,
   });
@@ -246,6 +247,48 @@ test('self-referral cannot overwrite paid storage or blend its static channel fi
 
   landing.dom.window.close();
   selfReferral.dom.window.close();
+});
+
+test('self-hop submission uses one paid first-touch snapshot for every acquisition field', async () => {
+  const paidFirstTouch = {
+    ...ACQUISITION,
+    utm_source: 'meta',
+    utm_medium: 'paid_social',
+    utm_campaign: 'paid-first',
+    fbclid: 'first-click',
+    campaign_id: 'first-campaign',
+  };
+  const selfHop = Object.fromEntries(
+    ACQUISITION_KEYS.map((key) => [key, `self-hop-${key}`]),
+  );
+  Object.assign(selfHop, {
+    utm_source: 'spacebogam.kr',
+    utm_medium: 'consultation_page',
+    utm_campaign: 'spacebogam_site',
+    fbclid: 'self-hop-click',
+    campaign_id: 'self-hop-campaign',
+  });
+  const localStorage = storage({
+    [FIRST_TOUCH_ATTRIBUTION_KEY]: JSON.stringify({
+      values: paidFirstTouch,
+      expiresAt: Date.now() + 60_000,
+    }),
+  });
+  const sessionStorage = storage();
+
+  const { dom, calls } = await submitStoredForm(
+    localStorage,
+    sessionStorage,
+    `?source_page=%2Fconsultation%2F&${query(selfHop)}`,
+  );
+
+  assert.equal(calls.submit.length, 1, 'the stubbed submit payload should be captured once');
+  const submittedAcquisition = Object.fromEntries(
+    ACQUISITION_KEYS.map((key) => [key, calls.submit[0].marketingAttribution[key]]),
+  );
+  assert.deepEqual(submittedAcquisition, paidFirstTouch);
+
+  dom.window.close();
 });
 
 test('same-origin and legacy cross-domain decoration stays bounded across repeated hops', async () => {
