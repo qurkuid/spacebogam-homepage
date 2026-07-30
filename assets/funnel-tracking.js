@@ -9,7 +9,13 @@
   var EXPERIMENT_KEY = 'spacebogam_homepage_headline_v1_variant';
   var FORCE_VARIANT_KEY = 'spacebogam_headline_v1_force_variant';
   var ATTRIBUTION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-  var UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+  var ATTRIBUTION_KEYS = [
+    'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
+    'gclid', 'gbraid', 'wbraid', 'fbclid', 'msclkid',
+    'n_keyword', 'n_query', 'n_campaign_type', 'n_ad_group', 'n_keyword_id',
+    'utm_id', 'campaign_id', 'adset_id', 'ad_id', 'asset_id'
+  ];
+  var STATIC_CHANNEL_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
   var SELF_REFERRAL_SOURCE = 'spacebogam.kr';
   var RETRY_DELAY_MS = 1500;
   // 콘솔/QA 에서 읽을 수 있는 전송 실패 버퍼 (window.__spacebogamFunnelFailures)
@@ -61,37 +67,71 @@
     }
   }
 
-  function currentAttribution(storage){
-    var params = new URLSearchParams(location.search);
-    var values = {};
-    var hasCampaignValue = false;
-    UTM_KEYS.forEach(function(key){
-      var value = params.get(key) || '';
-      values[key] = value;
-      if (value) hasCampaignValue = true;
-    });
-    if (hasCampaignValue) {
-      if (storage) {
-        try {
-          storage.setItem(ATTRIBUTION_KEY, JSON.stringify({
-            values: values,
-            expiresAt: Date.now() + ATTRIBUTION_TTL_MS
-          }));
-        } catch(error) {}
-      }
-      return values;
-    }
+  function storedAttribution(storage){
     try {
       var stored = storage ? JSON.parse(storage.getItem(ATTRIBUTION_KEY) || 'null') : null;
       if (stored && stored.expiresAt > Date.now() && stored.values) return stored.values;
     } catch(error) {}
-    return values;
+    return {};
   }
 
-  // CMP-171: landing_page / referrer 는 상담 링크에 실려야만 consult_req 에 남는다.
-  // 세션 첫 페이지에서 한 번 굳혀두고 내부 이동 뒤에도 같은 값을 쓴다.
+  function saveAttribution(storage, values){
+    if (!storage) return;
+    try {
+      storage.setItem(ATTRIBUTION_KEY, JSON.stringify({
+        values: values,
+        expiresAt: Date.now() + ATTRIBUTION_TTL_MS
+      }));
+    } catch(error) {}
+  }
+
+  function hasAttribution(values){
+    for (var i = 0; i < ATTRIBUTION_KEYS.length; i++) {
+      if (values[ATTRIBUTION_KEYS[i]]) return true;
+    }
+    return false;
+  }
+
+  function currentAttribution(storage){
+    var params = new URLSearchParams(location.search);
+    var values = {};
+    var stored = storedAttribution(storage);
+    var selfReferral = params.get('utm_source') === SELF_REFERRAL_SOURCE;
+    ATTRIBUTION_KEYS.forEach(function(key){
+      var value = params.get(key) || '';
+      if (value && (!selfReferral || STATIC_CHANNEL_KEYS.indexOf(key) === -1)) {
+        values[key] = value;
+      }
+    });
+    // 상담 CTA 의 하드코딩된 자기참조 채널은 실제 신규 유입이 아니다. 저장된 광고
+    // first touch 를 덮거나 그 채널과 섞지 않는다. 저장값이 없는 직접 진입에서는
+    // click id 같은 비채널 값만이라도 보존한다.
+    if (selfReferral && hasAttribution(stored)) return stored;
+    if (hasAttribution(values)) {
+      saveAttribution(storage, values);
+      return values;
+    }
+    return stored;
+  }
+
+  function boundedLandingPage(value){
+    try {
+      var url = new URL(value, location.href);
+      url.searchParams.delete('landing_page');
+      url.searchParams.delete('source_page');
+      return url.toString().slice(0, JOURNEY_MAX_LENGTH);
+    } catch(error) {
+      return String(value || '').slice(0, JOURNEY_MAX_LENGTH);
+    }
+  }
+
+  // 세션 첫 페이지에서 한 번 굳혀두고 내부 이동 뒤에도 같은 값을 쓴다. 같은 도메인의
+  // 신규 폼은 이 저장값을 직접 읽으므로 URL 에 다시 중첩해 실을 필요가 없다.
   function sessionJourney(storage){
-    var fallback = { landing_page: location.href, referrer: document.referrer || '' };
+    var fallback = {
+      landing_page: boundedLandingPage(location.href),
+      referrer: (document.referrer || '').slice(0, JOURNEY_MAX_LENGTH)
+    };
     if (!storage) return fallback;
     try {
       var stored = JSON.parse(storage.getItem(JOURNEY_KEY) || 'null');
@@ -359,8 +399,12 @@
     try {
       var url = new URL(anchor.getAttribute('href') || '', location.href);
       if (!isConsultationUrl(url)) return;
-      var overrideSelfReferral = attribution.utm_source && hasSelfReferralUtm(url);
-      UTM_KEYS.forEach(function(key){
+      var sameOrigin = url.hostname === location.hostname || !url.hostname;
+      var overrideSelfReferral = hasAttribution(attribution) && hasSelfReferralUtm(url);
+      if (overrideSelfReferral) {
+        STATIC_CHANNEL_KEYS.forEach(function(key){ url.searchParams.delete(key); });
+      }
+      ATTRIBUTION_KEYS.forEach(function(key){
         if (!attribution[key]) return;
         if (!url.searchParams.has(key) || overrideSelfReferral) {
           url.searchParams.set(key, attribution[key]);
@@ -368,11 +412,17 @@
       });
       url.searchParams.set('sbClientId', clientId);
       url.searchParams.set('sbSessionId', sessionId);
-      // 유입 랜딩·외부 리퍼러·상담 링크를 누른 페이지. 상담 저장 시 그대로 귀속에 들어간다.
-      // 빈 값은 붙이지 않는다. 링크 길이를 늘리기만 하고 원천에는 ''로 남는다.
-      setIfPresent(url, 'landing_page', journey.landing_page);
-      setIfPresent(url, 'referrer', journey.referrer);
-      setIfPresent(url, 'source_page', location.href);
+      // 같은 도메인은 session journey 를 직접 읽는다. 레거시 intm 링크만 도메인
+      // 경계를 넘는 landing/referrer 가 필요하며 source_page 는 항상 bounded path 다.
+      url.searchParams.delete('landing_page');
+      url.searchParams.delete('source_page');
+      if (sameOrigin) {
+        url.searchParams.delete('referrer');
+      } else {
+        setIfPresent(url, 'landing_page', journey.landing_page);
+        setIfPresent(url, 'referrer', journey.referrer);
+      }
+      setIfPresent(url, 'source_page', location.pathname);
       url.searchParams.set('experiment_id', EXPERIMENT_ID);
       url.searchParams.set('experiment_variant', experimentVariant);
       // CMP-191: 검증 세션 표식은 도메인을 건너면서 이름이 바뀐다. spacebogam 은

@@ -26,7 +26,10 @@
   var CLIENT_KEY = 'spacebogam_funnel_client_id';
   var SESSION_KEY = 'spacebogam_funnel_session_id';
   var ATTRIBUTION_KEY = 'spacebogam_funnel_attribution';
+  var FIRST_TOUCH_ATTRIBUTION_KEY = 'spacebogam_funnel_first_touch_attribution';
+  var JOURNEY_KEY = 'spacebogam_funnel_journey';
   var EXPERIMENT_KEY = 'spacebogam_homepage_headline_v1_variant';
+  var ATTRIBUTION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
   // lead 단계 event_id 는 세션 내내 고정이어야 한다. 새로 뽑으면 새로고침마다 폼 조회가
   // 중복 집계되고, 무엇보다 lead_submit_success 는 서버 recordSubmittedLead 가
   // sbSubmitEventId 로 같은 행을 쓰기 때문에 id 가 다르면 원장에 두 건이 남는다.
@@ -44,6 +47,8 @@
     'gclid', 'gbraid', 'wbraid', 'fbclid', 'msclkid',
     'n_keyword', 'n_query', 'n_campaign_type', 'n_ad_group', 'n_keyword_id'
   ].concat(PLATFORM_ID_KEYS);
+  var STATIC_CHANNEL_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+  var SELF_REFERRAL_SOURCE = 'spacebogam.kr';
   var TEST_TRAFFIC_KEY = 'is_test';
   var TEST_TRUTHY = ['1', 'true', 'yes', 'y', 'on'];
 
@@ -118,15 +123,103 @@
 
   /**
    * 광고 클릭은 홈에 떨어지고 폼은 그 다음 페이지다. 현재 URL 에 파라미터가 없으면
-   * funnel-tracking.js 가 30일 보관하는 스냅샷에서 UTM 을 되살린다. 플랫폼 식별자는
-   * 그 스냅샷에 없으므로 URL 에 실려 온 값만 쓴다.
+   * funnel-tracking.js / site-tracking.js 가 30일 보관하는 전체 스냅샷에서 되살린다.
+   * 예전 {values, expiresAt} 저장 형식도 그대로 읽는다.
    */
-  function storedUtm(){
+  function readStoredAttribution(key){
+    if (!local) return null;
     try {
-      var stored = local ? JSON.parse(local.getItem(ATTRIBUTION_KEY) || 'null') : null;
+      var stored = JSON.parse(local.getItem(key) || 'null');
       if (stored && stored.expiresAt > Date.now() && stored.values) return stored.values;
+    } catch(error) {}
+    return null;
+  }
+
+  function writeStoredAttribution(key, values){
+    if (!local) return;
+    try {
+      local.setItem(key, JSON.stringify({
+        values: values,
+        expiresAt: Date.now() + ATTRIBUTION_TTL_MS
+      }));
+    } catch(error) {}
+  }
+
+  function hasAttribution(values){
+    if (!values) return false;
+    for (var i = 0; i < QUERY_ATTRIBUTION_KEYS.length; i++) {
+      if (values[QUERY_ATTRIBUTION_KEYS[i]]) return true;
+    }
+    return false;
+  }
+
+  function isCampaignAttribution(values){
+    if (!values) return false;
+    var source = (values.utm_source || '').trim().toLowerCase();
+    if (source && source !== SELF_REFERRAL_SOURCE) return true;
+    for (var i = 0; i < PLATFORM_ID_KEYS.length; i++) {
+      if (values[PLATFORM_ID_KEYS[i]]) return true;
+    }
+    for (var j = 0; j < QUERY_ATTRIBUTION_KEYS.length; j++) {
+      var key = QUERY_ATTRIBUTION_KEYS[j];
+      if (STATIC_CHANNEL_KEYS.indexOf(key) !== -1) continue;
+      if (values[key]) return true;
+    }
+    return false;
+  }
+
+  function currentQueryAttribution(){
+    var values = {};
+    QUERY_ATTRIBUTION_KEYS.forEach(function(key){
+      var value = (params.get(key) || '').trim();
+      if (value) values[key] = value;
+    });
+    return values;
+  }
+
+  function resolveFirstTouchAttribution(legacyAttribution){
+    var firstTouch = readStoredAttribution(FIRST_TOUCH_ATTRIBUTION_KEY);
+    if (firstTouch && hasAttribution(firstTouch)) return firstTouch;
+
+    var current = currentQueryAttribution();
+    if (hasAttribution(current) && isCampaignAttribution(current)) {
+      writeStoredAttribution(FIRST_TOUCH_ATTRIBUTION_KEY, current);
+      return current;
+    }
+    if (legacyAttribution && hasAttribution(legacyAttribution) && isCampaignAttribution(legacyAttribution)) {
+      writeStoredAttribution(FIRST_TOUCH_ATTRIBUTION_KEY, legacyAttribution);
+      return legacyAttribution;
+    }
+    return {};
+  }
+
+  function storedAttribution(){
+    try {
+      var stored = readStoredAttribution(ATTRIBUTION_KEY);
+      if (stored) return stored;
     } catch(e) {}
     return {};
+  }
+
+  function storedJourney(){
+    var fallback = {
+      landing_page: params.get('landing_page') || location.href,
+      referrer: params.get('referrer') || document.referrer || ''
+    };
+    if (!session) return fallback;
+    try {
+      var stored = JSON.parse(session.getItem(JOURNEY_KEY) || 'null');
+      if (stored && stored.landing_page) return stored;
+    } catch(e) {}
+    return fallback;
+  }
+
+  function boundedPath(value){
+    try {
+      return new URL(value || location.pathname, location.href).pathname.slice(0, 1000);
+    } catch(e) {
+      return location.pathname.slice(0, 1000);
+    }
   }
 
   function experimentVariant(){
@@ -136,10 +229,21 @@
     } catch(e) { return ''; }
   }
 
-  var fallbackUtm = storedUtm();
+  var fallbackAttribution = storedAttribution();
+  var journey = storedJourney();
+  var currentIsSelfReferral = params.get('utm_source') === SELF_REFERRAL_SOURCE;
+  var firstTouchAttribution = resolveFirstTouchAttribution(fallbackAttribution);
+  var hasFirstTouchAttribution = hasAttribution(firstTouchAttribution);
+  currentIsSelfReferral = currentIsSelfReferral && hasFirstTouchAttribution;
 
   function attributionValue(key){
-    return (params.get(key) || '').trim() || (fallbackUtm[key] || '');
+    var current = (params.get(key) || '').trim();
+    if (currentIsSelfReferral && STATIC_CHANNEL_KEYS.indexOf(key) !== -1) {
+      current = '';
+      return current || (firstTouchAttribution[key] || '');
+    }
+    if (!current && hasFirstTouchAttribution) return firstTouchAttribution[key] || '';
+    return current || (fallbackAttribution[key] || '');
   }
 
   function marketingAttribution(){
@@ -147,8 +251,9 @@
       form_path: location.pathname,
       submitted_at: new Date().toISOString(),
       device_type: deviceType(),
-      landing_page: location.href.slice(0, 1000),
-      referrer: (document.referrer || '').slice(0, 1000),
+      source_page: boundedPath(params.get('source_page')),
+      landing_page: String(journey.landing_page || '').slice(0, 1000),
+      referrer: String(journey.referrer || '').slice(0, 1000),
       experiment_id: EXPERIMENT_ID,
       experiment_variant: experimentVariant(),
       page_variant: params.get('page_variant') || '',

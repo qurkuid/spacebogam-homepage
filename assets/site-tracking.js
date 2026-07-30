@@ -12,25 +12,90 @@
   var EXPERIMENT_ID = 'homepage_headline_v1';
   var EXPERIMENT_KEY = 'spacebogam_homepage_headline_v1_variant';
   var FORCE_VARIANT_KEY = 'spacebogam_headline_v1_force_variant';
+  var ATTRIBUTION_KEY = 'spacebogam_funnel_attribution';
+  var JOURNEY_KEY = 'spacebogam_funnel_journey';
+  var ATTRIBUTION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+  var JOURNEY_MAX_LENGTH = 1000;
+  var SELF_REFERRAL_SOURCE = 'spacebogam.kr';
   // Emergency rollback: set to 'A' and deploy this one file. Empty keeps 50:50 assignment.
   var GLOBAL_EXPERIMENT_VARIANT = '';
   window.__spacebogamHomepageHeadlineVariant = GLOBAL_EXPERIMENT_VARIANT;
   var ATTRIBUTION_KEYS = [
-    'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id',
-    'campaign_id', 'adset_id', 'ad_id', 'asset_id',
-    'gclid', 'gbraid', 'wbraid', 'fbclid', 'n_keyword', 'ref',
-    'variant', 'page_variant', 'is_test'
+    'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
+    'gclid', 'gbraid', 'wbraid', 'fbclid', 'msclkid',
+    'n_keyword', 'n_query', 'n_campaign_type', 'n_ad_group', 'n_keyword_id',
+    'utm_id', 'campaign_id', 'adset_id', 'ad_id', 'asset_id'
   ];
-  // Presence of any of these on the landing URL means the visit carries its own
-  // campaign attribution, so the CTA's hardcoded utm_* fallbacks must not blend in.
-  var INBOUND_CAMPAIGN_KEYS = [
-    'utm_source', 'utm_medium', 'utm_campaign', 'utm_id',
-    'campaign_id', 'adset_id', 'ad_id', 'asset_id',
-    'gclid', 'gbraid', 'wbraid', 'fbclid'
+  var CONTEXT_KEYS = [
+    'ref', 'variant', 'page_variant', 'is_test'
   ];
   // Channel fields the CTA hardcodes; cleared before relay when inbound attribution exists.
   // 'ref' is deliberately kept: it marks CTA placement, not the acquisition channel.
   var STATIC_CHANNEL_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+
+  function storedAttribution(){
+    try {
+      var stored = JSON.parse(localStorage.getItem(ATTRIBUTION_KEY) || 'null');
+      if (stored && stored.expiresAt > Date.now() && stored.values) return stored.values;
+    } catch(error) {}
+    return {};
+  }
+
+  function hasAttribution(values){
+    for (var i = 0; i < ATTRIBUTION_KEYS.length; i++) {
+      if (values[ATTRIBUTION_KEYS[i]]) return true;
+    }
+    return false;
+  }
+
+  function currentAttribution(){
+    var current = new URL(location.href);
+    var stored = storedAttribution();
+    var values = {};
+    var selfReferral = current.searchParams.get('utm_source') === SELF_REFERRAL_SOURCE;
+    ATTRIBUTION_KEYS.forEach(function(key){
+      var value = current.searchParams.get(key) || '';
+      if (value && (!selfReferral || STATIC_CHANNEL_KEYS.indexOf(key) === -1)) {
+        values[key] = value;
+      }
+    });
+    if (selfReferral && hasAttribution(stored)) return stored;
+    if (!hasAttribution(values)) return stored;
+    try {
+      localStorage.setItem(ATTRIBUTION_KEY, JSON.stringify({
+        values: values,
+        expiresAt: Date.now() + ATTRIBUTION_TTL_MS
+      }));
+    } catch(error) {}
+    return values;
+  }
+
+  function boundedLandingPage(value){
+    try {
+      var url = new URL(value, location.href);
+      url.searchParams.delete('landing_page');
+      url.searchParams.delete('source_page');
+      return url.toString().slice(0, JOURNEY_MAX_LENGTH);
+    } catch(error) {
+      return String(value || '').slice(0, JOURNEY_MAX_LENGTH);
+    }
+  }
+
+  function sessionJourney(){
+    var fallback = {
+      landing_page: boundedLandingPage(location.href),
+      referrer: (document.referrer || '').slice(0, JOURNEY_MAX_LENGTH)
+    };
+    try {
+      var stored = JSON.parse(sessionStorage.getItem(JOURNEY_KEY) || 'null');
+      if (stored && stored.landing_page) return stored;
+      sessionStorage.setItem(JOURNEY_KEY, JSON.stringify(fallback));
+    } catch(error) {}
+    return fallback;
+  }
+
+  var attribution = currentAttribution();
+  var journey = sessionJourney();
 
   function getNaverId(metaName, fallback){
     var meta = document.querySelector('meta[name="' + metaName + '"]');
@@ -222,8 +287,8 @@
   }
 
   // CMP-173: /consultation/apply/ 는 spacebogam 도메인 안에서 제출까지 끝내는 신규 폼이다.
-  // 여기에 attribution 을 릴레이하지 않으면 플랫폼 식별자 5종이 랜딩→폼 이동에서 사라진다.
-  // localStorage 스냅샷은 UTM 만 보관하므로 URL 릴레이가 유일한 경로다.
+  // 저장 스냅샷과 URL 릴레이를 함께 유지해 브라우저 저장소 제한이나 중간 홉에도
+  // 플랫폼 식별자가 랜딩→폼 이동에서 사라지지 않게 한다.
   var LOCAL_CONSULTATION_PATHS = ['/consultation/', '/consultation', '/consultation/apply/', '/consultation/apply'];
 
   function isLocalConsultationUrl(u){
@@ -246,24 +311,21 @@
     return 'home_a_default';
   }
 
-  function hasInboundCampaign(current){
-    for (var i = 0; i < INBOUND_CAMPAIGN_KEYS.length; i++) {
-      if (current.searchParams.get(INBOUND_CAMPAIGN_KEYS[i])) return true;
-    }
-    return false;
-  }
-
   function decorate(url){
     try {
       var u = new URL(url, location.href);
       if (!isIntmConsultationUrl(u) && !isLocalConsultationUrl(u)) return url;
 
       var current = new URL(location.href);
-      var inbound = hasInboundCampaign(current);
+      var inbound = hasAttribution(attribution);
       if (inbound) {
         STATIC_CHANNEL_KEYS.forEach(function(key){ u.searchParams.delete(key); });
       }
       ATTRIBUTION_KEYS.forEach(function(key){
+        var value = attribution[key];
+        if (value) u.searchParams.set(key, value);
+      });
+      CONTEXT_KEYS.forEach(function(key){
         var value = current.searchParams.get(key);
         if (value) u.searchParams.set(key, value);
       });
@@ -274,6 +336,15 @@
         if (!u.searchParams.has('utm_campaign')) u.searchParams.set('utm_campaign', CAMPAIGN);
       }
       if (!u.searchParams.has('ref')) u.searchParams.set('ref', 'spacebogam');
+      u.searchParams.delete('landing_page');
+      u.searchParams.delete('source_page');
+      if (isLocalConsultationUrl(u)) {
+        u.searchParams.delete('referrer');
+      } else {
+        if (journey.landing_page) u.searchParams.set('landing_page', journey.landing_page);
+        if (journey.referrer) u.searchParams.set('referrer', journey.referrer);
+      }
+      u.searchParams.set('source_page', location.pathname);
       // Experiment enrichment is best-effort: it must never discard the relayed
       // ad attribution above by throwing out of the outer catch.
       try {
@@ -298,6 +369,10 @@
     };
     var current = new URL(location.href);
     ATTRIBUTION_KEYS.forEach(function(key){
+      var value = attribution[key];
+      if (value) payload[key] = value;
+    });
+    CONTEXT_KEYS.forEach(function(key){
       var value = current.searchParams.get(key);
       if (value) payload[key] = value;
     });
@@ -484,7 +559,7 @@
   function init(){
     if (!document.querySelector('script[data-spacebogam-funnel="1"]')) {
       var funnelScript = document.createElement('script');
-      funnelScript.src = '/assets/funnel-tracking.js?v=7cffb58a';
+      funnelScript.src = '/assets/funnel-tracking.js?v=c17e5943';
       funnelScript.dataset.spacebogamFunnel = '1';
       document.head.appendChild(funnelScript);
     }
