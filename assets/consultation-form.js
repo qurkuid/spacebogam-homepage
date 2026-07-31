@@ -347,6 +347,7 @@
     var type = question.questionType;
     var choices = optionsOf(question);
     var wrap = element('div', 'cf-field');
+    wrap.setAttribute('data-question-id', String(question.id));
     var label = element('label', 'cf-label');
     label.setAttribute('for', name);
     label.textContent = question.question;
@@ -428,6 +429,9 @@
 
   var questions = [];
   var startedTracked = false;
+  var submitSucceeded = false;
+  var completedFields = {};
+  var lastCompletedQuestionId = '';
 
   function markStarted(){
     if (startedTracked) return;
@@ -435,6 +439,65 @@
     sendFunnelEvent('lead_form_start');
     trackGtag('lead_form_start');
     trackPixel('InitiateCheckout');
+  }
+
+  /**
+   * CMP-252: 답변 값은 절대 계측하지 않는다. 질문 id/type/순서와 완료 여부만 보내
+   * 필드별 이탈 위치를 파악하면서 이름·전화·주소 같은 개인정보는 분석 도구에 남기지 않는다.
+   */
+  function questionTrackingDetail(question){
+    return {
+      question_id: String(question.id),
+      question_type: question.questionType || 'unknown',
+      field_position: questions.indexOf(question) + 1,
+      is_required: question.isRequired ? 'true' : 'false'
+    };
+  }
+
+  function fieldWrap(question){
+    return root.querySelector('.cf-field[data-question-id="' + question.id + '"]');
+  }
+
+  function clearQuestionError(question){
+    var wrap = fieldWrap(question);
+    if (!wrap) return;
+    var error = wrap.querySelector('.cf-field-error');
+    if (error) error.remove();
+    var fields = wrap.querySelectorAll('[name="q' + question.id + '"]');
+    Array.prototype.forEach.call(fields, function(field){
+      field.removeAttribute('aria-invalid');
+      field.removeAttribute('aria-describedby');
+    });
+  }
+
+  function renderQuestionError(question){
+    var wrap = fieldWrap(question);
+    if (!wrap) return null;
+    clearQuestionError(question);
+    var errorId = 'cf-field-error-q' + question.id;
+    var error = element('p', 'cf-field-error', '필수 입력 항목입니다.');
+    error.id = errorId;
+    error.setAttribute('role', 'alert');
+    wrap.appendChild(error);
+    var fields = wrap.querySelectorAll('[name="q' + question.id + '"]');
+    Array.prototype.forEach.call(fields, function(field){
+      field.setAttribute('aria-invalid', 'true');
+      field.setAttribute('aria-describedby', errorId);
+    });
+    return fields[0] || null;
+  }
+
+  function trackFieldCompletion(event){
+    var target = event && event.target;
+    if (!target || !target.name || target.name.charAt(0) !== 'q') return;
+    var questionId = target.name.slice(1);
+    var question = questions.find(function(item){ return String(item.id) === questionId; });
+    if (!question || !readAnswer(question)) return;
+    clearQuestionError(question);
+    if (completedFields[questionId]) return;
+    completedFields[questionId] = true;
+    lastCompletedQuestionId = questionId;
+    trackGtag('lead_form_field_complete', questionTrackingDetail(question));
   }
 
   function renderError(message){
@@ -497,6 +560,10 @@
 
     form.addEventListener('input', markStarted);
     form.addEventListener('change', markStarted);
+    form.addEventListener('change', trackFieldCompletion);
+    // 텍스트 입력의 change 는 포커스를 떠날 때 발생한다. blur 보완으로 모바일 키보드의
+    // 완료/다음 동작에서도 같은 개인정보 비수집 이벤트가 한 번만 남는다.
+    form.addEventListener('blur', trackFieldCompletion, true);
 
     form.addEventListener('submit', function(event){
       event.preventDefault();
@@ -505,6 +572,10 @@
 
       var answers = {};
       var missing = null;
+      questions.forEach(clearQuestionError);
+      consent.removeAttribute('aria-invalid');
+      var consentError = consentWrap.querySelector('.cf-field-error');
+      if (consentError) consentError.remove();
       questions.forEach(function(question){
         var value = readAnswer(question);
         if (value) answers[String(question.id)] = value;
@@ -514,13 +585,24 @@
       if (missing) {
         status.textContent = '「' + missing.question + '」 항목을 입력해주세요.';
         status.classList.add('cf-status-error');
-        var field = root.querySelector('[name="q' + missing.id + '"]');
+        var field = renderQuestionError(missing);
+        trackGtag('lead_form_validation_error', questionTrackingDetail(missing));
         if (field && field.focus) field.focus();
         return;
       }
       if (!consent.checked) {
         status.textContent = '개인정보 수집·이용 동의가 필요합니다.';
         status.classList.add('cf-status-error');
+        consent.setAttribute('aria-invalid', 'true');
+        var error = element('p', 'cf-field-error', '필수 동의 항목입니다.');
+        error.setAttribute('role', 'alert');
+        consentWrap.appendChild(error);
+        trackGtag('lead_form_validation_error', {
+          question_id: 'consent',
+          question_type: 'consent',
+          field_position: questions.length + 1,
+          is_required: 'true'
+        });
         consent.focus();
         return;
       }
@@ -566,6 +648,7 @@
     // 서버가 되돌려준 값을 우선 쓴다. 우리가 보낸 sbSubmitEventId 와 같은 값이어야 정상이고,
     // 다르면 서버가 자체 파생한 것이므로 그쪽이 원장의 진실이다.
     var leadEventId = body.leadEventId || submitEventId;
+    submitSucceeded = true;
     trackPixel('Lead', {eventID: leadEventId});
     trackGtag('lead_submit_success', {lead_event_id: leadEventId});
     sendFunnelEvent('lead_submit_success');
@@ -618,6 +701,16 @@
         renderError('상담 신청서를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
       });
   }
+
+  window.addEventListener('pagehide', function(){
+    if (!startedTracked || submitSucceeded) return;
+    trackGtag('lead_form_abandon', {
+      completed_field_count: Object.keys(completedFields).length,
+      last_question_id: lastCompletedQuestionId || 'none',
+      required_field_count: questions.filter(function(question){ return question.isRequired; }).length,
+      transport_type: 'beacon'
+    });
+  });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

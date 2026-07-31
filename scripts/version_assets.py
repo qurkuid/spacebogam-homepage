@@ -27,6 +27,9 @@ VERSIONED = [
     "assets/funnel-tracking.js",
     "assets/site-canonical.js",
     "assets/site.css",
+    # CMP-252: 상담 폼은 Meta 인앱 브라우저 캐시에 남으면 오류·계측 수정이 배포돼도
+    # 이전 자산이 계속 실행된다. 공용 추적 자산과 같은 내용 해시 계약을 적용한다.
+    "assets/consultation-form.js",
 ]
 
 HASH_LEN = 8

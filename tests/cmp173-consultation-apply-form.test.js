@@ -141,6 +141,43 @@ test('필수 항목이 비면 제출하지 않고 그 항목을 지목한다', a
 
   assert.equal(calls.submit.length, 0, '검증 실패 시 서버로 나가면 안 된다');
   assert.match(document.querySelector('.cf-status').textContent, /성함/);
+  assert.match(document.querySelector('[data-question-id="13"] .cf-field-error').textContent, /필수/);
+  assert.equal(document.querySelector('[name="q13"]').getAttribute('aria-invalid'), 'true');
+  const validation = calls.gtag.find((call) => call[1] === 'lead_form_validation_error');
+  assert.equal(validation[2].question_id, '13');
+  assert.equal(validation[2].field_position, 1);
+});
+
+test('필드 완료·이탈 계측은 답변 값 없이 질문 메타데이터만 남긴다', async () => {
+  const { window, document, calls } = bootstrap();
+  await settle();
+
+  const name = document.querySelector('[name="q13"]');
+  name.value = '분석 도구에 남으면 안 되는 이름';
+  name.dispatchEvent(new document.defaultView.Event('input', { bubbles: true }));
+  name.dispatchEvent(new document.defaultView.Event('change', { bubbles: true }));
+  name.dispatchEvent(new document.defaultView.Event('blur', { bubbles: true }));
+  window.dispatchEvent(new window.Event('pagehide'));
+  await settle();
+
+  const completions = calls.gtag.filter((call) => call[1] === 'lead_form_field_complete');
+  assert.equal(completions.length, 1, '한 필드 완료는 중복 발화하면 안 된다');
+  assert.deepEqual(
+    {
+      question_id: completions[0][2].question_id,
+      question_type: completions[0][2].question_type,
+      field_position: completions[0][2].field_position,
+      is_required: completions[0][2].is_required,
+    },
+    { question_id: '13', question_type: 'short_answer', field_position: 1, is_required: 'true' }
+  );
+  assert.doesNotMatch(JSON.stringify(completions[0]), /분석 도구에 남으면 안 되는 이름/);
+
+  const abandon = calls.gtag.find((call) => call[1] === 'lead_form_abandon');
+  assert.equal(abandon[2].completed_field_count, 1);
+  assert.equal(abandon[2].last_question_id, '13');
+  assert.equal(abandon[2].required_field_count, 10);
+  assert.equal(abandon[2].transport_type, 'beacon');
 });
 
 test('동의 없이는 제출하지 않는다', async () => {

@@ -76,11 +76,14 @@ if (window.wcs) {
 .cf-required{color:#c0392b}
 .cf-input{width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid rgba(0,0,0,.24);border-radius:8px;font:inherit;background:#fff}
 .cf-input:focus{outline:2px solid var(--brown,#7a5c3e);outline-offset:1px}
+.cf-input[aria-invalid="true"]{border-color:#c0392b;box-shadow:0 0 0 1px #c0392b}
+.cf-choice input[aria-invalid="true"]{outline:2px solid #c0392b;outline-offset:2px}
 .cf-textarea{resize:vertical;min-height:84px}
 .cf-choices{display:flex;flex-wrap:wrap;gap:8px 14px}
 .cf-choice{display:inline-flex;align-items:flex-start;gap:8px;line-height:1.5;cursor:pointer}
 .cf-choice input{margin-top:4px;flex:none;width:18px;height:18px}
 .cf-help{margin:6px 0 0;font-size:.86rem;color:var(--soft,#6b6b6b)}
+.cf-field-error{margin:7px 0 0;color:#c0392b;font-size:.9rem;font-weight:600}
 .cf-consent{margin:0 0 18px;padding:14px;border-radius:8px;background:rgba(0,0,0,.04)}
 .cf-status{margin:0 0 12px;min-height:1.2em;font-size:.92rem}
 .cf-status-error{color:#c0392b;font-weight:600}
@@ -131,6 +134,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </section>
 </main>
 <footer><div class="wrap">공간보감 · 부산 인테리어 상담 · <a href="/consultation/">상담 안내</a> · <a href="/portfolio.html">포트폴리오</a></div><div class="wrap foot-legal"><a href="/privacy/">개인정보처리방침</a></div></footer>
-<script defer src="/assets/consultation-form.js?v=194d5f7c"></script>
+<script defer src="/assets/consultation-form.js?v=1c5a13a2"></script>
 </body>
 </html>
