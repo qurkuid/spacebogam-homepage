@@ -1,0 +1,59 @@
+@font-face{font-family:Suit;src:url("SUIT-Variable.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
+:root{color-scheme:light;--paper:#f6f3ed;--ink:#1e1d1a;--line:#d9d4ca}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:Suit,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;line-height:1.5;word-break:keep-all;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+.v8-skip{position:fixed;left:16px;top:-48px;z-index:10;padding:10px 14px;background:#fff;color:#111}
+.v8-skip:focus{top:12px}
+.v8-header{height:74px;padding:0 clamp(22px,4vw,64px);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:32px;border-bottom:1px solid var(--line);background:rgba(246,243,237,.96);position:relative;z-index:2}
+.v8-brand{font-weight:700;letter-spacing:-.04em}
+.v8-header nav{display:flex;gap:40px;font-size:14px}
+.v8-header nav a[aria-current="page"]{text-decoration:underline;text-underline-offset:5px}
+.v8-consult{justify-self:end;font-size:14px;font-weight:650}
+.v8-home{overflow:hidden}
+.v8-home-hero{height:calc(100svh - 74px);min-height:560px;position:relative;background:#897f71}
+.v8-home-hero img{width:100%;height:100%;display:block;object-fit:cover;object-position:center}
+.v8-home-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(19,16,12,.56),rgba(19,16,12,.06) 68%)}
+.v8-sensitive-a{position:relative;overflow:hidden}
+.v8-sensitive-a:before{content:"";position:absolute;z-index:1;left:55.5%;top:57.5%;width:clamp(54px,6vw,94px);height:clamp(24px,2.5vw,38px);transform:translate(-50%,-50%);border-radius:50%;background:rgba(232,229,212,.28);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);pointer-events:none}
+.v8-home-copy{position:absolute;z-index:1;left:clamp(28px,6vw,96px);bottom:clamp(48px,10vh,110px);color:#fff}
+.v8-home-copy h1{font-size:clamp(38px,5vw,72px);font-weight:400;letter-spacing:-.04em;margin:0 0 28px;text-shadow:0 2px 24px rgba(0,0,0,.3)}
+.v8-home-copy a{font-size:clamp(16px,1.5vw,20px);border-bottom:1px solid rgba(255,255,255,.72);padding-bottom:6px}
+.v8-portfolio{width:min(1240px,calc(100% - 64px));margin:0 auto;padding:72px 0 100px}
+.v8-portfolio h1{font-size:clamp(38px,4vw,58px);font-weight:400;letter-spacing:-.04em;margin:0 0 32px}
+.v8-filters{display:flex;gap:30px;margin-bottom:40px}
+.v8-filters button{border:0;padding:0 0 5px;background:none;color:#69645b;cursor:pointer}
+.v8-filters button[aria-pressed="true"]{color:var(--ink);border-bottom:1px solid var(--ink)}
+.v8-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:58px 12px}
+.v8-grid article[hidden]{display:none}
+.v8-grid a{display:block}
+.v8-image{position:relative;overflow:hidden}
+.v8-grid img{width:100%;aspect-ratio:1.45/1;display:block;object-fit:cover;background:#ddd8cf}
+.v8-grid h2{font-size:21px;font-weight:400;letter-spacing:-.025em;margin:14px 0 4px}
+.v8-grid p{font-size:13px;color:#69645b;margin:0}
+.v8-empty{color:#69645b}
+.v8-project{width:min(1040px,calc(100% - 64px));margin:0 auto;padding:72px 0 100px}
+.v8-project h1{font-size:clamp(38px,4vw,58px);font-weight:400;letter-spacing:-.04em;margin:0 0 32px}
+.v8-project>p{font-size:14px;color:#69645b;margin:-22px 0 32px}
+.v8-project .v8-image{margin-top:16px}
+.v8-project img{width:100%;aspect-ratio:1.6/1;display:block;object-fit:cover;background:#ddd8cf}
+@media(max-width:720px){
+  .v8-header{height:60px;padding:0 18px;grid-template-columns:1fr auto;gap:14px}
+  .v8-header nav{display:none}
+  .v8-consult{font-size:13px}
+  .v8-home-hero{height:calc(100svh - 60px);min-height:540px}
+  .v8-home-hero img{object-position:58% center}
+  .v8-home-hero.v8-sensitive-a:before{left:50%;top:56.5%}
+  .v8-home-hero:after{background:linear-gradient(0deg,rgba(18,15,11,.58),rgba(18,15,11,.03) 68%)}
+  .v8-home-copy{left:24px;bottom:56px}
+  .v8-home-copy h1{font-size:39px;margin-bottom:22px}
+  .v8-portfolio{width:calc(100% - 32px);padding:46px 0 72px}
+  .v8-portfolio h1{font-size:38px;margin-bottom:24px}
+  .v8-filters{gap:22px;overflow-x:auto;white-space:nowrap;margin-bottom:28px;font-size:14px}
+  .v8-grid{grid-template-columns:1fr;gap:36px}
+  .v8-grid h2{font-size:19px;margin-top:11px}
+  .v8-project{width:calc(100% - 32px);padding:46px 0 72px}
+  .v8-project h1{font-size:38px;margin-bottom:24px}
+}
+@media(prefers-reduced-motion:no-preference){.v8-grid img{transition:opacity .2s}.v8-grid a:hover img{opacity:.88}}
