@@ -512,6 +512,7 @@
   }
 
   function injectPhoneCtas(){
+    if (document.body.dataset.noAutoCta === 'true') return;
     ensurePhoneCtaStyles();
     var context = pagePhoneContext();
     var existingHeaderCall = document.querySelector('.spacebogam-header-call');

@@ -425,11 +425,9 @@
       setIfPresent(url, 'source_page', location.pathname);
       url.searchParams.set('experiment_id', EXPERIMENT_ID);
       url.searchParams.set('experiment_variant', experimentVariant);
-      // CMP-191: 검증 세션 표식은 도메인을 건너면서 이름이 바뀐다. spacebogam 은
-      // is_test, intm 은 n 을 읽는다. 여기서 옮겨 싣지 않으면 QA 세션이 상담
-      // 페이지로 넘어가는 순간 실유입으로 기록되고 퍼널 form_start 가 부풀어 오른다.
-      if (testSession) url.searchParams.set('n', '1');
-      else url.searchParams.delete('n');
+      // CMP-191: 같은 도메인은 is_test, 레거시 intm 링크는 n 으로 검증 표식을 넘긴다.
+      if (testSession) url.searchParams.set(sameOrigin ? 'is_test' : 'n', '1');
+      else url.searchParams.delete(sameOrigin ? 'is_test' : 'n');
       anchor.setAttribute('href', url.toString());
     } catch(error) {}
   }
