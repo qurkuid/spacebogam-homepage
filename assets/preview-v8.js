@@ -1,4 +1,5 @@
 (function(){
+  var isTest=new URLSearchParams(location.search).get('is_test')||'';
   document.addEventListener('click',function(event){
     var target=event.target.closest('[data-v8-event]');
     if(!target)return;
@@ -7,7 +8,8 @@
       event:target.dataset.v8Event,
       page_path:location.pathname,
       link_url:target.getAttribute('href')||'',
-      project:target.dataset.project||''
+      project:target.dataset.project||'',
+      is_test:isTest
     });
   });
 
