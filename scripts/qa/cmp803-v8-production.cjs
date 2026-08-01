@@ -35,6 +35,9 @@ const puppeteer = require('../../../intm-cmp244/node_modules/puppeteer');
     mainLinks: document.querySelectorAll('main a').length,
     forms: document.forms.length,
     consults: document.querySelectorAll('header a[href*="/consultation/"]').length,
+    stories: document.querySelectorAll('.v8-story').length,
+    storyConsults: [...document.querySelectorAll('.v8-story a')].filter(link => new URL(link.href).pathname === '/consultation/').length,
+    storyTitles: [...document.querySelectorAll('.v8-story h2')].map(title => title.textContent.replace(/\s+/g, ' ').trim()),
   }));
   await page.$eval('[data-v8-event="home_portfolio_cta_click"]', link => link.addEventListener('click', event => event.preventDefault()));
   await page.click('[data-v8-event="home_portfolio_cta_click"]');
@@ -57,7 +60,9 @@ const puppeteer = require('../../../intm-cmp244/node_modules/puppeteer');
   const mobileColumns = await page.$eval('.v8-grid', grid => getComputedStyle(grid).gridTemplateColumns.split(' ').length);
 
   const requiredEvents = ['home_portfolio_cta_click', 'portfolio_project_open', 'portfolio_consult_click'];
-  if (!home.font || home.canonical !== 'https://spacebogam.kr/' || !home.robots.startsWith('index,follow') || home.mainLinks !== 1 || home.forms !== 0 || home.consults !== 1 ||
+  if (!home.font || home.canonical !== 'https://spacebogam.kr/' || !home.robots.startsWith('index,follow') || home.mainLinks !== 4 || home.forms !== 0 || home.consults !== 1 ||
+      home.stories !== 3 || home.storyConsults !== 3 ||
+      !['보이지 않던 문제', '가능한 조건', '사는 방식을'].every(fragment => home.storyTitles.some(title => title.includes(fragment))) ||
       portfolio.columns !== 2 || !portfolio.firstPair || portfolio.cardConsults !== 0 || mobileColumns !== 1 || !empty ||
       !homeEvents.includes(requiredEvents[0]) || !requiredEvents.slice(1).every(event => events.includes(event))) {
     throw new Error(`CMP-803 check failed: ${JSON.stringify({home, portfolio, mobileColumns, empty, homeEvents, events})}`);
