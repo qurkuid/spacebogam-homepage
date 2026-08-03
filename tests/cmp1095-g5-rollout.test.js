@@ -5,7 +5,7 @@ const test = require('node:test');
 
 const root = path.resolve(__dirname, '..');
 const dir = path.join(root, 'g4-private');
-const PAGES = ['process.html', 'portfolio.html', 'estimate.html', 'guides.html', 'qna.html', 'living.html', 'commercial.html'];
+const PAGES = ['process.html', 'portfolio.html', 'estimate.html', 'guides.html', 'qna.html', 'living.html', 'commercial.html', 'blog.html'];
 
 test('every G5 hub page is private, tracked once, and generated (not hand-duplicated)', () => {
   for (const name of PAGES) {
@@ -33,4 +33,12 @@ test('qna preserves all 30 real questions, none fabricated', () => {
   const sourceQuestions = [...source.matchAll(/Q(\d+)\./g)].map(m => Number(m[1]));
   assert.equal(Math.max(...sourceQuestions), 30);
   assert.equal((g4.match(/<b>Q\d+<\/b>/g) || []).length, 30);
+});
+
+test('blog hub preserves all 50 real posts, none fabricated', () => {
+  const source = fs.readFileSync(path.join(root, 'blog.html'), 'utf8');
+  const g4 = fs.readFileSync(path.join(dir, 'blog.html'), 'utf8');
+  const sourcePosts = (source.match(/<article class="post-card">/g) || []).length;
+  assert.equal(sourcePosts, 50);
+  assert.equal((g4.match(/<a class="card"/g) || []).length, 50);
 });

@@ -244,6 +244,34 @@ def build_commercial():
     (OUT / "commercial.html").write_text(shell("commercial", "상업공간 포트폴리오", body), encoding="utf-8")
 
 
+# ------------------------------------------------------------------- blog --
+def build_blog():
+    doc = soup_of("blog.html")
+    hero = doc.find("section", class_="hero")
+    h1 = text(hero.find("h1"))
+    lede = text(hero.find("p"))
+    posts = doc.select("article.post-card")
+    cards = []
+    for p in posts:
+        h2a = p.find("h2").find("a")
+        href = h2a.get("href", "")
+        title = text(h2a)
+        cat = text(p.find("span", class_="cat"))
+        date = text(p.select_one("div.meta span"))
+        img = p.find("img")
+        src = img.get("src") if img else ""
+        alt = img.get("alt") if img else title
+        if src.startswith("/"):
+            src = ".." + src
+        img_html = f'<img src="{src}" alt="{alt}" loading="lazy">' if src else ""
+        sub = f"{cat} · {date}" if cat and date else (cat or date)
+        cards.append(card(f"../{href}", title, sub, img_html))
+    body = f"""<div class="eyebrow">Blog</div><h1>{h1}</h1><p class="lede">{lede}</p>
+<section class="section"><h2>게시물 {len(posts)}건</h2><div class="grid">{''.join(cards)}</div></section>
+<a class="back" href="index.html">← 대표 시안으로 돌아가기</a>"""
+    (OUT / "blog.html").write_text(shell("blog", "블로그", body), encoding="utf-8")
+
+
 if __name__ == "__main__":
     OUT.mkdir(exist_ok=True)
     build_process()
@@ -253,4 +281,5 @@ if __name__ == "__main__":
     build_qna()
     build_living()
     build_commercial()
+    build_blog()
     print("done:", sorted(p.name for p in OUT.glob("*.html")))
