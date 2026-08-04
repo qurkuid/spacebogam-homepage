@@ -35,7 +35,7 @@ def shell(page, title, body, landing=None):
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>{title} | G4</title><link rel="stylesheet" href="g4.css"></head>
 <body data-page="{page}" data-creative="g4_editorial_web_v1" data-promise="living_before_decoration" data-landing="{landing}"><div class="notice"><div class="shell"><strong>PRIVATE G4 PREVIEW</strong> · 사용자 소유 이미지 기반의 내부 검토용 시안입니다. 외부 공개·운영 적용 금지.</div></div><header class="shell sitehead"><a class="brand" href="index.html">공간보감</a><nav aria-label="주요 메뉴">{NAV}</nav><a class="cta" data-event="consultation_click" data-placement="header" data-cta="start_consultation" href="../consultation/apply/">프로젝트 적합성 확인</a></header><main class="detail">
 {body}
-</main><footer class="shell footer"><nav aria-label="하단 메뉴">{NAV}</nav>공간보감 · G4 비공개 작동 시안 · 공개 전 사진 권리 및 개인정보 별도 검수</footer><script src="g4-tracking.js"></script></body></html>
+</main><footer class="shell footer"><nav aria-label="하단 메뉴">{NAV}</nav>공간보감 · G4 비공개 작동 시안 · 공개 전 사진 권리 및 개인정보 별도 검수</footer><script defer src="/assets/funnel-tracking.js"></script><script src="g4-tracking.js"></script></body></html>
 """
 
 
