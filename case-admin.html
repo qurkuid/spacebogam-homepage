@@ -1,0 +1,76 @@
+<!doctype html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>공간보감 사례 관리자</title><meta name="robots" content="noindex,nofollow">
+<style>:root{--ink:#221c15;--soft:#6c6258;--bg:#fffdf9;--paper:#faf5ec;--line:#e7ddcf;--brown:#b06743;--deep:#1b1611;--danger:#b3261e;--ok:#2e7d32;--max:1180px}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Pretendard","Noto Sans KR",sans-serif;line-height:1.65;letter-spacing:-.018em}.wrap{width:min(var(--max),calc(100% - 32px));margin:auto}.top{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:10}.top .wrap{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{font-weight:650;font-size:22px}button,.btn{border:0;border-radius:12px;background:var(--deep);color:#fff;padding:11px 14px;font-weight:600;cursor:pointer}button.light{background:#fff;color:var(--ink);border:1px solid var(--line)}main{padding:34px 0}.login,.app{background:var(--paper);border:1px solid var(--line);border-radius:26px;padding:24px}.grid{display:grid;grid-template-columns:330px 1fr;gap:18px}.list{display:grid;gap:8px;max-height:74vh;overflow:auto}.item{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px;cursor:pointer}.item.active{border-color:var(--brown);box-shadow:0 0 0 2px rgba(122,96,75,.1)}.item b{display:block;font-size:14px;line-height:1.35}.item span{font-size:12px;color:var(--soft)}.status-pill{display:inline-block;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;margin-top:4px}.status-draft{background:#fff3e0;color:#8a5200}.status-published{background:#e8f5e9;color:var(--ok)}label{font-size:12px;color:var(--brown);font-weight:700;display:block;margin:12px 0 6px}.hint{color:var(--soft);font-size:12px;margin:2px 0 0}input,textarea,select{width:100%;border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;color:var(--ink);font:inherit}textarea{min-height:110px}.editor{background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.check{border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:16px}.check h3{margin:0 0 8px;font-size:14px}.check ul{margin:0;padding-left:18px}.check li.bad{color:var(--danger)}.check li.good{color:var(--ok)}.imgrow{border:1px dashed var(--line);border-radius:14px;padding:12px;margin-top:10px}.imgrow .row{grid-template-columns:1fr 1fr auto}.spec-box{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px;font-size:12px;color:var(--soft);margin-top:10px}@media(max-width:860px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}}</style>
+</head><body>
+<header class="top"><div class="wrap"><div class="brand">공간보감 사례 관리자</div><div><a class="pill" href="portfolio.html" style="border:1px solid var(--line);border-radius:999px;padding:8px 12px;background:#fff;text-decoration:none;color:inherit">포트폴리오 보기</a></div></div></header>
+<main class="wrap">
+<section id="login" class="login"><h1>간단 로그인</h1><p class="hint">정적 사이트라 서버에 바로 저장하지 않습니다. 여기서 사례를 작성·수정한 뒤 <b>cases.json</b>을 내려받아 개발팀장에게 전달하면 사이트에 반영됩니다(직접 실행 가능하면 아래 발행 방법 참고).</p><label>관리 비밀번호</label><input id="password" type="password" placeholder="관리 비밀번호"><div class="actions"><button onclick="login()">들어가기</button></div><p class="hint">초기값(로컬 확인용): ggbg-case</p></section>
+
+<section id="app" class="app hidden">
+<div class="actions"><button onclick="newCase()">새 사례</button><button class="light" onclick="downloadJSON()">cases.json 다운로드</button><button class="light" onclick="copyJSON()">JSON 복사</button><label class="pill" style="cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:8px 12px;background:#fff">cases.json 불러오기<input type="file" accept="application/json" onchange="loadFile(event)" style="display:none"></label></div>
+<p class="hint">사진 파일은 이 화면에서 올리지 않습니다. 아래 이미지 규격을 지켜 파일을 준비한 뒤, <code>assets/case/&lt;슬러그&gt;/</code> 폴더에 넣고 경로를 입력하세요.</p>
+
+<div class="grid">
+<aside><input id="search" placeholder="사례 검색" oninput="renderList()"><div id="list" class="list"></div></aside>
+<section class="editor">
+<div class="row"><div><label>제목 (예: 대우이안 35평 리모델링)</label><input id="title" oninput="onFieldChange()"></div><div><label>슬러그 (영문 소문자·하이픈, URL에 사용)</label><input id="slug" oninput="onFieldChange()"><p class="hint">비우면 제목에서 자동 생성</p></div></div>
+<div class="row"><div><label>공간 유형</label><select id="kind" onchange="onFieldChange()"><option value="apartment">아파트(주거)</option><option value="house">주택(주거)</option><option value="commercial">상업공간</option></select></div><div><label>대표 사례 여부</label><select id="featured" onchange="onFieldChange()"><option value="false">아니오</option><option value="true">예 (홈 노출)</option></select></div></div>
+<div class="row"><div><label>위치 (예: 부산 해운대구)</label><input id="location" oninput="onFieldChange()"></div><div><label>평형 (예: 35평)</label><input id="pyeong" oninput="onFieldChange()"></div></div>
+<label>한 줄 요약 (30자 내외, 카드·메타에 노출)</label><input id="summary" maxlength="60" oninput="onFieldChange()">
+<label>본문 설명 (200~400자 — 공간 구성·마감재·기간·해결한 문제 위주)</label><textarea id="description" oninput="onFieldChange()"></textarea>
+
+<div class="row"><div><label>사진 사용 허가</label><select id="photo_permission" onchange="onFieldChange()"><option value="미확인">미확인</option><option value="허가">허가</option><option value="불가">불가</option></select><p class="hint">'허가'가 아니면 절대 게시되지 않습니다.</p></div><div><label>고객명 노출 여부</label><select id="customer_name_visibility" onchange="onFieldChange()"><option value="비노출">비노출</option><option value="일부">일부(이니셜 등)</option><option value="노출">노출</option></select></div></div>
+
+<div class="spec-box"><b>이미지 규격</b> — 형식 JPEG/WebP, 파일명은 영문 소문자·하이픈만(예: living-after.jpg), 색공간 sRGB.<br>썸네일: 4:5 세로, 가로 800px 이상, 500KB 이하. 현장 사진: 4:3, 가로 1200px 이상, 1.2MB 이하.<br>alt 텍스트 형식: "[공간유형] [프로젝트명] [시공 전/후] 사진" — 얼굴·로고 등 식별정보 제외.</div>
+
+<label>썸네일 이미지 경로 (예: assets/case/daewoo-35py/thumb.jpg)</label><input id="thumb_path" oninput="onFieldChange()">
+<label>썸네일 alt 텍스트</label><input id="thumb_alt" oninput="onFieldChange()">
+
+<div class="imgrow"><label>현장 사진 (전/후, 1장 이상)</label><div id="gallery"></div><button class="light" type="button" onclick="addGalleryRow()">+ 사진 추가</button></div>
+
+<label>발행 상태</label><select id="status" onchange="onFieldChange()"><option value="draft">초안 (사이트에 반영 안 됨)</option><option value="published">발행 (스크립트 실행 시 사이트에 반영)</option></select>
+
+<div id="checklist" class="check"></div>
+
+<div class="actions"><button onclick="saveCase()">현재 사례 저장</button><button class="light" onclick="deleteCase()">삭제</button><button class="light" onclick="previewCase()">미리보기</button></div>
+<div id="preview" class="preview hidden" style="border:1px solid var(--line);border-radius:18px;padding:16px;background:#fff;margin-top:12px"></div>
+</section>
+</div>
+</section>
+
+<section id="guide" style="margin-top:24px;padding:18px;border:1px solid var(--line);border-radius:18px;background:#fff">
+<h2 style="font-size:16px">사례 1건 발행하는 방법 (개발 도움 없이)</h2>
+<ol style="padding-left:20px;line-height:1.9">
+<li>위에서 "새 사례"로 항목을 만들고 모든 필수 항목을 채웁니다.</li>
+<li>이미지 규격에 맞춘 사진 파일을 <code>assets/case/&lt;슬러그&gt;/</code> 폴더에 넣습니다.</li>
+<li>사진 사용 허가가 '허가'인지, 아래 체크리스트가 모두 초록색인지 확인합니다.</li>
+<li>발행 상태를 '발행'으로 바꾸고 저장합니다.</li>
+<li>"cases.json 다운로드"로 파일을 받아 <code>data/cases/cases.json</code>에 덮어씁니다.</li>
+<li>터미널에서 <code>python3 scripts_build_case.py</code> 를 실행하면 사례 페이지와 포트폴리오 목록이 자동으로 만들어집니다.</li>
+<li>로컬에서 결과 페이지를 확인한 뒤, 개발팀장에게 배포를 요청합니다 (실서비스 배포는 별도 승인 절차).</li>
+</ol>
+</section>
+</main>
+<script>
+const DEFAULT_PASS='ggbg-case';let cases=[];let current=0;
+function login(){const v=document.getElementById('password').value.trim();if(v!==DEFAULT_PASS&&v!==localStorage.getItem('ggbg_case_pass')){alert('비밀번호가 다릅니다.');return}document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');loadCases()}
+async function loadCases(){try{cases=await fetch('data/cases/cases.json').then(r=>r.json())}catch(e){cases=[]}if(!cases.length)newCase();else selectCase(0);renderList()}
+function renderList(){const q=(document.getElementById('search').value||'').toLowerCase();const box=document.getElementById('list');box.innerHTML='';cases.forEach((c,i)=>{if(q&&!((c.title||'').toLowerCase().includes(q)))return;const d=document.createElement('div');d.className='item '+(i===current?'active':'');d.onclick=()=>selectCase(i);const pillClass=c.status==='published'?'status-published':'status-draft';d.innerHTML=`<b>${escapeHtml(c.title||'(제목 없음)')}</b><span>${c.location||''} · ${c.pyeong||''}</span><span class="status-pill ${pillClass}">${c.status==='published'?'발행':'초안'}</span>`;box.appendChild(d)})}
+function selectCase(i){current=i;const c=cases[i]||{};for(const k of ['title','slug','location','pyeong','summary','description','status'])document.getElementById(k).value=c[k]||'';document.getElementById('kind').value=c.kind||'apartment';document.getElementById('featured').value=String(!!c.featured);document.getElementById('photo_permission').value=c.photo_permission||'미확인';document.getElementById('customer_name_visibility').value=c.customer_name_visibility||'비노출';document.getElementById('thumb_path').value=(c.thumbnail&&c.thumbnail.path)||'';document.getElementById('thumb_alt').value=(c.thumbnail&&c.thumbnail.alt)||'';renderGallery(c.gallery||[]);renderList();runChecklist()}
+function renderGallery(items){const box=document.getElementById('gallery');box.innerHTML='';(items.length?items:[]).forEach((g,idx)=>addGalleryRow(g,idx));if(!items.length)addGalleryRow()}
+function addGalleryRow(g,idx){g=g||{path:'',alt:'',phase:'후'};const box=document.getElementById('gallery');const row=document.createElement('div');row.className='row';row.style.marginTop='8px';row.innerHTML=`<input placeholder="경로 (assets/case/.../after-1.jpg)" value="${escapeHtml(g.path)}" oninput="onFieldChange()"><input placeholder="alt 텍스트" value="${escapeHtml(g.alt)}" oninput="onFieldChange()"><select onchange="onFieldChange()"><option value="전" ${g.phase==='전'?'selected':''}>전</option><option value="후" ${g.phase!=='전'?'selected':''}>후</option></select>`;box.appendChild(row)}
+function collectGallery(){return Array.from(document.getElementById('gallery').children).map(row=>{const inputs=row.querySelectorAll('input');const sel=row.querySelector('select');return{path:inputs[0].value.trim(),alt:inputs[1].value.trim(),phase:sel.value}}).filter(g=>g.path)}
+function slugify(s){return(s||'case').toLowerCase().replace(/[^0-9a-z가-힣]+/g,'-').replace(/^-|-$/g,'')}
+function collect(){return{slug:document.getElementById('slug').value.trim()||slugify(document.getElementById('title').value),title:document.getElementById('title').value.trim(),kind:document.getElementById('kind').value,location:document.getElementById('location').value.trim(),pyeong:document.getElementById('pyeong').value.trim(),summary:document.getElementById('summary').value.trim(),description:document.getElementById('description').value.trim(),featured:document.getElementById('featured').value==='true',photo_permission:document.getElementById('photo_permission').value,customer_name_visibility:document.getElementById('customer_name_visibility').value,status:document.getElementById('status').value,thumbnail:{path:document.getElementById('thumb_path').value.trim(),alt:document.getElementById('thumb_alt').value.trim()},gallery:collectGallery()}}
+function onFieldChange(){runChecklist()}
+function runChecklist(){const c=collect();const items=[];const push=(ok,label)=>items.push(`<li class="${ok?'good':'bad'}">${ok?'✓':'✗'} ${label}</li>`);push(c.photo_permission==='허가','사진 사용 허가 = 허가');push(!!c.thumbnail.alt,'썸네일 alt 텍스트 입력됨');push(c.gallery.length>=1,'현장 사진 1장 이상');push(c.gallery.every(g=>g.alt),'모든 현장 사진에 alt 텍스트 있음');push(/^[a-z0-9-]+$/.test(c.slug),'슬러그가 영문 소문자·하이픈만 사용');push(c.summary.length>0&&c.summary.length<=60,'한 줄 요약 입력됨(60자 이하)');push(c.description.length>=200&&c.description.length<=400,`본문 설명 길이 ${c.description.length}자 (200~400자 권장)`);push(!/가격|견적\s*확정/.test(c.description),'본문에 가격 확정 표현 없음');document.getElementById('checklist').innerHTML=`<h3>발행 전 체크리스트</h3><ul>${items.join('')}</ul>`}
+function saveCase(){const c=collect();if(!c.title){alert('제목을 입력하세요');return}cases[current]=c;renderList();runChecklist();alert('저장되었습니다. cases.json을 다운로드해 전달하세요.')}
+function newCase(){cases.unshift({slug:'',title:'',kind:'apartment',location:'',pyeong:'',summary:'',description:'',featured:false,photo_permission:'미확인',customer_name_visibility:'비노출',status:'draft',thumbnail:{path:'',alt:''},gallery:[]});current=0;selectCase(0)}
+function deleteCase(){if(!confirm('삭제할까요?'))return;cases.splice(current,1);current=0;renderList();if(cases.length)selectCase(0);else newCase()}
+function downloadJSON(){cases[current]=collect();const blob=new Blob([JSON.stringify(cases,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cases.json';a.click();URL.revokeObjectURL(a.href)}
+async function copyJSON(){cases[current]=collect();await navigator.clipboard.writeText(JSON.stringify(cases,null,2));alert('복사했습니다.')}
+function loadFile(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{cases=JSON.parse(r.result);current=0;renderList();selectCase(0)};r.readAsText(f)}
+function previewCase(){const c=collect();const box=document.getElementById('preview');box.classList.remove('hidden');box.innerHTML=`<h2>${escapeHtml(c.title)} 인테리어 사례</h2><p>${escapeHtml(c.summary)}</p><p>${escapeHtml(c.description)}</p><p>유형: ${c.kind} · 위치: ${escapeHtml(c.location)} · 평형: ${escapeHtml(c.pyeong)}</p>`}
+function escapeHtml(s){return(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+</script>
+</body></html>
