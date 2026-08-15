@@ -482,13 +482,24 @@
       }
     }, 10000);
 
-    var scrollSent = false;
+    // CMP-1186: 25/50/75/100% 4구간을 잰다. eventName 은 intm DB CHECK 제약에 이미
+    // 있는 'scroll_50' 을 그대로 재사용하고 scrollDepth 값으로만 구간을 구분한다.
+    // 새 eventName(scroll_25 등)을 쓰려면 intm 쪽 스키마·DB 마이그레이션이 별도로
+    // 필요해 배포 리스크가 커진다 — 필요해지면 후속 이슈로 분리.
+    var SCROLL_THRESHOLDS = [25, 50, 75, 100];
+    var scrollSentUpTo = 0;
     window.addEventListener('scroll', function(){
-      if (scrollSent) return;
+      if (scrollSentUpTo >= SCROLL_THRESHOLDS.length) return;
       var scrollable = document.documentElement.scrollHeight - window.innerHeight;
-      if (scrollable <= 0 || window.scrollY / scrollable < 0.5) return;
-      scrollSent = true;
-      send('scroll_50', {scrollDepth: 50});
+      if (scrollable <= 0) return;
+      var pct = window.scrollY / scrollable * 100;
+      while (scrollSentUpTo < SCROLL_THRESHOLDS.length) {
+        var depth = SCROLL_THRESHOLDS[scrollSentUpTo];
+        // 100% 는 서브픽셀 반올림 오차로 정확히 안 맞을 수 있어 살짝 여유를 둔다.
+        if (pct < (depth >= 100 ? 99 : depth)) break;
+        send('scroll_50', {scrollDepth: depth});
+        scrollSentUpTo++;
+      }
     }, {passive: true});
   }
 
