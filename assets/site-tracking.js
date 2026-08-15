@@ -560,7 +560,7 @@
   function init(){
     if (!document.querySelector('script[data-spacebogam-funnel="1"]')) {
       var funnelScript = document.createElement('script');
-      funnelScript.src = '/assets/funnel-tracking.js?v=c17e5943';
+      funnelScript.src = '/assets/funnel-tracking.js?v=af955b95';
       funnelScript.dataset.spacebogamFunnel = '1';
       document.head.appendChild(funnelScript);
     }
