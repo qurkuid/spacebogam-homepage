@@ -27,6 +27,14 @@ button{font:inherit}
 .v8-home-cta-group{display:flex;flex-wrap:wrap;align-items:center;gap:22px;margin:0}
 .v8-home-copy .v8-home-primary-cta{display:inline-block;background:var(--paper);color:var(--ink);border-bottom:1px solid var(--paper);padding:14px 22px;font-weight:650;font-size:clamp(15px,1.3vw,17px)}
 .v8-home-bridge{position:absolute;z-index:1;right:clamp(28px,4vw,64px);bottom:28px;margin:0;color:rgba(255,255,255,.82);font-size:13px}
+.v8-case-carousel{width:min(1240px,calc(100% - 64px));margin:0 auto;padding:64px 0 0}
+.v8-case-carousel-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;margin-bottom:28px}
+.v8-case-carousel-head h2{margin:0;font-size:clamp(24px,2.4vw,32px);font-weight:400;letter-spacing:-.03em}
+.v8-case-carousel-cta{display:inline-block;border-bottom:1px solid var(--ink);padding-bottom:5px;font-weight:650;white-space:nowrap}
+.v8-case-carousel-track{display:flex;gap:20px;margin:0;padding:4px 0 12px;list-style:none;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.v8-case-carousel-item{flex:0 0 min(320px,78vw);scroll-snap-align:start}
+.v8-case-carousel-item img{width:100%;aspect-ratio:1.2/1;display:block;object-fit:cover;background:#ddd8cf}
+.v8-case-carousel-label{display:block;margin-top:12px;font-size:14px;font-weight:650}
 .v8-stories{width:min(1240px,calc(100% - 64px));margin:0 auto;padding:120px 0}
 .v8-story{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(300px,.92fr);align-items:center;gap:clamp(48px,7vw,108px);padding:0 0 120px}
 .v8-story:nth-child(even) img{order:2}
@@ -71,6 +79,9 @@ button{font:inherit}
   .v8-home-bridge{display:none}
   .v8-home-cta-group{flex-direction:column;align-items:flex-start;gap:14px}
   .v8-home-copy .v8-home-primary-cta{padding:13px 20px}
+  .v8-case-carousel{width:calc(100% - 32px);padding:40px 0 0}
+  .v8-case-carousel-head{flex-direction:column;align-items:flex-start;gap:14px}
+  .v8-case-carousel-item{flex-basis:74vw}
   .v8-stories{width:calc(100% - 32px);padding:72px 0}
   .v8-story{grid-template-columns:1fr;gap:28px;padding-bottom:76px}
   .v8-story:nth-child(even) img{order:0}
