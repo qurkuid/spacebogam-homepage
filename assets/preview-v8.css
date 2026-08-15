@@ -24,6 +24,8 @@ button{font:inherit}
 .v8-home-copy h1{font-size:clamp(38px,5vw,72px);font-weight:400;line-height:1.12;letter-spacing:-.04em;margin:0 0 22px;text-shadow:0 2px 24px rgba(0,0,0,.3)}
 .v8-home-intro{margin:0 0 28px;font-size:clamp(15px,1.3vw,18px);line-height:1.8;text-shadow:0 2px 18px rgba(0,0,0,.35)}
 .v8-home-copy a{font-size:clamp(16px,1.5vw,20px);border-bottom:1px solid rgba(255,255,255,.72);padding-bottom:6px}
+.v8-home-cta-group{display:flex;flex-wrap:wrap;align-items:center;gap:22px;margin:0}
+.v8-home-copy .v8-home-primary-cta{display:inline-block;background:var(--paper);color:var(--ink);border-bottom:1px solid var(--paper);padding:14px 22px;font-weight:650;font-size:clamp(15px,1.3vw,17px)}
 .v8-home-bridge{position:absolute;z-index:1;right:clamp(28px,4vw,64px);bottom:28px;margin:0;color:rgba(255,255,255,.82);font-size:13px}
 .v8-stories{width:min(1240px,calc(100% - 64px));margin:0 auto;padding:120px 0}
 .v8-story{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(300px,.92fr);align-items:center;gap:clamp(48px,7vw,108px);padding:0 0 120px}
@@ -67,6 +69,8 @@ button{font:inherit}
   .v8-home-copy h1{font-size:38px;margin-bottom:18px}
   .v8-home-intro br{display:none}
   .v8-home-bridge{display:none}
+  .v8-home-cta-group{flex-direction:column;align-items:flex-start;gap:14px}
+  .v8-home-copy .v8-home-primary-cta{padding:13px 20px}
   .v8-stories{width:calc(100% - 32px);padding:72px 0}
   .v8-story{grid-template-columns:1fr;gap:28px;padding-bottom:76px}
   .v8-story:nth-child(even) img{order:0}
