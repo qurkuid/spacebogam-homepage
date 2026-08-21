@@ -21,6 +21,10 @@
   var COMPANY_ID = '4206bdfd-b51d-4433-9f8e-c854131948cc';
   var META_PIXEL_ID = '512750840350337';
   var EXPERIMENT_ID = 'homepage_headline_v1';
+  // 전 페이지 공통 페이지뷰 스니펫(tools/inject_naver_wcs.py)과 같은 wa 값.
+  var NAVER_WCS_ID = 's_7702568df18';
+  // CMP-1244(네이버 검색광고 프리미엄 로그분석 연동)에서 실제 전환유형 코드를 받으면 채운다.
+  var NAVER_CONV_TYPE = '';
 
   // funnel-tracking.js 와 반드시 같은 키여야 한다.
   var CLIENT_KEY = 'spacebogam_funnel_client_id';
@@ -302,6 +306,18 @@
   function trackPixel(eventName, options){
     try {
       if (typeof window.fbq === 'function') window.fbq('track', eventName, {currency: 'KRW'}, options);
+    } catch(e) {}
+  }
+
+  function trackNaverConversion(){
+    try {
+      if (typeof window.wcs_do !== 'function') return;
+      window.wcs_do({
+        wcs_id: NAVER_WCS_ID,
+        conv_type: NAVER_CONV_TYPE,
+        conv_value: '',
+        conv_currency: 'KRW'
+      });
     } catch(e) {}
   }
 
@@ -651,6 +667,7 @@
     submitSucceeded = true;
     trackPixel('Lead', {eventID: leadEventId});
     trackGtag('lead_submit_success', {lead_event_id: leadEventId});
+    trackNaverConversion();
     sendFunnelEvent('lead_submit_success');
     // 같은 세션에서 한 건 더 신청하면 별개의 상담 건이다 — id 를 비워 다음 건이 새로 뽑게 한다.
     try { if (session) session.removeItem(EVENT_IDS_KEY); } catch(e) {}
