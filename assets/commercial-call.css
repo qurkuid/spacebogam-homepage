@@ -30,7 +30,27 @@ body.commercial-call .top .wrap{justify-content:space-between}
 
 .cc-secondary{display:inline-flex;align-items:center;justify-content:center;margin-top:18px;
   min-height:52px;padding:0 24px;border-radius:999px;border:1px solid var(--line);
-  background:#fff;color:var(--ink);font-weight:700}
+  background:#fff;color:var(--ink);font-weight:700;cursor:pointer;font:inherit}
+.cc-secondary[disabled]{opacity:.6;cursor:progress}
+
+/* CMP-1315 연결 실패용 최소 콜백 폼 */
+.cc-callback-form{max-width:480px;margin-top:22px}
+.cc-field{margin:0 0 16px}
+.cc-label{display:block;font-weight:650;margin:0 0 8px}
+.cc-required{color:#c0392b;margin-left:2px}
+.cc-input{width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid rgba(0,0,0,.24);
+  border-radius:8px;font:inherit;background:#fff}
+.cc-input:focus{outline:2px solid var(--brown);outline-offset:1px}
+.cc-input[aria-invalid="true"]{border-color:#c0392b;box-shadow:0 0 0 1px #c0392b}
+.cc-choices{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:2px}
+.cc-choice{display:inline-flex;align-items:flex-start;gap:8px;line-height:1.5;cursor:pointer;font-size:14.5px}
+.cc-choice input{margin-top:3px;flex:none;width:17px;height:17px}
+.cc-choice input[aria-invalid="true"]{outline:2px solid #c0392b;outline-offset:2px}
+.cc-consent{margin:4px 0 18px;padding:12px 14px;border-radius:8px;background:rgba(0,0,0,.04);font-size:13.5px}
+.cc-callback-status{margin:0 0 10px;min-height:1.2em;font-size:.92rem}
+.cc-status-error{color:#c0392b;font-weight:600}
+.cc-callback-success{padding:18px 20px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.cc-callback-success-title{font-weight:700;font-size:17px;margin:0 0 8px}
 
 footer .cc-fine{font-size:13px;opacity:.72;margin:6px 0 0}
 footer .cc-fine a{text-decoration:underline}

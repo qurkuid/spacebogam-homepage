@@ -11,9 +11,9 @@
  *
  * phone_click 은 funnel-tracking.js 가 tel: 링크 클릭에서 자동 전송한다.
  * data-cta-location 값이 ctaLocation 으로 그대로 들어간다.
- * 문자 콜백(sms:)은 아직 이벤트를 보내지 않는다 — intm 의
- * spacebogam_funnel_events_event_name_check 열거형에 해당 이름이 없어 400 이 된다.
- * 열거형 추가 후 여기서 send 를 켠다.
+ * 연결 실패용 콜백 폼은 assets/commercial-call-callback.js 가 별도로 담당한다
+ * (성함/연락처만 받는 최소 폼, lead_form_view/lead_form_start/lead_submit_success —
+ * 전부 기존 DB CHECK 열거형에 있는 이름만 쓴다. 새 이름 추가·마이그레이션 불필요).
  */
 (function () {
   'use strict';
@@ -28,7 +28,6 @@
         ['오픈 일정', '의료기관 개설 신고와 입점 가능일에 맞춰 공정을 역산합니다.'],
         ['환자·직원 동선', '대기, 접수, 상담, 진료, 수납 흐름과 프라이버시를 함께 봅니다.']
       ],
-      sms: '병원 인테리어 문의드립니다. 진료과목/지역/전용면적/오픈 희망일/통화 가능 시간을 남깁니다.'
     },
     office: {
       eyebrow: '부산 사무실 인테리어',
@@ -39,7 +38,6 @@
         ['입주 일정', '건물 관리규정과 야간·주말 공사 가능 여부에 맞춰 공정을 역산합니다.'],
         ['업무 동선', '고정석, 회의실, 집중석, 라운지 비율이 입주 이후 운영을 결정합니다.']
       ],
-      sms: '사무실 인테리어 문의드립니다. 인원수/지역/전용면적/입주 희망일/통화 가능 시간을 남깁니다.'
     },
     shop: {
       eyebrow: '부산 카페·매장 인테리어',
@@ -50,7 +48,6 @@
         ['오픈 일정', '영업신고, 입점 가능일, 야간 공사 가능 여부에 맞춰 공정을 역산합니다.'],
         ['고객·직원 동선', '입구, 주문, 픽업, 좌석, 백룸 흐름이 체류 시간과 운영 피로도를 좌우합니다.']
       ],
-      sms: '매장 인테리어 문의드립니다. 업종/지역/전용면적/오픈 희망일/통화 가능 시간을 남깁니다.'
     }
   };
 
@@ -98,12 +95,6 @@
         article.appendChild(p);
         wrap.appendChild(article);
       });
-    }
-
-    var sms = document.getElementById('cc-sms');
-    if (sms) {
-      // iOS 는 &body=, Android 는 ?body= 를 쓴다. iOS 형식이 양쪽에서 더 잘 열린다.
-      sms.setAttribute('href', 'sms:050713881252&body=' + encodeURIComponent(v.sms));
     }
 
     var title = {
