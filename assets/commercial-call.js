@@ -1,4 +1,4 @@
-/* CMP-1312 상업공간 전화상담 랜딩 — 업종 variant 스위치
+/* CMP-1312/1315/1322 상업공간 전화상담 랜딩 — 업종 variant 스위치
  *
  * 업종(commercial_vertical)은 utm_content 앞부분에서 읽는다.
  *   utm_content = "<vertical>__<creative>"   예) office__a1_condition
@@ -14,9 +14,25 @@
  * 연결 실패용 콜백 폼은 assets/commercial-call-callback.js 가 별도로 담당한다
  * (성함/연락처만 받는 최소 폼, lead_form_view/lead_form_start/lead_submit_success —
  * 전부 기존 DB CHECK 열거형에 있는 이름만 쓴다. 새 이름 추가·마이그레이션 불필요).
+ *
+ * CMP-1313 전략 정본 (CMP-1322 반영):
+ *   - 1차 업종은 office 단독이 기본값이다. 파라미터가 없거나 알 수 없는 값이면
+ *     office 로 진입한다(더 이상 일반 카피로 남겨두지 않는다).
+ *   - clinic(병원·의원)은 CMP-1312 확인카드 69695e54-e188-417d-870a-820287e18eb5
+ *     응답이 B안(사무실+병원)일 때만 켠다. 카드가 pending 인 동안은 HOSPITAL_ENABLED=false
+ *     로 막아 두고, clinic 요청은 office 로 폴백한다. 응답이 오면 이 상수만 뒤집는다.
+ *   - 미용실·필라테스는 VERTICALS 에 없다 — 정본에서 1차 범위 제외됐으므로 추가하지 않는다.
+ *
+ * sms: 콜백 링크 (.cc-sms, commercial/call/index.html) 클릭 계측:
+ *   intm spacebogam_funnel_events_event_name_check CHECK 제약에 commercial_callback_click
+ *   이 없어 그동안 400 이 났다. intm PR #61 로 열거형에 추가됐으므로 여기서 전송을 켠다.
+ *   FUNNEL_ALLOWED 클라 허용목록은 preview-v8.js 전용이고 이 페이지는 그 스크립트를
+ *   로드하지 않는다 — window.spacebogamFunnel.send() 를 직접 호출하면 게이트 없이 나간다.
  */
 (function () {
   'use strict';
+
+  var HOSPITAL_ENABLED = false;
 
   var VERTICALS = {
     clinic: {
@@ -51,6 +67,12 @@
     }
   };
 
+  function isAllowed(key) {
+    if (!VERTICALS[key]) return false;
+    if (key === 'clinic' && !HOSPITAL_ENABLED) return false;
+    return true;
+  }
+
   function readVertical() {
     var params;
     try {
@@ -59,11 +81,11 @@
       return null;
     }
     var direct = (params.get('vertical') || '').toLowerCase().trim();
-    if (VERTICALS[direct]) return direct;
+    if (isAllowed(direct)) return direct;
 
     var content = (params.get('utm_content') || '').toLowerCase().trim();
     var prefix = content.split('__')[0];
-    if (VERTICALS[prefix]) return prefix;
+    if (isAllowed(prefix)) return prefix;
     return null;
   }
 
@@ -105,9 +127,23 @@
     if (title) document.title = title;
   }
 
+  function wireSmsCallback() {
+    var links = document.querySelectorAll('a.cc-sms[href^="sms:"]');
+    Array.prototype.forEach.call(links, function (link) {
+      link.addEventListener('click', function () {
+        if (window.spacebogamFunnel && typeof window.spacebogamFunnel.send === 'function') {
+          window.spacebogamFunnel.send('commercial_callback_click', {
+            ctaLocation: link.getAttribute('data-cta-location') || 'commercial_call_sms'
+          });
+        }
+      });
+    });
+  }
+
   function init() {
-    var key = readVertical();
-    if (key) apply(key);
+    var key = readVertical() || 'office';
+    apply(key);
+    wireSmsCallback();
   }
 
   if (document.readyState === 'loading') {
