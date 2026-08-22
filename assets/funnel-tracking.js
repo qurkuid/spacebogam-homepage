@@ -67,6 +67,19 @@
     }
   }
 
+  // CMP-1259: gtag.js 측정 ID를 하드코딩하지 않고 _ga 쿠키에서 GA4 client_id만
+  // 읽는다(형식 GA1.<버전>.<clientId>, 뒤 두 세그먼트가 client_id). 값이 없으면
+  // 빈 문자열 — PII 아님, 순수 GA4 익명 식별자.
+  function ga4ClientId(){
+    try {
+      var match = document.cookie.match(/(?:^|;\s*)_ga=([^;]+)/);
+      if (!match) return '';
+      var parts = decodeURIComponent(match[1]).split('.');
+      if (parts.length >= 4) return parts[2] + '.' + parts[3];
+    } catch(error) {}
+    return '';
+  }
+
   function storedAttribution(storage){
     try {
       var stored = storage ? JSON.parse(storage.getItem(ATTRIBUTION_KEY) || 'null') : null;
@@ -481,6 +494,46 @@
         send('engaged_session', {engagedSeconds: 10});
       }
     }, 10000);
+
+    // CMP-1259 v2 (대표 실측 확인 후 범위 축소, CMP-1256 코멘트 참고): GA4/Clarity가
+    // 이미 라이브에서 체류를 잡고 있어 INTM 신규 전송은 폐기했다. 여기서 남은 건
+    // Meta 입찰 신호용 픽셀 이벤트 하나뿐이다 — Meta 최적화는 자기 픽셀이 받은
+    // 이벤트만 학습하므로 GA4/Clarity 데이터는 대체가 안 된다.
+    // document.visibilityState==='visible' 구간만 250ms 틱으로 누적, 30000ms 도달시
+    // 세션당 1회(sessionStorage). PII 없이 utm/fbclid 유무/GA4 client_id만 전송한다.
+    var QUALIFIED_VISIBLE_MS = 30000;
+    var QUALIFIED_TICK_MS = 250;
+    var QUALIFIED_SESSION_KEY = 'spacebogam_funnel_qualified30_sent';
+    // 저장소가 열려는 있으나 read/write 가 SecurityError 를 던지는 브라우저가 있다
+    // (사파리 '모든 쿠키 차단', 일부 인앱 웹뷰). 이 파일의 다른 저장소 접근은 전부
+    // try 로 감싸져 있는데 이 한 줄만 노출돼 있어, 던지면 init() 이 통째로 죽고
+    // 바로 아래 CMP-1186 스크롤 계측 등록까지 함께 사라진다(헤드리스 재현 확인).
+    var qualifiedAlreadySent = true;
+    try {
+      qualifiedAlreadySent = !session || session.getItem(QUALIFIED_SESSION_KEY) === 'true';
+    } catch(error) {
+      qualifiedAlreadySent = true;
+    }
+    if (!testSession && !qualifiedAlreadySent) {
+      var visibleAccumMs = 0;
+      var qualifiedTimer = window.setInterval(function(){
+        if (document.visibilityState !== 'visible') return;
+        visibleAccumMs += QUALIFIED_TICK_MS;
+        if (visibleAccumMs < QUALIFIED_VISIBLE_MS) return;
+        window.clearInterval(qualifiedTimer);
+        try { session.setItem(QUALIFIED_SESSION_KEY, 'true'); } catch(error) {}
+        if (typeof window.fbq === 'function') {
+          window.fbq('trackCustom', 'QualifiedLanding30s', {
+            page_path: location.pathname,
+            utm_source: attribution.utm_source || '',
+            utm_medium: attribution.utm_medium || '',
+            utm_campaign: attribution.utm_campaign || '',
+            hasFbclid: !!attribution.fbclid,
+            ga4ClientId: ga4ClientId()
+          });
+        }
+      }, QUALIFIED_TICK_MS);
+    }
 
     // CMP-1186: 25/50/75/100% 4구간을 잰다. eventName 은 intm DB CHECK 제약에 이미
     // 있는 'scroll_50' 을 그대로 재사용하고 scrollDepth 값으로만 구간을 구분한다.
