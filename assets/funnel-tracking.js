@@ -482,6 +482,38 @@
       }
     }, 10000);
 
+    // CMP-1259: 광고 도착 페이지 30초 "누적 가시" 체류. 위 10초 타이머는 단순
+    // wall-clock + 발화시점 1회 검사라 백그라운드 탭 방치를 못 거른다. 여기는
+    // document.visibilityState==='visible' 구간만 250ms 틱으로 누적한다.
+    // eventName 은 신규로 만들지 않고 기존 'engaged_session' 을 engagedSeconds:30 으로
+    // 재사용한다(CMP-1186 scroll_50 선례와 동일 — 새 이름은 zod enum + DB CHECK +
+    // intm 배포가 별도로 필요해 배포 리스크가 커진다).
+    var QUALIFIED_VISIBLE_MS = 30000;
+    var QUALIFIED_TICK_MS = 250;
+    var QUALIFIED_SESSION_KEY = 'spacebogam_funnel_qualified30_sent';
+    if (!testSession && session && session.getItem(QUALIFIED_SESSION_KEY) !== 'true') {
+      var visibleAccumMs = 0;
+      var qualifiedTimer = window.setInterval(function(){
+        if (document.visibilityState !== 'visible') return;
+        visibleAccumMs += QUALIFIED_TICK_MS;
+        if (visibleAccumMs < QUALIFIED_VISIBLE_MS) return;
+        window.clearInterval(qualifiedTimer);
+        try { session.setItem(QUALIFIED_SESSION_KEY, 'true'); } catch(error) {}
+        send('engaged_session', {engagedSeconds: 30});
+        if (typeof window.fbq === 'function') {
+          window.fbq('trackCustom', 'QualifiedLanding30s', {
+            clientId: clientId,
+            sessionId: sessionId,
+            page_path: location.pathname,
+            utm_source: attribution.utm_source || '',
+            utm_medium: attribution.utm_medium || '',
+            utm_campaign: attribution.utm_campaign || '',
+            fbclid: attribution.fbclid || ''
+          });
+        }
+      }, QUALIFIED_TICK_MS);
+    }
+
     // CMP-1186: 25/50/75/100% 4구간을 잰다. eventName 은 intm DB CHECK 제약에 이미
     // 있는 'scroll_50' 을 그대로 재사용하고 scrollDepth 값으로만 구간을 구분한다.
     // 새 eventName(scroll_25 등)을 쓰려면 intm 쪽 스키마·DB 마이그레이션이 별도로
