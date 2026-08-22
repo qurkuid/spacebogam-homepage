@@ -27,6 +27,12 @@
  *     로 막아 두고, clinic 요청은 office 로 폴백한다. 응답이 오면 이 상수만 뒤집는다.
  *   - 미용실·필라테스는 VERTICALS 에 없다 — 정본에서 1차 범위 제외됐으므로 추가하지 않는다.
  *
+ * CMP-1315 Impeccable 재검증 반영 (2026-08-22 대표 결정):
+ *   - 사진(연출컷·플레이스홀더 포함) 일체 미사용 — 상업 시공 사례 0건이 이유다.
+ *   - shop 은 항목이 9개라 통화 장벽이 높다는 지적을 받아 askItems 대신 askGroups
+ *     (운영 방식 / 공간·일정 / 필수 설비 3그룹)로 렌더링한다. office/clinic 은 4개뿐이라
+ *     기존 askItems 평면 목록을 유지한다. render 쪽에서 askGroups 존재 여부로 분기한다.
+ *
  * sms: 콜백 링크 (.cc-sms, commercial/call/index.html) 클릭 계측:
  *   intm spacebogam_funnel_events_event_name_check CHECK 제약에 commercial_callback_click
  *   이 없어 그동안 400 이 났다. intm PR #61 로 열거형에 추가됐으므로 여기서 전송을 켠다.
@@ -73,23 +79,29 @@
     },
     shop: {
       eyebrow: '부산 카페·매장 인테리어',
-      lead: '업종, 전용면적, 오픈 희망일, 그리고 전기·급배수·환기·소방·간판 조건을 먼저 확인해야 공사 범위와 일정이 잡힙니다. 조건 확인 없이 금액부터 말씀드리지 않습니다.',
+      lead: '지금 매장을 어떤 방식으로 운영하실 계획인지부터 전화로 편하게 말씀해주세요. 급배수·환기·간판 같은 세부 조건은 통화에서 함께 확인합니다. 조건 확인 없이 금액부터 말씀드리지 않습니다.',
       whyTitle: '고객 동선과 주방·백룸 설비를 먼저 맞춥니다',
       cards: [
         ['설비 조건', '전기 용량, 급배수, 후드·환기, 소방, 간판·파사드를 도면보다 먼저 확인합니다.'],
         ['오픈 일정', '영업신고, 입점 가능일, 야간 공사 가능 여부에 맞춰 공정을 역산합니다.'],
         ['고객·직원 동선', '입구, 주문, 픽업, 좌석, 백룸 흐름이 체류 시간과 운영 피로도를 좌우합니다.']
       ],
-      askItems: [
-        ['업종', '운영 방식에 따라 동선과 설비가 달라집니다'],
-        ['면적', '전용면적과 층수, 엘리베이터 유무'],
-        ['오픈 희망일', '영업신고와 공정 일정'],
-        ['급배수', '주방·화장실 배관 조건'],
-        ['환기', '후드·덕트 설치 가능 여부'],
-        ['전기', '전기 용량과 배선 조건'],
-        ['소방', '소방시설 설치 기준'],
-        ['간판', '간판·파사드 규정'],
-        ['동선', '입구·주문·픽업·좌석 흐름']
+      askGroups: [
+        {
+          label: '운영 방식',
+          note: '무엇을 어떻게 운영하실지가 동선과 설비를 정합니다',
+          items: ['업종', '고객·직원 동선']
+        },
+        {
+          label: '공간·일정',
+          note: '필요한 면적과 오픈 희망일이 공정을 정합니다',
+          items: ['전용면적', '오픈 희망일']
+        },
+        {
+          label: '필수 설비',
+          note: '급배수·환기·전기·소방·간판은 개설 인허가와 직결됩니다',
+          items: ['급배수', '환기', '전기', '소방', '간판']
+        }
       ]
     }
   };
@@ -146,21 +158,47 @@
       });
     }
 
-    var askItems = v.askItems || [];
-    setText('cc-ask-title', '이 ' + askItems.length + '가지를 확인하면 공사 범위가 잡힙니다');
     var askList = document.getElementById('cc-asklist');
     if (askList) {
       askList.innerHTML = '';
-      askItems.forEach(function (pair) {
-        var li = document.createElement('li');
-        var b = document.createElement('b');
-        b.textContent = pair[0];
-        var span = document.createElement('span');
-        span.textContent = pair[1];
-        li.appendChild(b);
-        li.appendChild(span);
-        askList.appendChild(li);
-      });
+      if (v.askGroups && v.askGroups.length) {
+        askList.classList.add('cc-asklist--grouped');
+        setText('cc-ask-title', '이 ' + v.askGroups.length + '가지 큰 틀만 알려주시면 공사 범위가 잡힙니다');
+        v.askGroups.forEach(function (group) {
+          var li = document.createElement('li');
+          li.className = 'cc-askgroup';
+          var b = document.createElement('b');
+          b.textContent = group.label;
+          li.appendChild(b);
+          var note = document.createElement('span');
+          note.className = 'cc-askgroup-note';
+          note.textContent = group.note;
+          li.appendChild(note);
+          var ul = document.createElement('ul');
+          ul.className = 'cc-askgroup-items';
+          group.items.forEach(function (item) {
+            var tag = document.createElement('li');
+            tag.textContent = item;
+            ul.appendChild(tag);
+          });
+          li.appendChild(ul);
+          askList.appendChild(li);
+        });
+      } else {
+        askList.classList.remove('cc-asklist--grouped');
+        var askItems = v.askItems || [];
+        setText('cc-ask-title', '이 ' + askItems.length + '가지를 확인하면 공사 범위가 잡힙니다');
+        askItems.forEach(function (pair) {
+          var li = document.createElement('li');
+          var b = document.createElement('b');
+          b.textContent = pair[0];
+          var span = document.createElement('span');
+          span.textContent = pair[1];
+          li.appendChild(b);
+          li.appendChild(span);
+          askList.appendChild(li);
+        });
+      }
     }
 
     var title = {

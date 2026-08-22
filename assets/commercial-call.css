@@ -41,6 +41,8 @@ body.commercial-call{background:var(--paper);color:var(--ink)}
   padding:16px 24px;font-weight:650;line-height:1.3}
 .cc-primary-label{font-size:15px}
 .cc-primary-num{font-size:21px;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.cc-hero-callback{display:inline-block;margin:16px 0 0;font-size:14px;font-weight:650;
+  border-bottom:1px solid var(--ink);padding-bottom:3px}
 .cc-hours{margin:16px 0 0;font-size:13px;color:#69645b}
 
 /* ── 섹션 공통 ── */
@@ -52,14 +54,30 @@ body.commercial-call{background:var(--paper);color:var(--ink)}
 /* ── 통화에서 확인하는 것 — 박스 대신 헤어라인 목록 ── */
 .cc-asklist{list-style:none;counter-reset:cc;margin:0;padding:0;
   display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 clamp(28px,4vw,56px)}
-.cc-asklist li{counter-increment:cc;border-top:1px solid var(--line);padding:22px 0 24px}
-.cc-asklist li:before{content:counter(cc,decimal-leading-zero);
+.cc-asklist > li{counter-increment:cc;border-top:1px solid var(--line);padding:22px 0 24px}
+.cc-asklist > li:before{content:counter(cc,decimal-leading-zero);
   display:block;margin-bottom:10px;font-size:12px;letter-spacing:.12em;color:#69645b}
-.cc-asklist b{display:block;font-size:20px;font-weight:650;letter-spacing:-.025em}
-.cc-asklist span{display:block;margin-top:6px;font-size:14px;line-height:1.7;color:#69645b}
+.cc-asklist > li > b{display:block;font-size:20px;font-weight:650;letter-spacing:-.025em}
+.cc-asklist > li > span{display:block;margin-top:6px;font-size:14px;line-height:1.7;color:#69645b}
+
+/* ── 통화에서 확인하는 것 (그룹형, shop) — 9개 항목을 3그룹으로 축약 ── */
+.cc-asklist--grouped{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cc-askgroup-note{display:block;margin-top:6px;font-size:14px;line-height:1.7;color:#69645b}
+.cc-askgroup-items{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;padding:0}
+.cc-askgroup-items li{padding:6px 12px;font-size:13px;color:#59554d;
+  background:var(--paper);border:1px solid var(--line)}
 
 .cc-note{margin:clamp(28px,4vw,40px) 0 0;max-width:720px;font-size:15px;line-height:1.9;color:#59554d}
 .cc-note b{color:var(--ink);font-weight:650}
+
+/* ── 전화 상담 후 얻는 것 — 헤어라인 목록과 다른 리듬의 3단계 흐름 ── */
+.cc-steps{list-style:none;counter-reset:none;margin:0;padding:0;
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+.cc-steps li{position:relative;padding:0 clamp(20px,3vw,32px) 0 0}
+.cc-steps li + li{border-left:1px solid var(--line);padding-left:clamp(20px,3vw,32px)}
+.cc-steps b{display:block;font-size:13px;letter-spacing:.12em;color:#69645b;font-weight:650}
+.cc-steps strong{display:block;margin-top:14px;font-size:20px;font-weight:650;letter-spacing:-.025em}
+.cc-steps span{display:block;margin-top:10px;font-size:14px;line-height:1.8;color:#69645b}
 
 /* ── 공간보감 기준 — article.card 계약 유지, 박스는 제거 ── */
 .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 clamp(28px,4vw,56px)}
@@ -109,11 +127,15 @@ body.commercial-call{background:var(--paper);color:var(--ink)}
 
 @media(max-width:900px){
   .cards{grid-template-columns:1fr}
+  .cc-steps{grid-template-columns:1fr;gap:28px 0}
+  .cc-steps li + li{border-left:0;border-top:1px solid var(--line);padding-left:0;padding-top:24px}
 }
 @media(max-width:760px){
   .cc-wrap{width:min(1040px,calc(100% - 40px))}
   .cc-asklist{grid-template-columns:1fr}
+  .cc-asklist--grouped{grid-template-columns:1fr}
   .cc-primary{display:flex;width:100%;align-items:flex-start}
+  .cc-hero-callback{display:block}
   .cc-secondary{display:flex;width:100%}
 }
 @media(max-width:600px){
