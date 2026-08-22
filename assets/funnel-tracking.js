@@ -459,6 +459,25 @@
     };
   }
 
+  // CMP-1315: phone_click은 Meta 최적화 이벤트이자 CPL 분모다. header/hero/sticky 등
+  // CTA 여러 개를 한 세션에서 누르면 중복 집계돼 가드레일 판정이 부풀려진다.
+  // 세션당 1회로 제한 — sessionStorage 접근이 던지면(사파리 등) 열어둔 채로 보낸다.
+  var PHONE_CLICK_SESSION_KEY = 'spacebogam_funnel_phone_click_sent';
+
+  function phoneClickAlreadySent(){
+    try {
+      return !!session && session.getItem(PHONE_CLICK_SESSION_KEY) === 'true';
+    } catch(error) {
+      return false;
+    }
+  }
+
+  function markPhoneClickSent(){
+    try {
+      if (session) session.setItem(PHONE_CLICK_SESSION_KEY, 'true');
+    } catch(error) {}
+  }
+
   function handleClick(event){
     var target = event.target;
     if (!(target instanceof Element)) return;
@@ -478,7 +497,10 @@
       return;
     }
     if (url.protocol === 'tel:') {
-      send('phone_click', clickDetail(anchor));
+      if (!phoneClickAlreadySent()) {
+        markPhoneClickSent();
+        send('phone_click', clickDetail(anchor));
+      }
       return;
     }
     if (url.hostname === 'pf.kakao.com') {

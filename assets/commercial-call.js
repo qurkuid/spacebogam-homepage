@@ -222,11 +222,33 @@
     });
   }
 
+  // CMP-1315: funnel-tracking.js 의 phone_click 과 나란히 나가는 Meta Pixel도 같은
+  // 이유로 세션당 1회만 쏴야 한다 — 안 그러면 이 커스텀 이벤트를 보는 최적화·CPL
+  // 판단이 CTA 여러 번 클릭에 부풀려진다. sessionStorage 접근이 던지면 열어둔 채
+  // 보낸다(막는 게 목적이 아니라 정상 케이스의 중복만 줄이는 것).
+  var PHONE_PIXEL_SESSION_KEY = 'spacebogam_commercial_phone_pixel_sent';
+
+  function phonePixelAlreadySent() {
+    try {
+      return window.sessionStorage && window.sessionStorage.getItem(PHONE_PIXEL_SESSION_KEY) === 'true';
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function markPhonePixelSent() {
+    try {
+      if (window.sessionStorage) window.sessionStorage.setItem(PHONE_PIXEL_SESSION_KEY, 'true');
+    } catch (error) {}
+  }
+
   function wireTelPixel() {
     var links = document.querySelectorAll('a[href^="tel:"]');
     Array.prototype.forEach.call(links, function (link) {
       link.addEventListener('click', function () {
         if (typeof window.fbq !== 'function') return;
+        if (phonePixelAlreadySent()) return;
+        markPhonePixelSent();
         window.fbq('trackCustom', 'phone_click', {
           vertical: document.body.getAttribute('data-commercial-vertical') || 'office',
           cta_location: link.getAttribute('data-cta-location') || 'phone_link',
