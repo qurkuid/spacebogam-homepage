@@ -9,7 +9,11 @@
  *   덮어쓴다(항상 home_a_default / home_b_visit_stage_standard). 업종을 거기 실으면
  *   유실된다. utm_content 는 수집기가 원문 그대로 저장하므로 업종 분해가 가능하다.
  *
- * phone_click 은 funnel-tracking.js 가 tel: 링크 클릭에서 자동 전송한다.
+ * phone_click 은 funnel-tracking.js 가 tel: 링크 클릭에서 내부 funnel_events 수집기로
+ * 자동 전송한다(그대로 유지). 이 페이지는 site-tracking.js 를 로드하지 않아 Meta Pixel
+ * 쪽 trackCustom 호출이 빠져 있었다(CMP-1323, CMP-1317에서 실측 발견). wireTelPixel() 이
+ * 같은 tel: 클릭에서 fbq('trackCustom','phone_click', ...) 을 병행 발화한다 — 대체가 아니라
+ * funnel-tracking.js 전송과 나란히 나가는 것이다.
  * data-cta-location 값이 ctaLocation 으로 그대로 들어간다.
  * 연결 실패용 콜백 폼은 assets/commercial-call-callback.js 가 별도로 담당한다
  * (성함/연락처만 받는 최소 폼, lead_form_view/lead_form_start/lead_submit_success —
@@ -180,10 +184,26 @@
     });
   }
 
+  function wireTelPixel() {
+    var links = document.querySelectorAll('a[href^="tel:"]');
+    Array.prototype.forEach.call(links, function (link) {
+      link.addEventListener('click', function () {
+        if (typeof window.fbq !== 'function') return;
+        window.fbq('trackCustom', 'phone_click', {
+          vertical: document.body.getAttribute('data-commercial-vertical') || 'office',
+          cta_location: link.getAttribute('data-cta-location') || 'phone_link',
+          phone_target: (link.getAttribute('href') || '').replace(/^tel:/, ''),
+          page: location.pathname
+        });
+      });
+    });
+  }
+
   function init() {
     var key = readVertical() || 'office';
     apply(key);
     wireSmsCallback();
+    wireTelPixel();
   }
 
   if (document.readyState === 'loading') {
