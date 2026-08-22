@@ -67,6 +67,19 @@
     }
   }
 
+  // CMP-1259: gtag.js 측정 ID를 하드코딩하지 않고 _ga 쿠키에서 GA4 client_id만
+  // 읽는다(형식 GA1.<버전>.<clientId>, 뒤 두 세그먼트가 client_id). 값이 없으면
+  // 빈 문자열 — PII 아님, 순수 GA4 익명 식별자.
+  function ga4ClientId(){
+    try {
+      var match = document.cookie.match(/(?:^|;\s*)_ga=([^;]+)/);
+      if (!match) return '';
+      var parts = decodeURIComponent(match[1]).split('.');
+      if (parts.length >= 4) return parts[2] + '.' + parts[3];
+    } catch(error) {}
+    return '';
+  }
+
   function storedAttribution(storage){
     try {
       var stored = storage ? JSON.parse(storage.getItem(ATTRIBUTION_KEY) || 'null') : null;
@@ -482,12 +495,12 @@
       }
     }, 10000);
 
-    // CMP-1259: 광고 도착 페이지 30초 "누적 가시" 체류. 위 10초 타이머는 단순
-    // wall-clock + 발화시점 1회 검사라 백그라운드 탭 방치를 못 거른다. 여기는
-    // document.visibilityState==='visible' 구간만 250ms 틱으로 누적한다.
-    // eventName 은 신규로 만들지 않고 기존 'engaged_session' 을 engagedSeconds:30 으로
-    // 재사용한다(CMP-1186 scroll_50 선례와 동일 — 새 이름은 zod enum + DB CHECK +
-    // intm 배포가 별도로 필요해 배포 리스크가 커진다).
+    // CMP-1259 v2 (대표 실측 확인 후 범위 축소, CMP-1256 코멘트 참고): GA4/Clarity가
+    // 이미 라이브에서 체류를 잡고 있어 INTM 신규 전송은 폐기했다. 여기서 남은 건
+    // Meta 입찰 신호용 픽셀 이벤트 하나뿐이다 — Meta 최적화는 자기 픽셀이 받은
+    // 이벤트만 학습하므로 GA4/Clarity 데이터는 대체가 안 된다.
+    // document.visibilityState==='visible' 구간만 250ms 틱으로 누적, 30000ms 도달시
+    // 세션당 1회(sessionStorage). PII 없이 utm/fbclid 유무/GA4 client_id만 전송한다.
     var QUALIFIED_VISIBLE_MS = 30000;
     var QUALIFIED_TICK_MS = 250;
     var QUALIFIED_SESSION_KEY = 'spacebogam_funnel_qualified30_sent';
@@ -499,16 +512,14 @@
         if (visibleAccumMs < QUALIFIED_VISIBLE_MS) return;
         window.clearInterval(qualifiedTimer);
         try { session.setItem(QUALIFIED_SESSION_KEY, 'true'); } catch(error) {}
-        send('engaged_session', {engagedSeconds: 30});
         if (typeof window.fbq === 'function') {
           window.fbq('trackCustom', 'QualifiedLanding30s', {
-            clientId: clientId,
-            sessionId: sessionId,
             page_path: location.pathname,
             utm_source: attribution.utm_source || '',
             utm_medium: attribution.utm_medium || '',
             utm_campaign: attribution.utm_campaign || '',
-            fbclid: attribution.fbclid || ''
+            hasFbclid: !!attribution.fbclid,
+            ga4ClientId: ga4ClientId()
           });
         }
       }, QUALIFIED_TICK_MS);
