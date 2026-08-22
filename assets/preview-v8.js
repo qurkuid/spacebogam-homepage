@@ -8,6 +8,9 @@
   // CMP-1038 머지 시점의 옛 실측(등록 전)을 그대로 베껴 써서 빠져 있었다 — 그 결과
   // 서버는 수용 가능한데 클라이언트가 애초에 안 보내는 상태였다. 2026-08-22 재실측
   // 기준 202 로 수용되는 이름들.
+  // CMP-1289: 블로그·시공사례·프로세스 페이지에 data-v8-event 마크업을 붙이며
+  // 같은 클라이언트 allowlist 드리프트를 그대로 반복하지 않도록 서버가 이미
+  // 202 로 수용 확인한 5개 이름을 함께 등록한다.
   var FUNNEL_ALLOWED={
     home_portfolio_cta_click:1,
     portfolio_project_open:1,
@@ -16,7 +19,12 @@
     case_consult_click:1,
     home_hero_consult_cta_click:1,
     home_case_carousel_consult_click:1,
-    home_story_consult_click:1
+    home_story_consult_click:1,
+    blog_consult_click:1,
+    blog_filter_select:1,
+    blog_naver_source_open:1,
+    case_related_story_open:1,
+    portfolio_related_story_open:1
   };
 
   document.addEventListener('click',function(event){
