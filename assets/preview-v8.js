@@ -3,13 +3,20 @@
 
   // CMP-1038: intm 수집기(funnel-events)가 이름을 서버 스키마+DB CHECK 로 검증한다.
   // 여기 없는 이름을 보내면 전량 400 이므로, 미등록 이름은 GA4 로만 보낸다.
-  // 2026-08-22 실측 기준 202 로 수용되는 이름들.
+  // CMP-1272: 홈 히어로/캐러셀/스토리 CTA 3종은 서버 쪽 allowlist(contracts.ts
+  // funnelEventNameSchema + DB CHECK, PR#55)가 이미 등록을 마쳤는데 이 목록만
+  // CMP-1038 머지 시점의 옛 실측(등록 전)을 그대로 베껴 써서 빠져 있었다 — 그 결과
+  // 서버는 수용 가능한데 클라이언트가 애초에 안 보내는 상태였다. 2026-08-22 재실측
+  // 기준 202 로 수용되는 이름들.
   var FUNNEL_ALLOWED={
     home_portfolio_cta_click:1,
     portfolio_project_open:1,
     portfolio_consult_click:1,
     blog_case_open:1,
-    case_consult_click:1
+    case_consult_click:1,
+    home_hero_consult_cta_click:1,
+    home_case_carousel_consult_click:1,
+    home_story_consult_click:1
   };
 
   document.addEventListener('click',function(event){
