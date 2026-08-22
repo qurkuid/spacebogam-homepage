@@ -44,6 +44,12 @@
         ['오픈 일정', '의료기관 개설 신고와 입점 가능일에 맞춰 공정을 역산합니다.'],
         ['환자·직원 동선', '대기, 접수, 상담, 진료, 수납 흐름과 프라이버시를 함께 봅니다.']
       ],
+      askItems: [
+        ['진료과목', '운영 방식에 따라 대기·진료 동선이 달라집니다'],
+        ['전용면적', '층수와 엘리베이터 유무'],
+        ['오픈 희망일', '의료기관 개설 신고 일정과 맞물립니다'],
+        ['급배수·환기·소방·의료가스', '개설 신고 심사 항목과 직결됩니다']
+      ]
     },
     office: {
       eyebrow: '부산 사무실 인테리어',
@@ -54,6 +60,12 @@
         ['입주 일정', '건물 관리규정과 야간·주말 공사 가능 여부에 맞춰 공정을 역산합니다.'],
         ['업무 동선', '고정석, 회의실, 집중석, 라운지 비율이 입주 이후 운영을 결정합니다.']
       ],
+      askItems: [
+        ['좌석 수', '좌석 배치와 필요 면적을 좌우합니다'],
+        ['회의실', '규모·개수와 방음·화상회의 조건'],
+        ['전기·통신', '전기 용량과 통신·네트워크 배선'],
+        ['이전 희망일', '건물 관리규정과 공정 일정']
+      ]
     },
     shop: {
       eyebrow: '부산 카페·매장 인테리어',
@@ -64,6 +76,17 @@
         ['오픈 일정', '영업신고, 입점 가능일, 야간 공사 가능 여부에 맞춰 공정을 역산합니다.'],
         ['고객·직원 동선', '입구, 주문, 픽업, 좌석, 백룸 흐름이 체류 시간과 운영 피로도를 좌우합니다.']
       ],
+      askItems: [
+        ['업종', '운영 방식에 따라 동선과 설비가 달라집니다'],
+        ['면적', '전용면적과 층수, 엘리베이터 유무'],
+        ['오픈 희망일', '영업신고와 공정 일정'],
+        ['급배수', '주방·화장실 배관 조건'],
+        ['환기', '후드·덕트 설치 가능 여부'],
+        ['전기', '전기 용량과 배선 조건'],
+        ['소방', '소방시설 설치 기준'],
+        ['간판', '간판·파사드 규정'],
+        ['동선', '입구·주문·픽업·좌석 흐름']
+      ]
     }
   };
 
@@ -116,6 +139,23 @@
         article.appendChild(b);
         article.appendChild(p);
         wrap.appendChild(article);
+      });
+    }
+
+    var askItems = v.askItems || [];
+    setText('cc-ask-title', '이 ' + askItems.length + '가지를 확인하면 공사 범위가 잡힙니다');
+    var askList = document.getElementById('cc-asklist');
+    if (askList) {
+      askList.innerHTML = '';
+      askItems.forEach(function (pair) {
+        var li = document.createElement('li');
+        var b = document.createElement('b');
+        b.textContent = pair[0];
+        var span = document.createElement('span');
+        span.textContent = pair[1];
+        li.appendChild(b);
+        li.appendChild(span);
+        askList.appendChild(li);
       });
     }
 
