@@ -504,7 +504,17 @@
     var QUALIFIED_VISIBLE_MS = 30000;
     var QUALIFIED_TICK_MS = 250;
     var QUALIFIED_SESSION_KEY = 'spacebogam_funnel_qualified30_sent';
-    if (!testSession && session && session.getItem(QUALIFIED_SESSION_KEY) !== 'true') {
+    // 저장소가 열려는 있으나 read/write 가 SecurityError 를 던지는 브라우저가 있다
+    // (사파리 '모든 쿠키 차단', 일부 인앱 웹뷰). 이 파일의 다른 저장소 접근은 전부
+    // try 로 감싸져 있는데 이 한 줄만 노출돼 있어, 던지면 init() 이 통째로 죽고
+    // 바로 아래 CMP-1186 스크롤 계측 등록까지 함께 사라진다(헤드리스 재현 확인).
+    var qualifiedAlreadySent = true;
+    try {
+      qualifiedAlreadySent = !session || session.getItem(QUALIFIED_SESSION_KEY) === 'true';
+    } catch(error) {
+      qualifiedAlreadySent = true;
+    }
+    if (!testSession && !qualifiedAlreadySent) {
       var visibleAccumMs = 0;
       var qualifiedTimer = window.setInterval(function(){
         if (document.visibilityState !== 'visible') return;
