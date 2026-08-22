@@ -63,7 +63,49 @@ if (window.wcs) {
   window.__spacebogamNaverCtsPvSent = true;
 }
 </script>
+<!--
+  CMP-1295 — 광고 각도별 메시지매치.
+  CMP-1280 광고 A/B/C/D 를 클릭한 사람이 첫 화면에서 광고에서 본 문장을 그대로 다시 본다.
+  설계 원칙 세 가지. 이걸 어기면 회귀다.
+   1) 카피 5벌(기본 + A~D)이 모두 HTML 에 들어있고 CSS 가 하나만 고른다.
+      자바스크립트로 글자를 갈아끼우지 않는다 — 그리다 만 화면이 보이지 않는다.
+   2) 스크립트는 URL 파라미터만 읽는다. sessionStorage/localStorage 를 건드리지 않는다
+      (CMP-1245 계열 회귀: 저장소 접근이 throw 하면 init 이 통째로 죽는다).
+   3) 파라미터가 없거나 모르는 값이면 아무것도 하지 않는다 → 지금 라이브와 100% 동일한 화면.
+      자바스크립트가 꺼져 있어도 마찬가지다.
+  폼은 손대지 않는다. 질문·필수항목·제출 경로 전부 그대로다.
+-->
 <style>
+.mm-angle{display:none}
+html[data-ad-angle] .mm-default{display:none}
+html[data-ad-angle="a"] .mm-a,
+html[data-ad-angle="b"] .mm-b,
+html[data-ad-angle="c"] .mm-c,
+html[data-ad-angle="d"] .mm-d{display:block}
+/* 남겨주신 정보 → 상담 결과 안내 블록 */
+.mm-bridge{margin:26px 0 0;padding:20px 22px;border:1px solid var(--line);border-radius:20px;background:var(--paper)}
+.mm-bridge h2{font-size:17px;font-weight:600;margin:0 0 14px;letter-spacing:-.03em}
+.mm-list{list-style:none;display:grid;gap:10px;margin:0;padding:0}
+.mm-list li{display:grid;grid-template-columns:1fr;gap:2px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.mm-list b{font-size:14px;font-weight:600}
+.mm-list span{font-size:13.5px;color:var(--soft);line-height:1.55}
+html[data-ad-angle="a"] .mm-list li.mm-i-a,
+html[data-ad-angle="b"] .mm-list li.mm-i-b,
+html[data-ad-angle="c"] .mm-list li.mm-i-c{order:-1;border-color:var(--brown);box-shadow:0 0 0 1px var(--brown)}
+.mm-note{margin:14px 0 0;font-size:12.5px;color:var(--soft);line-height:1.55}
+/* D — 실제 시공 사례 스트립 */
+.mm-cases{display:none}
+html[data-ad-angle="d"] .mm-cases{display:block;margin:24px 0 0}
+.mm-case-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mm-case-grid a{display:block;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
+/* 사진 상자의 크기는 부모가 정하고 img 는 그 안을 채운다. img 에 aspect-ratio 만 걸면
+   width/height 속성이 만든 UA 비율에 밀려 세로 사진이 그대로 늘어난다(실측). */
+.mm-case-thumb{display:block;width:100%;height:104px;overflow:hidden;background:var(--paper)}
+.mm-case-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.mm-case-grid b{display:block;font-size:12.5px;font-weight:600;padding:8px 10px 2px;letter-spacing:-.03em}
+.mm-case-grid span{display:block;font-size:11.5px;color:var(--soft);padding:0 10px 10px}
+.mm-case-more{display:inline-flex;margin-top:12px;border:1px solid var(--line);border-radius:999px;padding:9px 15px;font-size:13.5px;background:#fff}
+@media(min-width:900px){.mm-case-thumb{height:150px}}
 .cf-form{max-width:680px}
 .cf-group{margin:0 0 28px}
 .cf-group-title{font-size:1.05rem;margin:0 0 18px;padding-bottom:10px;border-bottom:1px solid rgba(0,0,0,.12)}
@@ -94,6 +136,26 @@ if (window.wcs) {
 .cf-loading{color:var(--soft,#6b6b6b)}
 @media (min-width:720px){.cf-submit{width:auto;min-width:280px}}
 </style>
+<script>
+/* CMP-1295 — 광고 각도 판별. head 에서 동기 실행해 본문이 그려지기 전에 결정한다.
+   저장소를 읽지 않고, 실패하면 조용히 기본 카피로 남는다. */
+(function(){
+  var MAP = {
+    ad_a_structure: 'a',
+    ad_b_budget: 'b',
+    ad_c_schedule: 'c',
+    ad_d_proof: 'd'
+  };
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var raw = params.get('page_variant') || params.get('variant') || params.get('utm_content') || '';
+    var angle = MAP[String(raw).trim().toLowerCase()];
+    if (angle) document.documentElement.setAttribute('data-ad-angle', angle);
+  } catch (error) {
+    /* 파라미터를 못 읽으면 기본 카피 그대로. 계측·폼과는 무관하다. */
+  }
+})();
+</script>
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -106,9 +168,71 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <section class="hero">
     <div class="wrap">
       <div class="crumb"><a href="/">홈</a> / <a href="/consultation/">상담</a> / 신청</div>
-      <div class="eyebrow">CONSULTATION · 상담 신청</div>
-      <h1>지금 상황만 적어주시면<br>나머지는 저희가 정리해 드립니다.</h1>
-      <p class="lead">필수 항목만 채우셔도 접수됩니다. 남겨주신 연락처로 담당자가 연락드리고, 필요한 내용은 통화에서 함께 정리합니다. 상담만으로 계약이 진행되지는 않습니다.</p>
+
+      <!-- 기본(광고 파라미터 없음) — 현행 라이브와 동일 -->
+      <div class="mm-default">
+        <div class="eyebrow">CONSULTATION · 상담 신청</div>
+        <h1>지금 상황만 적어주시면<br>나머지는 저희가 정리해 드립니다.</h1>
+        <p class="lead">필수 항목만 채우셔도 접수됩니다. 남겨주신 연락처로 담당자가 연락드리고, 필요한 내용은 통화에서 함께 정리합니다. 상담만으로 계약이 진행되지는 않습니다.</p>
+      </div>
+
+      <!-- A. 구조·동선 -->
+      <div class="mm-angle mm-a">
+        <div class="eyebrow">CONSULTATION · 구조 상담 신청</div>
+        <h1>구조부터 살펴야,<br>공사 범위가 보입니다</h1>
+        <p class="lead">시공하실 공간과 공급평형을 남겨주시면, 1차 상담에서 우리 집 구조와 동선을 기준으로 공사 범위를 함께 정리해 드립니다. 상담만으로 구조를 바꿀 수 있는지, 공사가 가능한지는 정해지지 않습니다.</p>
+      </div>
+
+      <!-- B. 예산·우선순위 -->
+      <div class="mm-angle mm-b">
+        <div class="eyebrow">CONSULTATION · 예산 상담 신청</div>
+        <h1>예산 안에서 가능한<br>범위부터 정해요</h1>
+        <p class="lead">예산 구간과 가장 중요하게 보시는 부분을 남겨주시면, 1차 상담에서 그 예산 안의 우선순위를 함께 정리해 드립니다. 정확한 견적은 현장 실측 이후에 안내드립니다.</p>
+      </div>
+
+      <!-- C. 일정·입주 -->
+      <div class="mm-angle mm-c">
+        <div class="eyebrow">CONSULTATION · 일정 상담 신청</div>
+        <h1>입주 일정에 맞춰<br>시작할 수 있을까요</h1>
+        <p class="lead">시공 희망 시기와 상담 가능한 날짜·시간을 남겨주시면, 1차 상담에서 일정에 맞춰 진행이 가능한지와 남은 준비 기간을 함께 확인해 드립니다. 착공일·완공일을 보장해 드리지는 않습니다.</p>
+      </div>
+
+      <!-- D. 실사·신뢰 -->
+      <div class="mm-angle mm-d">
+        <div class="eyebrow">CONSULTATION · 사례 확인 후 상담 신청</div>
+        <h1>부산 아파트,<br>실제 시공 사례로 확인</h1>
+        <p class="lead">광고에서 보신 사진은 공간보감이 실제로 시공한 부산 아파트 현장입니다. 사례를 먼저 보시고, 우리 집 조건으로 상담을 신청하세요.</p>
+      </div>
+
+      <!-- D 전용 — 실제 시공 사례 스트립 -->
+      <div class="mm-cases">
+        <div class="mm-case-grid">
+          <a href="/case-mega-centum-49py.html">
+            <span class="mm-case-thumb"><img src="/assets/portfolio/mega-centum-49py.jpg" alt="부산 해운대 메가센텀꿈에그린 49평 인테리어 시공 사례" loading="lazy" width="480" height="360"></span>
+            <b>메가센텀꿈에그린 49평</b><span>부산 해운대</span>
+          </a>
+          <a href="/case-daewoo-ian-35py.html">
+            <span class="mm-case-thumb"><img src="/assets/portfolio/daewoo-ian-35py.jpg" alt="부산 북구 대우이안 아파트 35평 인테리어 시공 사례" loading="lazy" width="480" height="360"></span>
+            <b>대우이안 35평</b><span>부산 북구</span>
+          </a>
+          <a href="/case-oryukdo-sk-view.html">
+            <span class="mm-case-thumb"><img src="/assets/case/2d965ba4-64ad-4d62-a7c3-8902b41e321c/9231405c-0b87-40ea-bc8f-323d8756ae16.webp" alt="부산 남구 오륙도 SK뷰 인테리어 시공 사례" loading="lazy" width="480" height="360"></span>
+            <b>오륙도 SK뷰</b><span>부산 남구</span>
+          </a>
+        </div>
+        <a class="mm-case-more" href="/portfolio.html">시공 사례 전체 보기 ›</a>
+      </div>
+
+      <!-- 공통 — 남겨주신 정보가 상담에서 어떻게 쓰이는지 -->
+      <div class="mm-bridge">
+        <h2>남겨주신 정보로 이렇게 상담해 드립니다</h2>
+        <ul class="mm-list">
+          <li class="mm-i-a"><b>시공 장소 · 공급평형</b><span>우리 집 구조와 동선 기준으로 어디까지 공사할지 범위를 정리해 드립니다.</span></li>
+          <li class="mm-i-b"><b>예산 구간 · 중요하게 보는 부분</b><span>그 예산 안에서 무엇을 먼저 할지 우선순위를 함께 정합니다.</span></li>
+          <li class="mm-i-c"><b>시공 희망 시기 · 상담 날짜</b><span>희망하시는 일정에 맞춰 진행이 가능한지와 준비 기간을 확인해 드립니다.</span></li>
+        </ul>
+        <p class="mm-note">필수 항목만 채우셔도 접수됩니다. 남겨주신 연락처로 담당자가 연락드리고, 나머지는 통화에서 함께 정리합니다. 상담만으로 계약이 진행되지 않으며, 정확한 견적은 현장 실측 이후에 안내해 드립니다.</p>
+      </div>
     </div>
   </section>
 
