@@ -335,6 +335,13 @@
     post(payload, 0);
   }
 
+  // CMP-1038: preview-v8.js 의 V8 클릭 표식이 이 수집기로 직접 보낼 수 있도록 노출한다.
+  // GTM 게시 경로에 의존하지 않기 위한 것이며, isTest 세션 표식이 send() 안에서
+  // 함께 붙기 때문에 검증 세션이 실집계를 오염하지 않는다(CMP-1110 동반 해결).
+  // init() 보다 앞에 두어, init() 가 storage 예외로 죽더라도 노출은 살아남게 한다.
+  window.spacebogamFunnel = window.spacebogamFunnel || {};
+  window.spacebogamFunnel.send = send;
+
   // 전송 실패를 조용히 삼키지 않는다. 재시도 1회 + 관측 가능한 신호를 남긴다. (CMP-141)
   function reportFailure(payload, reason){
     var record = {
