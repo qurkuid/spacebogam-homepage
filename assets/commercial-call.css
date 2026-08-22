@@ -1,0 +1,50 @@
+/* CMP-1312 상업공간 전용 전화상담 랜딩 */
+body.commercial-call{background:var(--bg)}
+body.commercial-call .top .wrap{justify-content:space-between}
+
+.cc-hero{padding:44px 0 40px}
+.cc-hero h1{font-size:clamp(28px,5.2vw,46px);line-height:1.16;letter-spacing:-.045em;font-weight:620;margin:14px 0 18px}
+.cc-hero .lead{font-size:17px;word-break:keep-all}
+
+.cc-primary{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+  margin-top:26px;min-height:64px;padding:12px 30px;border-radius:999px;
+  background:var(--brown);color:#fff;font-weight:800;line-height:1.25;
+  box-shadow:0 16px 40px rgba(176,103,67,.28)}
+.cc-primary-label{font-size:17px}
+.cc-primary-label:before{content:"☎";margin-right:8px}
+.cc-primary-num{font-size:20px;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.cc-hours{margin:14px 0 0;font-size:14px;color:var(--soft)}
+
+.cc-ask .kicker,.cc-why .kicker,.cc-fallback .kicker{margin-bottom:8px}
+.cc-ask h2,.cc-why h2,.cc-fallback h2{font-size:clamp(21px,2.6vw,30px);line-height:1.24;font-weight:560;margin:0 0 22px}
+
+.cc-asklist{list-style:none;counter-reset:cc;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.cc-asklist li{counter-increment:cc;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px 16px 52px;position:relative}
+.cc-asklist li:before{content:counter(cc);position:absolute;left:16px;top:16px;width:24px;height:24px;border-radius:50%;
+  background:var(--brown);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.cc-asklist b{display:block;font-size:17px;font-weight:620}
+.cc-asklist span{display:block;font-size:14px;color:var(--soft);margin-top:3px;word-break:keep-all}
+
+.cc-note{margin:20px 0 0;color:var(--soft);font-size:15px;word-break:keep-all}
+.cc-note b{color:var(--ink)}
+
+.cc-secondary{display:inline-flex;align-items:center;justify-content:center;margin-top:18px;
+  min-height:52px;padding:0 24px;border-radius:999px;border:1px solid var(--line);
+  background:#fff;color:var(--ink);font-weight:700}
+
+footer .cc-fine{font-size:13px;opacity:.72;margin:6px 0 0}
+footer .cc-fine a{text-decoration:underline}
+
+/* 모바일 고정 전화 CTA — 단일 버튼 */
+body.commercial-call .spacebogam-mobile-actions{grid-template-columns:1fr}
+body.commercial-call .cc-sticky{font-size:17px;letter-spacing:.01em}
+
+@media(max-width:760px){
+  .cc-asklist{grid-template-columns:1fr}
+  .cc-primary{display:flex;width:100%}
+  .cc-secondary{display:flex;width:100%}
+}
+@media(max-width:600px){
+  body.commercial-call{padding-bottom:96px}
+  .cc-hero{padding:30px 0 32px}
+}
