@@ -84,6 +84,7 @@ body.commercial-call{background:var(--paper);color:var(--ink)}
 .cards .card{border-top:1px solid var(--line);padding:22px 0 24px;background:none;border-radius:0}
 .cards .card b{display:block;font-size:20px;font-weight:650;letter-spacing:-.025em}
 .cards .card p{margin:8px 0 0;font-size:15px;line-height:1.8;color:#69645b}
+.cc-honesty{margin:clamp(28px,4vw,40px) 0 0;max-width:640px;font-size:14px;line-height:1.8;color:#69645b;border-top:1px solid var(--line);padding-top:22px}
 
 /* ── 콜백 폼 — 밑줄 입력, 사각 ── */
 .cc-sms{display:inline-block;margin:0 0 32px;font-weight:650;
@@ -95,7 +96,7 @@ body.commercial-call{background:var(--paper);color:var(--ink)}
 .cc-input{width:100%;box-sizing:border-box;padding:12px 0;font:inherit;font-size:16px;
   color:var(--ink);background:none;border:0;border-bottom:1px solid var(--line);border-radius:0}
 .cc-input::placeholder{color:#a09a90}
-.cc-input:focus{outline:0;border-bottom-color:var(--ink)}
+.cc-input:focus{outline:2px solid var(--ink);outline-offset:2px;border-bottom-color:var(--ink)}
 .cc-input[aria-invalid="true"]{border-bottom-color:#8c2f22}
 .cc-choices{display:flex;flex-wrap:wrap;gap:12px 24px;margin-top:4px}
 .cc-choice{display:inline-flex;align-items:flex-start;gap:9px;line-height:1.6;cursor:pointer;font-size:15px}
@@ -139,7 +140,7 @@ body.commercial-call{background:var(--paper);color:var(--ink)}
   .cc-secondary{display:flex;width:100%}
 }
 @media(max-width:600px){
-  body.commercial-call{padding-bottom:74px}
+  body.commercial-call{padding-bottom:calc(74px + env(safe-area-inset-bottom))}
   .cc-header{height:60px;padding:0 20px}
   .cc-header .cc-tel{display:none}
   .cc-sticky-bar{display:block}
