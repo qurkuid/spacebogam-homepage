@@ -1,0 +1,147 @@
+/* CMP-1312 상업공간 전용 전화상담 랜딩 — 공간보감 브랜드 정본(preview-v8) 위에 작성.
+ *
+ * 브랜드 정본 출처: spacebogam.kr 라이브 홈(index.html)이 로드하는 assets/preview-v8.css.
+ *   폰트  SUIT Variable (자체 호스팅). 제목 weight 400, 강조 650, 브랜드마크 700.
+ *   색    --paper #f6f3ed / --ink #1e1d1a / --line #d9d4ca, 보조텍스트 #69645b·#59554d.
+ *         액센트 색이 없다. 갈색(#b06743)·테라코타 계열을 쓰지 않는다.
+ *   형태  직각. 알약(border-radius:999px)·드롭섀도·그라데이션을 쓰지 않는다.
+ *   CTA   ink 채움 사각 버튼(.v8-story-consult) 또는 밑줄 링크(.v8-story a).
+ *
+ * 2026-08-22 대표 브랜드 FAIL 사유: 이전 판은 assets/commercial.css(레거시 4개 페이지
+ * 전용 고아 팔레트)를 로드해 갈색 알약 버튼·weight 800·크림 카드박스·시스템 폰트로
+ * 렌더됐다. 라이브 홈과 다른 브랜드로 보였다. 이 파일은 commercial.css에 의존하지 않는다.
+ *
+ * DOM 계약(assets/commercial-call.js / -callback.js)은 그대로 유지한다:
+ *   #cc-eyebrow #cc-lead #cc-ask-title #cc-asklist(li>b+span)
+ *   #cc-why-title #cc-why-cards(article.card>b+p) #cc-callback-root
+ *   a[href^="tel:"] · a.cc-sms[href^="sms:"] · data-cta-location · data-v8-event
+ */
+
+body.commercial-call{background:var(--paper);color:var(--ink)}
+
+.cc-wrap{width:min(1040px,calc(100% - 64px));margin:0 auto}
+
+/* ── 상단바 — .v8-header와 같은 규격 ── */
+.cc-header{height:74px;padding:0 clamp(22px,4vw,64px);display:flex;align-items:center;
+  justify-content:space-between;gap:24px;border-bottom:1px solid var(--line);background:var(--paper)}
+.cc-brand{font-weight:700;letter-spacing:-.04em;font-size:19px}
+.cc-header .cc-tel{font-size:14px;font-weight:650;border-bottom:1px solid var(--ink);padding-bottom:4px;white-space:nowrap}
+
+/* ── 히어로 ──
+   라이브 홈은 사진 전면 히어로다. 상업 시공 사례 사진이 0장이라(2026-08-22 INTM 실측)
+   연출컷 대신 v8 포트폴리오/프로젝트 페이지의 타이포 히어로 규격을 쓴다. */
+.cc-hero{padding:clamp(48px,9vw,96px) 0 clamp(40px,7vw,72px)}
+.cc-eyebrow{margin:0 0 16px;font-size:13px;letter-spacing:.12em;color:#69645b}
+.cc-hero h1{margin:0 0 24px;font-size:clamp(34px,6.4vw,58px);font-weight:400;
+  line-height:1.14;letter-spacing:-.04em}
+.cc-lead{margin:0 0 36px;max-width:720px;font-size:clamp(15px,1.3vw,17px);line-height:1.9;color:#59554d}
+
+.cc-primary{display:inline-flex;flex-direction:column;gap:4px;
+  background:var(--ink);color:var(--paper);border:1px solid var(--ink);
+  padding:16px 24px;font-weight:650;line-height:1.3}
+.cc-primary-label{font-size:15px}
+.cc-primary-num{font-size:21px;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.cc-hero-callback{display:inline-block;margin:16px 0 0;font-size:14px;font-weight:650;
+  border-bottom:1px solid var(--ink);padding-bottom:3px}
+.cc-hours{margin:16px 0 0;font-size:13px;color:#69645b}
+
+/* ── 섹션 공통 ── */
+.cc-section{padding:clamp(56px,7vw,88px) 0;border-top:1px solid var(--line)}
+.cc-kicker{margin:0 0 14px;font-size:13px;letter-spacing:.12em;color:#69645b}
+.cc-section h2{margin:0 0 clamp(28px,4vw,44px);font-size:clamp(26px,3vw,40px);
+  font-weight:400;line-height:1.2;letter-spacing:-.04em}
+
+/* ── 통화에서 확인하는 것 — 박스 대신 헤어라인 목록 ── */
+.cc-asklist{list-style:none;counter-reset:cc;margin:0;padding:0;
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 clamp(28px,4vw,56px)}
+.cc-asklist > li{counter-increment:cc;border-top:1px solid var(--line);padding:22px 0 24px}
+.cc-asklist > li:before{content:counter(cc,decimal-leading-zero);
+  display:block;margin-bottom:10px;font-size:12px;letter-spacing:.12em;color:#69645b}
+.cc-asklist > li > b{display:block;font-size:20px;font-weight:650;letter-spacing:-.025em}
+.cc-asklist > li > span{display:block;margin-top:6px;font-size:14px;line-height:1.7;color:#69645b}
+
+/* ── 통화에서 확인하는 것 (그룹형, shop) — 9개 항목을 3그룹으로 축약 ── */
+.cc-asklist--grouped{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cc-askgroup-note{display:block;margin-top:6px;font-size:14px;line-height:1.7;color:#69645b}
+.cc-askgroup-items{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;padding:0}
+.cc-askgroup-items li{padding:6px 12px;font-size:13px;color:#59554d;
+  background:var(--paper);border:1px solid var(--line)}
+
+.cc-note{margin:clamp(28px,4vw,40px) 0 0;max-width:720px;font-size:15px;line-height:1.9;color:#59554d}
+.cc-note b{color:var(--ink);font-weight:650}
+
+/* ── 전화 상담 후 얻는 것 — 헤어라인 목록과 다른 리듬의 3단계 흐름 ── */
+.cc-steps{list-style:none;counter-reset:none;margin:0;padding:0;
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+.cc-steps li{position:relative;padding:0 clamp(20px,3vw,32px) 0 0}
+.cc-steps li + li{border-left:1px solid var(--line);padding-left:clamp(20px,3vw,32px)}
+.cc-steps b{display:block;font-size:13px;letter-spacing:.12em;color:#69645b;font-weight:650}
+.cc-steps strong{display:block;margin-top:14px;font-size:20px;font-weight:650;letter-spacing:-.025em}
+.cc-steps span{display:block;margin-top:10px;font-size:14px;line-height:1.8;color:#69645b}
+
+/* ── 공간보감 기준 — article.card 계약 유지, 박스는 제거 ── */
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 clamp(28px,4vw,56px)}
+.cards .card{border-top:1px solid var(--line);padding:22px 0 24px;background:none;border-radius:0}
+.cards .card b{display:block;font-size:20px;font-weight:650;letter-spacing:-.025em}
+.cards .card p{margin:8px 0 0;font-size:15px;line-height:1.8;color:#69645b}
+.cc-honesty{margin:clamp(28px,4vw,40px) 0 0;max-width:640px;font-size:14px;line-height:1.8;color:#69645b;border-top:1px solid var(--line);padding-top:22px}
+
+/* ── 콜백 폼 — 밑줄 입력, 사각 ── */
+.cc-sms{display:inline-block;margin:0 0 32px;font-weight:650;
+  border-bottom:1px solid var(--ink);padding-bottom:4px}
+.cc-callback-form{max-width:520px}
+.cc-field{margin:0 0 26px}
+.cc-label{display:block;font-size:14px;font-weight:650;margin:0 0 10px}
+.cc-required{color:#8c2f22;margin-left:3px}
+.cc-input{width:100%;box-sizing:border-box;padding:12px 0;font:inherit;font-size:16px;
+  color:var(--ink);background:none;border:0;border-bottom:1px solid var(--line);border-radius:0}
+.cc-input::placeholder{color:#a09a90}
+.cc-input:focus{outline:2px solid var(--ink);outline-offset:2px;border-bottom-color:var(--ink)}
+.cc-input[aria-invalid="true"]{border-bottom-color:#8c2f22}
+.cc-choices{display:flex;flex-wrap:wrap;gap:12px 24px;margin-top:4px}
+.cc-choice{display:inline-flex;align-items:flex-start;gap:9px;line-height:1.6;cursor:pointer;font-size:15px}
+.cc-choice input{margin-top:3px;flex:none;width:16px;height:16px;accent-color:#1e1d1a}
+.cc-choice input[aria-invalid="true"]{outline:1px solid #8c2f22;outline-offset:2px}
+.cc-consent{margin:0 0 26px;padding:16px 0;border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);font-size:14px;line-height:1.7;color:#59554d}
+.cc-callback-status{margin:0 0 14px;min-height:1.2em;font-size:14px;color:#59554d}
+.cc-status-error{color:#8c2f22;font-weight:650}
+.cc-secondary{display:inline-flex;align-items:center;justify-content:center;
+  min-height:52px;padding:0 26px;font:inherit;font-weight:650;cursor:pointer;
+  background:var(--ink);color:var(--paper);border:1px solid var(--ink);border-radius:0}
+.cc-secondary[disabled]{opacity:.55;cursor:progress}
+.cc-callback-success{padding:24px 0;border-top:1px solid var(--line)}
+.cc-callback-success-title{margin:0 0 10px;font-size:20px;font-weight:650;letter-spacing:-.025em}
+
+/* ── 푸터 ── */
+.cc-footer{background:var(--ink);color:var(--paper);padding:clamp(40px,5vw,56px) 0}
+.cc-footer p{margin:0;font-size:15px}
+.cc-footer .cc-fine{margin:10px 0 0;font-size:13px;line-height:1.8;color:rgba(246,243,237,.66)}
+.cc-footer .cc-fine a{border-bottom:1px solid rgba(246,243,237,.4)}
+
+/* ── 모바일 고정 전화 CTA — 직각 ink 바, 그림자 없음 ── */
+.cc-sticky-bar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:80;
+  padding-bottom:env(safe-area-inset-bottom);background:var(--ink);border-top:1px solid var(--ink)}
+.cc-sticky{display:flex;min-height:58px;align-items:center;justify-content:center;
+  color:var(--paper);font-size:17px;font-weight:650;letter-spacing:.01em}
+.cc-sticky:before{content:"";display:inline-block;width:0;height:0}
+
+@media(max-width:900px){
+  .cards{grid-template-columns:1fr}
+  .cc-steps{grid-template-columns:1fr;gap:28px 0}
+  .cc-steps li + li{border-left:0;border-top:1px solid var(--line);padding-left:0;padding-top:24px}
+}
+@media(max-width:760px){
+  .cc-wrap{width:min(1040px,calc(100% - 40px))}
+  .cc-asklist{grid-template-columns:1fr}
+  .cc-asklist--grouped{grid-template-columns:1fr}
+  .cc-primary{display:flex;width:100%;align-items:flex-start}
+  .cc-hero-callback{display:block}
+  .cc-secondary{display:flex;width:100%}
+}
+@media(max-width:600px){
+  body.commercial-call{padding-bottom:calc(74px + env(safe-area-inset-bottom))}
+  .cc-header{height:60px;padding:0 20px}
+  .cc-header .cc-tel{display:none}
+  .cc-sticky-bar{display:block}
+}

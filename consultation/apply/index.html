@@ -36,7 +36,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <script src="/assets/site-canonical.js?v=c69a8498"></script>
-<script defer src="/assets/site-tracking.js?v=78a1d3c2"></script>
+<script defer src="/assets/site-tracking.js?v=3f49a799"></script>
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -81,8 +81,7 @@ html[data-ad-angle] .mm-default{display:none}
 html[data-ad-angle="a"] .mm-a,
 html[data-ad-angle="b"] .mm-b,
 html[data-ad-angle="c"] .mm-c,
-html[data-ad-angle="d"] .mm-d,
-html[data-ad-angle="e"] .mm-e{display:block}
+html[data-ad-angle="d"] .mm-d{display:block}
 /* 남겨주신 정보 → 상담 결과 안내 블록 */
 .mm-bridge{margin:26px 0 0;padding:20px 22px;border:1px solid var(--line);border-radius:20px;background:var(--paper)}
 .mm-bridge h2{font-size:17px;font-weight:600;margin:0 0 14px;letter-spacing:-.03em}
@@ -92,8 +91,7 @@ html[data-ad-angle="e"] .mm-e{display:block}
 .mm-list span{font-size:13.5px;color:var(--soft);line-height:1.55}
 html[data-ad-angle="a"] .mm-list li.mm-i-a,
 html[data-ad-angle="b"] .mm-list li.mm-i-b,
-html[data-ad-angle="c"] .mm-list li.mm-i-c,
-html[data-ad-angle="e"] .mm-list li.mm-i-e{order:-1;border-color:var(--brown);box-shadow:0 0 0 1px var(--brown)}
+html[data-ad-angle="c"] .mm-list li.mm-i-c{order:-1;border-color:var(--brown);box-shadow:0 0 0 1px var(--brown)}
 .mm-note{margin:14px 0 0;font-size:12.5px;color:var(--soft);line-height:1.55}
 /* D — 실제 시공 사례 스트립 */
 .mm-cases{display:none}
@@ -140,14 +138,15 @@ html[data-ad-angle="d"] .mm-cases{display:block;margin:24px 0 0}
 </style>
 <script>
 /* CMP-1295 — 광고 각도 판별. head 에서 동기 실행해 본문이 그려지기 전에 결정한다.
-   저장소를 읽지 않고, 실패하면 조용히 기본 카피로 남는다. */
+   저장소를 읽지 않고, 실패하면 조용히 기본 카피로 남는다.
+   각도 e(commercial_text_card, 미용실·필라테스)는 CMP-1313 정본 반영으로 CMP-1322 에서
+   제거했다 — 상업광고는 이제 /commercial/call/ 로 가고, 이 ref 재사용은 정본 §7 금지사항이다. */
 (function(){
   var MAP = {
     ad_a_structure: 'a',
     ad_b_budget: 'b',
     ad_c_schedule: 'c',
-    ad_d_proof: 'd',
-    commercial_text_card: 'e'
+    ad_d_proof: 'd'
   };
   try {
     var params = new URLSearchParams(window.location.search);
@@ -207,13 +206,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <p class="lead">광고에서 보신 사진은 공간보감이 실제로 시공한 부산 아파트 현장입니다. 사례를 먼저 보시고, 우리 집 조건으로 상담을 신청하세요.</p>
       </div>
 
-      <!-- E. 상업공간(미용실·필라테스) — 업종 조건 진단 -->
-      <div class="mm-angle mm-e">
-        <div class="eyebrow">CONSULTATION · 상업공간 상담 신청</div>
-        <h1>미용실·필라테스도,<br>구조와 동선부터 진단합니다</h1>
-        <p class="lead">업종과 시공 예정 공간을 남겨주시면, 1차 상담에서 거울·조명 배치, 바닥 하중, 방음, 급배수 같은 업종별 조건부터 확인해 드립니다. 상담만으로 공사 가능 여부가 정해지지는 않습니다.</p>
-      </div>
-
       <!-- D 전용 — 실제 시공 사례 스트립 -->
       <div class="mm-cases">
         <div class="mm-case-grid">
@@ -240,7 +232,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <li class="mm-i-a"><b>시공 장소 · 공급평형</b><span>우리 집 구조와 동선 기준으로 어디까지 공사할지 범위를 정리해 드립니다.</span></li>
           <li class="mm-i-b"><b>예산 구간 · 중요하게 보는 부분</b><span>그 예산 안에서 무엇을 먼저 할지 우선순위를 함께 정합니다.</span></li>
           <li class="mm-i-c"><b>시공 희망 시기 · 상담 날짜</b><span>희망하시는 일정에 맞춰 진행이 가능한지와 준비 기간을 확인해 드립니다.</span></li>
-          <li class="mm-i-e"><b>업종 · 시공 예정 공간</b><span>미용실·필라테스 등 업종 조건(거울·조명·바닥 하중·방음·급배수)을 먼저 확인해 상담해 드립니다.</span></li>
         </ul>
         <p class="mm-note">필수 항목만 채우셔도 접수됩니다. 남겨주신 연락처로 담당자가 연락드리고, 나머지는 통화에서 함께 정리합니다. 상담만으로 계약이 진행되지 않으며, 정확한 견적은 현장 실측 이후에 안내해 드립니다.</p>
       </div>
