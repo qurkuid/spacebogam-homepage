@@ -60,6 +60,7 @@ const puppeteer = require('../../../intm-cmp244/node_modules/puppeteer');
   const mobileColumns = await page.$eval('.v8-grid', grid => getComputedStyle(grid).gridTemplateColumns.split(' ').length);
 
   const requiredEvents = ['home_portfolio_cta_click', 'portfolio_project_open', 'portfolio_consult_click'];
+  // qa-entry-url-allow: canonical 값 비교용 문자열이다. 유입 URL 이 아니라 표식 대상이 아니다.
   if (!home.font || home.canonical !== 'https://spacebogam.kr/' || !home.robots.startsWith('index,follow') || home.mainLinks !== 4 || home.forms !== 0 || home.consults !== 1 ||
       home.stories !== 3 || home.storyConsults !== 3 ||
       !['보이지 않던 문제', '가능한 조건', '사는 방식을'].every(fragment => home.storyTitles.some(title => title.includes(fragment))) ||
