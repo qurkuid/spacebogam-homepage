@@ -144,7 +144,7 @@ HEAD_TRACKING = """  <!-- Google tag (gtag.js) -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <script src="/assets/site-canonical.js?v=c69a8498"></script>
-  <script defer src="/assets/site-tracking.js?v=23478542"></script>
+  <script defer src="/assets/site-tracking.js?v=8ecc6ade"></script>
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
