@@ -108,9 +108,9 @@ function runFunnel({ pathname = '/commercial/call/', search = '', sessionValues 
 test('phone_click: 같은 세션에서 CTA 3개(header/hero/sticky)를 눌러도 1건만 전송', () => {
   const { requests, clickTel } = runFunnel({ search: '?utm_content=shop__a1_condition' });
 
-  clickTel('tel:0507-1388-1252', 'header_phone');
-  clickTel('tel:0507-1388-1252', 'hero_phone');
-  clickTel('tel:0507-1388-1252', 'sticky_phone');
+  clickTel('tel:050713881252', 'header_phone');
+  clickTel('tel:050713881252', 'hero_phone');
+  clickTel('tel:050713881252', 'sticky_phone');
 
   const phoneClicks = requests.filter((r) => r.eventName === 'phone_click');
   assert.equal(phoneClicks.length, 1, 'phone_click은 세션당 1회여야 한다');
@@ -119,17 +119,17 @@ test('phone_click: 같은 세션에서 CTA 3개(header/hero/sticky)를 눌러도
 
 test('phone_click: 세션이 바뀌면(sessionStorage 비었으면) 다시 1회 전송된다', () => {
   const first = runFunnel({ search: '?utm_content=office__b2' });
-  first.clickTel('tel:0507-1388-1252', 'header_phone');
+  first.clickTel('tel:050713881252', 'header_phone');
   assert.equal(first.requests.filter((r) => r.eventName === 'phone_click').length, 1);
 
   const second = runFunnel({ search: '?utm_content=office__b2' }); // 새 세션, sessionStorage 초기화
-  second.clickTel('tel:0507-1388-1252', 'header_phone');
+  second.clickTel('tel:050713881252', 'header_phone');
   assert.equal(second.requests.filter((r) => r.eventName === 'phone_click').length, 1);
 });
 
 test('phone_click payload: vertical 키는 없고 utmContent 필드에 업종 접두사가 그대로 실린다 (strict 스키마 보존)', () => {
   const { requests, clickTel } = runFunnel({ search: '?utm_content=shop__a1_condition&utm_source=meta&utm_medium=cpc' });
-  clickTel('tel:0507-1388-1252', 'header_phone');
+  clickTel('tel:050713881252', 'header_phone');
 
   const [payload] = requests.filter((r) => r.eventName === 'phone_click');
   assert.ok(payload, 'phone_click 이벤트가 전송돼야 한다');
@@ -146,7 +146,7 @@ function runCommercialCall({ search }) {
   const clickHandlers = { tel: [], sms: [] };
   const bodyAttrs = {};
   const telLink = {
-    getAttribute: (name) => (name === 'data-cta-location' ? 'header_phone' : name === 'href' ? 'tel:0507-1388-1252' : null),
+    getAttribute: (name) => (name === 'data-cta-location' ? 'header_phone' : name === 'href' ? 'tel:050713881252' : null),
     addEventListener: (type, handler) => {
       if (type === 'click') clickHandlers.tel.push(handler);
     },
