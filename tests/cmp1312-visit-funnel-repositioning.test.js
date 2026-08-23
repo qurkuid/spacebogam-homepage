@@ -144,6 +144,61 @@ test('four Meta creative keys keep each ad hook on the landing hero', () => {
   }
 });
 
+// 실제 Meta 광고 URL에는 QA 전용 `vertical=` 파라미터가 없다. 업종은 utm_content 소재
+// 라벨에서만 읽히므로, 소재 키 단독으로도 업종이 갈려야 한다. 이게 깨지면 shop 광고가
+// 사무실 랜딩으로 떨어지고 phone_click 의 vertical 집계까지 office 로 오염된다.
+test('creative key alone routes the vertical without the QA-only vertical param', () => {
+  const cases = [
+    ['office_a', 'office', ['입주일은 정해졌는데,', '공사 계획은 아직인가요?']],
+    ['office_b', 'office', ['직원이 늘었는데,', '사무실은 그대로인가요?']],
+    ['shop_a', 'shop', ['공사가 하루 늦어지면,', '매출도 하루 늦게 시작됩니다.']],
+    ['shop_b', 'shop', ['예쁜 매장보다 먼저,', '설비와 운영 동선입니다.']],
+  ];
+  for (const [creative, vertical, hook] of cases) {
+    const { doc, byId } = runCommercialCall({ search: `?utm_content=${creative}` });
+    assert.equal(doc.body.getAttribute('data-commercial-vertical'), vertical);
+    assert.equal(doc.body.getAttribute('data-commercial-creative'), creative);
+    assert.deepEqual(headlineLines(byId['cc-headline']), hook);
+  }
+});
+
+// 정본 UTM 스펙이 규정한 업종 파라미터도 읽어야 office/shop 분리 집계가 성립한다.
+test('commercial_vertical param switches the variant', () => {
+  const { doc, byId } = runCommercialCall({ search: '?commercial_vertical=shop' });
+  assert.equal(doc.body.getAttribute('data-commercial-vertical'), 'shop');
+  assert.deepEqual(headlineLines(byId['cc-headline']), ['공사가 하루 늦어지면,', '매출도 하루 늦게 시작됩니다.']);
+});
+
+// vertical 집계 오염 회귀: shop 소재 클릭은 shop 으로 보고돼야 한다.
+test('phone_click from a shop creative reports the shop vertical', () => {
+  const { telLinks, fbqCalls } = runCommercialCall({ search: '?utm_content=shop_a' });
+  telLinks[1].click();
+  const [, eventName, payload] = fbqCalls[0];
+  assert.equal(eventName, 'phone_click');
+  assert.equal(payload.vertical, 'shop');
+});
+
+// 소재 라벨 표기는 운영 중에 바뀐다(사진형 v5 처럼 버전 접두어가 붙는다). 업종 토큰이
+// 라벨 어디에 있든 읽어야 한다 — 못 읽으면 조용히 office 로 떨어져 집계가 오염된다.
+test('vertical is read from any segment of the creative label', () => {
+  const cases = [
+    ['v5_shop_a', 'shop'],
+    ['shop__a1_condition', 'shop'],
+    ['meta-v5-shop-b', 'shop'],
+    ['v5_office_a', 'office'],
+  ];
+  for (const [content, vertical] of cases) {
+    const { doc } = runCommercialCall({ search: `?utm_content=${content}` });
+    assert.equal(doc.body.getAttribute('data-commercial-vertical'), vertical, content);
+  }
+});
+
+// 업종 토큰이 없는 라벨은 기존대로 office 기본값으로 떨어진다(무관한 캠페인 오분류 방지).
+test('a label with no vertical token falls back to office', () => {
+  const { doc } = runCommercialCall({ search: '?utm_content=ig-202608-basement-r1' });
+  assert.equal(doc.body.getAttribute('data-commercial-vertical'), 'office');
+});
+
 test('clinic stays disabled and falls back to office', () => {
   const { doc } = runCommercialCall({ search: '?vertical=clinic' });
   assert.equal(doc.body.getAttribute('data-commercial-vertical'), 'office');

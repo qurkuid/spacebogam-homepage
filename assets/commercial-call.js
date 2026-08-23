@@ -152,9 +152,20 @@
     var direct = (params.get('vertical') || '').toLowerCase().trim();
     if (isAllowed(direct)) return direct;
 
+    // 정본 UTM 스펙의 업종 파라미터. office/shop 분리 집계가 여기에 걸린다.
+    var tagged = (params.get('commercial_vertical') || '').toLowerCase().trim();
+    if (isAllowed(tagged)) return tagged;
+
+    // 실제 광고 URL에는 위의 두 파라미터가 없으므로 소재 라벨이 유일한 업종 판별 수단이다.
+    // 라벨 표기는 운영 중에도 바뀐다 — shop_a, shop__a1_condition, 사진형 v5 의 v5_shop_a.
+    // 그래서 첫 구간만 보지 않고 구분자로 쪼갠 모든 구간에서 업종 토큰을 찾는다.
+    // 여기서 못 읽으면 office 로 떨어져 shop 광고가 사무실 랜딩에 붙고,
+    // phone_click 의 vertical 집계까지 office 로 오염된다.
     var content = (params.get('utm_content') || '').toLowerCase().trim();
-    var prefix = content.split('__')[0];
-    if (isAllowed(prefix)) return prefix;
+    var segments = content.split(/[^a-z0-9]+/);
+    for (var i = 0; i < segments.length; i += 1) {
+      if (isAllowed(segments[i])) return segments[i];
+    }
     return null;
   }
 
