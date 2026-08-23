@@ -1,4 +1,8 @@
-/* CMP-1312/1315/1322 상업공간 전화상담 랜딩 — 업종 variant 스위치
+/* CMP-1312/1315/1322 상업공간 상담 랜딩 — 업종 variant 스위치
+ *
+ * CMP-1312 재포지셔닝: 전화는 최종 목적지가 아니라 대면상담으로 가는 1차 경로다.
+ * 퍼널: 광고 → 랜딩 → 전화 사전 확인(업종·면적·일정) → 대면상담 예약 → 현장 확인 →
+ * 견적·제안. variant 별로 headline(히어로 훅)과 lead(상업 리스크 문장)를 함께 스위치한다.
  *
  * 업종(commercial_vertical)은 utm_content 앞부분에서 읽는다.
  *   utm_content = "<vertical>__<creative>"   예) office__a1_condition
@@ -47,7 +51,8 @@
   var VERTICALS = {
     clinic: {
       eyebrow: '부산 병원·의원 인테리어',
-      lead: '진료과목, 전용면적, 오픈 희망일, 그리고 급배수·환기·소방·의료가스 조건을 먼저 확인해야 공사 범위와 일정이 잡힙니다. 조건 확인 없이 금액부터 말씀드리지 않습니다.',
+      headline: ['개원일은 다가오는데,', '공사 계획은 아직인가요?'],
+      lead: '개설 신고와 공사 일정은 진료과목, 전용면적, 오픈 희망일부터 확인해야 잡힙니다. 전화로 이 조건들을 먼저 확인하고, 대면상담 일정을 잡아드립니다. 조건 확인 없이 금액부터 말씀드리지 않습니다.',
       whyTitle: '대기·상담·진료 동선을 먼저 나눕니다',
       cards: [
         ['설비 조건', '전기 용량, 급배수, 환기, 소방, 냉난방 위치를 도면보다 먼저 확인합니다.'],
@@ -63,7 +68,8 @@
     },
     office: {
       eyebrow: '부산 사무실 인테리어',
-      lead: '인원수, 전용면적, 입주 희망일, 그리고 전기·통신·공조·소방 조건을 먼저 확인해야 공사 범위와 일정이 잡힙니다. 조건 확인 없이 금액부터 말씀드리지 않습니다.',
+      headline: ['직원이 늘었는데,', '사무실은 그대로인가요?'],
+      lead: '이전·확장·재배치는 인원수, 전용면적, 입주 희망일부터 확인해야 방향이 잡힙니다. 전화로 이 조건들을 먼저 확인하고, 대면상담 일정을 잡아드립니다. 조건 확인 없이 금액부터 말씀드리지 않습니다.',
       whyTitle: '업무 방식과 전기·통신 계획을 먼저 맞춥니다',
       cards: [
         ['설비 조건', '전기 용량, 통신·네트워크, 공조, 소방, 냉난방 위치를 도면보다 먼저 확인합니다.'],
@@ -79,7 +85,8 @@
     },
     shop: {
       eyebrow: '부산 카페·매장 인테리어',
-      lead: '지금 매장을 어떤 방식으로 운영하실 계획인지부터 전화로 편하게 말씀해주세요. 급배수·환기·간판 같은 세부 조건은 통화에서 함께 확인합니다. 조건 확인 없이 금액부터 말씀드리지 않습니다.',
+      headline: ['공사가 하루 늦어지면,', '매출도 하루 늦게 시작됩니다.'],
+      lead: '업종, 전용면적, 오픈 희망일을 전화로 먼저 확인하고, 대면상담 일정을 잡아드립니다. 급배수·환기·간판 같은 세부 조건은 대면상담에서 함께 확인합니다. 조건 확인 없이 금액부터 말씀드리지 않습니다.',
       whyTitle: '고객 동선과 주방·백룸 설비를 먼저 맞춥니다',
       cards: [
         ['설비 조건', '전기 용량, 급배수, 후드·환기, 소방, 간판·파사드를 도면보다 먼저 확인합니다.'],
@@ -106,6 +113,29 @@
     }
   };
 
+  var CREATIVE_OVERRIDES = {
+    office_a: {
+      vertical: 'office',
+      headline: ['입주일은 정해졌는데,', '공사 계획은 아직인가요?'],
+      lead: '입주일을 기준으로 좌석 수, 전기·통신 조건, 건물의 공사 가능 시간부터 확인해야 일정이 구체화됩니다. 전화로 기본 조건을 먼저 확인하고, 대면상담 일정을 잡아드립니다.'
+    },
+    office_b: {
+      vertical: 'office',
+      headline: ['직원이 늘었는데,', '사무실은 그대로인가요?'],
+      lead: '회의실, 집중석, 전기·통신 배선이 실제 업무 흐름과 맞아야 합니다. 현재 사용 방식과 필요한 공간을 전화로 먼저 확인하고, 대면상담 일정을 잡아드립니다.'
+    },
+    shop_a: {
+      vertical: 'shop',
+      headline: ['공사가 하루 늦어지면,', '매출도 하루 늦게 시작됩니다.'],
+      lead: '업종, 전용면적, 오픈 희망일을 전화로 먼저 확인하고, 대면상담 일정을 잡아드립니다. 입점·설비·공사 조건을 확인한 뒤 현장에 맞는 견적을 안내합니다.'
+    },
+    shop_b: {
+      vertical: 'shop',
+      headline: ['예쁜 매장보다 먼저,', '설비와 운영 동선입니다.'],
+      lead: '주문·픽업·백룸 동선과 급배수·환기·전기 조건을 전화로 먼저 확인하고, 대면상담 일정을 잡아드립니다. 세부 조건은 대면상담과 현장 확인에서 구체화합니다.'
+    }
+  };
+
   function isAllowed(key) {
     if (!VERTICALS[key]) return false;
     if (key === 'clinic' && !HOSPITAL_ENABLED) return false;
@@ -128,18 +158,41 @@
     return null;
   }
 
+  function readCreative() {
+    try {
+      var content = (new URLSearchParams(location.search).get('utm_content') || '').toLowerCase().trim();
+      return CREATIVE_OVERRIDES[content] ? content : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
   function setText(id, value) {
     var node = document.getElementById(id);
     if (node) node.textContent = value;
   }
 
-  function apply(key) {
+  function setHeadline(id, lines) {
+    var node = document.getElementById(id);
+    if (!node || !lines || !lines.length) return;
+    node.textContent = '';
+    lines.forEach(function (line, index) {
+      if (index > 0) node.appendChild(document.createElement('br'));
+      node.appendChild(document.createTextNode(line));
+    });
+  }
+
+  function apply(key, creativeKey) {
     var v = VERTICALS[key];
     if (!v) return;
+    var creative = CREATIVE_OVERRIDES[creativeKey];
+    if (creative && creative.vertical !== key) creative = null;
 
     document.body.setAttribute('data-commercial-vertical', key);
+    if (creativeKey && creative) document.body.setAttribute('data-commercial-creative', creativeKey);
     setText('cc-eyebrow', v.eyebrow);
-    setText('cc-lead', v.lead);
+    setHeadline('cc-headline', creative ? creative.headline : v.headline);
+    setText('cc-lead', creative ? creative.lead : v.lead);
     setText('cc-why-title', v.whyTitle);
 
     var wrap = document.getElementById('cc-why-cards');
@@ -163,7 +216,7 @@
       askList.innerHTML = '';
       if (v.askGroups && v.askGroups.length) {
         askList.classList.add('cc-asklist--grouped');
-        setText('cc-ask-title', '이 ' + v.askGroups.length + '가지 큰 틀만 알려주시면 공사 범위가 잡힙니다');
+        setText('cc-ask-title', '전화에서 이 ' + v.askGroups.length + '가지 큰 틀만 확인하면 대면상담을 잡을 수 있습니다');
         v.askGroups.forEach(function (group) {
           var li = document.createElement('li');
           li.className = 'cc-askgroup';
@@ -187,7 +240,7 @@
       } else {
         askList.classList.remove('cc-asklist--grouped');
         var askItems = v.askItems || [];
-        setText('cc-ask-title', '이 ' + askItems.length + '가지를 확인하면 공사 범위가 잡힙니다');
+        setText('cc-ask-title', '전화에서 이 ' + askItems.length + '가지만 확인하면 대면상담을 잡을 수 있습니다');
         askItems.forEach(function (pair) {
           var li = document.createElement('li');
           var b = document.createElement('b');
@@ -202,9 +255,9 @@
     }
 
     var title = {
-      clinic: '부산 병원·의원 인테리어 전화 상담 | 공간보감',
-      office: '부산 사무실 인테리어 전화 상담 | 공간보감',
-      shop: '부산 카페·매장 인테리어 전화 상담 | 공간보감'
+      clinic: '부산 병원·의원 인테리어 상담 예약 | 공간보감',
+      office: '부산 사무실 인테리어 상담 예약 | 공간보감',
+      shop: '부산 카페·매장 인테리어 상담 예약 | 공간보감'
     }[key];
     if (title) document.title = title;
   }
@@ -261,7 +314,7 @@
 
   function init() {
     var key = readVertical() || 'office';
-    apply(key);
+    apply(key, readCreative());
     wireSmsCallback();
     wireTelPixel();
   }

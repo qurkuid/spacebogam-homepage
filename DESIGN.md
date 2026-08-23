@@ -52,7 +52,9 @@
 1차 CTA는 **ink 채움 직각 블록**이다 — 배경 `#1e1d1a`, 글자 `#f6f3ed`, radius 0, shadow none.
 2차는 **밑줄 텍스트 링크**. 3차 이상은 만들지 않는다.
 
-상업 랜딩(`/commercial/call/`)의 전화 CTA는 3곳, 전부 `data-v8-event="phone_click"`:
+상업 랜딩(`/commercial/call/`)의 전화 CTA는 3곳, 전부 `data-v8-event="phone_click"`.
+전화 CTA는 **대면상담 예약으로 가는 1차 경로**다 — 라벨·주변 카피에 통화로 상담이
+끝난다는 약속(전화 상담 완결, "통화 ○분" 등)을 쓰지 않는다:
 
 | `data-cta-location` | 형태 |
 |---|---|

@@ -1,7 +1,9 @@
-/* CMP-1315 상업 전용 전화상담 랜딩 — 연결 실패용 최소 콜백 폼
+/* CMP-1315 상업 상담 랜딩 — 연결 실패용 최소 콜백 폼
  *
  * 전화가 어려운 방문자를 위한 최소 입력 콜백 폼. 성함/연락처(필수) +
- * 통화 가능 시간대(선택)만 받는다. 주거형 28문항 상담폼(/consultation/apply/,
+ * 통화 가능 시간대(선택)만 받는다. CMP-1312 재포지셔닝: 콜백은 담당자가
+ * 전화드려 조건을 확인하고 대면상담 일정을 잡기 위한 요청이다 — 카피만
+ * 그 프레임으로 쓰고, 제출 API·질문 ID·이벤트명 계약은 그대로 둔다. 주거형 28문항 상담폼(/consultation/apply/,
  * assets/consultation-form.js)과는 별도 화면·별도 스크립트이며 서로 링크하지 않는다
  * (CMP-1315: "주거형 28문항 폼 연결 금지"). 제출 자체는 intm 의 동일한 공개 상담
  * 접수 API(consult_req 가 정본 리드 테이블, /api/consultation/submit)로 보내되,
@@ -236,7 +238,7 @@
     consentInput.id = 'cc-callback-consent';
     consentLabel.appendChild(consentInput);
     consentLabel.appendChild(document.createTextNode(
-      '개인정보 수집·이용에 동의합니다. (연락처 확인 및 상담 콜백 목적, 상담 종료 후 파기)'
+      '개인정보 수집·이용에 동의합니다. (상담 콜백 및 대면상담 일정 안내 목적, 상담 종료 후 파기)'
     ));
     consentWrap.appendChild(consentLabel);
     form.appendChild(consentWrap);
@@ -245,7 +247,7 @@
     status.setAttribute('role', 'status');
     form.appendChild(status);
 
-    var submit = el('button', 'cc-secondary cc-callback-submit', '콜백 요청하기');
+    var submit = el('button', 'cc-secondary cc-callback-submit', '콜백으로 대면상담 잡기');
     submit.type = 'submit';
     form.appendChild(submit);
 
@@ -334,7 +336,7 @@
         renderSuccess();
       }).catch(function(error){
         submit.disabled = false;
-        submit.textContent = '콜백 요청하기';
+        submit.textContent = '콜백으로 대면상담 잡기';
         status.textContent = '접수에 실패했습니다. 잠시 후 다시 시도하시거나 전화로 문의해주세요. (' +
           ((error && error.message) || 'network error') + ')';
         status.classList.add('cc-status-error');
@@ -350,7 +352,7 @@
     root.innerHTML = '';
     var box = el('div', 'cc-callback-success');
     box.appendChild(el('p', 'cc-callback-success-title', '콜백 요청이 접수되었습니다.'));
-    box.appendChild(el('p', 'cc-note', '남겨주신 연락처로 담당자가 순차적으로 연락드립니다.'));
+    box.appendChild(el('p', 'cc-note', '남겨주신 연락처로 담당자가 전화드려 조건을 확인하고, 대면상담 일정을 함께 잡아드립니다.'));
     root.appendChild(box);
     sendFunnelEvent('lead_submit_success');
     try { if (session) session.removeItem(EVENT_IDS_KEY); } catch(e) {}
