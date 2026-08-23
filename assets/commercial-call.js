@@ -152,8 +152,15 @@
     var direct = (params.get('vertical') || '').toLowerCase().trim();
     if (isAllowed(direct)) return direct;
 
+    // 정본 UTM 스펙의 업종 파라미터. office/shop 분리 집계가 여기에 걸린다.
+    var tagged = (params.get('commercial_vertical') || '').toLowerCase().trim();
+    if (isAllowed(tagged)) return tagged;
+
+    // 소재 라벨은 shop__a1_condition 과 CREATIVE_OVERRIDES 키인 shop_b 두 형태를 함께 쓴다.
+    // 밑줄 개수와 무관하게 첫 구간을 업종으로 읽는다. 실제 광고 URL에는 위의 vertical
+    // 파라미터가 없으므로 이 경로가 유일한 업종 판별 수단이다.
     var content = (params.get('utm_content') || '').toLowerCase().trim();
-    var prefix = content.split('__')[0];
+    var prefix = content.split('_')[0];
     if (isAllowed(prefix)) return prefix;
     return null;
   }
