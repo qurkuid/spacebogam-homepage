@@ -43,6 +43,7 @@ for (const story of stories) {
   const html = read(`blog/${story}.html`);
   const json = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(match => JSON.parse(match[1])).find(item => item['@type'] === 'BlogPosting');
   assert.ok(json?.headline && json?.datePublished && json?.image && json?.author && json?.mainEntityOfPage, `${story}: BlogPosting fields`);
+  // qa-entry-url-allow: JSON-LD image 절대경로 비교용 문자열이다. 유입 URL 이 아니라 표식 대상이 아니다.
   assert.equal(json.image, `https://spacebogam.kr/${image}`, `${story}: approved structured image`);
   assert.equal((html.match(/blog_case_open/g) || []).length, 1, `${story}: one case link`);
   assert.equal((html.match(/blog_consult_click/g) || []).length, 2, `${story}: header plus one body consultation`);
