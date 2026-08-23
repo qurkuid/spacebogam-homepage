@@ -178,6 +178,27 @@ test('phone_click from a shop creative reports the shop vertical', () => {
   assert.equal(payload.vertical, 'shop');
 });
 
+// 소재 라벨 표기는 운영 중에 바뀐다(사진형 v5 처럼 버전 접두어가 붙는다). 업종 토큰이
+// 라벨 어디에 있든 읽어야 한다 — 못 읽으면 조용히 office 로 떨어져 집계가 오염된다.
+test('vertical is read from any segment of the creative label', () => {
+  const cases = [
+    ['v5_shop_a', 'shop'],
+    ['shop__a1_condition', 'shop'],
+    ['meta-v5-shop-b', 'shop'],
+    ['v5_office_a', 'office'],
+  ];
+  for (const [content, vertical] of cases) {
+    const { doc } = runCommercialCall({ search: `?utm_content=${content}` });
+    assert.equal(doc.body.getAttribute('data-commercial-vertical'), vertical, content);
+  }
+});
+
+// 업종 토큰이 없는 라벨은 기존대로 office 기본값으로 떨어진다(무관한 캠페인 오분류 방지).
+test('a label with no vertical token falls back to office', () => {
+  const { doc } = runCommercialCall({ search: '?utm_content=ig-202608-basement-r1' });
+  assert.equal(doc.body.getAttribute('data-commercial-vertical'), 'office');
+});
+
 test('clinic stays disabled and falls back to office', () => {
   const { doc } = runCommercialCall({ search: '?vertical=clinic' });
   assert.equal(doc.body.getAttribute('data-commercial-vertical'), 'office');
