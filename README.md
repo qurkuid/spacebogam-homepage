@@ -24,3 +24,16 @@
 - `/index.html` → `/`
 
 현재 정적 파일에는 보조 안전장치로 `assets/site-canonical.js`가 들어 있지만, Google 색인 기준으로는 nginx/서버 301이 우선입니다.
+
+## 개발: pre-commit 훅
+
+이 저장소의 pre-commit 훅(`.githooks/pre-commit`, CMP-267 + CMP-1341 QA 유입 URL 검사)은
+저장소에 커밋되어 있지만 `core.hooksPath`는 git 설정이라 clone마다 자동 적용되지 않습니다.
+클론 직후 한 번 실행하세요.
+
+```
+git config core.hooksPath .githooks
+```
+
+실행하지 않아도 커밋은 가능하지만(CMP-267 검사가 로컬 `.git/hooks/pre-commit`에만 있던 시절과
+달리) 이 검사를 건너뛰게 됩니다.
