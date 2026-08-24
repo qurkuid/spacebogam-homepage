@@ -3,9 +3,21 @@
 <head>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+new Date().getTime(),event:'gtm.js'});
+/* CMP-1369: 태그 컨테이너가 첫 화면 메인스레드를 7초 가까이 붙잡아, 광고로 들어온 사람이
+   상담 폼을 눌러도 몇 초간 반응하지 않았다(실측 TBT 6.8s). 태그는 하나도 빼지 않고
+   로드 "시점"만 미룬다. 사용자가 먼저 손대면(터치/입력/스크롤) 그 즉시 로드한다. */
+var q=[],fired=false;
+w.__sbLazyTag=function(fn){fired?fn():q.push(fn)};
+function go(){if(fired)return;fired=true;while(q.length)q.shift()()}
+['pointerdown','keydown','touchstart','scroll'].forEach(function(e){
+w.addEventListener(e,go,{once:true,passive:true})});
+if(d.readyState==='complete')setTimeout(go,1500);
+else w.addEventListener('load',function(){setTimeout(go,1500)});
+setTimeout(go,8000);
+w.__sbLazyTag(function(){var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);});
 })(window,document,'script','dataLayer','GTM-PW8GLP8S');</script>
 <!-- End Google Tag Manager -->
 
@@ -39,7 +51,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","@id":"https://spacebogam.kr/#site-navigation","name":"공간보감 대표 메뉴","itemListElement":[{"@type":"SiteNavigationElement","position":1,"name":"회사소개","url":"https://spacebogam.kr/overview.html"},{"@type":"SiteNavigationElement","position":2,"name":"진행과정","url":"https://spacebogam.kr/process.html"},{"@type":"SiteNavigationElement","position":3,"name":"포트폴리오","url":"https://spacebogam.kr/portfolio.html"},{"@type":"SiteNavigationElement","position":4,"name":"상담","url":"https://spacebogam.kr/consultation/"},{"@type":"SiteNavigationElement","position":5,"name":"주거","url":"https://spacebogam.kr/living.html"},{"@type":"SiteNavigationElement","position":6,"name":"상업공간","url":"https://spacebogam.kr/commercial.html"},{"@type":"SiteNavigationElement","position":7,"name":"견적준비","url":"https://spacebogam.kr/estimate.html"},{"@type":"SiteNavigationElement","position":8,"name":"인테리어 가이드","url":"https://spacebogam.kr/guides.html"},{"@type":"SiteNavigationElement","position":9,"name":"인테리어 Q&A","url":"https://spacebogam.kr/qna.html"}]}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"공간보감 부산 인테리어 포트폴리오","itemListElement":[{"@type":"ListItem","position":1,"item":{"@type":"CreativeWork","name":"부산 해운대 메가센텀꿈에그린 49평 전체 리모델링","image":"https://spacebogam.kr/assets/portfolio/mega-centum-49py.jpg","about":"부산 아파트 인테리어, 49평, 실제 현장 사진","contentLocation":"부산 해운대구"}},{"@type":"ListItem","position":2,"item":{"@type":"CreativeWork","name":"부산 사직동 쌍용예가 1차 32평 대면형 주방·공조 리모델링","image":"https://spacebogam.kr/assets/blog/224136390525-부산-사직쌍용예가-1차-인테리어-32평-iot와-공조-1.jpg","about":"부산 아파트 리모델링, 30평대, 실제 사례","contentLocation":"부산 동래구 사직동"}},{"@type":"ListItem","position":3,"item":{"@type":"CreativeWork","name":"부산 사직동 쌍용예가 1차 42평 주방·거실 리모델링","image":"https://spacebogam.kr/assets/blog/224005033357-사직-쌍용예가-1차-42평-인테리어-다섯-식구-1.jpg","about":"부산 아파트 리모델링, 40평대, 실제 사례","contentLocation":"부산 동래구 사직동"}}]}</script>
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EJGXDD5C1T"></script>
+  <script>__sbLazyTag(function(){var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-EJGXDD5C1T';document.head.appendChild(s)});</script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}

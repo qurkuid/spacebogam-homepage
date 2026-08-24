@@ -3,9 +3,21 @@
 <head>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+new Date().getTime(),event:'gtm.js'});
+/* CMP-1369: 태그 컨테이너가 첫 화면 메인스레드를 7초 가까이 붙잡아, 광고로 들어온 사람이
+   상담 폼을 눌러도 몇 초간 반응하지 않았다(실측 TBT 6.8s). 태그는 하나도 빼지 않고
+   로드 "시점"만 미룬다. 사용자가 먼저 손대면(터치/입력/스크롤) 그 즉시 로드한다. */
+var q=[],fired=false;
+w.__sbLazyTag=function(fn){fired?fn():q.push(fn)};
+function go(){if(fired)return;fired=true;while(q.length)q.shift()()}
+['pointerdown','keydown','touchstart','scroll'].forEach(function(e){
+w.addEventListener(e,go,{once:true,passive:true})});
+if(d.readyState==='complete')setTimeout(go,1500);
+else w.addEventListener('load',function(){setTimeout(go,1500)});
+setTimeout(go,8000);
+w.__sbLazyTag(function(){var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);});
 })(window,document,'script','dataLayer','GTM-PW8GLP8S');</script>
 <!-- End Google Tag Manager -->
 
@@ -26,7 +38,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/assets/page.css">
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-EJGXDD5C1T"></script>
+<script>__sbLazyTag(function(){var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-EJGXDD5C1T';document.head.appendChild(s)});</script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
