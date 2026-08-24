@@ -441,6 +441,36 @@
     return field ? String(field.value || '').trim() : '';
   }
 
+  // ---- 필수 항목 축소 (CMP-1369) ------------------------------------------
+
+  /**
+   * intm 질문 정의는 28문항 중 11문항을 필수로 표시한다(세부주소·비밀번호·시공장소·
+   * 예산구간·인지경로·상담희망 날짜/시간 포함). 광고로 처음 들어온 사람에게 그걸 다
+   * 요구해서, 최근 7일 폼을 쓰기 시작한 7명이 전원 중도 이탈했다.
+   *
+   * 대표 승인(2026-08-24, 확인카드 3f77c316)에 따라 **화면에서 질문을 빼지 않고**
+   * 필수 표시만 4개로 좁힌다. 나머지는 '선택 입력' 접힘 영역에 그대로 남아 CRM 에
+   * 똑같이 저장된다. 서버는 isRequired 를 강제하지 않으므로(intm
+   * src/app/api/consultation/submit/route.ts 는 값 추출만 한다) 클라이언트만 바꾸면 된다.
+   *
+   * id 로 고정하지 않는 이유: 질문 정의는 intm 관리 화면에서 편집된다. 서버가 기본
+   * 정보를 뽑을 때 쓰는 것과 같은 타입/문구 규칙으로 맞춰야 둘이 어긋나지 않는다.
+   */
+  var CORE_REQUIRED_MATCHERS = [
+    function(q){ return q.questionType === 'short_answer' && /성함|이름/.test(q.question); },
+    function(q){ return q.questionType === 'phonenumber' || /연락처/.test(q.question); },
+    function(q){ return (q.questionType === 'address' || /주소/.test(q.question)) && !/세부/.test(q.question); },
+    function(q){ return /평형|평수/.test(q.question); }
+  ];
+
+  function isCoreRequired(question){
+    if (!question || typeof question.question !== 'string') return false;
+    for (var i = 0; i < CORE_REQUIRED_MATCHERS.length; i++) {
+      if (CORE_REQUIRED_MATCHERS[i](question)) return true;
+    }
+    return false;
+  }
+
   // ---- 흐름 ---------------------------------------------------------------
 
   var questions = [];
@@ -702,13 +732,15 @@
         questions = list
           .filter(function(q){ return q && q.id != null && q.is_visible !== false && q.isVisible !== false; })
           .map(function(q){
-            return {
+            var mapped = {
               id: q.id,
               question: q.question,
               questionType: q.questionType || q.question_type,
-              options: q.options,
-              isRequired: q.isRequired != null ? q.isRequired : q.is_required
+              options: q.options
             };
+            // 서버가 준 is_required 는 무시하고 CMP-1369 의 핵심 4개만 필수로 둔다.
+            mapped.isRequired = isCoreRequired(mapped);
+            return mapped;
           });
         if (!questions.length) throw new Error('empty question set');
         renderForm();
