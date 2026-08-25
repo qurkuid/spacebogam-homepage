@@ -298,6 +298,40 @@
     heroHeadline.innerHTML = '부산 아파트 인테리어,<br>비용·기간·사례<br>먼저 확인하세요';
   }
 
+  // CMP-1426: 히어로 CTA 신뢰요소 A/B. 위 headline 실험(EXPERIMENT_KEY)과는 별도
+  // 세션 키/축으로 50:50 배정한다 — 홈 헤드라인 버킷과 얽히면 두 실험 중 하나가
+  // 다른 쪽 배정에 끌려가 판정이 불가능해진다([[spacebogam-page-variant-overwritten-by-home-bucket]]).
+  var HERO_CTA_TRUST_KEY = 'spacebogam_hero_cta_trust_v1_variant';
+
+  function resolveHeroCtaTrustVariant(){
+    if (!isHomepage) return '';
+    try {
+      var stored = session && normalizeExperimentVariant(session.getItem(HERO_CTA_TRUST_KEY));
+      if (stored) return stored;
+    } catch(error) {}
+    var randomValue = Math.random();
+    if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
+      var randomBytes = new Uint32Array(1);
+      window.crypto.getRandomValues(randomBytes);
+      randomValue = randomBytes[0] / 4294967296;
+    }
+    var assigned = randomValue < 0.5 ? 'A' : 'B';
+    try { if (session) session.setItem(HERO_CTA_TRUST_KEY, assigned); } catch(error) {}
+    return assigned;
+  }
+
+  var heroCtaTrustVariant = resolveHeroCtaTrustVariant();
+
+  function applyHeroCtaTrustVariant(){
+    if (!heroCtaTrustVariant) return;
+    var cta = document.querySelector('.v8-home-primary-cta');
+    // ctaLocation 은 intm 수집기의 strict 스키마 필드라 새 키를 못 넣는다. variant
+    // 축은 기존 자유텍스트 필드인 ctaLocation 에 실어 home_hero_consult_cta_click ·
+    // consultation_click 양쪽에서 A/B 조회가 가능하게 한다.
+    if (cta) cta.dataset.ctaLocation = 'hero_cta_' + heroCtaTrustVariant.toLowerCase();
+    if (heroCtaTrustVariant === 'B') document.body.classList.add('v8-hero-cta-trust-b');
+  }
+
   function deviceType(){
     if (window.innerWidth < 768) return 'mobile';
     if (window.innerWidth < 1024) return 'tablet';
@@ -517,6 +551,7 @@
     document.addEventListener('click', handleClick, true);
     send('page_view');
     applyHomeHeadline();
+    applyHeroCtaTrustVariant();
 
     window.setTimeout(function(){
       if (document.visibilityState === 'visible') {

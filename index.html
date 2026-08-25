@@ -27,6 +27,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <title>부산 아파트 인테리어·리모델링 | 공간보감</title>
   <meta name="description" content="부산 아파트 인테리어·리모델링. 현장실측, 3D 디자인, 실측 견적 기반 상담.">
   <link rel="stylesheet" href="assets/preview-v8.css?v=cmp1192-webp">
+  <!-- CMP-1426: 히어로 CTA 신뢰요소 A/B 전용 스타일. 공유 preview-v8.css를 건드리면
+       참조하는 14개 페이지 전부 캐시버스팅 해시를 손으로 맞춰야 해서, 홈 전용 규칙만
+       이 페이지에 인라인으로 둔다. -->
+  <style>
+    .v8-home-hero-trust{display:none;margin:14px 0 0;font-size:13px;letter-spacing:.01em}
+    .v8-home-hero-trust a{color:var(--paper);border-bottom:1px solid rgba(246,243,237,.6);padding-bottom:2px;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+    body.v8-hero-cta-trust-b .v8-home-hero-trust{display:block}
+  </style>
 
   <link rel="canonical" href="https://spacebogam.kr/" />
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
@@ -62,7 +70,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <script src="/assets/site-canonical.js?v=c69a8498"></script>
-  <script defer src="/assets/funnel-tracking.js?v=bf8bd138"></script>
+  <script defer src="/assets/funnel-tracking.js?v=f696d170"></script>
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -129,6 +137,9 @@ fbq('track', 'PageView');
           <a class="v8-home-primary-cta" href="/consultation/" data-v8-event="home_hero_consult_cta_click">우리 집 조건 상담하기 <span aria-hidden="true">→</span></a>
           <a class="v8-home-secondary-cta" href="#story-start" data-v8-event="home_portfolio_cta_click">세 가지 이야기로 확인하기 <span aria-hidden="true">→</span></a>
         </div>
+        <!-- CMP-1426: 히어로 CTA A/B 실험군(B)에서만 노출. assets/funnel-tracking.js가
+             별도 50:50 버킷을 계산해 body에 v8-hero-cta-trust-b 클래스를 붙인다. -->
+        <p class="v8-home-hero-trust"><a href="portfolio.html" data-cta-location="hero_trust_line">실제 시공사진 1,047장, 포트폴리오에서 확인 <span aria-hidden="true">→</span></a></p>
       </div>
       <p class="v8-home-bridge">처음 공사가 막막한 순간부터, 조건을 판단하고 생활이 달라지는 순간까지.</p>
     </section>
