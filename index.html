@@ -78,17 +78,24 @@ fbq('track', 'PageView');
 </script>
 <!-- End Meta Pixel Code -->
 <!-- Naver WCS / CTS common tracking -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js" data-spacebogam-naver-wcs="1"></script>
-<script type="text/javascript">
-if (!window.wcs_add) window.wcs_add = {};
-window.wcs_add["wa"] = "s_7702568df18";
-if (!window._nasa) window._nasa = {};
-if (window.wcs) {
-  window.wcs.inflow("spacebogam.kr");
-  window.wcs_do();
-  window.__spacebogamNaverCtsPvSent = true;
-}
-</script>
+<!-- CMP-1411: GTM/gtag 처럼 __sbLazyTag 로 로드 시점만 미룬다(CMP-1369가 이 스크립트는 놓쳤었다).
+     기존에 <head>에서 동기 로드돼 파서를 막던 것을 제거. -->
+<script type="text/javascript">__sbLazyTag(function(){
+  var s = document.createElement('script');
+  s.src = '//wcs.naver.net/wcslog.js';
+  s.setAttribute('data-spacebogam-naver-wcs', '1');
+  s.onload = function(){
+    if (!window.wcs_add) window.wcs_add = {};
+    window.wcs_add["wa"] = "s_7702568df18";
+    if (!window._nasa) window._nasa = {};
+    if (window.wcs) {
+      window.wcs.inflow("spacebogam.kr");
+      window.wcs_do();
+      window.__spacebogamNaverCtsPvSent = true;
+    }
+  };
+  document.head.appendChild(s);
+});</script>
 
   <script defer src="assets/preview-v8.js?v=cmp1289"></script>
 </head>
