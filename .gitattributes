@@ -1,0 +1,4 @@
+# CMP-168: 배포 릴리스는 `git archive` 로 추출되므로, 여기 export-ignore 처리한
+# 경로는 저장소·작업트리·preview(3023)에는 그대로 남고 공개 릴리스에서만 빠진다.
+scripts/ export-ignore
+blog-admin.html export-ignore
