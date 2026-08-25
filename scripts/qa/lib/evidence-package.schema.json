@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spacebogam.kr/schemas/auto-deploy-evidence-package.json",
+  "title": "spacebogam.kr 자동 배포 증거 패키지 (CMP-1436)",
+  "description": "저위험 변경 자동 승인·배포 시도 1건에 대한 판정 근거 전체. dry-run 모드에서는 deploy/verify 단계가 채워지지 않은 채로 CLASSIFYING 까지만 기록된다.",
+  "type": "object",
+  "required": ["runId", "commitSha", "baseSha", "classifier", "gate", "state"],
+  "properties": {
+    "runId": { "type": "string", "description": "이 배포 시도의 고유 ID. 중복 실행 방지 키." },
+    "commitSha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "baseSha": { "type": "string", "pattern": "^[0-9a-f]{40}$", "description": "직전 라이브 릴리스 커밋" },
+    "issueIdentifier": { "type": "string", "description": "이 변경을 만든 원본 이슈 (예: CMP-1369)" },
+    "dryRun": { "type": "boolean", "description": "true면 실제 배포/롤백 명령을 전혀 실행하지 않음" },
+    "state": {
+      "type": "string",
+      "enum": [
+        "RECEIVED", "CLASSIFYING", "HUMAN_REVIEW_REQUIRED", "AUTO_APPROVED",
+        "PRE_DEPLOY_GATE", "GATE_FAILED", "VERSION_PINNED", "DEPLOYED",
+        "POST_DEPLOY_VERIFY", "VERIFY_FAILED", "AUTO_ROLLBACK", "ROLLED_BACK",
+        "VERIFIED_OK", "DONE", "BLOCKED"
+      ]
+    },
+    "classifier": {
+      "type": "object",
+      "description": "scripts/qa/lib/risk-classifier.mjs 출력",
+      "required": ["verdict", "files"],
+      "properties": {
+        "verdict": { "type": "string", "enum": ["AUTO_ELIGIBLE", "HUMAN_REQUIRED"] },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "category", "verdict", "reasons"],
+            "properties": {
+              "path": { "type": "string" },
+              "status": { "type": "string" },
+              "category": { "type": "string" },
+              "verdict": { "type": "string", "enum": ["AUTO_ELIGIBLE", "HUMAN_REQUIRED"] },
+              "reasons": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "description": "배포 전 필수 검증. 하나라도 실패하면 GATE_FAILED — 자동 진행 중단.",
+      "properties": {
+        "newTestFailures": { "type": "integer", "minimum": 0, "description": "tests/harness.sh 기준. 반드시 0." },
+        "requiredRegressionsPassed": { "type": "boolean" },
+        "testHarnessLog": { "type": "string", "description": "tests/harness.sh 실행 로그 경로 또는 요약" },
+        "preflightPassed": { "type": "boolean", "description": "/Volumes/DATABASE/spacebogam/bin/preflight.sh exit 0" }
+      }
+    },
+    "deploy": {
+      "type": "object",
+      "description": "dry-run 에서는 비어 있음. 실제 배포 시 bin/deploy.sh 결과를 기록.",
+      "properties": {
+        "previousReleaseSha": { "type": "string" },
+        "newReleaseSha": { "type": "string" },
+        "byteVerifyPassed": { "type": "boolean", "description": "bin/lib.sh verify_release() 결과" },
+        "deployLogExcerpt": { "type": "string" }
+      }
+    },
+    "postDeployVerify": {
+      "type": "object",
+      "description": "배포 후 실URL 자동 판정. candidate #5 의 핵심 — 바이트 일치를 넘어 사용자 체감 지표까지 본다.",
+      "properties": {
+        "probedUrls": { "type": "array", "items": { "type": "string" } },
+        "lcpMsBefore": { "type": "number" },
+        "lcpMsAfter": { "type": "number" },
+        "lcpRegressionPct": { "type": "number", "description": "(after-before)/before. 임계치 초과 시 VERIFY_FAILED." },
+        "jsErrorRateBefore": { "type": "number" },
+        "jsErrorRateAfter": { "type": "number" },
+        "coreEventReadback": {
+          "type": "object",
+          "description": "배포 전후 동일 창(예: 15분)에서 핵심 이벤트 수 대조 — 계측이 죽지 않았는지 확인",
+          "properties": {
+            "eventName": { "type": "string", "enum": ["page_view", "form_start", "form_submit", "phone_click", "engaged_session"] },
+            "countBeforeWindow": { "type": "integer" },
+            "countAfterWindow": { "type": "integer" },
+            "withinExpectedRange": { "type": "boolean" }
+          }
+        },
+        "verdict": { "type": "string", "enum": ["PASS", "FAIL", "SKIPPED_DRY_RUN"] }
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "description": "VERIFY_FAILED 시에만 채워짐",
+      "properties": {
+        "triggered": { "type": "boolean" },
+        "targetSha": { "type": "string" },
+        "rollbackLogExcerpt": { "type": "string" },
+        "confirmedLive": { "type": "boolean" }
+      }
+    },
+    "audit": {
+      "type": "object",
+      "required": ["actorAgentId", "timestamps"],
+      "properties": {
+        "actorAgentId": { "type": "string" },
+        "lockKey": { "type": "string", "description": "동시 배포 방지용 락 파일 경로/키" },
+        "timestamps": {
+          "type": "object",
+          "properties": {
+            "receivedAt": { "type": "string", "format": "date-time" },
+            "classifiedAt": { "type": "string", "format": "date-time" },
+            "deployedAt": { "type": "string", "format": "date-time" },
+            "verifiedAt": { "type": "string", "format": "date-time" }
+          }
+        }
+      }
+    }
+  }
+}
