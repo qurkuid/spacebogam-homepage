@@ -32,6 +32,7 @@ const QUESTIONS = [
   { id: 33, question: '상담을 원하는 날짜를 선택해주세요', questionType: 'date', options: null, isRequired: true },
   { id: 34, question: '상담을 원하는 시간을 선택해주세요', questionType: 'single_choice', options: ['10:00', '14:00'], isRequired: true },
   { id: 7, question: '기타 요청사항이 있으시면 알려주세요.', questionType: 'text', options: null, isRequired: false },
+  { id: 17, question: '통화 가능한 시간대를 알려주세요.', questionType: 'single_choice', options: ['오전', '오후'], isRequired: false },
   { id: 25, question: '선호하는 인테리어 스타일을 선택해주세요', questionType: 'multiple_choice', options: ['모던', '북유럽'], isRequired: false },
 ];
 
@@ -120,6 +121,18 @@ test('질문 API 응답을 타입별 입력 위젯으로 렌더한다', async ()
   assert.equal(document.querySelector('#q34_0').type, 'radio');
 });
 
+test('전화상담으로 오인할 수 있는 카피만 중립화하고 질문 ID 계약은 유지한다', async () => {
+  const { document } = bootstrap();
+  await settle();
+
+  assert.doesNotMatch(pageSource, /필요한 내용은 통화에서|나머지는 통화에서/);
+  assert.match(pageSource, /필요한 내용은 상담 전 안내 과정에서 함께 정리합니다/);
+  const timeField = document.querySelector('[data-question-id="17"]');
+  assert.match(timeField.querySelector('.cf-label').textContent, /연락 가능한 시간대/);
+  assert.doesNotMatch(timeField.querySelector('.cf-label').textContent, /통화 가능한 시간대/);
+  assert.equal(timeField.querySelector('input').name, 'q17', 'CRM 질문 ID 계약을 바꾸면 안 된다');
+});
+
 test('선택 항목은 접어두되 버리지 않는다 — CRM 필드가 사라지면 안 된다', async () => {
   const { document } = bootstrap();
   await settle();
@@ -176,7 +189,7 @@ test('필드 완료·이탈 계측은 답변 값 없이 질문 메타데이터�
   const abandon = calls.gtag.find((call) => call[1] === 'lead_form_abandon');
   assert.equal(abandon[2].completed_field_count, 1);
   assert.equal(abandon[2].last_question_id, '13');
-  assert.equal(abandon[2].required_field_count, 10);
+  assert.equal(abandon[2].required_field_count, 4);
   assert.equal(abandon[2].transport_type, 'beacon');
 });
 
@@ -259,6 +272,19 @@ test('Pixel Lead 의 eventID 와 서버가 돌려준 leadEventId 가 같은 값�
   assert.ok(lead, 'Lead 이벤트가 발화해야 한다');
   assert.equal(lead[3].eventID, sent, '브라우저와 서버가 같은 event_id 를 써야 중복 제거된다');
   assert.equal(lead[2].currency, 'KRW');
+});
+
+test('완료 화면은 전화상담을 암시하지 않고 상담 일정 안내를 고지한다', async () => {
+  const { document } = bootstrap();
+  await settle();
+
+  fillRequired(document);
+  document.querySelector('form').dispatchEvent(new document.defaultView.Event('submit', { bubbles: true, cancelable: true }));
+  await settle();
+
+  const success = document.querySelector('.cf-success').textContent;
+  assert.match(success, /담당자가 확인 후 상담 일정을 안내해 드립니다/);
+  assert.doesNotMatch(success, /통화|순차적으로 연락드립니다/);
 });
 
 test('서버가 다른 event_id 를 파생하면 서버 값을 따른다', async () => {
