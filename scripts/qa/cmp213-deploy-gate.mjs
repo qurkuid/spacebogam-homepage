@@ -56,7 +56,15 @@ async function run(){
 
   const t0 = Date.now();
   await page.goto(HOME, { waitUntil: 'load', timeout: 60000 });
-  await new Promise((r) => setTimeout(r, 3000)); // 지연 태그(load+1.5s)가 뜰 시간을 준다
+  // 지연 태그(load+1.5s 트리거)가 뜬 뒤, GTM/gtag/Pixel 이 같은 슬로우4G 대역폭을 나눠 쓰며
+  // 순차로 받아와 실행되기까지 걸리는 시간을 기다린다. CMP-213 게이트 1차 실측(로컬 스로틀)에서
+  // load 이후 GA4 collect 히트까지 약 4.8초가 걸렸다 — 고정 3초 대기는 매번 놓친다(오탐).
+  // 히트가 뜨면 즉시 빠져나오고, GA4_WAIT_MS 까지는 기다린다.
+  const GA4_WAIT_MS = 9000;
+  const pollStart = Date.now();
+  while (!net.ga4Hit && Date.now() - pollStart < GA4_WAIT_MS) {
+    await new Promise((r) => setTimeout(r, 250));
+  }
   const lcp = await page.evaluate(() => Math.round(window.__lcp || 0));
   const loadMs = Date.now() - t0;
 
