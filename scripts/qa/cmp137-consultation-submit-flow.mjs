@@ -11,18 +11,25 @@
  *
  * DRY_RUN=1 이면 폼을 끝까지 채우되 제출 버튼을 누르지 않는다.
  * 픽스처는 전부 `[QA]` 접두어 비식별 값이며 연락처는 도달 불가 더미다(CMP-139 승인 범위).
+ *
+ * BASE_URL=http://127.0.0.1:3023 이면 작업 트리 preview(커밋 전 검증), 미지정 시 기본값
+ * 운영 도메인(배포 후 검증)을 검사한다. 실제 상담 저장은 항상 운영 DB(intm.kr)로 간다 —
+ * BASE_URL 은 홈/랜딩만 바꾼다.
+ * qa-entry-url-allow: 문서 주석, 실제 유입 URL 구성이 아님 — is_test 는 아래 qaEntryUrl() 이 강제한다.
  */
 import puppeteer from '/Users/baegchangseog/.nvm/versions/node/v24.15.0/lib/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js';
 import { qaEntryUrl } from './lib/qa-entry-url.mjs';
+import { announceTarget } from './lib/qa-target.mjs';
 
 const CHROME =
   '/Users/baegchangseog/Library/Caches/ms-playwright/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing';
 
 const VARIANT = (process.env.VARIANT || 'A').toUpperCase();
 const DRY_RUN = process.env.DRY_RUN === '1';
+const BASE_URL = announceTarget('CMP137');
 // CMP-267: 이 프로브는 라이브에서 실제 제출까지 하므로 퍼널 상단 이벤트도 그대로 남는다.
 // qaEntryUrl 이 is_test=1 을 강제해 세션 전체가 is_test=t 로 기록된다.
-const HOME = qaEntryUrl('https://spacebogam.kr/', { experiment_force: VARIANT });
+const HOME = qaEntryUrl(`${BASE_URL}/`, { experiment_force: VARIANT });
 
 const FIXTURE = {
   name: `[QA]테스트${VARIANT}`,

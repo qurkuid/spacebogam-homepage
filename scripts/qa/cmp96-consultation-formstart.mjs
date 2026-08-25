@@ -6,12 +6,16 @@
 // 이전 판(구 URL 하드코딩 + origin=intm.kr 필터)은 새 경로의 이벤트를 구조적으로 보지 못해
 // 실험 귀속이 정상인데도 항상 FAIL 을 뱉었다. 판정은 host 가 아니라 pathname 으로 한다.
 // 사용: node scripts/qa/cmp96-consultation-formstart.mjs <출력디렉터리>
+//   BASE_URL=http://127.0.0.1:3023 node scripts/qa/cmp96-consultation-formstart.mjs   # 커밋 전 preview 검증
+//   BASE_URL 미지정 시 기본값 https://spacebogam.kr (배포 후 검증)
 import puppeteer from '/Users/baegchangseog/.nvm/versions/node/v24.15.0/lib/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js';
 import { writeFileSync } from 'node:fs';
 import { qaEntryUrl } from './lib/qa-entry-url.mjs';
+import { announceTarget } from './lib/qa-target.mjs';
 
 const CHROME = '/Users/baegchangseog/Library/Caches/ms-playwright/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing';
 const OUT = process.argv[2] || '.';
+const BASE_URL = announceTarget('CMP96-formstart');
 // 폼이 spacebogam.kr 로 옮겨간 뒤에도 수집 엔드포인트는 intm.kr 그대로다(교차 출처 POST).
 const MATCH = 'intm.kr/api/marketing/funnel-events';
 const FORM_PATH = '/consultation/apply';
@@ -43,7 +47,7 @@ async function journey(browser, variant) {
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') consoleMsgs.push(`[${m.type()}] ${m.text().slice(0, 240)}`); });
 
   // CMP-267: qaEntryUrl 이 is_test=1 을 강제한다. 이게 없으면 이 프로브의 세션이 실유입으로 집계된다.
-  await page.goto(qaEntryUrl('https://spacebogam.kr/', `${UTM}&experiment_force=${variant}`), { waitUntil: 'networkidle2', timeout: 60000 });
+  await page.goto(qaEntryUrl(`${BASE_URL}/`, `${UTM}&experiment_force=${variant}`), { waitUntil: 'networkidle2', timeout: 60000 });
   await sleep(1000);
   // 홈 → /consultation/
   await page.evaluate(() => document.querySelector('a[href*="/consultation/"]').click());

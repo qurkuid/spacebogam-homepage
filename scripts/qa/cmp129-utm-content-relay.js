@@ -6,10 +6,23 @@
  *
  * 네트워크 전송(fetch)은 전부 스텁으로 가로채 운영 계측 데이터를 오염시키지 않는다.
  * 실행: node scripts/qa/cmp129-utm-content-relay.js
+ *   BASE_URL=http://127.0.0.1:3023 node scripts/qa/cmp129-utm-content-relay.js
+ *   BASE_URL 미지정 시 기본값 https://spacebogam.kr
+ *
+ * CMP-155 주의: 이 하네스는 fs.readFileSync 로 로컬 작업 트리 파일(index.html,
+ * consultation/index.html, assets/*.js)을 직접 읽는다 — 네트워크로 페이지를 받아오지
+ * 않는다. 따라서 검사 대상 "콘텐츠"는 BASE_URL 과 무관하게 항상 커밋 전 로컬 상태다.
+ * BASE_URL 은 오직 JSDOM 안에서 상대 링크를 절대 URL 로 풀 때 쓰는 origin(그리고
+ * isConsultLink 의 호스트 판정 기준)만 바꾼다. spacebogam.kr 로 배포된 실제 HTML 을
+ * 검사하려는 목적이라면 이 스크립트가 아니라 cmp96/cmp137 프로브를 쓴다.
  */
 const fs = require('fs');
 const path = require('path');
 const {JSDOM} = require('jsdom');
+
+const BASE_URL = (process.env.BASE_URL || 'https://spacebogam.kr').replace(/\/+$/, '');
+const TARGET_HOST = new URL(BASE_URL).hostname;
+console.error(`[CMP129] target BASE_URL = ${BASE_URL} (콘텐츠는 항상 로컬 작업 트리 — 위 주의 참조)`);
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const FUNNEL = fs.readFileSync(path.join(ROOT, 'assets/funnel-tracking.js'), 'utf8');
@@ -56,7 +69,7 @@ async function runCase(name, opts){
     try {
       const u = new w.URL(href, landingUrl);
       return (u.hostname === 'intm.kr' && u.pathname === '/consultation/ggbg') ||
-        (/spacebogam\.kr$/.test(u.hostname) && /^\/consultation\/?$/.test(u.pathname));
+        (u.hostname === TARGET_HOST && /^\/consultation\/?$/.test(u.pathname));
     } catch(e) { return false; }
   };
   const anchors = Array.from(w.document.querySelectorAll('a[href]'))
@@ -110,23 +123,23 @@ const IG_ATTRIBUTION = {
   const results = [];
   // 1홉: IG 랜딩(홈) → 상담 링크
   results.push(await runCase('A1. UTM 있음 · 홈 랜딩 → 상담 링크', {
-    page: 'home', url: 'https://spacebogam.kr/?' + IG_QUERY
+    page: 'home', url: BASE_URL + '/?' + IG_QUERY
   }));
   // 2홉: 상담 페이지(쿼리 유지) → intm.kr 신청서
   results.push(await runCase('A2. UTM 있음 · 상담 페이지(쿼리 유지) → intm.kr', {
-    page: 'consultation', url: 'https://spacebogam.kr/consultation/?' + IG_QUERY
+    page: 'consultation', url: BASE_URL + '/consultation/?' + IG_QUERY
   }));
   // 2홉 최악 케이스: 쿼리 없이 상담 페이지 도착, 저장된 attribution 만으로 복원
   results.push(await runCase('A3. UTM 있음 · 상담 페이지(쿼리 유실) → intm.kr', {
-    page: 'consultation', url: 'https://spacebogam.kr/consultation/',
+    page: 'consultation', url: BASE_URL + '/consultation/',
     storedAttribution: IG_ATTRIBUTION
   }));
   // 대조군: UTM 없음
   results.push(await runCase('B1. UTM 없음 · 홈 랜딩 → 상담 링크', {
-    page: 'home', url: 'https://spacebogam.kr/'
+    page: 'home', url: BASE_URL + '/'
   }));
   results.push(await runCase('B2. UTM 없음 · 상담 페이지 → intm.kr', {
-    page: 'consultation', url: 'https://spacebogam.kr/consultation/'
+    page: 'consultation', url: BASE_URL + '/consultation/'
   }));
   console.log(JSON.stringify(results, null, 2));
 })();
