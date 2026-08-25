@@ -1,4 +1,10 @@
 (function(){
+  // CMP-1278: 일부 페이지(portfolio.html, case-hwamyeong-kolong.html)는 정적
+  // <script> 태그로 이 파일을 로드하면서 site-tracking.js 의 동적 주입도 함께
+  // 받아 이 IIFE 가 두 번 실행됐다(모든 이벤트 2배 전송). 로드 경로(정적 태그 vs
+  // site-tracking.js 주입)와 무관하게 페이지당 1회만 실행되도록 여기서 막는다.
+  if (window.__spacebogamFunnelInit) return;
+  window.__spacebogamFunnelInit = true;
   var ENDPOINT = 'https://intm.kr/api/marketing/funnel-events';
   var CLIENT_KEY = 'spacebogam_funnel_client_id';
   var SESSION_KEY = 'spacebogam_funnel_session_id';
