@@ -38,10 +38,10 @@ const QUESTIONS = [
 ];
 
 const LANDING_QUERY =
-  '?utm_source=meta&utm_medium=paid_social&utm_campaign=busan_remodeling' +
+  '?type=residential&utm_source=meta&utm_medium=paid_social&utm_campaign=busan_remodeling' +
   '&utm_id=CMP173&campaign_id=111&adset_id=222&ad_id=333&asset_id=444&is_test=1';
 
-function bootstrap({ search = '', submitResponse, page = 'apply' } = {}) {
+function bootstrap({ search = '?type=residential', submitResponse, page = 'apply' } = {}) {
   const direct = page === 'consultation';
   const source = direct ? consultationPageSource : pageSource;
   const pathname = direct ? '/consultation/' : '/consultation/apply/';
@@ -90,6 +90,47 @@ function bootstrap({ search = '', submitResponse, page = 'apply' } = {}) {
   window.eval(formSource);
   return { window, calls, document: window.document };
 }
+
+test('유형 미선택 진입은 주거·상업 선택만 먼저 보여준다', async () => {
+  const { document, calls } = bootstrap({ search: '' });
+  await settle();
+  assert.equal(calls.questions, 0);
+  assert.equal(document.querySelectorAll('#consult-form-root a.button').length, 2);
+  assert.match(document.querySelector('#consult-form-root').textContent, /주거 인테리어/);
+  assert.match(document.querySelector('#consult-form-root').textContent, /상업공간 인테리어/);
+});
+
+test('상업 유형은 주거 질문 없이 전용 payload와 광고 귀속을 제출한다', async () => {
+  const query = '?type=commercial&vertical=office&utm_source=meta&utm_campaign=commercial_p0&campaign_id=11&adset_id=22&ad_id=33&is_test=1';
+  const { document, calls } = bootstrap({ search: query });
+  await settle();
+  assert.equal(calls.questions, 0, '상업 폼은 주거 질문 API에 의존하지 않는다');
+  assert.equal(document.querySelector('[name="q8"]'), null, '동호수 질문이 없어야 한다');
+  assert.equal(document.querySelector('[name="q16"]'), null, '주거 수정 비밀번호가 없어야 한다');
+  document.querySelector('[name="qname"]').value = '테스트';
+  document.querySelector('[name="qphone"]').value = '010-1234-5678';
+  document.querySelector('[name="qvertical"]').value = 'office';
+  document.querySelector('[name="qaddress"]').value = '부산 해운대구';
+  document.querySelector('[name="qarea"]').value = '30';
+  document.querySelector('[name="qcurrentState"]').value = 'vacant';
+  document.querySelector('[name="qopenDate"]').value = '2026-10-01';
+  document.querySelector('[name="qbudget"]').value = '50_100m';
+  document.querySelector('[name="qcallbackTime"]').value = 'weekday_pm';
+  document.querySelector('[name="qrequestNote"]').value = '현장 확인 요청';
+  document.querySelector('#cf-consent-input').checked = true;
+  document.querySelector('form').dispatchEvent(new document.defaultView.Event('submit', { bubbles: true, cancelable: true }));
+  await settle();
+  const payload = calls.submit[0];
+  assert.equal(payload.type, 'commercial');
+  assert.deepEqual(payload.answers, { '9999': 'true' });
+  assert.equal(payload.commercialLead.vertical, 'office');
+  assert.equal(payload.commercialLead.currentState, 'vacant');
+  assert.equal(payload.commercialLead.consent, true);
+  assert.equal(payload.marketingAttribution.campaign_id, '11');
+  assert.equal(payload.marketingAttribution.adset_id, '22');
+  assert.equal(payload.marketingAttribution.ad_id, '33');
+  assert.equal(payload.marketingAttribution.is_test, 'true');
+});
 
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 async function settle() {

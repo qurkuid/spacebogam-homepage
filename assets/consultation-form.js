@@ -57,6 +57,8 @@
   var TEST_TRUTHY = ['1', 'true', 'yes', 'y', 'on'];
 
   var params = new URLSearchParams(location.search);
+  var leadType = params.get('type') === 'commercial' ? 'commercial' :
+    (params.get('type') === 'residential' ? 'residential' : '');
   var root = document.getElementById('consult-form-root');
   if (!root) return;
 
@@ -398,7 +400,9 @@
       select.id = name;
       select.className = 'cf-input';
       select.appendChild(new Option('선택해주세요', ''));
-      choices.forEach(function(choice){ select.appendChild(new Option(choice, choice)); });
+      choices.forEach(function(choice){
+        select.appendChild(new Option((question.optionLabels && question.optionLabels[choice]) || choice, choice));
+      });
       wrap.appendChild(select);
     } else if (type === 'text') {
       var textarea = document.createElement('textarea');
@@ -479,6 +483,23 @@
   // ---- 흐름 ---------------------------------------------------------------
 
   var questions = [];
+  var COMMERCIAL_QUESTIONS = [
+    {id:'name', question:'성명을 알려주세요.', questionType:'short_answer', isRequired:true},
+    {id:'phone', question:'연락처를 알려주세요.', questionType:'phonenumber', isRequired:true},
+    {id:'vertical', question:'업종·공간 유형을 선택해주세요.', questionType:'select', isRequired:true,
+      options:['office','shop','cafe_restaurant','clinic','other'], optionLabels:{office:'사무실',shop:'일반상가',cafe_restaurant:'카페·음식점',clinic:'병원·의원',other:'기타'}},
+    {id:'address', question:'현장 지역·주소를 알려주세요.', questionType:'address', isRequired:true},
+    {id:'area', question:'전용면적을 알려주세요.', questionType:'number', isRequired:true},
+    {id:'currentState', question:'현재 현장 상태를 선택해주세요.', questionType:'select', isRequired:true,
+      options:['vacant','occupied','shell','renovation'], optionLabels:{vacant:'공실',occupied:'영업·사용 중',shell:'신축·무마감',renovation:'기존 인테리어 철거 예정'}},
+    {id:'openDate', question:'오픈·입주 희망일을 알려주세요.', questionType:'date', isRequired:true},
+    {id:'budget', question:'예산 구간을 선택해주세요.', questionType:'select', isRequired:true,
+      options:['under_30m','30_50m','50_100m','100_200m','over_200m','undecided'], optionLabels:{under_30m:'3천만원 미만','30_50m':'3천만~5천만원','50_100m':'5천만~1억원','100_200m':'1억~2억원',over_200m:'2억원 이상',undecided:'미정'}},
+    {id:'callbackTime', question:'연락 가능한 시간을 선택해주세요.', questionType:'select', isRequired:true,
+      options:['weekday_am','weekday_pm','weekday_evening'], optionLabels:{weekday_am:'평일 오전',weekday_pm:'평일 오후',weekday_evening:'평일 17시 이후'}},
+    {id:'requestNote', question:'요청사항이 있으시면 알려주세요.', questionType:'text', isRequired:false}
+  ];
+  var COMMERCIAL_VERTICALS = ['office','shop','cafe_restaurant','clinic','other'];
   var startedTracked = false;
   var submitSucceeded = false;
   var submitting = false;
@@ -562,6 +583,24 @@
     root.appendChild(box);
   }
 
+  function renderLeadTypePicker(){
+    root.innerHTML = '';
+    var box = element('div', 'cf-form cf-group');
+    box.appendChild(element('h2', 'cf-group-title', '어떤 공간을 상담하시나요?'));
+    var choices = element('div', 'cf-choices');
+    [['residential','주거 인테리어'], ['commercial','상업공간 인테리어']].forEach(function(item){
+      var link = element('a', 'button', item[1]);
+      var next = new URLSearchParams(params);
+      next.set('type', item[0]);
+      link.href = location.pathname + '?' + next.toString() + '#consult-form-root';
+      choices.appendChild(link);
+    });
+    box.appendChild(choices);
+    root.appendChild(box);
+    sendFunnelEvent('lead_form_view');
+    trackGtag('lead_form_view', {lead_type:'unselected'});
+  }
+
   function renderForm(){
     root.innerHTML = '';
     var form = document.createElement('form');
@@ -572,7 +611,7 @@
     var optional = questions.filter(function(q){ return !q.isRequired; });
 
     var primary = element('div', 'cf-group');
-    primary.appendChild(element('h2', 'cf-group-title', '상담에 꼭 필요한 정보'));
+    primary.appendChild(element('h2', 'cf-group-title', leadType === 'commercial' ? '상업공간 상담 정보' : '상담에 꼭 필요한 정보'));
     required.forEach(function(q){ primary.appendChild(buildField(q)); });
     form.appendChild(primary);
 
@@ -661,6 +700,12 @@
         return;
       }
       answers[CONSENT_ANSWER_ID] = 'true';
+      var commercialLead = null;
+      if (leadType === 'commercial') {
+        commercialLead = {};
+        COMMERCIAL_QUESTIONS.forEach(function(question){ commercialLead[question.id] = readAnswer(question); });
+        commercialLead.consent = true;
+      }
 
       submitting = true;
       submit.disabled = true;
@@ -670,9 +715,11 @@
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          answers: answers,
+          answers: leadType === 'commercial' ? {[CONSENT_ANSWER_ID]:'true'} : answers,
           filePath: null,
           companyId: COMPANY_ID,
+          type: leadType,
+          commercialLead: commercialLead,
           marketingAttribution: marketingAttribution()
         })
       }).then(function(response){
@@ -696,6 +743,9 @@
     });
 
     root.appendChild(form);
+    if (leadType === 'commercial' && COMMERCIAL_VERTICALS.indexOf(params.get('vertical')) !== -1) {
+      root.querySelector('[name="qvertical"]').value = params.get('vertical');
+    }
     sendFunnelEvent('lead_form_view');
     trackGtag('lead_form_view');
   }
@@ -729,6 +779,16 @@
     // Pixel 이 아직 뜨지 않았어도 fbq 스텁이 큐에 쌓아두므로 여기서 다시 init 하지 않는다.
     if (typeof window.fbq === 'function' && !window.__spacebogamPixelInitialized) {
       window.__spacebogamPixelInitialized = META_PIXEL_ID;
+    }
+
+    if (!leadType) {
+      renderLeadTypePicker();
+      return;
+    }
+    if (leadType === 'commercial') {
+      questions = COMMERCIAL_QUESTIONS;
+      renderForm();
+      return;
     }
 
     fetch(QUESTIONS_URL, {method: 'GET'})

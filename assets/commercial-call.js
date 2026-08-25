@@ -323,9 +323,21 @@
     });
   }
 
+  function wireCommercialFormLinks(key) {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-commercial-form-link]'), function (link) {
+      var target = new URL('/consultation/', location.origin);
+      new URLSearchParams(location.search).forEach(function (value, name) { target.searchParams.set(name, value); });
+      target.searchParams.set('type', 'commercial');
+      target.searchParams.set('vertical', key);
+      target.searchParams.set('channel', 'commercial_landing');
+      link.href = target.pathname + target.search;
+    });
+  }
+
   function init() {
     var key = readVertical() || 'office';
     apply(key, readCreative());
+    wireCommercialFormLinks(key);
     wireSmsCallback();
     wireTelPixel();
   }
