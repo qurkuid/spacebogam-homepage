@@ -22,8 +22,8 @@
 <!-- Meta Pixel Code -->
 <script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','512750840350337');fbq('track','PageView');</script>
 <!-- End Meta Pixel Code -->
-<script src="//wcs.naver.net/wcslog.js" data-spacebogam-naver-wcs="1"></script><script>if(!window.wcs_add)window.wcs_add={};window.wcs_add.wa='s_7702568df18';if(!window._nasa)window._nasa={};if(window.wcs){window.wcs.inflow('spacebogam.kr');window.wcs_do();window.__spacebogamNaverCtsPvSent=true}</script>
-</head>
+<!-- CMP-1411: 여기 있던 동기 Naver WCS 로드 블록을 제거. assets/site-tracking.js(위에서 defer 로드)가
+     sendNaverCtsPageView()에서 이미 같은 계정(s_7702568df18)으로 비동기(async) 로드+중복방지를 처리한다. --></head>
 <body class="v8-consultation-page" data-no-auto-cta="true">
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PW8GLP8S" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=512750840350337&amp;ev=PageView&amp;noscript=1" alt="" aria-hidden="true"></noscript>
