@@ -2,276 +2,48 @@
 <html lang="ko">
 <head>
 <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});
-/* CMP-1369: 태그 컨테이너가 첫 화면 메인스레드를 7초 가까이 붙잡아, 광고로 들어온 사람이
-   상담 폼을 눌러도 몇 초간 반응하지 않았다(실측 TBT 6.8s). 태그는 하나도 빼지 않고
-   로드 "시점"만 미룬다. 사용자가 먼저 손대면(터치/입력/스크롤) 그 즉시 로드한다. */
-var q=[],fired=false;
-w.__sbLazyTag=function(fn){fired?fn():q.push(fn)};
-function go(){if(fired)return;fired=true;while(q.length)q.shift()()}
-['pointerdown','keydown','touchstart','scroll'].forEach(function(e){
-w.addEventListener(e,go,{once:true,passive:true})});
-if(d.readyState==='complete')setTimeout(go,1500);
-else w.addEventListener('load',function(){setTimeout(go,1500)});
-setTimeout(go,8000);
-w.__sbLazyTag(function(){var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);});
-})(window,document,'script','dataLayer','GTM-PW8GLP8S');</script>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var q=[],fired=false;w.__sbLazyTag=function(fn){fired?fn():q.push(fn)};function go(){if(fired)return;fired=true;while(q.length)q.shift()()}['pointerdown','keydown','touchstart','scroll'].forEach(function(e){w.addEventListener(e,go,{once:true,passive:true})});if(d.readyState==='complete')setTimeout(go,1500);else w.addEventListener('load',function(){setTimeout(go,1500)});setTimeout(go,8000);w.__sbLazyTag(function(){var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);});})(window,document,'script','dataLayer','GTM-PW8GLP8S');</script>
 <!-- End Google Tag Manager -->
-
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>부산 인테리어 상담 신청 | 공간보감</title>
-<meta name="description" content="공간보감 부산 인테리어 상담 신청서. 공간 유형, 평수, 예산, 희망 일정을 남기시면 담당자가 연락드립니다.">
-<!-- 폼 페이지는 색인 대상이 아니다. 안내 페이지 /consultation/ 과 중복 색인되면 유입이 갈린다. -->
+<meta name="description" content="공간보감 부산 인테리어 상담 신청서. 필수 정보 네 가지만 남기시면 담당자가 확인 후 상담 일정을 안내합니다.">
 <meta name="robots" content="noindex,follow">
 <link rel="canonical" href="https://spacebogam.kr/consultation/apply/">
-<meta property="og:type" content="website">
-<meta property="og:locale" content="ko_KR">
-<meta property="og:site_name" content="공간보감">
-<meta property="og:title" content="부산 인테리어 상담 신청 | 공간보감">
-<meta property="og:description" content="공간보감 도메인 안에서 바로 상담을 신청하세요.">
-<meta property="og:url" content="https://spacebogam.kr/consultation/apply/">
-<meta property="og:image" content="https://spacebogam.kr/assets/portfolio/daewoo-ian-35py.jpg">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/assets/page.css">
+<meta property="og:type" content="website"><meta property="og:locale" content="ko_KR"><meta property="og:site_name" content="공간보감">
+<meta property="og:title" content="부산 인테리어 상담 신청 | 공간보감"><meta property="og:description" content="우리 집 조건을 남겨주시면 담당자가 확인 후 상담 일정을 안내합니다."><meta property="og:url" content="https://spacebogam.kr/consultation/apply/">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="/assets/preview-v8.css?v=consultation-form-v8">
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<script src="/assets/site-canonical.js?v=c69a8498"></script><script defer src="/assets/site-tracking.js?v=8eae5c56"></script>
 <!-- Google tag (gtag.js) -->
 <script>__sbLazyTag(function(){var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-EJGXDD5C1T';document.head.appendChild(s)});</script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-EJGXDD5C1T');
-</script>
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<script src="/assets/site-canonical.js?v=c69a8498"></script>
-<script defer src="/assets/site-tracking.js?v=8eae5c56"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-EJGXDD5C1T');</script>
 <!-- Meta Pixel Code -->
-<script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '512750840350337');
-fbq('track', 'PageView');
-</script>
+<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','512750840350337');fbq('track','PageView');</script>
 <!-- End Meta Pixel Code -->
-<!-- Naver WCS / CTS common tracking -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js" data-spacebogam-naver-wcs="1"></script>
-<script type="text/javascript">
-if (!window.wcs_add) window.wcs_add = {};
-window.wcs_add["wa"] = "s_7702568df18";
-if (!window._nasa) window._nasa = {};
-if (window.wcs) {
-  window.wcs.inflow("spacebogam.kr");
-  window.wcs_do();
-  window.__spacebogamNaverCtsPvSent = true;
-}
-</script>
-<!--
-  CMP-1295 — 광고 각도별 메시지매치.
-  CMP-1280 광고 A/B/C/D 를 클릭한 사람이 첫 화면에서 광고에서 본 문장을 그대로 다시 본다.
-  설계 원칙 세 가지. 이걸 어기면 회귀다.
-   1) 카피 5벌(기본 + A~D)이 모두 HTML 에 들어있고 CSS 가 하나만 고른다.
-      자바스크립트로 글자를 갈아끼우지 않는다 — 그리다 만 화면이 보이지 않는다.
-   2) 스크립트는 URL 파라미터만 읽는다. sessionStorage/localStorage 를 건드리지 않는다
-      (CMP-1245 계열 회귀: 저장소 접근이 throw 하면 init 이 통째로 죽는다).
-   3) 파라미터가 없거나 모르는 값이면 아무것도 하지 않는다 → 지금 라이브와 100% 동일한 화면.
-      자바스크립트가 꺼져 있어도 마찬가지다.
-  폼은 손대지 않는다. 질문·필수항목·제출 경로 전부 그대로다.
--->
-<style>
-.mm-angle{display:none}
-html[data-ad-angle] .mm-default{display:none}
-html[data-ad-angle="a"] .mm-a,
-html[data-ad-angle="b"] .mm-b,
-html[data-ad-angle="c"] .mm-c,
-html[data-ad-angle="d"] .mm-d{display:block}
-/* 남겨주신 정보 → 상담 결과 안내 블록 */
-.mm-bridge{margin:26px 0 0;padding:20px 22px;border:1px solid var(--line);border-radius:20px;background:var(--paper)}
-.mm-bridge h2{font-size:17px;font-weight:600;margin:0 0 14px;letter-spacing:-.03em}
-.mm-list{list-style:none;display:grid;gap:10px;margin:0;padding:0}
-.mm-list li{display:grid;grid-template-columns:1fr;gap:2px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
-.mm-list b{font-size:14px;font-weight:600}
-.mm-list span{font-size:13.5px;color:var(--soft);line-height:1.55}
-html[data-ad-angle="a"] .mm-list li.mm-i-a,
-html[data-ad-angle="b"] .mm-list li.mm-i-b,
-html[data-ad-angle="c"] .mm-list li.mm-i-c{order:-1;border-color:var(--brown);box-shadow:0 0 0 1px var(--brown)}
-.mm-note{margin:14px 0 0;font-size:12.5px;color:var(--soft);line-height:1.55}
-/* D — 실제 시공 사례 스트립 */
-.mm-cases{display:none}
-html[data-ad-angle="d"] .mm-cases{display:block;margin:24px 0 0}
-.mm-case-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.mm-case-grid a{display:block;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
-/* 사진 상자의 크기는 부모가 정하고 img 는 그 안을 채운다. img 에 aspect-ratio 만 걸면
-   width/height 속성이 만든 UA 비율에 밀려 세로 사진이 그대로 늘어난다(실측). */
-.mm-case-thumb{display:block;width:100%;height:104px;overflow:hidden;background:var(--paper)}
-.mm-case-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.mm-case-grid b{display:block;font-size:12.5px;font-weight:600;padding:8px 10px 2px;letter-spacing:-.03em}
-.mm-case-grid span{display:block;font-size:11.5px;color:var(--soft);padding:0 10px 10px}
-.mm-case-more{display:inline-flex;margin-top:12px;border:1px solid var(--line);border-radius:999px;padding:9px 15px;font-size:13.5px;background:#fff}
-@media(min-width:900px){.mm-case-thumb{height:150px}}
-.cf-form{max-width:680px}
-.cf-group{margin:0 0 28px}
-.cf-group-title{font-size:1.05rem;margin:0 0 18px;padding-bottom:10px;border-bottom:1px solid rgba(0,0,0,.12)}
-.cf-optional{border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:14px 16px}
-.cf-optional[open]{padding-bottom:20px}
-.cf-optional>summary{cursor:pointer;font-weight:600;color:var(--brown,#7a5c3e)}
-.cf-optional>.cf-field{margin-top:18px}
-.cf-field{margin:0 0 18px}
-.cf-label{display:block;font-weight:600;margin:0 0 8px;line-height:1.45}
-.cf-required{color:#c0392b}
-.cf-input{width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid rgba(0,0,0,.24);border-radius:8px;font:inherit;background:#fff}
-.cf-input:focus{outline:2px solid var(--brown,#7a5c3e);outline-offset:1px}
-.cf-input[aria-invalid="true"]{border-color:#c0392b;box-shadow:0 0 0 1px #c0392b}
-.cf-choice input[aria-invalid="true"]{outline:2px solid #c0392b;outline-offset:2px}
-.cf-textarea{resize:vertical;min-height:84px}
-.cf-choices{display:flex;flex-wrap:wrap;gap:8px 14px}
-.cf-choice{display:inline-flex;align-items:flex-start;gap:8px;line-height:1.5;cursor:pointer}
-.cf-choice input{margin-top:4px;flex:none;width:18px;height:18px}
-.cf-help{margin:6px 0 0;font-size:.86rem;color:var(--soft,#6b6b6b)}
-.cf-field-error{margin:7px 0 0;color:#c0392b;font-size:.9rem;font-weight:600}
-.cf-consent{margin:0 0 18px;padding:14px;border-radius:8px;background:rgba(0,0,0,.04)}
-.cf-status{margin:0 0 12px;min-height:1.2em;font-size:.92rem}
-.cf-status-error{color:#c0392b;font-weight:600}
-.cf-submit{width:100%;font-size:1.05rem;padding:16px;border:0;cursor:pointer}
-.cf-submit[disabled]{opacity:.6;cursor:progress}
-.cf-success h2{margin:0 0 12px}
-.cf-error-box{padding:20px;border:1px solid rgba(0,0,0,.14);border-radius:10px}
-.cf-loading{color:var(--soft,#6b6b6b)}
-@media (min-width:720px){.cf-submit{width:auto;min-width:280px}}
-</style>
-<script>
-/* CMP-1295 — 광고 각도 판별. head 에서 동기 실행해 본문이 그려지기 전에 결정한다.
-   저장소를 읽지 않고, 실패하면 조용히 기본 카피로 남는다.
-   각도 e(commercial_text_card, 미용실·필라테스)는 CMP-1313 정본 반영으로 CMP-1322 에서
-   제거했다 — 상업광고는 이제 /commercial/call/ 로 가고, 이 ref 재사용은 정본 §7 금지사항이다. */
-(function(){
-  var MAP = {
-    ad_a_structure: 'a',
-    ad_b_budget: 'b',
-    ad_c_schedule: 'c',
-    ad_d_proof: 'd'
-  };
-  try {
-    var params = new URLSearchParams(window.location.search);
-    var raw = params.get('page_variant') || params.get('variant') || params.get('utm_content') || '';
-    var angle = MAP[String(raw).trim().toLowerCase()];
-    if (angle) document.documentElement.setAttribute('data-ad-angle', angle);
-  } catch (error) {
-    /* 파라미터를 못 읽으면 기본 카피 그대로. 계측·폼과는 무관하다. */
-  }
-})();
-</script>
+<script src="//wcs.naver.net/wcslog.js" data-spacebogam-naver-wcs="1"></script><script>if(!window.wcs_add)window.wcs_add={};window.wcs_add.wa='s_7702568df18';if(!window._nasa)window._nasa={};if(window.wcs){window.wcs.inflow('spacebogam.kr');window.wcs_do();window.__spacebogamNaverCtsPvSent=true}</script>
 </head>
-<body>
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PW8GLP8S"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
-<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=512750840350337&ev=PageView&noscript=1" alt="" aria-hidden="true" /></noscript>
-<header class="top"><div class="wrap"><a class="brand" href="/">공간보감</a><nav class="nav"><a href="/overview.html">회사소개</a><a href="/process.html">진행과정</a><a href="/portfolio.html">포트폴리오</a><a href="/consultation/">상담</a><a href="/living.html">주거</a><a href="/commercial.html">상업공간</a><a href="/estimate.html">견적준비</a><a href="/guides.html">가이드</a><a href="/qna.html">Q&amp;A</a></nav><a class="cta" href="/consultation/apply/">상담 신청</a></div></header>
-<main>
-  <section class="hero">
-    <div class="wrap">
-      <div class="crumb"><a href="/">홈</a> / <a href="/consultation/">상담</a> / 신청</div>
-
-      <!-- 기본(광고 파라미터 없음) — 현행 라이브와 동일 -->
-      <div class="mm-default">
-        <div class="eyebrow">CONSULTATION · 상담 신청</div>
-        <h1>지금 상황만 적어주시면<br>나머지는 저희가 정리해 드립니다.</h1>
-        <p class="lead">필수 항목만 채우셔도 접수됩니다. 담당자가 내용을 확인하고, 필요한 내용은 상담 전 안내 과정에서 함께 정리합니다. 상담만으로 계약이 진행되지는 않습니다.</p>
-      </div>
-
-      <!-- A. 구조·동선 -->
-      <div class="mm-angle mm-a">
-        <div class="eyebrow">CONSULTATION · 구조 상담 신청</div>
-        <h1>구조부터 살펴야,<br>공사 범위가 보입니다</h1>
-        <p class="lead">시공하실 공간과 공급평형을 남겨주시면, 1차 상담에서 우리 집 구조와 동선을 기준으로 공사 범위를 함께 정리해 드립니다. 상담만으로 구조를 바꿀 수 있는지, 공사가 가능한지는 정해지지 않습니다.</p>
-      </div>
-
-      <!-- B. 예산·우선순위 -->
-      <div class="mm-angle mm-b">
-        <div class="eyebrow">CONSULTATION · 예산 상담 신청</div>
-        <h1>예산 안에서 가능한<br>범위부터 정해요</h1>
-        <p class="lead">예산 구간과 가장 중요하게 보시는 부분을 남겨주시면, 1차 상담에서 그 예산 안의 우선순위를 함께 정리해 드립니다. 정확한 견적은 현장 실측 이후에 안내드립니다.</p>
-      </div>
-
-      <!-- C. 일정·입주 -->
-      <div class="mm-angle mm-c">
-        <div class="eyebrow">CONSULTATION · 일정 상담 신청</div>
-        <h1>입주 일정에 맞춰<br>시작할 수 있을까요</h1>
-        <p class="lead">시공 희망 시기와 상담 가능한 날짜·시간을 남겨주시면, 1차 상담에서 일정에 맞춰 진행이 가능한지와 남은 준비 기간을 함께 확인해 드립니다. 착공일·완공일을 보장해 드리지는 않습니다.</p>
-      </div>
-
-      <!-- D. 실사·신뢰 -->
-      <div class="mm-angle mm-d">
-        <div class="eyebrow">CONSULTATION · 사례 확인 후 상담 신청</div>
-        <h1>부산 아파트,<br>실제 시공 사례로 확인</h1>
-        <p class="lead">광고에서 보신 사진은 공간보감이 실제로 시공한 부산 아파트 현장입니다. 사례를 먼저 보시고, 우리 집 조건으로 상담을 신청하세요.</p>
-      </div>
-
-      <!-- D 전용 — 실제 시공 사례 스트립 -->
-      <div class="mm-cases">
-        <div class="mm-case-grid">
-          <a href="/case-mega-centum-49py.html">
-            <span class="mm-case-thumb"><img src="/assets/portfolio/mega-centum-49py.jpg" alt="부산 해운대 메가센텀꿈에그린 49평 인테리어 시공 사례" loading="lazy" width="480" height="360"></span>
-            <b>메가센텀꿈에그린 49평</b><span>부산 해운대</span>
-          </a>
-          <a href="/case-daewoo-ian-35py.html">
-            <span class="mm-case-thumb"><img src="/assets/portfolio/daewoo-ian-35py.jpg" alt="부산 북구 대우이안 아파트 35평 인테리어 시공 사례" loading="lazy" width="480" height="360"></span>
-            <b>대우이안 35평</b><span>부산 북구</span>
-          </a>
-          <a href="/case-oryukdo-sk-view.html">
-            <span class="mm-case-thumb"><img src="/assets/case/2d965ba4-64ad-4d62-a7c3-8902b41e321c/9231405c-0b87-40ea-bc8f-323d8756ae16.webp" alt="부산 남구 오륙도 SK뷰 인테리어 시공 사례" loading="lazy" width="480" height="360"></span>
-            <b>오륙도 SK뷰</b><span>부산 남구</span>
-          </a>
-        </div>
-        <a class="mm-case-more" href="/portfolio.html">시공 사례 전체 보기 ›</a>
-      </div>
-
-      <!-- 공통 — 남겨주신 정보가 상담에서 어떻게 쓰이는지 -->
-      <div class="mm-bridge">
-        <h2>남겨주신 정보로 이렇게 상담해 드립니다</h2>
-        <ul class="mm-list">
-          <li class="mm-i-a"><b>시공 장소 · 공급평형</b><span>우리 집 구조와 동선 기준으로 어디까지 공사할지 범위를 정리해 드립니다.</span></li>
-          <li class="mm-i-b"><b>예산 구간 · 중요하게 보는 부분</b><span>그 예산 안에서 무엇을 먼저 할지 우선순위를 함께 정합니다.</span></li>
-          <li class="mm-i-c"><b>시공 희망 시기 · 상담 날짜</b><span>희망하시는 일정에 맞춰 진행이 가능한지와 준비 기간을 확인해 드립니다.</span></li>
-        </ul>
-        <p class="mm-note">필수 항목만 채우셔도 접수됩니다. 담당자가 내용을 확인하고, 필요한 내용은 상담 전 안내 과정에서 함께 정리합니다. 상담만으로 계약이 진행되지 않으며, 정확한 견적은 현장 실측 이후에 안내해 드립니다.</p>
-      </div>
-    </div>
+<body class="v8-consultation-page" data-no-auto-cta="true">
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PW8GLP8S" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=512750840350337&amp;ev=PageView&amp;noscript=1" alt="" aria-hidden="true"></noscript>
+<a class="v8-skip" href="#consult-form-root">신청서 바로가기</a>
+<header class="v8-header"><a class="v8-brand" href="/">공간보감</a><nav aria-label="주요 메뉴"><a href="/portfolio.html">포트폴리오</a><a href="/process.html">진행 과정</a><a href="/blog.html">시공 이야기</a></nav><a class="v8-consult" href="#consult-form-root" aria-current="page">상담 신청</a></header>
+<main class="v8-apply-main">
+  <section class="v8-apply-intro" aria-labelledby="consultation-title">
+    <p class="v8-section-label">주거 인테리어 상담</p>
+    <h1 id="consultation-title">우리 집 조건부터,<br>함께 확인합니다</h1>
+    <p>필수 정보 네 가지만 남겨주세요. 담당자가 내용을 확인한 뒤 상담 일정을 안내합니다.</p>
+    <a class="v8-button-primary" data-cta-location="consultation_apply_v8_form_anchor" href="#consult-form-root">필수 정보부터 작성 <span aria-hidden="true">↓</span></a>
+    <p class="v8-apply-note">신청만으로 계약이 진행되지 않습니다. 추가 정보는 선택해서 작성할 수 있습니다.</p>
   </section>
-
-  <section>
-    <div class="wrap">
-      <div id="consult-form-root"><p class="cf-loading">상담 신청서를 불러오는 중입니다…</p></div>
-      <noscript>
-        <p>브라우저에서 자바스크립트가 꺼져 있어 신청서를 표시할 수 없습니다.
-        <a href="https://intm.kr/consultation/ggbg?utm_source=spacebogam.kr&amp;utm_medium=consultation_apply&amp;utm_campaign=spacebogam_site&amp;ref=spacebogam_apply_noscript">이곳에서 신청</a>하시거나 전화로 문의해주세요.</p>
-      </noscript>
-    </div>
-  </section>
-
-  <section>
-    <div class="wrap">
-      <div class="head"><div class="kicker">접수 후 진행</div><div><h2>신청하시면 이렇게 이어집니다</h2></div></div>
-      <div class="grid">
-        <article class="card"><h3>1. 접수 확인</h3><p>접수 즉시 안내 알림톡이 발송되고, 담당자가 내용을 확인합니다.</p></article>
-        <article class="card"><h3>2. 1차 상담</h3><p>생활 방식, 공사 범위, 예산, 일정을 듣고 방향과 다음 단계를 정리합니다.</p></article>
-        <article class="card"><h3>3. 현장실측</h3><p>필요하면 현장 치수·구조·설비를 확인해 실측 견적의 근거를 만듭니다. 실측 비용은 본계약 시 공사비에서 차감됩니다.</p></article>
-      </div>
-    </div>
+  <section class="v8-form-section" aria-label="상담 신청서">
+    <div id="consult-form-root" tabindex="-1"><p class="cf-loading">상담 신청서를 불러오는 중입니다…</p></div>
+    <noscript><p class="cf-error-box">자바스크립트가 꺼져 있어 신청서를 표시할 수 없습니다. <a href="https://intm.kr/consultation/ggbg?utm_source=spacebogam.kr&amp;utm_medium=consultation_apply&amp;utm_campaign=spacebogam_site&amp;ref=spacebogam_apply_noscript">기존 신청서 열기</a></p></noscript>
+    <p class="v8-phone-note">작성에 도움이 필요하면 <a data-cta-location="consultation_apply_v8_phone_inquiry" href="tel:050713881252" aria-label="공간보감 전화 문의 1551-0163">전화 문의 1551-0163</a></p>
   </section>
 </main>
-<footer><div class="wrap">공간보감 · 부산 인테리어 상담 · <a href="/consultation/">상담 안내</a> · <a href="/portfolio.html">포트폴리오</a></div><div class="wrap foot-legal"><a href="/privacy/">개인정보처리방침</a></div></footer>
-<script defer src="/assets/consultation-form.js?v=fb894205"></script>
+<footer class="v8-footer"><div><strong>공간보감</strong><span>부산 주거 인테리어</span></div><nav aria-label="하단 메뉴"><a href="/privacy/">개인정보처리방침</a></nav></footer>
+<script defer src="/assets/consultation-form.js?v=3ca8f426"></script>
 </body>
 </html>

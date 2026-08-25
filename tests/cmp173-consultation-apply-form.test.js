@@ -17,6 +17,7 @@ const { JSDOM } = require('jsdom');
 const root = path.resolve(__dirname, '..');
 const formSource = fs.readFileSync(path.join(root, 'assets/consultation-form.js'), 'utf8');
 const pageSource = fs.readFileSync(path.join(root, 'consultation/apply/index.html'), 'utf8');
+const consultationPageSource = fs.readFileSync(path.join(root, 'consultation/index.html'), 'utf8');
 
 // 실제 https://intm.kr/api/consultation/questions 응답에서 추린 대표 표본.
 // 타입별로 하나씩은 남겨 렌더링 분기를 전부 지나가게 한다.
@@ -40,9 +41,12 @@ const LANDING_QUERY =
   '?utm_source=meta&utm_medium=paid_social&utm_campaign=busan_remodeling' +
   '&utm_id=CMP173&campaign_id=111&adset_id=222&ad_id=333&asset_id=444&is_test=1';
 
-function bootstrap({ search = '', submitResponse } = {}) {
-  const dom = new JSDOM(pageSource.replace(/<script[\s\S]*?<\/script>/g, ''), {
-    url: 'https://spacebogam.kr/consultation/apply/' + search,
+function bootstrap({ search = '', submitResponse, page = 'apply' } = {}) {
+  const direct = page === 'consultation';
+  const source = direct ? consultationPageSource : pageSource;
+  const pathname = direct ? '/consultation/' : '/consultation/apply/';
+  const dom = new JSDOM(source.replace(/<script[\s\S]*?<\/script>/g, ''), {
+    url: 'https://spacebogam.kr' + pathname + search,
     runScripts: 'outside-only',
     pretendToBeVisual: true,
   });
@@ -126,7 +130,7 @@ test('전화상담으로 오인할 수 있는 카피만 중립화하고 질문 I
   await settle();
 
   assert.doesNotMatch(pageSource, /필요한 내용은 통화에서|나머지는 통화에서/);
-  assert.match(pageSource, /필요한 내용은 상담 전 안내 과정에서 함께 정리합니다/);
+  assert.match(pageSource, /담당자가 내용을 확인한 뒤 상담 일정을 안내합니다/);
   const timeField = document.querySelector('[data-question-id="17"]');
   assert.match(timeField.querySelector('.cf-label').textContent, /연락 가능한 시간대/);
   assert.doesNotMatch(timeField.querySelector('.cf-label').textContent, /통화 가능한 시간대/);
@@ -257,6 +261,39 @@ test('제출 payload 가 intm 계약과 플랫폼 식별자·is_test 를 그대�
   for (const key of Object.keys(attribution)) {
     assert.ok(ALLOWED.has(key), '서버 허용목록에 없는 키: ' + key);
   }
+});
+
+test('/consultation/ 직접 제출은 현재 페이지를 source_page·form_path·landing_page로 보존한다', async () => {
+  const { document, calls } = bootstrap({ page: 'consultation', search: LANDING_QUERY });
+  await settle();
+
+  fillRequired(document);
+  document.querySelector('form').dispatchEvent(new document.defaultView.Event('submit', { bubbles: true, cancelable: true }));
+  await settle();
+
+  assert.equal(calls.submit.length, 1);
+  const attribution = calls.submit[0].marketingAttribution;
+  assert.equal(attribution.form_path, '/consultation/');
+  assert.equal(attribution.source_page, '/consultation/');
+  assert.match(attribution.landing_page, /^https:\/\/spacebogam\.kr\/consultation\//);
+  assert.equal(attribution.utm_id, 'CMP173');
+  assert.equal(attribution.is_test, 'true');
+});
+
+test('유효한 submit 이벤트가 겹쳐도 API 요청은 한 번만 보낸다', async () => {
+  const { document, calls } = bootstrap({ page: 'consultation' });
+  await settle();
+
+  fillRequired(document);
+  const submitEvent = () => document.querySelector('form').dispatchEvent(
+    new document.defaultView.Event('submit', { bubbles: true, cancelable: true })
+  );
+  submitEvent();
+  submitEvent();
+  await settle();
+
+  assert.equal(calls.submit.length, 1);
+  assert.equal(calls.funnel.filter((event) => event.eventName === 'lead_submit_success').length, 1);
 });
 
 test('Pixel Lead 의 eventID 와 서버가 돌려준 leadEventId 가 같은 값이다', async () => {

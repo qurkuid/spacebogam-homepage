@@ -481,6 +481,7 @@
   var questions = [];
   var startedTracked = false;
   var submitSucceeded = false;
+  var submitting = false;
   var completedFields = {};
   var lastCompletedQuestionId = '';
 
@@ -618,6 +619,8 @@
 
     form.addEventListener('submit', function(event){
       event.preventDefault();
+      // 클릭과 모바일 키보드 완료가 같은 프레임에 겹쳐도 상담 건은 한 번만 보낸다.
+      if (submitting) return;
       status.textContent = '';
       status.classList.remove('cf-status-error');
 
@@ -659,6 +662,7 @@
       }
       answers[CONSENT_ANSWER_ID] = 'true';
 
+      submitting = true;
       submit.disabled = true;
       submit.textContent = '접수 중…';
 
@@ -681,6 +685,7 @@
         }
         renderSuccess(result.body);
       }).catch(function(error){
+        submitting = false;
         submit.disabled = false;
         submit.textContent = '상담 신청하기';
         status.textContent = '접수에 실패했습니다. 잠시 후 다시 시도하시거나 전화로 문의해주세요. (' +
@@ -712,10 +717,9 @@
     box.appendChild(element('h2', null, '상담 신청이 접수되었습니다.'));
     box.appendChild(element('p', null,
       '담당자가 확인 후 상담 일정을 안내해 드립니다. 접수 안내 알림톡이 곧 도착합니다.'));
-    box.appendChild(element('p', 'cf-help',
-      '기다리시는 동안 비슷한 평형·지역의 시공 사례를 먼저 보시면 상담이 빨라집니다.'));
-    var link = element('a', 'button', '포트폴리오 보기');
-    link.href = '/portfolio.html';
+    box.appendChild(element('p', 'cf-help', '추가로 확인할 내용이 있으면 담당자가 안내 과정에서 함께 여쭙습니다.'));
+    var link = element('a', 'button', '공간보감 홈으로');
+    link.href = '/';
     box.appendChild(link);
     root.appendChild(box);
     try { root.scrollIntoView({behavior: 'smooth', block: 'start'}); } catch(e) {}
