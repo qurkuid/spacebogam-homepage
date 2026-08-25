@@ -553,11 +553,58 @@
     applyHomeHeadline();
     applyHeroCtaTrustVariant();
 
-    window.setTimeout(function(){
-      if (document.visibilityState === 'visible') {
-        send('engaged_session', {engagedSeconds: 10});
+    // CMP-213: 이 스크립트는 페이지마다 새로 실행된다. 진입 페이지에서 연속 10초를
+    // 못 채우고 다음 페이지로 넘어가면(예: 6초 뒤 상담 페이지 이동) 세션 전체
+    // 체류가 10초를 넘겨도 engaged_session 이 한 번도 안 잡혔다(실측 과소집계 3~4%).
+    // sessionStorage 에 누적 visible ms 를 페이지 이동 너머로 들고 다니고, 매 tick
+    // 마다 즉시 기록해 마지막 tick 전에 unload 돼도 손실이 최대 1초로 줄어든다.
+    var ENGAGED_THRESHOLD_MS = 10000;
+    var ENGAGED_TICK_MS = 1000;
+    var ENGAGED_ACCUM_KEY = 'spacebogam_funnel_engaged_accum_ms';
+    var ENGAGED_SENT_KEY = 'spacebogam_funnel_engaged_sent';
+
+    function readEngagedAccumMs(){
+      try {
+        return session ? (parseInt(session.getItem(ENGAGED_ACCUM_KEY), 10) || 0) : 0;
+      } catch(error) {
+        return 0;
       }
-    }, 10000);
+    }
+    function writeEngagedAccumMs(ms){
+      try {
+        if (session) session.setItem(ENGAGED_ACCUM_KEY, String(ms));
+      } catch(error) {}
+    }
+    function engagedAlreadySent(){
+      try {
+        return !!session && session.getItem(ENGAGED_SENT_KEY) === 'true';
+      } catch(error) {
+        return false;
+      }
+    }
+    function markEngagedSent(){
+      try {
+        if (session) session.setItem(ENGAGED_SENT_KEY, 'true');
+      } catch(error) {}
+    }
+
+    if (!engagedAlreadySent()) {
+      // setInterval 대신 자기재귀 setTimeout 을 쓴다 — 이 파일의 기존 setTimeout
+      // 하나만 스텁하는 테스트 하네스와 스로틀 타이머 환경 모두에서 안전하다.
+      var engagedTick = function(){
+        if (document.visibilityState === 'visible') {
+          var totalMs = readEngagedAccumMs() + ENGAGED_TICK_MS;
+          writeEngagedAccumMs(totalMs);
+          if (totalMs >= ENGAGED_THRESHOLD_MS) {
+            markEngagedSent();
+            send('engaged_session', {engagedSeconds: Math.round(totalMs / 1000)});
+            return;
+          }
+        }
+        window.setTimeout(engagedTick, ENGAGED_TICK_MS);
+      };
+      window.setTimeout(engagedTick, ENGAGED_TICK_MS);
+    }
 
     // CMP-1259 v2 (대표 실측 확인 후 범위 축소, CMP-1256 코멘트 참고): GA4/Clarity가
     // 이미 라이브에서 체류를 잡고 있어 INTM 신규 전송은 폐기했다. 여기서 남은 건

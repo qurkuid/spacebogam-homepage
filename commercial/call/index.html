@@ -41,9 +41,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
 if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
+n.queue=[];
+f.__sbLazyTag(function(){t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
+s.parentNode.insertBefore(t,s)});
+}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '512750840350337');
 fbq('track', 'PageView');
@@ -61,7 +63,7 @@ if (window.wcs) {
   window.__spacebogamNaverCtsPvSent = true;
 }
 </script>
-<script defer src="/assets/funnel-tracking.js?v=f696d170"></script>
+<script defer src="/assets/funnel-tracking.js?v=d13f7d46"></script>
 <script defer src="/assets/commercial-call.js?v=cmp1312-face-v5"></script>
 <script defer src="/assets/commercial-call-callback.js?v=cmp1312-face-v4"></script>
 </head><body class="commercial-call">
