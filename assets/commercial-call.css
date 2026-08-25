@@ -43,6 +43,8 @@ body.commercial-call{background:var(--paper);color:var(--ink)}
 .cc-primary-num{font-size:21px;letter-spacing:.01em;font-variant-numeric:tabular-nums}
 .cc-hero-callback{display:inline-block;margin:16px 0 0;font-size:14px;font-weight:650;
   border-bottom:1px solid var(--ink);padding-bottom:3px}
+.cc-form-link{display:inline-block;margin:16px 20px 0 0;font-size:14px;font-weight:650;
+  border-bottom:1px solid var(--ink);padding-bottom:3px}
 .cc-hours{margin:16px 0 0;font-size:13px;color:#69645b}
 
 /* ── 섹션 공통 ── */

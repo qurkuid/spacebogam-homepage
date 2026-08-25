@@ -198,3 +198,10 @@ test('commercial-call.js: Meta Pixel phone_click도 세션당 1회만 발화한�
   assert.equal(pixelCalls[0][1], 'phone_click');
   assert.equal(pixelCalls[0][2].vertical, 'shop');
 });
+
+test('commercial-call.js: 정식 상담 CTA는 현재 UTM·광고 ID와 업종을 보존한다', () => {
+  assert.match(commercialCallSource, /new URLSearchParams\(location\.search\)/);
+  assert.match(commercialCallSource, /target\.searchParams\.set\('type', 'commercial'\)/);
+  assert.match(commercialCallSource, /target\.searchParams\.set\('vertical', key\)/);
+  assert.match(commercialCallSource, /target\.searchParams\.set\('channel', 'commercial_landing'\)/);
+});
