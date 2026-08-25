@@ -351,6 +351,11 @@
     return [];
   }
 
+  function neutralQuestionCopy(question){
+    if (typeof question !== 'string') return question;
+    return question.replace('통화 가능한 시간대', '연락 가능한 시간대');
+  }
+
   var INPUT_TYPE_BY_QUESTION_TYPE = {
     phonenumber: 'tel',
     number: 'number',
@@ -706,7 +711,7 @@
     var box = element('div', 'cf-success');
     box.appendChild(element('h2', null, '상담 신청이 접수되었습니다.'));
     box.appendChild(element('p', null,
-      '남겨주신 연락처로 담당자가 순차적으로 연락드립니다. 접수 안내 알림톡이 곧 도착합니다.'));
+      '담당자가 확인 후 상담 일정을 안내해 드립니다. 접수 안내 알림톡이 곧 도착합니다.'));
     box.appendChild(element('p', 'cf-help',
       '기다리시는 동안 비슷한 평형·지역의 시공 사례를 먼저 보시면 상담이 빨라집니다.'));
     var link = element('a', 'button', '포트폴리오 보기');
@@ -734,7 +739,7 @@
           .map(function(q){
             var mapped = {
               id: q.id,
-              question: q.question,
+              question: neutralQuestionCopy(q.question),
               questionType: q.questionType || q.question_type,
               options: q.options
             };
