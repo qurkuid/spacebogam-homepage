@@ -100,10 +100,16 @@ body.commercial-call{background:var(--paper);color:var(--ink)}
 .cc-input::placeholder{color:#a09a90}
 .cc-input:focus{outline:2px solid var(--ink);outline-offset:2px;border-bottom-color:var(--ink)}
 .cc-input[aria-invalid="true"]{border-bottom-color:#8c2f22}
+.cc-select{appearance:auto;min-height:48px}
+.cc-textarea{resize:vertical;line-height:1.6}
 .cc-choices{display:flex;flex-wrap:wrap;gap:12px 24px;margin-top:4px}
 .cc-choice{display:inline-flex;align-items:flex-start;gap:9px;line-height:1.6;cursor:pointer;font-size:15px}
 .cc-choice input{margin-top:3px;flex:none;width:16px;height:16px;accent-color:#1e1d1a}
 .cc-choice input[aria-invalid="true"]{outline:1px solid #8c2f22;outline-offset:2px}
+.cc-callback-details{margin:0 0 26px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.cc-callback-details-summary{padding:16px 0;font-size:14px;font-weight:650;cursor:pointer}
+.cc-callback-details-summary:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.cc-callback-details-body{padding:8px 0 2px}
 .cc-consent{margin:0 0 26px;padding:16px 0;border-top:1px solid var(--line);
   border-bottom:1px solid var(--line);font-size:14px;line-height:1.7;color:#59554d}
 .cc-callback-status{margin:0 0 14px;min-height:1.2em;font-size:14px;color:#59554d}

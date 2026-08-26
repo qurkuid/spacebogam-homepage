@@ -1,7 +1,8 @@
 /* CMP-1315 상업 상담 랜딩 — 연결 실패용 최소 콜백 폼
  *
- * 전화가 어려운 방문자를 위한 최소 입력 콜백 폼. 성함/연락처(필수) +
- * 통화 가능 시간대(선택)만 받는다. CMP-1312 재포지셔닝: 콜백은 담당자가
+ * 전화가 어려운 방문자를 위한 저부담 콜백 폼. 성함/연락처(필수), 업종/예산
+ * 기본값과 통화 가능 시간대(선택)를 받고, 현장 상세정보는 접힌 선택 영역에서만
+ * 받는다. CMP-1312 재포지셔닝: 콜백은 담당자가
  * 전화드려 조건을 확인하고 대면상담 일정을 잡기 위한 요청이다 — 카피만
  * 그 프레임으로 쓰고, 제출 API·질문 ID·이벤트명 계약은 그대로 둔다. 주거형 28문항 상담폼(/consultation/apply/,
  * assets/consultation-form.js)과는 별도 화면·별도 스크립트이며 서로 링크하지 않는다
@@ -45,6 +46,14 @@
   var CALLBACK_TIME_QUESTION_ID = '17';
   var CALLBACK_TIME_OPTIONS = ['오전 (9시~12시)', '오후 (12시~18시)', '저녁 (18시~21시)'];
   var CALLBACK_VERTICALS = ['office', 'shop'];
+  var CALLBACK_BUDGET_OPTIONS = [
+    {value: 'under_30m', label: '3천만원 미만'},
+    {value: '30_50m', label: '3천만~5천만원'},
+    {value: '50_100m', label: '5천만~1억원'},
+    {value: '100_200m', label: '1억~2억원'},
+    {value: 'over_200m', label: '2억원 이상'},
+    {value: 'undecided', label: '미정'}
+  ];
   var CONSENT_ANSWER_ID = '9999';
   var EXPERIMENT_ID = 'homepage_headline_v1';
 
@@ -178,6 +187,13 @@
     return node;
   }
 
+  function option(value, label){
+    var node = document.createElement('option');
+    node.value = value;
+    node.textContent = label;
+    return node;
+  }
+
   var viewSent = false;
   function trackView(){
     if (viewSent) return;
@@ -225,6 +241,33 @@
     phoneField.appendChild(phoneInput);
     form.appendChild(phoneField);
 
+    var verticalField = el('div', 'cc-field');
+    var verticalLabel = el('label', 'cc-label', '업종');
+    var verticalSelect = document.createElement('select');
+    verticalSelect.className = 'cc-input cc-select';
+    verticalSelect.id = 'cc-callback-vertical';
+    verticalSelect.appendChild(option('office', '사무실'));
+    verticalSelect.appendChild(option('shop', '일반상가'));
+    verticalSelect.value = commercialVertical();
+    verticalLabel.setAttribute('for', verticalSelect.id);
+    verticalField.appendChild(verticalLabel);
+    verticalField.appendChild(verticalSelect);
+    form.appendChild(verticalField);
+
+    var budgetField = el('div', 'cc-field');
+    var budgetLabel = el('label', 'cc-label', '예산');
+    var budgetSelect = document.createElement('select');
+    budgetSelect.className = 'cc-input cc-select';
+    budgetSelect.id = 'cc-callback-budget';
+    CALLBACK_BUDGET_OPTIONS.forEach(function(item){
+      budgetSelect.appendChild(option(item.value, item.label));
+    });
+    budgetSelect.value = 'undecided';
+    budgetLabel.setAttribute('for', budgetSelect.id);
+    budgetField.appendChild(budgetLabel);
+    budgetField.appendChild(budgetSelect);
+    form.appendChild(budgetField);
+
     var timeField = el('div', 'cc-field');
     timeField.appendChild(el('span', 'cc-label', '통화 가능한 시간대(선택)'));
     var timeChoices = el('div', 'cc-choices');
@@ -241,6 +284,46 @@
     });
     timeField.appendChild(timeChoices);
     form.appendChild(timeField);
+
+    var details = el('details', 'cc-callback-details');
+    details.appendChild(el('summary', 'cc-callback-details-summary', '현장 상세정보 추가하기 (선택)'));
+    var detailsBody = el('div', 'cc-callback-details-body');
+
+    function detailInput(id, labelText, type, placeholder, maxLength){
+      var field = el('div', 'cc-field');
+      var label = el('label', 'cc-label', labelText + ' (선택)');
+      var input = document.createElement('input');
+      input.type = type;
+      input.className = 'cc-input';
+      input.id = id;
+      if (placeholder) input.placeholder = placeholder;
+      if (maxLength) input.maxLength = maxLength;
+      label.setAttribute('for', id);
+      field.appendChild(label);
+      field.appendChild(input);
+      detailsBody.appendChild(field);
+      return input;
+    }
+
+    var addressInput = detailInput('cc-callback-address', '현장 주소', 'text', '예: 부산 해운대구', 200);
+    addressInput.autocomplete = 'street-address';
+    var areaInput = detailInput('cc-callback-area', '평수/면적', 'text', '예: 30평 또는 99㎡', 60);
+    var openDateInput = detailInput('cc-callback-open-date', '오픈 희망일', 'date', '', 0);
+
+    var noteField = el('div', 'cc-field');
+    var noteLabel = el('label', 'cc-label', '추가 요청사항 (선택)');
+    var requestNoteInput = document.createElement('textarea');
+    requestNoteInput.className = 'cc-input cc-textarea';
+    requestNoteInput.id = 'cc-callback-request-note';
+    requestNoteInput.rows = 3;
+    requestNoteInput.maxLength = 1000;
+    requestNoteInput.placeholder = '미리 알려주실 내용이 있다면 적어주세요.';
+    noteLabel.setAttribute('for', requestNoteInput.id);
+    noteField.appendChild(noteLabel);
+    noteField.appendChild(requestNoteInput);
+    detailsBody.appendChild(noteField);
+    details.appendChild(detailsBody);
+    form.appendChild(details);
 
     var consentWrap = el('div', 'cc-consent');
     var consentLabel = el('label', 'cc-choice');
@@ -276,7 +359,9 @@
       var name = nameInput.value.trim();
       var phone = phoneInput.value.trim();
       var checkedTime = form.querySelector('input[name="cc-callback-time"]:checked');
-      var vertical = commercialVertical();
+      var vertical = CALLBACK_VERTICALS.indexOf(verticalSelect.value) !== -1 ? verticalSelect.value : commercialVertical();
+      var budget = CALLBACK_BUDGET_OPTIONS.some(function(item){ return item.value === budgetSelect.value; }) ?
+        budgetSelect.value : 'undecided';
 
       if (!name) {
         status.textContent = '성함을 입력해주세요.';
@@ -337,7 +422,12 @@
             name: name,
             phone: phone,
             vertical: vertical,
+            budget: budget,
             callbackTime: checkedTime ? checkedTime.value : '',
+            address: addressInput.value.trim(),
+            area: areaInput.value.trim(),
+            openDate: openDateInput.value,
+            requestNote: requestNoteInput.value.trim(),
             consent: consentInput.checked
           },
           answers: answers,

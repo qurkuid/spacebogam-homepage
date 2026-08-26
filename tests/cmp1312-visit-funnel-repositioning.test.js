@@ -256,10 +256,12 @@ test('tel wiring, tracking markers, and callback mount survive the copy change',
   for (const marker of ['funnel-tracking.js', 'commercial-call.js', 'commercial-call-callback.js', '512750840350337', 'GTM-PW8GLP8S', 'data-spacebogam-naver-wcs', 'id="cc-callback-root"']) {
     assert.ok(html.includes(marker), marker);
   }
+  assert.match(html, /commercial-call\.css\?v=commercial-intake-v1/);
+  assert.match(html, /commercial-call-callback\.js\?v=commercial-intake-v1/);
   assert.match(html, /noindex,nofollow/);
 });
 
-test('callback form sends the explicit minimal commercial contract without adding UX fields', () => {
+test('callback form keeps the commercial contract and adds low-friction intake details', () => {
   assert.match(callbackSource, /\/api\/consultation\/submit/);
   assert.match(callbackSource, /COMPANY_ID = '4206bdfd-b51d-4433-9f8e-c854131948cc'/);
   assert.match(callbackSource, /NAME_QUESTION_ID = '13'/);
@@ -268,13 +270,24 @@ test('callback form sends the explicit minimal commercial contract without addin
   assert.match(callbackSource, /CONSENT_ANSWER_ID = '9999'/);
   assert.match(callbackSource, /type: 'commercial_callback'/);
   assert.match(callbackSource, /commercialCallback: \{/);
-  for (const field of ['name', 'phone', 'vertical', 'callbackTime', 'consent']) {
+  for (const field of ['name', 'phone', 'vertical', 'budget', 'callbackTime', 'address', 'area', 'openDate', 'requestNote', 'consent']) {
     assert.match(callbackSource, new RegExp(`\\b${field}:`), field);
   }
   assert.match(callbackSource, /params\.get\('vertical'\).*params\.get\('commercial_vertical'\)/);
   assert.match(callbackSource, /CALLBACK_VERTICALS = \['office', 'shop'\]/);
+  assert.match(callbackSource, /option\('office', '사무실'\)/);
+  assert.match(callbackSource, /option\('shop', '일반상가'\)/);
+  assert.match(callbackSource, /verticalSelect\.value = commercialVertical\(\)/);
+  for (const budget of ['under_30m', '30_50m', '50_100m', '100_200m', 'over_200m', 'undecided']) {
+    assert.ok(callbackSource.includes(`value: '${budget}'`), budget);
+  }
+  assert.match(callbackSource, /budgetSelect\.value = 'undecided'/);
+  assert.match(callbackSource, /el\('details', 'cc-callback-details'\)/);
+  assert.match(callbackSource, /현장 상세정보 추가하기 \(선택\)/);
+  for (const id of ['cc-callback-address', 'cc-callback-area', 'cc-callback-open-date', 'cc-callback-request-note']) {
+    assert.ok(callbackSource.includes(id), id);
+  }
   assert.doesNotMatch(callbackSource, /marketingAttribution\.channel\s*=/);
-  assert.equal((callbackSource.match(/document\.createElement\('input'\)/g) || []).length, 4, '이름/전화/시간 radio/동의 외 UX 필드 추가 금지');
   // 이벤트명은 DB CHECK enum에 있는 3개만 쓴다 — 새 이름은 400이 난다.
   for (const name of ['lead_form_view', 'lead_form_start', 'lead_submit_success']) {
     assert.ok(callbackSource.includes(`'${name}'`), name);
