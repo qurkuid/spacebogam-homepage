@@ -259,13 +259,22 @@ test('tel wiring, tracking markers, and callback mount survive the copy change',
   assert.match(html, /noindex,nofollow/);
 });
 
-test('callback form keeps its submission API contract and adopts in-person consultation framing', () => {
+test('callback form sends the explicit minimal commercial contract without adding UX fields', () => {
   assert.match(callbackSource, /\/api\/consultation\/submit/);
   assert.match(callbackSource, /COMPANY_ID = '4206bdfd-b51d-4433-9f8e-c854131948cc'/);
   assert.match(callbackSource, /NAME_QUESTION_ID = '13'/);
   assert.match(callbackSource, /PHONE_QUESTION_ID = '10'/);
   assert.match(callbackSource, /CALLBACK_TIME_QUESTION_ID = '17'/);
   assert.match(callbackSource, /CONSENT_ANSWER_ID = '9999'/);
+  assert.match(callbackSource, /type: 'commercial_callback'/);
+  assert.match(callbackSource, /commercialCallback: \{/);
+  for (const field of ['name', 'phone', 'vertical', 'callbackTime', 'consent']) {
+    assert.match(callbackSource, new RegExp(`\\b${field}:`), field);
+  }
+  assert.match(callbackSource, /params\.get\('vertical'\).*params\.get\('commercial_vertical'\)/);
+  assert.match(callbackSource, /CALLBACK_VERTICALS = \['office', 'shop'\]/);
+  assert.doesNotMatch(callbackSource, /marketingAttribution\.channel\s*=/);
+  assert.equal((callbackSource.match(/document\.createElement\('input'\)/g) || []).length, 4, '이름/전화/시간 radio/동의 외 UX 필드 추가 금지');
   // 이벤트명은 DB CHECK enum에 있는 3개만 쓴다 — 새 이름은 400이 난다.
   for (const name of ['lead_form_view', 'lead_form_start', 'lead_submit_success']) {
     assert.ok(callbackSource.includes(`'${name}'`), name);
