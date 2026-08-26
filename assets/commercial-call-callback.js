@@ -7,12 +7,11 @@
  * assets/consultation-form.js)과는 별도 화면·별도 스크립트이며 서로 링크하지 않는다
  * (CMP-1315: "주거형 28문항 폼 연결 금지"). 제출 자체는 intm 의 동일한 공개 상담
  * 접수 API(consult_req 가 정본 리드 테이블, /api/consultation/submit)로 보내되,
- * commercial_callback 유형과 최소 전용 payload 를 명시하고 질문 3개만 채운다 —
- * 2026-08-22 GET /api/consultation/questions 실측 기준 ID:
+ * 질문 3개만 채운다 — 2026-08-22 GET /api/consultation/questions 실측 기준 ID:
  *   13 = 성함, 10 = 연락처, 17 = 통화 가능한 시간대(선택형, 선택)
- * 서버는 최소 payload 를 검증해 consult_req 필드를 채우고 answers 에 담은 위 세 답변도
- * consult_answers 에 보존한다 — 28문항을 전부 채울 필요가 없다. 나머지 25개 질문은
- * 이 폼에 아예 존재하지 않는다.
+ * 서버는 questions 테이블을 순회하며 answers 에 있는 값만 뽑아 쓰고 없는 항목은
+ * 그냥 건너뛴다(빈 값이 NOT NULL 위반을 내는 컬럼은 name/phone 뿐) — 28문항을
+ * 전부 채울 필요가 없다. 나머지 25개 질문은 이 폼에 아예 존재하지 않는다.
  *
  * funnel-tracking.js 가 이 페이지에서 먼저 로드되어 clientId/sessionId/attribution/
  * is_test 를 localStorage·sessionStorage 에 채워둔다. 여기서는 같은 키를 읽기만
@@ -44,7 +43,6 @@
   var PHONE_QUESTION_ID = '10';
   var CALLBACK_TIME_QUESTION_ID = '17';
   var CALLBACK_TIME_OPTIONS = ['오전 (9시~12시)', '오후 (12시~18시)', '저녁 (18시~21시)'];
-  var CALLBACK_VERTICALS = ['office', 'shop'];
   var CONSENT_ANSWER_ID = '9999';
   var EXPERIMENT_ID = 'homepage_headline_v1';
 
@@ -86,15 +84,6 @@
   var clientId = storedId(local, CLIENT_KEY);
   var sessionId = storedId(session, SESSION_KEY);
   var params = new URLSearchParams(location.search);
-
-  function commercialVertical(){
-    // 광고 URL의 정본 키와 QA용 단축 키를 모두 지원한다. commercial-call.js가
-    // utm_content에서 판별해 body에 기록한 값도 받아 두 스크립트의 업종이 어긋나지 않게 한다.
-    var queryVertical = (params.get('vertical') || params.get('commercial_vertical') || '').trim().toLowerCase();
-    if (CALLBACK_VERTICALS.indexOf(queryVertical) !== -1) return queryVertical;
-    var renderedVertical = ((document.body && document.body.getAttribute('data-commercial-vertical')) || '').trim().toLowerCase();
-    return CALLBACK_VERTICALS.indexOf(renderedVertical) !== -1 ? renderedVertical : 'office';
-  }
 
   function isTestTraffic(){
     var truthy = ['1', 'true', 'yes', 'y', 'on'];
@@ -276,7 +265,6 @@
       var name = nameInput.value.trim();
       var phone = phoneInput.value.trim();
       var checkedTime = form.querySelector('input[name="cc-callback-time"]:checked');
-      var vertical = commercialVertical();
 
       if (!name) {
         status.textContent = '성함을 입력해주세요.';
@@ -332,14 +320,6 @@
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          type: 'commercial_callback',
-          commercialCallback: {
-            name: name,
-            phone: phone,
-            vertical: vertical,
-            callbackTime: checkedTime ? checkedTime.value : '',
-            consent: consentInput.checked
-          },
           answers: answers,
           filePath: null,
           companyId: COMPANY_ID,
