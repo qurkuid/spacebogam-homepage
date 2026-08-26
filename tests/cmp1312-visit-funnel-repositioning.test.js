@@ -257,7 +257,7 @@ test('tel wiring, tracking markers, and callback mount survive the copy change',
     assert.ok(html.includes(marker), marker);
   }
   assert.match(html, /commercial-call\.css\?v=commercial-intake-v1/);
-  assert.match(html, /commercial-call-callback\.js\?v=commercial-intake-v1/);
+  assert.match(html, /commercial-call-callback\.js\?v=commercial-intake-v2/);
   assert.match(html, /noindex,nofollow/);
 });
 
@@ -270,7 +270,7 @@ test('callback form keeps the commercial contract and adds low-friction intake d
   assert.match(callbackSource, /CONSENT_ANSWER_ID = '9999'/);
   assert.match(callbackSource, /type: 'commercial_callback'/);
   assert.match(callbackSource, /commercialCallback: \{/);
-  for (const field of ['name', 'phone', 'vertical', 'budget', 'callbackTime', 'address', 'area', 'openDate', 'requestNote', 'consent']) {
+  for (const field of ['name', 'phone', 'vertical', 'budget', 'callbackTime', 'address', 'area', 'leaseStatus', 'constructionStartDate', 'openDate', 'requestNote', 'consent']) {
     assert.match(callbackSource, new RegExp(`\\b${field}:`), field);
   }
   assert.match(callbackSource, /params\.get\('vertical'\).*params\.get\('commercial_vertical'\)/);
@@ -282,10 +282,21 @@ test('callback form keeps the commercial contract and adds low-friction intake d
     assert.ok(callbackSource.includes(`value: '${budget}'`), budget);
   }
   assert.match(callbackSource, /budgetSelect\.value = 'undecided'/);
-  assert.match(callbackSource, /el\('details', 'cc-callback-details'\)/);
-  assert.match(callbackSource, /현장 상세정보 추가하기 \(선택\)/);
-  for (const id of ['cc-callback-address', 'cc-callback-area', 'cc-callback-open-date', 'cc-callback-request-note']) {
+  for (const status of ['leased', 'deposit_paid', 'negotiating', 'viewing', 'owned']) {
+    assert.ok(callbackSource.includes(`value: '${status}'`), status);
+  }
+  for (const id of ['cc-callback-address', 'cc-callback-area', 'cc-callback-lease-status', 'cc-callback-construction-start-date', 'cc-callback-open-date', 'cc-callback-request-note']) {
     assert.ok(callbackSource.includes(id), id);
+  }
+  const detailsAt = callbackSource.indexOf("el('details', 'cc-callback-details')");
+  assert.ok(callbackSource.indexOf("requiredInput('cc-callback-address'") < detailsAt);
+  assert.ok(callbackSource.indexOf("requiredInput('cc-callback-area'") < detailsAt);
+  assert.ok(callbackSource.indexOf("'cc-callback-construction-start-date'") < detailsAt);
+  assert.match(callbackSource, /leaseStatusSelect\.required = true/);
+  assert.match(callbackSource, /추가 정보 입력하기 \(선택\)/);
+  for (const input of ['addressInput', 'areaInput', 'leaseStatusSelect', 'constructionStartDateInput']) {
+    assert.match(callbackSource, new RegExp(`${input}\\.setAttribute\\('aria-invalid', 'true'\\)`));
+    assert.match(callbackSource, new RegExp(`${input}\\.focus\\(\\)`));
   }
   assert.doesNotMatch(callbackSource, /marketingAttribution\.channel\s*=/);
   // 이벤트명은 DB CHECK enum에 있는 3개만 쓴다 — 새 이름은 400이 난다.

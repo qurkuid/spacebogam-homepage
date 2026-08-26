@@ -1,8 +1,8 @@
 /* CMP-1315 상업 상담 랜딩 — 연결 실패용 최소 콜백 폼
  *
- * 전화가 어려운 방문자를 위한 저부담 콜백 폼. 성함/연락처(필수), 업종/예산
- * 기본값과 통화 가능 시간대(선택)를 받고, 현장 상세정보는 접힌 선택 영역에서만
- * 받는다. CMP-1312 재포지셔닝: 콜백은 담당자가
+ * 전화가 어려운 방문자를 위한 콜백 폼. 성함/연락처와 현장 주소/면적/계약 여부/
+ * 공사 시작일을 필수로 받고, 나머지 정보는 선택 또는 기본값으로 받는다.
+ * CMP-1312 재포지셔닝: 콜백은 담당자가
  * 전화드려 조건을 확인하고 대면상담 일정을 잡기 위한 요청이다 — 카피만
  * 그 프레임으로 쓰고, 제출 API·질문 ID·이벤트명 계약은 그대로 둔다. 주거형 28문항 상담폼(/consultation/apply/,
  * assets/consultation-form.js)과는 별도 화면·별도 스크립트이며 서로 링크하지 않는다
@@ -53,6 +53,13 @@
     {value: '100_200m', label: '1억~2억원'},
     {value: 'over_200m', label: '2억원 이상'},
     {value: 'undecided', label: '미정'}
+  ];
+  var LEASE_STATUS_OPTIONS = [
+    {value: 'leased', label: '임대차 계약 완료'},
+    {value: 'deposit_paid', label: '계약금 납부 완료'},
+    {value: 'negotiating', label: '계약 협의 중'},
+    {value: 'viewing', label: '매물 확인 중'},
+    {value: 'owned', label: '자가 소유'}
   ];
   var CONSENT_ANSWER_ID = '9999';
   var EXPERIMENT_ID = 'homepage_headline_v1';
@@ -241,6 +248,46 @@
     phoneField.appendChild(phoneInput);
     form.appendChild(phoneField);
 
+    function requiredInput(id, labelText, type, placeholder, maxLength){
+      var field = el('div', 'cc-field');
+      var label = el('label', 'cc-label', labelText + ' ');
+      label.appendChild(el('span', 'cc-required', '*'));
+      var input = document.createElement('input');
+      input.type = type;
+      input.className = 'cc-input';
+      input.id = id;
+      input.required = true;
+      if (placeholder) input.placeholder = placeholder;
+      if (maxLength) input.maxLength = maxLength;
+      label.setAttribute('for', id);
+      field.appendChild(label);
+      field.appendChild(input);
+      form.appendChild(field);
+      return input;
+    }
+
+    var addressInput = requiredInput('cc-callback-address', '현장 주소', 'text', '예: 부산 해운대구', 200);
+    addressInput.autocomplete = 'street-address';
+    var areaInput = requiredInput('cc-callback-area', '평수/면적', 'text', '예: 30평 또는 99㎡', 60);
+
+    var leaseStatusField = el('div', 'cc-field');
+    var leaseStatusLabel = el('label', 'cc-label', '계약 여부 ');
+    leaseStatusLabel.appendChild(el('span', 'cc-required', '*'));
+    var leaseStatusSelect = document.createElement('select');
+    leaseStatusSelect.className = 'cc-input cc-select';
+    leaseStatusSelect.id = 'cc-callback-lease-status';
+    leaseStatusSelect.required = true;
+    leaseStatusSelect.appendChild(option('', '계약 상태를 선택해주세요'));
+    LEASE_STATUS_OPTIONS.forEach(function(item){ leaseStatusSelect.appendChild(option(item.value, item.label)); });
+    leaseStatusLabel.setAttribute('for', leaseStatusSelect.id);
+    leaseStatusField.appendChild(leaseStatusLabel);
+    leaseStatusField.appendChild(leaseStatusSelect);
+    form.appendChild(leaseStatusField);
+
+    var constructionStartDateInput = requiredInput(
+      'cc-callback-construction-start-date', '공사 시작일', 'date', '', 0
+    );
+
     var verticalField = el('div', 'cc-field');
     var verticalLabel = el('label', 'cc-label', '업종');
     var verticalSelect = document.createElement('select');
@@ -286,7 +333,7 @@
     form.appendChild(timeField);
 
     var details = el('details', 'cc-callback-details');
-    details.appendChild(el('summary', 'cc-callback-details-summary', '현장 상세정보 추가하기 (선택)'));
+    details.appendChild(el('summary', 'cc-callback-details-summary', '추가 정보 입력하기 (선택)'));
     var detailsBody = el('div', 'cc-callback-details-body');
 
     function detailInput(id, labelText, type, placeholder, maxLength){
@@ -305,9 +352,6 @@
       return input;
     }
 
-    var addressInput = detailInput('cc-callback-address', '현장 주소', 'text', '예: 부산 해운대구', 200);
-    addressInput.autocomplete = 'street-address';
-    var areaInput = detailInput('cc-callback-area', '평수/면적', 'text', '예: 30평 또는 99㎡', 60);
     var openDateInput = detailInput('cc-callback-open-date', '오픈 희망일', 'date', '', 0);
 
     var noteField = el('div', 'cc-field');
@@ -354,6 +398,10 @@
       status.classList.remove('cc-status-error');
       nameInput.removeAttribute('aria-invalid');
       phoneInput.removeAttribute('aria-invalid');
+      addressInput.removeAttribute('aria-invalid');
+      areaInput.removeAttribute('aria-invalid');
+      leaseStatusSelect.removeAttribute('aria-invalid');
+      constructionStartDateInput.removeAttribute('aria-invalid');
       consentInput.removeAttribute('aria-invalid');
 
       var name = nameInput.value.trim();
@@ -362,6 +410,11 @@
       var vertical = CALLBACK_VERTICALS.indexOf(verticalSelect.value) !== -1 ? verticalSelect.value : commercialVertical();
       var budget = CALLBACK_BUDGET_OPTIONS.some(function(item){ return item.value === budgetSelect.value; }) ?
         budgetSelect.value : 'undecided';
+      var address = addressInput.value.trim();
+      var area = areaInput.value.trim();
+      var leaseStatus = LEASE_STATUS_OPTIONS.some(function(item){ return item.value === leaseStatusSelect.value; }) ?
+        leaseStatusSelect.value : '';
+      var constructionStartDate = constructionStartDateInput.value;
 
       if (!name) {
         status.textContent = '성함을 입력해주세요.';
@@ -375,6 +428,34 @@
         status.classList.add('cc-status-error');
         phoneInput.setAttribute('aria-invalid', 'true');
         phoneInput.focus();
+        return;
+      }
+      if (!address) {
+        status.textContent = '현장 주소를 입력해주세요.';
+        status.classList.add('cc-status-error');
+        addressInput.setAttribute('aria-invalid', 'true');
+        addressInput.focus();
+        return;
+      }
+      if (!area) {
+        status.textContent = '평수/면적을 입력해주세요.';
+        status.classList.add('cc-status-error');
+        areaInput.setAttribute('aria-invalid', 'true');
+        areaInput.focus();
+        return;
+      }
+      if (!leaseStatus) {
+        status.textContent = '계약 여부를 선택해주세요.';
+        status.classList.add('cc-status-error');
+        leaseStatusSelect.setAttribute('aria-invalid', 'true');
+        leaseStatusSelect.focus();
+        return;
+      }
+      if (!constructionStartDate) {
+        status.textContent = '공사 시작일을 선택해주세요.';
+        status.classList.add('cc-status-error');
+        constructionStartDateInput.setAttribute('aria-invalid', 'true');
+        constructionStartDateInput.focus();
         return;
       }
       if (!consentInput.checked) {
@@ -424,8 +505,10 @@
             vertical: vertical,
             budget: budget,
             callbackTime: checkedTime ? checkedTime.value : '',
-            address: addressInput.value.trim(),
-            area: areaInput.value.trim(),
+            address: address,
+            area: area,
+            leaseStatus: leaseStatus,
+            constructionStartDate: constructionStartDate,
             openDate: openDateInput.value,
             requestNote: requestNoteInput.value.trim(),
             consent: consentInput.checked
