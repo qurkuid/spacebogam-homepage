@@ -10,6 +10,8 @@ const vm = require('node:vm');
 const root = path.resolve(__dirname, '..');
 const funnelSource = fs.readFileSync(path.join(root, 'assets/funnel-tracking.js'), 'utf8');
 const commercialCallSource = fs.readFileSync(path.join(root, 'assets/commercial-call.js'), 'utf8');
+const consultationFormSource = fs.readFileSync(path.join(root, 'assets/consultation-form.js'), 'utf8');
+const commercialHomeE2eSource = fs.readFileSync(path.join(root, 'tests/cmp1445-commercial-home.e2e.cjs'), 'utf8');
 
 function storage(initial = {}) {
   const values = new Map(Object.entries(initial));
@@ -204,4 +206,26 @@ test('commercial-call.js: 정식 상담 CTA는 현재 UTM·광고 ID와 업종�
   assert.match(commercialCallSource, /target\.searchParams\.set\('type', 'commercial'\)/);
   assert.match(commercialCallSource, /target\.searchParams\.set\('vertical', key\)/);
   assert.match(commercialCallSource, /target\.searchParams\.set\('channel', 'commercial_landing'\)/);
+});
+
+test('CMP-1445 공개 브라우저 E2E는 모바일·키보드·지연·귀속과 비밀 서명 live 모드를 갖춘다', () => {
+  assert.match(commercialHomeE2eSource, /width: 390, height: 844/);
+  assert.match(commercialHomeE2eSource, /keyboard\.press\('Tab'\)/);
+  assert.match(commercialHomeE2eSource, /setTimeout\(\(\) => request\.respond/);
+  assert.match(commercialHomeE2eSource, /campaign_id/);
+  assert.match(commercialHomeE2eSource, /adset_id/);
+  assert.match(commercialHomeE2eSource, /ad_id/);
+  assert.match(commercialHomeE2eSource, /CONSULTATION_QA_HMAC_SECRET/);
+  assert.match(commercialHomeE2eSource, /createHmac\('sha256', qaSecret\)/);
+  assert.doesNotMatch(commercialHomeE2eSource, /cmp1445-test-only-secret/);
+});
+
+test('CMP-1445 상업 직접 진입은 메타·히어로·푸터·JSON-LD와 exact dataLayer events를 전환한다', () => {
+  assert.match(consultationFormSource, /부산 상업공간 인테리어 상담 신청 \| 공간보감/);
+  assert.match(consultationFormSource, /필수 정보 9개/);
+  assert.match(consultationFormSource, /부산 상업공간 인테리어/);
+  assert.match(consultationFormSource, /schemaData\.name = '공간보감 상업공간 인테리어 상담'/);
+  assert.match(consultationFormSource, /schemaData\.serviceType = '사무실·상가·카페·병원 인테리어 상담'/);
+  assert.match(consultationFormSource, /pushDataLayerEvent\('form_start'\)/);
+  assert.match(consultationFormSource, /pushDataLayerEvent\('form_submit'\)/);
 });

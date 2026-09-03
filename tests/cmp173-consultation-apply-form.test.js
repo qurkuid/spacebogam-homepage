@@ -45,7 +45,9 @@ function bootstrap({ search = '?type=residential', submitResponse, page = 'apply
   const direct = page === 'consultation';
   const source = direct ? consultationPageSource : pageSource;
   const pathname = direct ? '/consultation/' : '/consultation/apply/';
-  const dom = new JSDOM(source.replace(/<script[\s\S]*?<\/script>/g, ''), {
+  // Keep structured-data scripts for metadata assertions; remove executable scripts only.
+  const html = source.replace(/<script(?![^>]*type="application\/ld\+json")[\s\S]*?<\/script>/g, '');
+  const dom = new JSDOM(html, {
     url: 'https://spacebogam.kr' + pathname + search,
     runScripts: 'outside-only',
     pretendToBeVisual: true,
@@ -130,6 +132,42 @@ test('상업 유형은 주거 질문 없이 전용 payload와 광고 귀속을 �
   assert.equal(payload.marketingAttribution.adset_id, '22');
   assert.equal(payload.marketingAttribution.ad_id, '33');
   assert.equal(payload.marketingAttribution.is_test, 'true');
+});
+
+test('상업 직접 진입은 상업용 메타·히어로·푸터와 정확한 필수 개수를 표시한다', async () => {
+  const { document } = bootstrap({ search: '?type=commercial&vertical=office', page: 'consultation' });
+  await settle();
+  assert.equal(document.title, '부산 상업공간 인테리어 상담 신청 | 공간보감');
+  assert.match(document.querySelector('meta[name="description"]').content, /상업공간/);
+  assert.match(document.querySelector('.v8-apply-intro').textContent, /필수 정보 9개/);
+  assert.match(document.querySelector('.v8-apply-intro').textContent, /사업 일정과 현장 조건/);
+  assert.equal(document.querySelector('.v8-footer span').textContent, '부산 상업공간 인테리어');
+  const schema = JSON.parse(document.querySelector('script[type="application/ld+json"]').textContent);
+  assert.equal(schema.name, '공간보감 상업공간 인테리어 상담');
+  assert.match(schema.serviceType, /사무실·상가·카페·병원/);
+  assert.equal(document.querySelectorAll('.cf-field').length, 10);
+  assert.match(document.querySelector('.cf-group-title').textContent, /필수 9개/);
+});
+
+test('실제 공개 폼은 DB 열거형을 건드리지 않고 dataLayer form_start/form_submit을 발화한다', async () => {
+  const { window, document, calls } = bootstrap({ search: '?type=commercial&vertical=office&is_test=1' });
+  await settle();
+  document.querySelector('[name="qname"]').value = '테스트';
+  document.querySelector('[name="qphone"]').value = '010-1234-5678';
+  document.querySelector('[name="qvertical"]').value = 'office';
+  document.querySelector('[name="qaddress"]').value = '부산 해운대구';
+  document.querySelector('[name="qarea"]').value = '30';
+  document.querySelector('[name="qcurrentState"]').value = 'vacant';
+  document.querySelector('[name="qopenDate"]').value = '2026-10-01';
+  document.querySelector('[name="qbudget"]').value = '50_100m';
+  document.querySelector('[name="qcallbackTime"]').value = 'weekday_pm';
+  document.querySelector('#cf-consent-input').checked = true;
+  document.querySelector('[name="qname"]').dispatchEvent(new window.Event('input', { bubbles: true }));
+  document.querySelector('form').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
+  await settle();
+  assert.ok(window.dataLayer.some((item) => item.event === 'form_start'));
+  assert.ok(window.dataLayer.some((item) => item.event === 'form_submit'));
+  assert.deepEqual(calls.funnel.map((item) => item.eventName), ['lead_form_view', 'lead_form_start', 'lead_submit_success']);
 });
 
 const tick = () => new Promise((resolve) => setImmediate(resolve));

@@ -8,7 +8,7 @@
  * 계측 계약은 CMP-151 / CMP-156 에서 이미 굳은 것을 그대로 쓴다. 새로 설계하지 않는다.
  *  - 플랫폼 식별자 5종(utm_id/campaign_id/adset_id/ad_id/asset_id)을 손실 없이 전달
  *  - Pixel Lead 의 eventID 와 서버가 저장하는 lead_event_id 를 같은 UUID 로 공유
- *  - is_test 를 그대로 전파해 QA 유입이 실적으로 집계되지 않게 한다
+ *  - is_test 는 요청 표식으로 전달한다. 서버는 별도 HMAC 증명이 있을 때만 QA로 확정한다.
  *  - clientId/sessionId 는 funnel-tracking.js 가 쓰는 저장소 키를 재사용한다.
  *    새로 만들면 클릭 이벤트와 상담 건이 이어지지 않는다(CMP-160).
  */
@@ -332,6 +332,17 @@
     } catch(e) {}
   }
 
+  function pushDataLayerEvent(eventName){
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: eventName,
+      event_category: 'conversion',
+      form_id: leadType === 'commercial' ? 'consultation_commercial' : 'consultation_residential',
+      lead_type: leadType,
+      page_path: location.pathname
+    });
+  }
+
   // ---- 렌더링 -------------------------------------------------------------
 
   function element(tag, className, text){
@@ -511,6 +522,7 @@
     startedTracked = true;
     sendFunnelEvent('lead_form_start');
     trackGtag('lead_form_start');
+    pushDataLayerEvent('form_start');
     trackPixel('InitiateCheckout');
   }
 
@@ -611,7 +623,7 @@
     var optional = questions.filter(function(q){ return !q.isRequired; });
 
     var primary = element('div', 'cf-group');
-    primary.appendChild(element('h2', 'cf-group-title', leadType === 'commercial' ? '상업공간 상담 정보' : '상담에 꼭 필요한 정보'));
+    primary.appendChild(element('h2', 'cf-group-title', leadType === 'commercial' ? '상업공간 상담 정보 (필수 9개)' : '상담에 꼭 필요한 정보'));
     required.forEach(function(q){ primary.appendChild(buildField(q)); });
     form.appendChild(primary);
 
@@ -757,6 +769,7 @@
     submitSucceeded = true;
     trackPixel('Lead', {eventID: leadEventId});
     trackGtag('lead_submit_success', {lead_event_id: leadEventId});
+    pushDataLayerEvent('form_submit');
     trackNaverConversion();
     sendFunnelEvent('lead_submit_success');
     // 같은 세션에서 한 건 더 신청하면 별개의 상담 건이다 — id 를 비워 다음 건이 새로 뽑게 한다.
@@ -775,11 +788,48 @@
     try { root.scrollIntoView({behavior: 'smooth', block: 'start'}); } catch(e) {}
   }
 
+  function applyLeadTypePageCopy(){
+    document.body.setAttribute('data-lead-type', leadType || 'unselected');
+    if (leadType !== 'commercial') return;
+
+    document.title = '부산 상업공간 인테리어 상담 신청 | 공간보감';
+    var description = document.querySelector('meta[name="description"]');
+    if (description) description.setAttribute('content', '사무실·상가·카페·병원 등 부산 상업공간 인테리어 상담을 신청하세요. 필수 정보 9개를 확인한 뒤 담당자가 연락드립니다.');
+    var ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute('content', document.title);
+    var ogDescription = document.querySelector('meta[property="og:description"]');
+    if (ogDescription) ogDescription.setAttribute('content', '사업 일정과 현장 조건을 남겨주시면 담당자가 확인 후 연락드립니다.');
+    var schema = document.querySelector('script[type="application/ld+json"]');
+    if (schema) {
+      try {
+        var schemaData = JSON.parse(schema.textContent || '{}');
+        schemaData.name = '공간보감 상업공간 인테리어 상담';
+        schemaData.serviceType = '사무실·상가·카페·병원 인테리어 상담';
+        schema.textContent = JSON.stringify(schemaData);
+      } catch (error) {}
+    }
+
+    var intro = document.querySelector('.v8-apply-intro');
+    if (intro) {
+      var label = intro.querySelector('.v8-section-label');
+      var heading = intro.querySelector('h1');
+      var summary = intro.querySelector('h1 + p');
+      var anchor = intro.querySelector('a[href="#consult-form-root"]');
+      if (label) label.textContent = '상업공간 인테리어 상담';
+      if (heading) heading.textContent = '사업 일정과 현장 조건부터, 함께 확인합니다';
+      if (summary) summary.textContent = '필수 정보 9개를 남겨주세요. 담당자가 현장 조건을 확인한 뒤 연락드립니다.';
+      if (anchor) anchor.textContent = '상업공간 상담 정보 작성 ↓';
+    }
+    var footerLabel = document.querySelector('.v8-footer span');
+    if (footerLabel) footerLabel.textContent = '부산 상업공간 인테리어';
+  }
+
   function init(){
     // Pixel 이 아직 뜨지 않았어도 fbq 스텁이 큐에 쌓아두므로 여기서 다시 init 하지 않는다.
     if (typeof window.fbq === 'function' && !window.__spacebogamPixelInitialized) {
       window.__spacebogamPixelInitialized = META_PIXEL_ID;
     }
+    applyLeadTypePageCopy();
 
     if (!leadType) {
       renderLeadTypePicker();
