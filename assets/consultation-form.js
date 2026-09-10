@@ -365,6 +365,93 @@
     date: 'date'
   };
 
+  var postcodeScript;
+  function loadPostcode(){
+    if (window.kakao && window.kakao.Postcode) return Promise.resolve();
+    if (postcodeScript) return postcodeScript;
+    postcodeScript = new Promise(function(resolve, reject){
+      var script = document.createElement('script');
+      var timer = setTimeout(fail, 10000);
+      function fail(){
+        clearTimeout(timer);
+        script.onload = script.onerror = null;
+        script.remove();
+        postcodeScript = null;
+        reject(new Error('postcode unavailable'));
+      }
+      script.src = 'https://t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+      script.async = true;
+      script.onerror = fail;
+      script.onload = function(){
+        if (!window.kakao || !window.kakao.Postcode) return fail();
+        clearTimeout(timer);
+        script.onload = script.onerror = null;
+        resolve();
+      };
+      document.head.appendChild(script);
+    });
+    return postcodeScript;
+  }
+
+  function addAddressSearch(wrap, input){
+    var requestId = 0;
+    var search = element('button', 'cf-address-search', '주소 검색');
+    search.type = 'button';
+    search.setAttribute('aria-expanded', 'false');
+    var panel = element('div', 'cf-address-panel');
+    panel.id = input.id + '-search';
+    panel.hidden = true;
+    search.setAttribute('aria-controls', panel.id);
+    var close = element('button', 'cf-address-close', '주소 검색 닫기');
+    close.type = 'button';
+    var host = element('div', 'cf-address-host');
+    var notice = element('p', 'cf-help', '도로명·건물명으로 검색하거나 주소를 직접 입력해주세요.');
+    notice.setAttribute('role', 'status');
+    panel.appendChild(close);
+    panel.appendChild(host);
+    wrap.insertBefore(search, input);
+    wrap.insertBefore(panel, input);
+    wrap.appendChild(notice);
+
+    function hide(){
+      requestId++;
+      panel.hidden = true;
+      search.setAttribute('aria-expanded', 'false');
+      search.focus();
+    }
+    close.addEventListener('click', hide);
+    search.addEventListener('click', function(){
+      if (!panel.hidden) { hide(); return; }
+      panel.hidden = false;
+      var currentRequest = ++requestId;
+      search.setAttribute('aria-expanded', 'true');
+      notice.textContent = '주소 검색을 불러오는 중입니다…';
+      loadPostcode().then(function(){
+        if (panel.hidden || currentRequest !== requestId) return;
+        host.innerHTML = '';
+        new window.kakao.Postcode({
+          width: '100%', height: '100%',
+          onresize: function(size){ host.style.height = size.height + 'px'; },
+          oncomplete: function(data){
+            input.value = data.address + (data.apartment === 'Y' && data.buildingName ? ' (' + data.buildingName + ')' : '');
+            input.dispatchEvent(new Event('input', {bubbles:true}));
+            input.dispatchEvent(new Event('change', {bubbles:true}));
+            hide();
+            var detail = root.querySelector('[autocomplete="address-line2"]');
+            notice.textContent = detail ? '주소가 입력되었습니다. 상세주소는 선택 입력입니다.' : '주소가 입력되었습니다.';
+            (detail || input).focus();
+          }
+        }).embed(host);
+        notice.textContent = '검색이 어렵다면 닫고 주소를 직접 입력해주세요.';
+        close.scrollIntoView({block:'start'});
+      }).catch(function(){
+        if (currentRequest !== requestId) return;
+        hide();
+        notice.textContent = '주소 검색을 불러오지 못했습니다. 다시 검색하거나 주소를 직접 입력해주세요.';
+      });
+    });
+  }
+
   function buildField(question){
     var name = 'q' + question.id;
     var type = question.questionType;
@@ -423,10 +510,18 @@
         input.placeholder = '010-0000-0000';
       }
       if (type === 'password') input.autocomplete = 'new-password';
-      if (type === 'address') input.placeholder = '예) 부산 북구 화명동 ○○아파트';
-      if (type === 'detailed_address') input.placeholder = '예) 101동 1001호';
+      if (type === 'address') {
+        input.placeholder = '주소 검색 또는 직접 입력';
+        input.autocomplete = 'address-line1';
+      }
+      if (type === 'detailed_address') {
+        input.placeholder = '동·호수 등 (선택 입력)';
+        input.autocomplete = 'address-line2';
+        label.textContent = '상세주소 (선택)';
+      }
       if (type === 'number') input.min = '0';
       wrap.appendChild(input);
+      if (type === 'address') addAddressSearch(wrap, input);
     }
 
     if (type === 'password') {
@@ -608,11 +703,15 @@
     form.noValidate = true;
 
     var required = questions.filter(function(q){ return q.isRequired; });
-    var optional = questions.filter(function(q){ return !q.isRequired; });
+    var addressDetail = questions.find(function(q){ return q.questionType === 'detailed_address'; });
+    var optional = questions.filter(function(q){ return !q.isRequired && q !== addressDetail; });
 
     var primary = element('div', 'cf-group');
     primary.appendChild(element('h2', 'cf-group-title', leadType === 'commercial' ? '상업공간 상담 정보' : '상담에 꼭 필요한 정보'));
-    required.forEach(function(q){ primary.appendChild(buildField(q)); });
+    required.forEach(function(q){
+      primary.appendChild(buildField(q));
+      if (q.questionType === 'address' && addressDetail) primary.appendChild(buildField(addressDetail));
+    });
     form.appendChild(primary);
 
     if (optional.length) {

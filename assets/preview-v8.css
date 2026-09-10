@@ -149,6 +149,10 @@ button{font:inherit}
 .cf-required{color:#a33a2b}
 .cf-input{width:100%;min-height:50px;box-sizing:border-box;padding:12px 13px;border:1px solid #aaa49a;border-radius:0;background:transparent;color:var(--ink);font:inherit;font-size:16px}
 .cf-input:focus{outline:2px solid var(--ink);outline-offset:2px;border-color:var(--ink)}
+.cf-address-search{width:100%;min-height:50px;margin:0 0 10px;border:1px solid var(--ink);border-radius:0;background:var(--ink);color:var(--paper);font:inherit;font-size:16px;cursor:pointer}
+.cf-address-close{min-height:50px;margin:0 0 10px;padding:0;border:0;border-radius:0;background:transparent;color:var(--ink);font:inherit;text-decoration:underline;cursor:pointer;scroll-margin-top:90px}
+.cf-address-search:focus-visible,.cf-address-close:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.cf-address-host{width:100%;height:400px;margin-bottom:10px}
 .cf-input[aria-invalid="true"]{border-color:#a33a2b;outline:1px solid #a33a2b;outline-offset:1px}
 .cf-textarea{min-height:104px;resize:vertical}
 .cf-choices{display:flex;flex-wrap:wrap;gap:10px 22px;padding:4px 0}
@@ -177,6 +181,10 @@ button{font:inherit}
 .cf-success p{margin:0 0 12px;color:#59554d;line-height:1.75}
 .cf-success .button{display:inline-block;margin-top:16px;padding-bottom:4px;border-bottom:1px solid var(--ink);font-weight:600}
 .v8-form-section>.v8-phone-note{max-width:680px;margin:28px 0 0;padding-top:18px;border-top:1px solid var(--line)}
+@media(min-width:721px) and (max-width:960px){
+  .v8-apply-main{grid-template-columns:minmax(0,1fr)}
+  .v8-apply-intro{position:static}
+}
 @media(max-width:720px){
   .v8-apply-main{width:100%;display:block;padding:0 0 72px}
   .v8-apply-intro{position:static;padding:32px 20px 30px;border-bottom:1px solid var(--line)}
