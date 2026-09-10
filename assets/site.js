@@ -34,3 +34,25 @@
     initFilters();
   }
 })();
+
+/* Portfolio card image fallback
+   Keeps cards readable if a mapped portfolio image is missing or blocked. */
+(function () {
+  function initPortfolioImageFallbacks() {
+    var imgs = document.querySelectorAll('.case-img img, .feature-img img, .portfolio-card img');
+    imgs.forEach(function (img) {
+      img.addEventListener('error', function () {
+        var frame = img.closest('.case-img, .feature-img, .card-media');
+        if (frame) frame.classList.add('is-fallback');
+        img.removeAttribute('src');
+        img.setAttribute('aria-hidden', 'true');
+      }, { once: true });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPortfolioImageFallbacks);
+  } else {
+    initPortfolioImageFallbacks();
+  }
+})();

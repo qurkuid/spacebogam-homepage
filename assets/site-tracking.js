@@ -5,7 +5,7 @@
   var NAVER_CTS_ACCOUNT_ID = 's_7702568df18';
   var NAVER_ANALYTICS_ACCOUNT_ID = '183d82ef1dd8190';
   var NAVER_CTS_DOMAIN = 'spacebogam.kr';
-  var NAVER_WCS_SCRIPT_SRC = 'https://wcs.pstatic.net/wcslog.js';
+  var NAVER_WCS_SCRIPT_SRC = 'https://wcs.naver.net/wcslog.js';
   var META_PIXEL_ID = '512750840350337';
   var META_PIXEL_SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
   var KAKAO_CHAT_URL = 'http://pf.kakao.com/_UEUBn/chat';
@@ -311,12 +311,51 @@
     return a;
   }
 
+  function trackSocialChannelClick(e){
+    var a = e.currentTarget;
+    if (a.getAttribute('aria-disabled') === 'true' || !a.getAttribute('href')) return;
+    var eventName = a.dataset.socialEvent || 'click_social_channel';
+    var payload = eventPayload({
+      event_category: 'social',
+      event_label: a.dataset.socialChannel || 'social_channel',
+      link_url: a.getAttribute('href') || '',
+      cta_text: (a.textContent || '').trim(),
+      cta_location: 'home_social_video_section'
+    });
+    sendEvent(eventName, payload);
+    sendMetaPixelCustomEvent(eventName, payload);
+  }
+
+  function trackFeaturedVideoClick(e){
+    var button = e.currentTarget;
+    if (button.disabled || button.getAttribute('aria-disabled') === 'true') return;
+    var payload = eventPayload({
+      event_category: 'social',
+      event_label: 'featured_youtube_video',
+      cta_text: (button.textContent || '').trim(),
+      cta_location: 'home_featured_video'
+    });
+    sendEvent('click_featured_video', payload);
+    sendMetaPixelCustomEvent('click_featured_video', payload);
+  }
+
   function ensurePhoneCtaStyles(){
     if (document.getElementById('spacebogam-phone-cta-style')) return;
     var style = document.createElement('style');
     style.id = 'spacebogam-phone-cta-style';
-    style.textContent = '.spacebogam-header-call,.spacebogam-header-kakao{border-radius:999px;padding:10px 14px;white-space:nowrap;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:7px}.spacebogam-header-call{background:#1b1611;color:#fff;border:1px solid #1b1611}.spacebogam-header-kakao{background:#fee500;color:#191600;border:1px solid #e5cf00}.kakao-icon{display:inline-flex;width:22px;height:22px;border-radius:50%;background:#191600;color:#fee500;align-items:center;justify-content:center;font-size:11px;font-weight:900;line-height:1}.spacebogam-mobile-actions{display:none;position:fixed;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:9999;grid-template-columns:1fr 1fr;gap:8px}.spacebogam-mobile-call,.spacebogam-mobile-kakao{min-height:56px;border-radius:18px;align-items:center;justify-content:center;text-align:center;font-size:16px;font-weight:800;box-shadow:0 18px 45px rgba(45,32,20,.28);border:1px solid rgba(255,255,255,.36);text-decoration:none;display:flex;padding:0 10px}.spacebogam-mobile-call{background:#1b1611;color:#fff}.spacebogam-mobile-call:before{content:"☎";font-size:18px;margin-right:8px}.spacebogam-mobile-kakao{background:#fee500;color:#191600;gap:7px}@media(max-width:600px){html,body{overflow-x:hidden}body{padding-bottom:92px}.spacebogam-header-call,.spacebogam-header-kakao{display:none}.spacebogam-mobile-actions{display:flex!important;left:8px;right:8px;gap:5px;max-width:calc(100vw - 16px);overflow:hidden}.spacebogam-mobile-actions>*{flex:1 1 0!important;width:0!important;min-width:0;max-width:100%;box-sizing:border-box;overflow:hidden;white-space:nowrap}.spacebogam-mobile-call,.spacebogam-mobile-kakao{font-size:13px;padding:0 6px}.spacebogam-mobile-call:before{margin-right:4px}.spacebogam-mobile-kakao .kakao-icon{flex:0 0 20px;width:20px;height:20px}}';
+    style.textContent = '.spacebogam-official-links{margin:16px 0 0;font-size:13px;line-height:1.7;color:rgba(255,255,255,.66);font-weight:400;word-break:keep-all}.spacebogam-official-links a{color:inherit;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}.spacebogam-official-links a:hover{color:#f2d38b}.spacebogam-header-call,.spacebogam-header-kakao{border-radius:999px;padding:10px 14px;white-space:nowrap;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:7px}.spacebogam-header-call{background:#1b1611;color:#fff;border:1px solid #1b1611}.spacebogam-header-kakao{background:#fee500;color:#191600;border:1px solid #e5cf00}.kakao-icon{display:inline-flex;width:22px;height:22px;border-radius:50%;background:#191600;color:#fee500;align-items:center;justify-content:center;font-size:11px;font-weight:900;line-height:1}.spacebogam-mobile-actions{display:none;position:fixed;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:9999;grid-template-columns:1fr 1fr;gap:8px}.spacebogam-mobile-call,.spacebogam-mobile-kakao{min-height:56px;border-radius:18px;align-items:center;justify-content:center;text-align:center;font-size:16px;font-weight:800;box-shadow:0 18px 45px rgba(45,32,20,.28);border:1px solid rgba(255,255,255,.36);text-decoration:none;display:flex;padding:0 10px}.spacebogam-mobile-call{background:#1b1611;color:#fff}.spacebogam-mobile-call:before{content:"☎";font-size:18px;margin-right:8px}.spacebogam-mobile-kakao{background:#fee500;color:#191600;gap:7px}@media(max-width:600px){html,body{overflow-x:hidden}body{padding-bottom:92px}.spacebogam-header-call,.spacebogam-header-kakao{display:none}.spacebogam-mobile-actions{display:grid;left:10px;right:10px;gap:6px;max-width:calc(100vw - 20px)}.spacebogam-mobile-actions>*{min-width:0}.spacebogam-mobile-call,.spacebogam-mobile-kakao{font-size:14px;padding:0 8px}.spacebogam-mobile-call:before{margin-right:5px}.spacebogam-mobile-kakao .kakao-icon{flex:0 0 22px}}';
     document.head.appendChild(style);
+  }
+
+  function injectOfficialChannelLinks(){
+    if (document.querySelector('.spacebogam-official-links')) return;
+    var footer = document.querySelector('footer');
+    if (!footer) return;
+    var target = footer.querySelector('.wrap') || footer;
+    var channel = document.createElement('p');
+    channel.className = 'spacebogam-official-links';
+    channel.innerHTML = '네이버 블로그와 플레이스에서 공간보감을 만나보세요. <a href="https://blog.naver.com/baek1985" target="_blank" rel="noopener" data-social-event="click_official_channel" data-social-channel="naver_blog">네이버 블로그</a> · <a href="https://naver.me/FgiFOmQt" target="_blank" rel="noopener" data-social-event="click_official_channel" data-social-channel="naver_place">네이버 플레이스</a>';
+    target.appendChild(channel);
   }
 
   function injectPhoneCtas(){
@@ -365,6 +404,7 @@
 
   function init(){
     injectPhoneCtas();
+    injectOfficialChannelLinks();
 
     document.querySelectorAll('a[href^="https://intm.kr/consultation/ggbg"], a[href^="/consultation/"]').forEach(function(a){
       a.setAttribute('href', decorate(a.getAttribute('href')));
@@ -387,6 +427,20 @@
       if (!a.dataset.spacebogamKakaoTracked) {
         a.addEventListener('click', trackKakaoClick, {capture:true});
         a.dataset.spacebogamKakaoTracked = '1';
+      }
+    });
+
+    document.querySelectorAll('[data-social-event]').forEach(function(a){
+      if (!a.dataset.spacebogamSocialTracked) {
+        a.addEventListener('click', trackSocialChannelClick, {capture:true});
+        a.dataset.spacebogamSocialTracked = '1';
+      }
+    });
+
+    document.querySelectorAll('[data-featured-video-button]').forEach(function(button){
+      if (!button.dataset.spacebogamFeaturedVideoTracked) {
+        button.addEventListener('click', trackFeaturedVideoClick, {capture:true});
+        button.dataset.spacebogamFeaturedVideoTracked = '1';
       }
     });
   }

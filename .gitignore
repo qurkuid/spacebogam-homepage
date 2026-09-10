@@ -2,3 +2,6 @@ data/blog/raw/
 data/blog/source-rss.xml
 __pycache__/
 .claude/
+
+# 내부 계획 문서 (공개 배포 금지)
+planning/
