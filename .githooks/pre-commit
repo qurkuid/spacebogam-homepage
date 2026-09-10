@@ -1,0 +1,23 @@
+#!/bin/bash
+# CMP-267 — scripts/qa/ 를 건드리는 커밋에서만 라이브 유입 URL 의 is_test 표식을 검사한다.
+# 검증 세션 표식이 빠진 프로브는 실행할 때마다 QA 세션을 실유입으로 집계시킨다.
+# 우회가 필요하면 `git commit --no-verify`.
+set -uo pipefail
+
+if git diff --cached --name-only | grep -q '^scripts/qa/'; then
+  node scripts/qa/lib/check-qa-entry-urls.mjs || {
+    echo ''
+    echo '[pre-commit] CMP-267 검사 실패 — 커밋을 중단합니다.'
+    exit 1
+  }
+fi
+
+# CMP-1341 — scripts/qa/ 밖(예: 새 도구 디렉터리, .omx 류 워크스페이스 스크래치가
+# 실수로 add 된 경우)에 커밋되는 헤드리스 자동화도 저장소 전체 스캐너로 한 번 더 본다.
+# 이 훅은 커밋되는 파일만 본다 — git add 되지 않은 스크래치 스크립트(진짜 사고 경로였다)는
+# 애초에 이 훅에 안 걸린다. 그 경로는 scripts/qa/lib/guarded-browser.mjs 가 런타임에서 막는다.
+node scripts/qa/lib/check-live-qa-urls-repo-wide.mjs || {
+  echo ''
+  echo '[pre-commit] CMP-1341 저장소 전체 검사 실패 — 커밋을 중단합니다.'
+  exit 1
+}

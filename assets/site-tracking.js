@@ -9,11 +9,93 @@
   var META_PIXEL_ID = '512750840350337';
   var META_PIXEL_SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
   var KAKAO_CHAT_URL = 'http://pf.kakao.com/_UEUBn/chat';
+  var EXPERIMENT_ID = 'homepage_headline_v1';
+  var EXPERIMENT_KEY = 'spacebogam_homepage_headline_v1_variant';
+  var FORCE_VARIANT_KEY = 'spacebogam_headline_v1_force_variant';
+  var ATTRIBUTION_KEY = 'spacebogam_funnel_attribution';
+  var JOURNEY_KEY = 'spacebogam_funnel_journey';
+  var ATTRIBUTION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+  var JOURNEY_MAX_LENGTH = 1000;
+  var SELF_REFERRAL_SOURCE = 'spacebogam.kr';
+  // Emergency rollback: set to 'A' and deploy this one file. Empty keeps 50:50 assignment.
+  var GLOBAL_EXPERIMENT_VARIANT = '';
+  window.__spacebogamHomepageHeadlineVariant = GLOBAL_EXPERIMENT_VARIANT;
   var ATTRIBUTION_KEYS = [
-    'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
-    'gclid', 'gbraid', 'wbraid', 'fbclid', 'n_keyword', 'ref',
-    'variant', 'page_variant'
+    'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
+    'gclid', 'gbraid', 'wbraid', 'fbclid', 'msclkid',
+    'n_keyword', 'n_query', 'n_campaign_type', 'n_ad_group', 'n_keyword_id',
+    'utm_id', 'campaign_id', 'adset_id', 'ad_id', 'asset_id'
   ];
+  var CONTEXT_KEYS = [
+    'ref', 'variant', 'page_variant', 'is_test'
+  ];
+  // Channel fields the CTA hardcodes; cleared before relay when inbound attribution exists.
+  // 'ref' is deliberately kept: it marks CTA placement, not the acquisition channel.
+  var STATIC_CHANNEL_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+
+  function storedAttribution(){
+    try {
+      var stored = JSON.parse(localStorage.getItem(ATTRIBUTION_KEY) || 'null');
+      if (stored && stored.expiresAt > Date.now() && stored.values) return stored.values;
+    } catch(error) {}
+    return {};
+  }
+
+  function hasAttribution(values){
+    for (var i = 0; i < ATTRIBUTION_KEYS.length; i++) {
+      if (values[ATTRIBUTION_KEYS[i]]) return true;
+    }
+    return false;
+  }
+
+  function currentAttribution(){
+    var current = new URL(location.href);
+    var stored = storedAttribution();
+    var values = {};
+    var selfReferral = current.searchParams.get('utm_source') === SELF_REFERRAL_SOURCE;
+    ATTRIBUTION_KEYS.forEach(function(key){
+      var value = current.searchParams.get(key) || '';
+      if (value && (!selfReferral || STATIC_CHANNEL_KEYS.indexOf(key) === -1)) {
+        values[key] = value;
+      }
+    });
+    if (selfReferral && hasAttribution(stored)) return stored;
+    if (!hasAttribution(values)) return stored;
+    try {
+      localStorage.setItem(ATTRIBUTION_KEY, JSON.stringify({
+        values: values,
+        expiresAt: Date.now() + ATTRIBUTION_TTL_MS
+      }));
+    } catch(error) {}
+    return values;
+  }
+
+  function boundedLandingPage(value){
+    try {
+      var url = new URL(value, location.href);
+      url.searchParams.delete('landing_page');
+      url.searchParams.delete('source_page');
+      return url.toString().slice(0, JOURNEY_MAX_LENGTH);
+    } catch(error) {
+      return String(value || '').slice(0, JOURNEY_MAX_LENGTH);
+    }
+  }
+
+  function sessionJourney(){
+    var fallback = {
+      landing_page: boundedLandingPage(location.href),
+      referrer: (document.referrer || '').slice(0, JOURNEY_MAX_LENGTH)
+    };
+    try {
+      var stored = JSON.parse(sessionStorage.getItem(JOURNEY_KEY) || 'null');
+      if (stored && stored.landing_page) return stored;
+      sessionStorage.setItem(JOURNEY_KEY, JSON.stringify(fallback));
+    } catch(error) {}
+    return fallback;
+  }
+
+  var attribution = currentAttribution();
+  var journey = sessionJourney();
 
   function getNaverId(metaName, fallback){
     var meta = document.querySelector('meta[name="' + metaName + '"]');
@@ -116,24 +198,107 @@
     });
   }
 
-  function sendNaverLead(){
-    withNaverAccount(getNaverCtsAccountId(), function(){
-      if (window.wcs && typeof window.wcs.trans === 'function') {
-        window.wcs.trans({type: 'lead'});
+  function normalizeExperimentVariant(value){
+    if (!value) return '';
+    var valueLower = String(value).toLowerCase();
+    if (valueLower === 'a' || valueLower === 'home_a' || valueLower === 'home_a_default' || valueLower === 'home_a_current') return 'A';
+    if (valueLower === 'b' || valueLower === 'home_b' || valueLower === 'home_b_visit_stage_standard' || valueLower === 'home_b_current') return 'B';
+    return '';
+  }
+
+  function currentExperimentVariant(storage){
+    try {
+      if (!storage) return '';
+      var stored = storage.getItem(EXPERIMENT_KEY);
+      return normalizeExperimentVariant(stored);
+    } catch(error) {
+      return '';
+    }
+  }
+
+  function writeExperimentVariant(storage, value){
+    if (!storage) return;
+    try {
+      storage.setItem(EXPERIMENT_KEY, value);
+    } catch(error) {}
+  }
+
+  function resolveExperimentVariant(storage){
+    var globalVariant = normalizeExperimentVariant(GLOBAL_EXPERIMENT_VARIANT);
+    if (globalVariant) {
+      writeExperimentVariant(storage, globalVariant);
+      return globalVariant;
+    }
+    var forced = '';
+    try {
+      var forcedParams = new URLSearchParams(location.search);
+      forced = normalizeExperimentVariant(
+        forcedParams.get('experiment_force') ||
+        forcedParams.get('force_experiment') ||
+        forcedParams.get('experiment_variant_force')
+      );
+      if (!forced) {
+        forced = normalizeExperimentVariant(localStorage.getItem(FORCE_VARIANT_KEY));
       }
-    });
+      if (forced) {
+        writeExperimentVariant(storage, forced);
+        try { localStorage.setItem(FORCE_VARIANT_KEY, forced); } catch(error) {}
+      }
+    } catch(error) {
+      forced = '';
+    }
+    if (forced) return forced;
+
+    var isHomepage = location.pathname === '/' || location.pathname === '/index.html';
+    var params = new URLSearchParams(location.search);
+    var variantFromQuery = normalizeExperimentVariant(params.get('experiment_variant'));
+    if (!variantFromQuery) variantFromQuery = normalizeExperimentVariant(params.get('variant'));
+    if (!variantFromQuery) variantFromQuery = normalizeExperimentVariant(params.get('page_variant'));
+    if (variantFromQuery) {
+      writeExperimentVariant(storage, variantFromQuery);
+      return variantFromQuery;
+    }
+    if (location.pathname.indexOf('/ab/home-b/') === 0) {
+      writeExperimentVariant(storage, 'B');
+      return 'B';
+    }
+    var stored = currentExperimentVariant(storage);
+    if (stored) return stored;
+    if (isHomepage) {
+      var randomValue = Math.random();
+      if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
+        var randomBytes = new Uint32Array(1);
+        window.crypto.getRandomValues(randomBytes);
+        randomValue = randomBytes[0] / 4294967296;
+      }
+      var assigned = randomValue < 0.5 ? 'A' : 'B';
+      writeExperimentVariant(storage, assigned);
+      return assigned;
+    }
+    return 'A';
+  }
+
+  function getExperimentVariant(){
+    return resolveExperimentVariant(sessionStorage);
   }
 
   function isIntmConsultationUrl(u){
     return u.hostname === 'intm.kr' && u.pathname === '/consultation/ggbg';
   }
 
+  // CMP-173: /consultation/apply/ 는 spacebogam 도메인 안에서 제출까지 끝내는 신규 폼이다.
+  // 저장 스냅샷과 URL 릴레이를 함께 유지해 브라우저 저장소 제한이나 중간 홉에도
+  // 플랫폼 식별자가 랜딩→폼 이동에서 사라지지 않게 한다.
+  var LOCAL_CONSULTATION_PATHS = ['/consultation/', '/consultation', '/consultation/apply/', '/consultation/apply'];
+
   function isLocalConsultationUrl(u){
     var sameHost = !u.hostname || u.hostname === location.hostname || u.hostname === 'spacebogam.kr' || u.hostname === 'www.spacebogam.kr';
-    return sameHost && (u.pathname === '/consultation/' || u.pathname === '/consultation');
+    return sameHost && LOCAL_CONSULTATION_PATHS.indexOf(u.pathname) !== -1;
   }
 
   function getPageVariant(){
+    var experimentVariant = getExperimentVariant();
+    if (experimentVariant === 'B') return 'home_b_visit_stage_standard';
     try {
       var current = new URL(location.href);
       var explicit = current.searchParams.get('page_variant') || current.searchParams.get('variant');
@@ -152,16 +317,41 @@
       if (!isIntmConsultationUrl(u) && !isLocalConsultationUrl(u)) return url;
 
       var current = new URL(location.href);
+      var inbound = hasAttribution(attribution);
+      if (inbound) {
+        STATIC_CHANNEL_KEYS.forEach(function(key){ u.searchParams.delete(key); });
+      }
       ATTRIBUTION_KEYS.forEach(function(key){
+        var value = attribution[key];
+        if (value) u.searchParams.set(key, value);
+      });
+      CONTEXT_KEYS.forEach(function(key){
         var value = current.searchParams.get(key);
         if (value) u.searchParams.set(key, value);
       });
 
-      if (!u.searchParams.has('utm_source')) u.searchParams.set('utm_source', SOURCE);
-      if (!u.searchParams.has('utm_medium')) u.searchParams.set('utm_medium', MEDIUM);
-      if (!u.searchParams.has('utm_campaign')) u.searchParams.set('utm_campaign', CAMPAIGN);
+      if (!inbound) {
+        if (!u.searchParams.has('utm_source')) u.searchParams.set('utm_source', SOURCE);
+        if (!u.searchParams.has('utm_medium')) u.searchParams.set('utm_medium', MEDIUM);
+        if (!u.searchParams.has('utm_campaign')) u.searchParams.set('utm_campaign', CAMPAIGN);
+      }
       if (!u.searchParams.has('ref')) u.searchParams.set('ref', 'spacebogam');
-      if (!u.searchParams.has('page_variant')) u.searchParams.set('page_variant', getPageVariant());
+      u.searchParams.delete('landing_page');
+      u.searchParams.delete('source_page');
+      if (isLocalConsultationUrl(u)) {
+        u.searchParams.delete('referrer');
+      } else {
+        if (journey.landing_page) u.searchParams.set('landing_page', journey.landing_page);
+        if (journey.referrer) u.searchParams.set('referrer', journey.referrer);
+      }
+      u.searchParams.set('source_page', location.pathname);
+      // Experiment enrichment is best-effort: it must never discard the relayed
+      // ad attribution above by throwing out of the outer catch.
+      try {
+        if (!u.searchParams.has('experiment_id')) u.searchParams.set('experiment_id', EXPERIMENT_ID);
+        if (!u.searchParams.has('experiment_variant')) u.searchParams.set('experiment_variant', getExperimentVariant());
+        if (!u.searchParams.has('page_variant')) u.searchParams.set('page_variant', getPageVariant());
+      } catch(e) {}
       return u.toString();
     } catch(e) { return url; }
   }
@@ -170,6 +360,8 @@
     var payload = {
       event_category: 'lead',
       event_label: 'spacebogam',
+      experiment_id: EXPERIMENT_ID,
+      experiment_variant: getExperimentVariant(),
       page_location: location.href,
       page_path: location.pathname,
       page_variant: getPageVariant(),
@@ -177,6 +369,10 @@
     };
     var current = new URL(location.href);
     ATTRIBUTION_KEYS.forEach(function(key){
+      var value = attribution[key];
+      if (value) payload[key] = value;
+    });
+    CONTEXT_KEYS.forEach(function(key){
       var value = current.searchParams.get(key);
       if (value) payload[key] = value;
     });
@@ -206,13 +402,10 @@
       cta_text: (a.textContent || '').trim(),
       cta_location: a.dataset.ctaLocation || a.className || 'consultation_link'
     });
-    sendEvent('generate_lead', payload);
     sendEvent('click_consultation', payload);
     sendEvent('click_kakao_or_consult', payload);
     sendMetaPixelCustomEvent('click_consultation', payload);
-    sendMetaPixelEvent('Lead', payload);
-    sendMetaPixelEvent('SubmitApplication', payload);
-    sendNaverLead();
+    sendMetaPixelEvent('Contact', payload);
   }
 
   function pagePhoneContext(){
@@ -265,8 +458,8 @@
     a.className = className;
     a.href = 'tel:050713881252';
     decoratePhoneLink(a, locationName);
-    a.setAttribute('aria-label', '공간보감 전화 상담 0507-1388-1252');
-    a.textContent = text || '전화 상담하기 0507-1388-1252';
+    a.setAttribute('aria-label', '공간보감 전화 상담 1551-0163');
+    a.textContent = text || '전화 상담하기';
     return a;
   }
 
@@ -297,7 +490,6 @@
     sendEvent('click_kakao_or_consult', payload);
     sendMetaPixelCustomEvent('kakao_chat_click', payload);
     sendMetaPixelEvent('Contact', payload);
-    sendNaverLead();
   }
 
   function buildKakaoLink(className, locationName, text){
@@ -359,6 +551,7 @@
   }
 
   function injectPhoneCtas(){
+    if (document.body.dataset.noAutoCta === 'true') return;
     ensurePhoneCtaStyles();
     var context = pagePhoneContext();
     var existingHeaderCall = document.querySelector('.spacebogam-header-call');
@@ -366,11 +559,12 @@
     if (existingHeaderCall) {
       existingHeaderCall.setAttribute('href', 'tel:050713881252');
       decoratePhoneLink(existingHeaderCall, existingHeaderCall.dataset.ctaLocation || context.location + '_header');
-      if ((existingHeaderCall.textContent || '').indexOf('0507-1388-1252') === -1) {
-        existingHeaderCall.textContent = '전화 상담 0507-1388-1252';
+      // 전화번호는 노출하지 않는다 — 버튼 라벨만 유지 (2026-07-04 사장님 지시)
+      if ((existingHeaderCall.textContent || '').indexOf('1551-0163') !== -1 || !(existingHeaderCall.textContent || '').trim()) {
+        existingHeaderCall.textContent = '전화 상담';
       }
     } else if (headerWrap) {
-      existingHeaderCall = buildPhoneLink('spacebogam-header-call', context.location + '_header', '전화 상담 0507-1388-1252');
+      existingHeaderCall = buildPhoneLink('spacebogam-header-call', context.location + '_header', '전화 상담');
       var headerConsult = headerWrap.querySelector('.top-cta, .cta');
       if (headerConsult && headerConsult.parentNode === headerWrap) headerWrap.insertBefore(existingHeaderCall, headerConsult.nextSibling);
       else headerWrap.appendChild(existingHeaderCall);
@@ -403,6 +597,12 @@
   }
 
   function init(){
+    if (!document.querySelector('script[data-spacebogam-funnel="1"]')) {
+      var funnelScript = document.createElement('script');
+      funnelScript.src = '/assets/funnel-tracking.js?v=891a8640';
+      funnelScript.dataset.spacebogamFunnel = '1';
+      document.head.appendChild(funnelScript);
+    }
     injectPhoneCtas();
     injectOfficialChannelLinks();
 
