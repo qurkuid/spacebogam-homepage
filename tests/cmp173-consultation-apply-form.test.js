@@ -145,7 +145,7 @@ function fillRequired(document) {
   document.querySelector('[name="q4"]').value = '34';
   document.querySelector('[name="q16"]').value = 'pw1234';
   document.querySelector('#q12_0').checked = true;
-  document.querySelector('[name="q21"]').value = '1억 이상';
+  document.querySelector('[name="q21"]').value = '1억~1.5억원';
   document.querySelector('[name="q33"]').value = '2026-08-10';
   document.querySelector('#q34_1').checked = true;
   document.querySelector('#cf-consent-input').checked = true;
@@ -171,22 +171,27 @@ test('전화상담으로 오인할 수 있는 카피만 중립화하고 질문 I
   await settle();
 
   assert.doesNotMatch(pageSource, /필요한 내용은 통화에서|나머지는 통화에서/);
-  assert.match(pageSource, /담당자가 내용을 확인한 뒤 상담 일정을 안내합니다/);
+  assert.match(pageSource, /담당자가 확인 후 상담 일정을 안내합니다/);
   const timeField = document.querySelector('[data-question-id="17"]');
   assert.match(timeField.querySelector('.cf-label').textContent, /연락 가능한 시간대/);
   assert.doesNotMatch(timeField.querySelector('.cf-label').textContent, /통화 가능한 시간대/);
   assert.equal(timeField.querySelector('input').name, 'q17', 'CRM 질문 ID 계약을 바꾸면 안 된다');
 });
 
-test('선택 항목은 접어두되 버리지 않는다 — CRM 필드가 사라지면 안 된다', async () => {
+test('추천 선택 항목은 펼쳐두고 나머지 CRM 필드는 접힌 그룹에 유지한다', async () => {
   const { document } = bootstrap();
   await settle();
 
   const optional = document.querySelector('details.cf-optional');
   assert.ok(optional, '선택 입력 그룹이 있어야 한다');
   assert.equal(optional.open, false, '기본은 접힌 상태여야 한다');
-  assert.ok(optional.querySelector('[name="q7"]'), '선택 질문도 폼에 존재해야 한다');
-  assert.ok(optional.querySelector('#q25_0'));
+  for (const selector of ['[name="q21"]', '#q12_0', '#q25_0', '[name="q7"]']) {
+    const input = document.querySelector(selector);
+    assert.ok(input, '추천 선택 질문도 폼에 존재해야 한다');
+    assert.equal(input.closest('details'), null, '추천 항목은 바로 보여야 한다');
+    assert.equal(input.required, false, '추천 항목을 필수로 강제하지 않는다');
+  }
+  assert.ok(optional.querySelector('[name="q17"]'), '나머지 선택 질문도 유지해야 한다');
 });
 
 test('필수 항목이 비면 제출하지 않고 그 항목을 지목한다', async () => {
@@ -269,6 +274,7 @@ test('제출 payload 가 intm 계약과 플랫폼 식별자·is_test 를 그대�
   // 답변은 질문 id 문자열 키 + 문자열 값, 복수선택은 ', ' 결합.
   assert.equal(payload.answers['13'], '홍길동');
   assert.equal(payload.answers['12'], '거실');
+  assert.equal(payload.answers['21'], '1억~1.5억원');
   assert.equal(payload.answers['34'], '14:00');
   assert.equal(payload.answers['9999'], 'true', '개인정보 동의는 고정 id 9999 로 실린다');
   assert.equal(payload.answers['7'], undefined, '빈 선택 항목은 보내지 않는다');
