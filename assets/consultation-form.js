@@ -708,18 +708,11 @@
   }
 
   function consolidateQuestions(list){
-    var groups = [
-      {primary: function(q){ return q.questionType === 'select' && /예산 구간/.test(q.question); },
-        duplicate: function(q){ return q.questionType === 'number' && /예산 금액/.test(q.question); }},
-      {primary: function(q){ return q.questionType === 'text' && /^기타 요청사항/.test(q.question); },
-        duplicate: function(q){ return q.questionType === 'text' && /공간별 요청사항|예산 내에서 꼭 반영|내 집이 이런 느낌/.test(q.question); }},
-      {primary: function(q){ return q.questionType === 'single_choice' && /디자인 공사/.test(q.question); },
-        duplicate: function(q){ return q.questionType === 'multiple_choice' && /디자인 공사/.test(q.question); }},
-      {primary: function(q){ return q.questionType === 'multiple_choice' && /상담 스타일/.test(q.question); },
-        duplicate: function(q){ return q.questionType === 'multiple_choice' && /이런 상담을 원해요/.test(q.question); }}
-    ];
+    // 같은 CRM 의미로 확인한 문항만 통합한다. 문구 편집으로 다른 질문이 빠지지 않게 ID를 쓴다.
+    var replacements = {'11':'21', '59':'7', '24':'7', '28':'7', '20':'32', '19':'31'};
+    var ids = list.map(function(q){ return String(q.id); });
     return list.filter(function(q){
-      return !groups.some(function(group){ return group.duplicate(q) && list.some(group.primary); });
+      return ids.indexOf(replacements[String(q.id)]) === -1;
     });
   }
 

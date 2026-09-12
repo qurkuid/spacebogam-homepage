@@ -526,3 +526,17 @@ test('추천 항목을 비워도 핵심 네 가지와 동의만으로 접수된�
   assert.deepEqual(Object.keys(calls.submit[0].answers).sort(), ['10', '13', '15', '4', '9999']);
   assert.ok(document.querySelector('.cf-success'));
 });
+
+
+test('문구가 바뀌거나 유사 질문이 추가되어도 확인된 ID만 통합한다', async () => {
+  const questionList = QUESTIONS.map(q => ({...q, id: String(q.id), question: '수정된 질문 ' + q.id}));
+  questionList.push({id: '101', question: '공간별 요청사항이 있으시면 적어주세요.', questionType: 'text'});
+  const { document } = bootstrap({ questionList });
+  await settle();
+  for (const id of [11, 59, 24, 28, 20, 19]) {
+    assert.equal(document.querySelector('[data-question-id="' + id + '"]'), null);
+  }
+  for (const id of [7, 21, 32, 31, 101]) {
+    assert.ok(document.querySelector('[data-question-id="' + id + '"]'));
+  }
+});
