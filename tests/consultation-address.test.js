@@ -110,6 +110,20 @@ function addressHarness() {
 
 const settle = () => new Promise((resolve) => setImmediate(resolve));
 
+test('주거 예산은 세부 구간을 저장하고 상업 예산은 기존 선택지를 유지한다', () => {
+  const context = { leadType: 'residential' };
+  vm.createContext(context);
+  vm.runInContext(functionSource('optionsOf'), context);
+  const question = { question: '예산 구간을 선택해주세요', questionType: 'select', options: ['기존 구간'] };
+  assert.deepEqual(Array.from(context.optionsOf(question)), [
+    '4천만원 미만', '4천만~5천만원', '5천만~6천만원', '6천만~7천만원',
+    '7천만~8천만원', '8천만~9천만원', '9천만~1억원',
+    '1억~1.5억원', '1.5억~2억원', '2억원 이상',
+  ]);
+  context.leadType = 'commercial';
+  assert.deepEqual(context.optionsOf(question), ['기존 구간']);
+});
+
 test('주소 입력칸을 누르면 검색이 열리고 다시 눌러도 닫히지 않는다', async () => {
   const h = addressHarness();
   let opened = 0;

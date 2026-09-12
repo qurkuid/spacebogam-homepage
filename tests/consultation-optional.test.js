@@ -70,6 +70,8 @@ test('추천 선택 항목은 우선순위대로 보이고 나머지는 원래 �
     { id: 5, question: '추가 예산', questionType: 'select', isRequired: false },
     { id: 6, question: '시공 완료 희망일', questionType: 'date', isRequired: false },
     { id: 7, question: '추가 요청사항', questionType: 'text', isRequired: false },
+    { id: 8, question: '시공장소를 모두 선택해 주세요.', questionType: 'multiple_choice', isRequired: false },
+    { id: 9, question: '선호하는 인테리어 스타일을 선택해주세요', questionType: 'multiple_choice', isRequired: false },
   ];
   const snapshot = structuredClone(optional);
   const harness = optionalFieldsHarness();
@@ -84,10 +86,10 @@ test('추천 선택 항목은 우선순위대로 보이고 나머지는 원래 �
   assert.equal(Boolean(details.open), false);
   assert.deepEqual(
     fieldsWithin(result).filter((question) => !fieldsWithin(details).includes(question)).map((question) => question.id),
-    [2, 3, 4],
+    [2, 3, 8, 9, 4],
   );
   assert.deepEqual(fieldsWithin(details).map((question) => question.id), [1, 5, 6, 7]);
-  assert.deepEqual(harness.built.map((question) => question.id).sort((a, b) => a - b), [1, 2, 3, 4, 5, 6, 7]);
+  assert.deepEqual(harness.built.map((question) => question.id).sort((a, b) => a - b), [1, 2, 3, 4, 5, 6, 7, 8, 9]);
   assert.ok(harness.built.every((question) => optional.includes(question)));
   assert.deepEqual(optional, snapshot);
 });

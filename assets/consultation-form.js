@@ -342,6 +342,13 @@
   }
 
   function optionsOf(question){
+    if (leadType === 'residential' && question.questionType === 'select' && /예산/.test(question.question)) {
+      return [
+        '4천만원 미만', '4천만~5천만원', '5천만~6천만원', '6천만~7천만원',
+        '7천만~8천만원', '8천만~9천만원', '9천만~1억원',
+        '1억~1.5억원', '1.5억~2억원', '2억원 이상'
+      ];
+    }
     var options = question.options;
     if (Array.isArray(options)) return options;
     if (typeof options === 'string') {
@@ -711,6 +718,8 @@
     var recommendations = [
       {match: function(q){ return q.questionType === 'select' && /예산/.test(q.question); }, help: '대략적인 예산만 골라도 그에 맞는 공사 범위를 논의하는 데 도움이 됩니다.'},
       {match: function(q){ return q.questionType === 'date' && /(시공|공사).*희망/.test(q.question); }, help: '희망일을 알려주시면 가능한 공사 일정을 함께 확인합니다. 미정이면 비워두세요.'},
+      {match: function(q){ return q.questionType === 'multiple_choice' && /시공장소|공사 범위/.test(q.question); }, help: '바꾸고 싶은 공간을 모두 골라주세요. 전체 공사를 생각하시면 전체 수리를 선택해주세요.'},
+      {match: function(q){ return q.questionType === 'multiple_choice' && /인테리어 스타일/.test(q.question); }, help: '마음에 드는 스타일을 여러 개 골라도 좋습니다. 취향에 맞는 디자인 방향을 함께 찾아갑니다.'},
       {match: function(q){ return q.questionType === 'text' && /요청사항/.test(q.question); }, help: '불편한 점이나 꼭 바꾸고 싶은 곳을 한 가지만 적어주셔도 좋습니다.'}
     ];
     var featured = [];
@@ -728,8 +737,8 @@
     var remaining = optional.filter(function(q){ return featured.indexOf(q) === -1; });
     if (remaining.length) {
       var details = element('details', 'cf-group cf-optional');
-      details.appendChild(element('summary', null, '공사 범위·취향도 알려주기 (선택)'));
-      details.appendChild(element('p', 'cf-help', '원하는 공간, 스타일, 상담 방식까지 알려주시면 관심 있는 내용부터 상담을 준비할 수 있습니다. 답하기 쉬운 항목부터 골라주세요.'));
+      details.appendChild(element('summary', null, '생활 방식·상담 일정도 알려주기 (선택)'));
+      details.appendChild(element('p', 'cf-help', '가족 구성, 생활 방식, 편한 상담 시간까지 알려주시면 더 알맞게 상담을 준비할 수 있습니다. 답하기 쉬운 항목부터 골라주세요.'));
       remaining.forEach(function(q){ details.appendChild(buildField(q)); });
       section.appendChild(details);
     }
