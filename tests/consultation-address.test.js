@@ -109,6 +109,23 @@ function addressHarness() {
 
 const settle = () => new Promise((resolve) => setImmediate(resolve));
 
+test('기본 주소는 읽기 전용이고 상세주소는 직접 입력할 수 있다', () => {
+  const context = {
+    document: { createElement: (tag) => new Node(tag) },
+    INPUT_TYPE_BY_QUESTION_TYPE: {},
+    optionsOf: () => [],
+    addAddressSearch() {},
+  };
+  vm.createContext(context);
+  vm.runInContext(`${functionSource('element')}\n${functionSource('buildField')}`, context);
+  const address = context.buildField({ id: 15, question: '주소', questionType: 'address' });
+  const detail = context.buildField({ id: 8, question: '상세주소', questionType: 'detailed_address' });
+  assert.equal(address.children[1].readOnly, true);
+  assert.equal(address.children[1].autocomplete, 'off');
+  assert.equal(Boolean(detail.children[1].readOnly), false);
+  assert.equal(detail.children[1].autocomplete, 'address-line2');
+});
+
 test('주소 SDK 로드 실패 뒤 다시 시도해 검색기를 연다', async () => {
   // Given
   const h = addressHarness();

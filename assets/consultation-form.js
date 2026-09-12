@@ -406,7 +406,7 @@
     var close = element('button', 'cf-address-close', '주소 검색 닫기');
     close.type = 'button';
     var host = element('div', 'cf-address-host');
-    var notice = element('p', 'cf-help', '도로명·건물명으로 검색하거나 주소를 직접 입력해주세요.');
+    var notice = element('p', 'cf-help', '주소 검색으로 도로명·건물명을 찾아 선택해주세요.');
     notice.setAttribute('role', 'status');
     panel.appendChild(close);
     panel.appendChild(host);
@@ -443,12 +443,12 @@
             (detail || input).focus();
           }
         }).embed(host);
-        notice.textContent = '검색이 어렵다면 닫고 주소를 직접 입력해주세요.';
+        notice.textContent = '검색 결과에서 주소를 선택해주세요.';
         close.scrollIntoView({block:'start'});
       }).catch(function(){
         if (currentRequest !== requestId) return;
         hide();
-        notice.textContent = '주소 검색을 불러오지 못했습니다. 다시 검색하거나 주소를 직접 입력해주세요.';
+        notice.textContent = '주소 검색을 불러오지 못했습니다. 잠시 후 다시 검색해주세요.';
       });
     });
   }
@@ -512,8 +512,9 @@
       }
       if (type === 'password') input.autocomplete = 'new-password';
       if (type === 'address') {
-        input.placeholder = '주소 검색 또는 직접 입력';
-        input.autocomplete = 'address-line1';
+        input.placeholder = '주소 검색으로 선택해주세요';
+        input.autocomplete = 'off';
+        input.readOnly = true;
       }
       if (type === 'detailed_address') {
         input.placeholder = '동·호수 등 (선택 입력)';
