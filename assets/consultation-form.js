@@ -421,6 +421,9 @@
       search.focus();
     }
     close.addEventListener('click', hide);
+    input.addEventListener('click', function(){
+      if (panel.hidden) search.click();
+    });
     search.addEventListener('click', function(){
       if (!panel.hidden) { hide(); return; }
       panel.hidden = false;

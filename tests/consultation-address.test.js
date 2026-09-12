@@ -61,6 +61,7 @@ class Node {
   dispatchEvent(event) { event.target = this; (this.listeners[event.type] || (() => {}))(event); return true; }
   remove() { this.removed = true; }
   focus() { this.focused = true; }
+  click() { this.dispatchEvent(new Event('click')); }
   scrollIntoView() { this.scrolled = true; }
   querySelector() { return null; }
 }
@@ -108,6 +109,25 @@ function addressHarness() {
 }
 
 const settle = () => new Promise((resolve) => setImmediate(resolve));
+
+test('주소 입력칸을 누르면 검색이 열리고 다시 눌러도 닫히지 않는다', async () => {
+  const h = addressHarness();
+  let opened = 0;
+  h.context.window.kakao = { Postcode: function() { this.embed = () => { opened += 1; }; } };
+  h.input.click();
+  await settle();
+  assert.equal(h.panel.hidden, false);
+  assert.equal(opened, 1);
+  h.input.click();
+  await settle();
+  assert.equal(h.panel.hidden, false);
+  assert.equal(opened, 1);
+  h.close.click();
+  h.input.click();
+  await settle();
+  assert.equal(h.panel.hidden, false);
+  assert.equal(opened, 2);
+});
 
 test('기본 주소는 읽기 전용이고 상세주소는 직접 입력할 수 있다', () => {
   const context = {
