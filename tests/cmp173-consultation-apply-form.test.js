@@ -35,13 +35,22 @@ const QUESTIONS = [
   { id: 7, question: '기타 요청사항이 있으시면 알려주세요.', questionType: 'text', options: null, isRequired: false },
   { id: 17, question: '통화 가능한 시간대를 알려주세요.', questionType: 'single_choice', options: ['오전', '오후'], isRequired: false },
   { id: 25, question: '선호하는 인테리어 스타일을 선택해주세요', questionType: 'multiple_choice', options: ['모던', '북유럽'], isRequired: false },
+  { id: 5, question: '시공 희망 시기를 알려주세요.', questionType: 'date', isRequired: false },
+  { id: 11, question: '예산 금액을 알려주세요.(천만원)', questionType: 'number', isRequired: false },
+  { id: 59, question: '공간별 요청사항이 있으시면 적어주세요.', questionType: 'text', isRequired: false },
+  { id: 24, question: '예산 내에서 꼭 반영하고 싶은 부분이 있나요?', questionType: 'text', isRequired: false },
+  { id: 28, question: '내 집이 이런 느낌이었으면 좋겠어요', questionType: 'text', isRequired: false },
+  { id: 20, question: '디자인 공사를 원하시나요?', questionType: 'multiple_choice', options: ['네', '아니오'], isRequired: false },
+  { id: 32, question: '디자인 공사를 함께 진행하시겠습니까?', questionType: 'single_choice', options: ['네', '아니오', '상담 후 결정'], isRequired: false },
+  { id: 19, question: '이런 상담을 원해요', questionType: 'multiple_choice', options: ['전문가 조언'], isRequired: false },
+  { id: 31, question: '원하시는 상담 스타일을 선택해주세요', questionType: 'multiple_choice', options: ['전문가 조언 위주'], isRequired: false },
 ];
 
 const LANDING_QUERY =
   '?type=residential&utm_source=meta&utm_medium=paid_social&utm_campaign=busan_remodeling' +
   '&utm_id=CMP173&campaign_id=111&adset_id=222&ad_id=333&asset_id=444&is_test=1';
 
-function bootstrap({ search = '?type=residential', submitResponse, page = 'apply' } = {}) {
+function bootstrap({ search = '?type=residential', submitResponse, page = 'apply', questionList = QUESTIONS } = {}) {
   const direct = page === 'consultation';
   const source = direct ? consultationPageSource : pageSource;
   const pathname = direct ? '/consultation/' : '/consultation/apply/';
@@ -61,7 +70,7 @@ function bootstrap({ search = '?type=residential', submitResponse, page = 'apply
       return Promise.resolve({
         ok: true,
         status: 200,
-        json: () => Promise.resolve({ success: true, questions: QUESTIONS }),
+        json: () => Promise.resolve({ success: true, questions: questionList }),
       });
     }
     if (String(url).includes('/api/marketing/funnel-events')) {
@@ -467,4 +476,53 @@ test('site-tracking / funnel-tracking 이 신규 폼 경로를 상담 링크로 
   // 인식하지 못하면 랜딩 URL 의 플랫폼 식별자가 폼으로 릴레이되지 않는다.
   assert.match(siteSource, /LOCAL_CONSULTATION_PATHS[\s\S]{0,200}'\/consultation\/apply\/'/);
   assert.match(funnelSource, /CONSULTATION_PATHS[\s\S]{0,200}'\/consultation\/apply\/'/);
+});
+
+
+test('중복 질문은 대표 입력 하나로 통합하고 답변은 대표 ID로만 제출한다', async () => {
+  const { document, calls } = bootstrap();
+  await settle();
+  for (const id of [11, 59, 24, 28, 20, 19]) {
+    assert.equal(document.querySelector('[data-question-id="' + id + '"]'), null);
+  }
+  assert.equal(document.querySelectorAll('textarea').length, 1);
+  for (const id of [7, 21, 32, 31, 5, 33]) {
+    assert.ok(document.querySelector('[data-question-id="' + id + '"]'), '목적이 다른 일정과 대표 질문 유지');
+  }
+  fillRequired(document);
+  document.querySelector('[name="q7"]').value = '주방 수납 강화, 밝은 분위기';
+  document.querySelector('#q32_2').checked = true;
+  document.querySelector('#q31_0').checked = true;
+  document.querySelector('form').dispatchEvent(new document.defaultView.Event('submit', { bubbles: true, cancelable: true }));
+  await settle();
+  assert.equal(calls.submit.length, 1);
+  const answers = calls.submit[0].answers;
+  assert.equal(answers['7'], '주방 수납 강화, 밝은 분위기');
+  assert.equal(answers['21'], '1억~1.5억원');
+  assert.equal(answers['32'], '상담 후 결정');
+  assert.equal(answers['31'], '전문가 조언 위주');
+  for (const id of [11, 59, 24, 28, 20, 19]) assert.equal(answers[id], undefined);
+});
+
+test('대표 질문이 없으면 기존 질문을 남겨 입력 기회를 보존한다', async () => {
+  const questionList = QUESTIONS.filter(q => ![7, 21, 32, 31].includes(q.id));
+  const { document } = bootstrap({ questionList });
+  await settle();
+  for (const id of [11, 59, 24, 28, 20, 19]) {
+    assert.ok(document.querySelector('[data-question-id="' + id + '"]'));
+  }
+});
+
+test('추천 항목을 비워도 핵심 네 가지와 동의만으로 접수된다', async () => {
+  const { document, calls } = bootstrap();
+  await settle();
+  for (const [name, value] of Object.entries({q13: '테스트', q10: '010-1234-5678', q15: '부산 해운대구', q4: '34'})) {
+    document.querySelector('[name="' + name + '"]').value = value;
+  }
+  document.querySelector('#cf-consent-input').checked = true;
+  document.querySelector('form').dispatchEvent(new document.defaultView.Event('submit', { bubbles: true, cancelable: true }));
+  await settle();
+  assert.equal(calls.submit.length, 1);
+  assert.deepEqual(Object.keys(calls.submit[0].answers).sort(), ['10', '13', '15', '4', '9999']);
+  assert.ok(document.querySelector('.cf-success'));
 });

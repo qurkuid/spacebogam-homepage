@@ -564,9 +564,8 @@
    * 예산구간·인지경로·상담희망 날짜/시간 포함). 광고로 처음 들어온 사람에게 그걸 다
    * 요구해서, 최근 7일 폼을 쓰기 시작한 7명이 전원 중도 이탈했다.
    *
-   * 대표 승인(2026-08-24, 확인카드 3f77c316)에 따라 **화면에서 질문을 빼지 않고**
-   * 필수 표시만 4개로 좁힌다. 나머지는 추천 입력과 접힘 영역에 그대로 남아 CRM 에
-   * 똑같이 저장된다. 서버는 isRequired 를 강제하지 않으므로(intm
+   * 필수 표시는 핵심 4개로 좁힌다. 중복 문항은 대표 질문으로 통합하고,
+   * 나머지는 추천 입력과 접힘 영역에 남겨 기존 질문 ID로 CRM에 저장한다. 서버는 isRequired 를 강제하지 않으므로(intm
    * src/app/api/consultation/submit/route.ts 는 값 추출만 한다) 클라이언트만 바꾸면 된다.
    *
    * id 로 고정하지 않는 이유: 질문 정의는 intm 관리 화면에서 편집된다. 서버가 기본
@@ -708,19 +707,34 @@
     trackGtag('lead_form_view', {lead_type:'unselected'});
   }
 
+  function consolidateQuestions(list){
+    var groups = [
+      {primary: function(q){ return q.questionType === 'select' && /예산 구간/.test(q.question); },
+        duplicate: function(q){ return q.questionType === 'number' && /예산 금액/.test(q.question); }},
+      {primary: function(q){ return q.questionType === 'text' && /^기타 요청사항/.test(q.question); },
+        duplicate: function(q){ return q.questionType === 'text' && /공간별 요청사항|예산 내에서 꼭 반영|내 집이 이런 느낌/.test(q.question); }},
+      {primary: function(q){ return q.questionType === 'single_choice' && /디자인 공사/.test(q.question); },
+        duplicate: function(q){ return q.questionType === 'multiple_choice' && /디자인 공사/.test(q.question); }},
+      {primary: function(q){ return q.questionType === 'multiple_choice' && /상담 스타일/.test(q.question); },
+        duplicate: function(q){ return q.questionType === 'multiple_choice' && /이런 상담을 원해요/.test(q.question); }}
+    ];
+    return list.filter(function(q){
+      return !groups.some(function(group){ return group.duplicate(q) && list.some(group.primary); });
+    });
+  }
+
   function buildOptionalFields(optional){
     var section = element('div', 'cf-group');
     var intro = element('div', 'cf-field');
-    intro.appendChild(element('p', 'cf-help', '추천 입력 · 선택사항'));
-    intro.appendChild(element('h2', 'cf-group-title', '상담 전에 알려주시면 좋아요'));
-    intro.appendChild(element('p', 'cf-help', '알려주신 조건을 바탕으로 공사 범위와 일정, 우선순위를 함께 검토할 수 있습니다. 아직 정하지 못한 항목은 비워두셔도 됩니다.'));
+    intro.appendChild(element('h2', 'cf-group-title', leadType === 'commercial' ? '추가 요청 (선택)' : '우리 집 계획 (선택)'));
+    intro.appendChild(element('p', 'cf-help', '아는 만큼만 알려주세요. 선택한 조건에 맞춰 상담을 준비합니다. 미정인 항목은 건너뛰어도 됩니다.'));
     section.appendChild(intro);
     var recommendations = [
-      {match: function(q){ return q.questionType === 'select' && /예산/.test(q.question); }, help: '대략적인 예산만 골라도 그에 맞는 공사 범위를 논의하는 데 도움이 됩니다.'},
-      {match: function(q){ return q.questionType === 'date' && /(시공|공사).*희망/.test(q.question); }, help: '희망일을 알려주시면 가능한 공사 일정을 함께 확인합니다. 미정이면 비워두세요.'},
-      {match: function(q){ return q.questionType === 'multiple_choice' && /시공장소|공사 범위/.test(q.question); }, help: '바꾸고 싶은 공간을 모두 골라주세요. 전체 공사를 생각하시면 전체 수리를 선택해주세요.'},
-      {match: function(q){ return q.questionType === 'multiple_choice' && /인테리어 스타일/.test(q.question); }, help: '마음에 드는 스타일을 여러 개 골라도 좋습니다. 취향에 맞는 디자인 방향을 함께 찾아갑니다.'},
-      {match: function(q){ return q.questionType === 'text' && /요청사항/.test(q.question); }, help: '불편한 점이나 꼭 바꾸고 싶은 곳을 한 가지만 적어주셔도 좋습니다.'}
+      {match: function(q){ return q.questionType === 'select' && /예산/.test(q.question); }, label: '생각 중인 예산'},
+      {match: function(q){ return q.questionType === 'multiple_choice' && /시공장소|공사 범위/.test(q.question); }, label: '바꾸고 싶은 공간 (복수 선택)'},
+      {match: function(q){ return q.questionType === 'multiple_choice' && /인테리어 스타일/.test(q.question); }, label: '좋아하는 스타일 (복수 선택)'},
+      {match: function(q){ return q.questionType === 'date' && /(시공|공사).*희망/.test(q.question); }, label: '공사 시작 희망일'},
+      {match: function(q){ return q.questionType === 'text' && /요청사항/.test(q.question); }, label: '꼭 반영할 점·추가 요청'}
     ];
     var featured = [];
     recommendations.forEach(function(item){
@@ -728,17 +742,16 @@
       if (!question) return;
       featured.push(question);
       var field = buildField(question);
+      field.querySelector('.cf-label').textContent = item.label;
       if (question.questionType === 'text') {
-        field.querySelector('textarea').placeholder = leadType === 'commercial' ? '예: 수납을 늘리고, 방문객 동선을 정리하고 싶어요.' : '예: 주방 수납이 부족해요. 욕실 두 곳을 바꾸고 싶어요.';
+        field.querySelector('textarea').placeholder = leadType === 'commercial' ? '예: 수납을 늘리고, 방문객 동선을 정리하고 싶어요.' : '예: 주방 수납을 늘리고, 밝고 편안한 분위기로 바꾸고 싶어요. 한 가지만 적어도 좋아요.';
       }
-      field.appendChild(element('p', 'cf-help', item.help));
       section.appendChild(field);
     });
     var remaining = optional.filter(function(q){ return featured.indexOf(q) === -1; });
     if (remaining.length) {
       var details = element('details', 'cf-group cf-optional');
-      details.appendChild(element('summary', null, '생활 방식·상담 일정도 알려주기 (선택)'));
-      details.appendChild(element('p', 'cf-help', '가족 구성, 생활 방식, 편한 상담 시간까지 알려주시면 더 알맞게 상담을 준비할 수 있습니다. 답하기 쉬운 항목부터 골라주세요.'));
+      details.appendChild(element('summary', null, '생활 방식·상담 일정 더 알려주기 (선택)'));
       remaining.forEach(function(q){ details.appendChild(buildField(q)); });
       section.appendChild(details);
     }
@@ -949,6 +962,7 @@
             mapped.isRequired = isCoreRequired(mapped);
             return mapped;
           });
+        questions = consolidateQuestions(questions);
         if (!questions.length) throw new Error('empty question set');
         renderForm();
       })

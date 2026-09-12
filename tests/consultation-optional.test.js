@@ -18,7 +18,7 @@ class Node {
   }
 
   querySelector(selector) {
-    return selector === 'textarea' ? this.textarea : null;
+    return selector === 'textarea' ? this.textarea : selector === '.cf-label' ? this.label : null;
   }
 }
 
@@ -43,6 +43,7 @@ function optionalFieldsHarness() {
       const node = new Node('field');
       node.question = question;
       node.textarea = {};
+      node.label = {};
       return node;
     },
   };
@@ -86,7 +87,7 @@ test('추천 선택 항목은 우선순위대로 보이고 나머지는 원래 �
   assert.equal(Boolean(details.open), false);
   assert.deepEqual(
     fieldsWithin(result).filter((question) => !fieldsWithin(details).includes(question)).map((question) => question.id),
-    [2, 3, 8, 9, 4],
+    [2, 8, 9, 3, 4],
   );
   assert.deepEqual(fieldsWithin(details).map((question) => question.id), [1, 5, 6, 7]);
   assert.deepEqual(harness.built.map((question) => question.id).sort((a, b) => a - b), [1, 2, 3, 4, 5, 6, 7, 8, 9]);
