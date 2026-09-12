@@ -558,7 +558,7 @@
    * 요구해서, 최근 7일 폼을 쓰기 시작한 7명이 전원 중도 이탈했다.
    *
    * 대표 승인(2026-08-24, 확인카드 3f77c316)에 따라 **화면에서 질문을 빼지 않고**
-   * 필수 표시만 4개로 좁힌다. 나머지는 '선택 입력' 접힘 영역에 그대로 남아 CRM 에
+   * 필수 표시만 4개로 좁힌다. 나머지는 추천 입력과 접힘 영역에 그대로 남아 CRM 에
    * 똑같이 저장된다. 서버는 isRequired 를 강제하지 않으므로(intm
    * src/app/api/consultation/submit/route.ts 는 값 추출만 한다) 클라이언트만 바꾸면 된다.
    *
@@ -701,6 +701,41 @@
     trackGtag('lead_form_view', {lead_type:'unselected'});
   }
 
+  function buildOptionalFields(optional){
+    var section = element('div', 'cf-group');
+    var intro = element('div', 'cf-field');
+    intro.appendChild(element('p', 'cf-help', '추천 입력 · 선택사항'));
+    intro.appendChild(element('h2', 'cf-group-title', '상담 전에 알려주시면 좋아요'));
+    intro.appendChild(element('p', 'cf-help', '알려주신 조건을 바탕으로 공사 범위와 일정, 우선순위를 함께 검토할 수 있습니다. 아직 정하지 못한 항목은 비워두셔도 됩니다.'));
+    section.appendChild(intro);
+    var recommendations = [
+      {match: function(q){ return q.questionType === 'select' && /예산/.test(q.question); }, help: '대략적인 예산만 골라도 그에 맞는 공사 범위를 논의하는 데 도움이 됩니다.'},
+      {match: function(q){ return q.questionType === 'date' && /(시공|공사).*희망/.test(q.question); }, help: '희망일을 알려주시면 가능한 공사 일정을 함께 확인합니다. 미정이면 비워두세요.'},
+      {match: function(q){ return q.questionType === 'text' && /요청사항/.test(q.question); }, help: '불편한 점이나 꼭 바꾸고 싶은 곳을 한 가지만 적어주셔도 좋습니다.'}
+    ];
+    var featured = [];
+    recommendations.forEach(function(item){
+      var question = optional.find(item.match);
+      if (!question) return;
+      featured.push(question);
+      var field = buildField(question);
+      if (question.questionType === 'text') {
+        field.querySelector('textarea').placeholder = leadType === 'commercial' ? '예: 수납을 늘리고, 방문객 동선을 정리하고 싶어요.' : '예: 주방 수납이 부족해요. 욕실 두 곳을 바꾸고 싶어요.';
+      }
+      field.appendChild(element('p', 'cf-help', item.help));
+      section.appendChild(field);
+    });
+    var remaining = optional.filter(function(q){ return featured.indexOf(q) === -1; });
+    if (remaining.length) {
+      var details = element('details', 'cf-group cf-optional');
+      details.appendChild(element('summary', null, '공사 범위·취향도 알려주기 (선택)'));
+      details.appendChild(element('p', 'cf-help', '원하는 공간, 스타일, 상담 방식까지 알려주시면 관심 있는 내용부터 상담을 준비할 수 있습니다. 답하기 쉬운 항목부터 골라주세요.'));
+      remaining.forEach(function(q){ details.appendChild(buildField(q)); });
+      section.appendChild(details);
+    }
+    return section;
+  }
+
   function renderForm(){
     root.innerHTML = '';
     var form = document.createElement('form');
@@ -719,17 +754,7 @@
     });
     form.appendChild(primary);
 
-    if (optional.length) {
-      // 선택 항목까지 한 화면에 펼치면 첫인상이 설문지가 된다. 접어두되 버리지는 않는다 —
-      // 상담사가 쓰는 정보라 CRM 에는 그대로 들어가야 한다.
-      var details = document.createElement('details');
-      details.className = 'cf-group cf-optional';
-      var summary = document.createElement('summary');
-      summary.textContent = '선택 입력 — 적어주시면 상담이 훨씬 구체적입니다 (' + optional.length + '개)';
-      details.appendChild(summary);
-      optional.forEach(function(q){ details.appendChild(buildField(q)); });
-      form.appendChild(details);
-    }
+    if (optional.length) form.appendChild(buildOptionalFields(optional));
 
     var consentWrap = element('div', 'cf-consent');
     var consentLabel = element('label', 'cf-choice');
