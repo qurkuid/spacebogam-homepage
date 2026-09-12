@@ -394,6 +394,7 @@
   }
 
   function addAddressSearch(wrap, input){
+    // Keep the iframe in page flow so mobile keyboards do not compete with a fixed popup.
     var requestId = 0;
     var search = element('button', 'cf-address-search', '주소 검색');
     search.type = 'button';
