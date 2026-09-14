@@ -11,7 +11,7 @@ from dataclasses import dataclass, asdict, field
 from datetime import datetime
 from email.utils import parsedate_to_datetime
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parent
@@ -320,7 +320,7 @@ def page_shell(title: str, description: str, main: str, canonical: str, prefix: 
     schemas = [local_business_schema()]
     if article:
         collection_path = canonical.split("/", 1)[0] or "blog"
-        schemas.append({"@context":"https://schema.org","@type":"Article","headline":article.title,"datePublished":article.date,"dateModified":article.date,"image":og_image,"author":{"@type":"Person","name":"백창석"},"publisher":{"@id":SITE_URL+"/#localbusiness"},"mainEntityOfPage":SITE_URL+"/"+canonical,"description":article.excerpt,"articleSection":article.category,"keywords":article.tags,"isPartOf":{"@id":SITE_URL+f"/{collection_path}/#blog"}})
+        schemas.append({"@context":"https://schema.org","@type":"BlogPosting","headline":article.title,"datePublished":article.date,"dateModified":article.date,"image":og_image,"author":{"@type":"Person","name":"백창석"},"publisher":{"@id":SITE_URL+"/#localbusiness"},"mainEntityOfPage":SITE_URL+"/"+canonical,"description":article.excerpt,"articleSection":article.category,"keywords":article.tags,"isPartOf":{"@id":SITE_URL+f"/{collection_path}/#blog"}})
     else:
         schemas.append(blog_collection_schema(posts, canonical, title))
     schema_html = "".join(f'<script type="application/ld+json">{json.dumps(schema, ensure_ascii=False, separators=(",",":"))}</script>' for schema in schemas)
@@ -417,18 +417,35 @@ def write_outputs(posts: list[BlogPost]) -> None:
 
 def update_sitemap(posts: list[BlogPost]) -> None:
     sitemap = ROOT / "sitemap.xml"
-    urls = []
-    if sitemap.exists():
-        s = sitemap.read_text(encoding="utf-8", errors="ignore")
-        urls = re.findall(r"<loc>(.*?)</loc>", s)
-    base_urls = [u for u in urls if "/blog/" not in u and "/insights/" not in u and "/guide/" not in u and "/qna/" not in u and "/author/" not in u and not u.endswith("/blog.html") and not u.endswith("/blog/") and not u.endswith("/feed.xml")]
-    add = [f"{SITE_URL}/insights/", f"{SITE_URL}/guide/", f"{SITE_URL}/qna/", f"{SITE_URL}/author/baek-changseok/", f"{SITE_URL}/feed.xml"] + [f"{SITE_URL}/insights/{p.slug}.html" for p in posts]
-    all_urls = []
-    for u in base_urls + add:
-        if u not in all_urls:
-            all_urls.append(u)
-    body = "\n".join(f"  <url><loc>{html.escape(u)}</loc><priority>{'0.9' if u.endswith('blog.html') or u.endswith('/blog/') or u.endswith('/insights/') else '0.7'}</priority></url>" for u in all_urls)
-    sitemap.write_text(f"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n{body}\n</urlset>\n", encoding="utf-8")
+    namespace = "http://www.sitemaps.org/schemas/sitemap/0.9"
+    ET.register_namespace("", namespace)
+    tag = lambda name: f"{{{namespace}}}{name}"
+    existing = ET.parse(sitemap).getroot() if sitemap.exists() else ET.Element(tag("urlset"))
+    entries = {node.findtext(tag("loc")): node for node in existing}
+    candidates = list(entries) + [f"{SITE_URL}/insights/"] + [f"{SITE_URL}/insights/{p.slug}.html" for p in posts]
+    result = ET.Element(tag("urlset"))
+    for url in dict.fromkeys(candidates):
+        parsed = urlparse(url)
+        relative = unquote(parsed.path).lstrip("/")
+        if not relative or relative.endswith("/"):
+            relative += "index.html"
+        page = ROOT / relative
+        if parsed.netloc != urlparse(SITE_URL).netloc or not page.is_file() or page.suffix != ".html":
+            continue
+        content = page.read_text(encoding="utf-8")
+        canonical = re.search(r'<link rel="canonical" href="([^"]+)"', content)
+        robots = re.search(r'<meta name="robots" content="([^"]*)"', content)
+        if not canonical or canonical[1] != url or (robots and "noindex" in robots[1].lower()):
+            continue
+        node = entries.get(url)
+        if node is None:
+            node = ET.Element(tag("url"))
+            ET.SubElement(node, tag("loc")).text = url
+        result.append(node)
+    # Existing lastmod is preserved; generation time is not a content update date.
+    ET.indent(result, space="  ")
+    ET.ElementTree(result).write(sitemap, encoding="utf-8", xml_declaration=True)
+
 
 
 def main() -> None:

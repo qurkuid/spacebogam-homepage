@@ -9,10 +9,10 @@
 
 ## SEO/GEO
 
-- LocalBusiness / Service / FAQPage / ItemList JSON-LD 포함
+- 화면에 보이는 내용에 맞춘 LocalBusiness / Service / ItemList JSON-LD. FAQ는 실제 문답이 있는 페이지에만 포함.
 - 부산, 아파트, 리모델링, 평형, 상업공간, 현장실측, 견적 키워드 포함
 - robots.txt / sitemap.xml / feed.xml 포함
-- sitemap.xml에는 `<lastmod>`, `<changefreq>`, `<priority>`를 포함해 Search Console 제출 신호를 강화합니다.
+- sitemap.xml에는 색인 가능한 정본 URL만 포함합니다. 생성기는 기존 lastmod를 보존하고, 실행 시각을 콘텐츠 수정일로 기록하지 않습니다. Google은 changefreq와 priority를 사용하지 않습니다.
 
 ## Canonical serving
 
@@ -22,6 +22,8 @@
 - `http://www.spacebogam.kr/*` → `https://spacebogam.kr/*`
 - `https://www.spacebogam.kr/*` → `https://spacebogam.kr/*`
 - `/index.html` → `/`
+- `/blog.html`, `/blog/` → `/insights/`; 기존 글은 대응하는 `/insights/` 글로 이전
+- 검토한 개별 별칭: `reports/seo-audit-20260914/redirects-to-apply.tsv` (쿼리 보존, 서버 미적용)
 
 현재 정적 파일에는 보조 안전장치로 `assets/site-canonical.js`가 들어 있지만, Google 색인 기준으로는 nginx/서버 301이 우선입니다.
 

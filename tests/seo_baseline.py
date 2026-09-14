@@ -15,11 +15,12 @@
 #   - sitemap.xml 의 <loc> 집합은 baseline 의 상위집합이어야 함 (URL 제거 FAIL)
 #   - robots.txt / feed.xml / CNAME / .nojekyll / IndexNow 키 파일 존재 유지
 import json, re, sys, pathlib
+from urllib.parse import unquote, urlsplit
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BASELINE = pathlib.Path(__file__).resolve().parent / "seo-baseline.json"
 
-TRACKING = ["GTM-PW8GLP8S", "G-EJGXDD5C1T", "512750840350337", "site-tracking.js", "data-spacebogam-naver-wcs"]
+TRACKING = ["GTM-PW8GLP8S", "G-EJGXDD5C1T", "512750840350337", "site-tracking.js", "funnel-tracking.js", "data-spacebogam-naver-wcs"]
 SITE_FILES = ["robots.txt", "feed.xml", "CNAME", ".nojekyll", "214395339aba481e8c39a54d80578afd.txt"]
 
 TITLE_RE = re.compile(r"<title>(.*?)</title>", re.S)
@@ -37,11 +38,11 @@ def pages():
     for p in sorted(ROOT.glob("*.html")):
         out.append(p)
     for sub in sorted(ROOT.iterdir()):
-        if sub.is_dir() and sub.name not in {".git", ".claude", "assets", "tests", "tools", "logs", "data", "node_modules", ".context"}:
+        if sub.is_dir() and not sub.name.startswith(".") and sub.name not in {".git", ".claude", "assets", "tests", "tools", "logs", "data", "node_modules", ".context", "reports", "artifacts", ".omx"}:
             out.extend(sorted(sub.rglob("index.html")))
-    for p in sorted((ROOT / "blog").glob("*.html")):
-        out.append(p)
-    return out
+    for directory in ("blog", "insights", "guides"):
+        out.extend(sorted((ROOT / directory).glob("*.html")))
+    return sorted(set(out))
 
 
 def jsonld_types(block):
@@ -69,6 +70,7 @@ def analyze(path):
         "title": bool(TITLE_RE.search(html)),
         "description": bool(DESC_RE.search(html)),
         "robots_meta": bool(ROBOTS_RE.search(html)),
+        "noindex": "noindex" in (ROBOTS_RE.search(html) or [None, ""])[1].lower(),
         "canonical": (CANON_RE.search(html) or [None, None])[1],
         "og_title": bool(OGT_RE.search(html)),
         "og_image": bool(OGI_RE.search(html)),
@@ -106,6 +108,19 @@ def main():
     lost_urls = set(base["site"]["sitemap_urls"]) - set(cur["site"]["sitemap_urls"])
     if lost_urls:
         errs.append(f"sitemap URL 유실 {len(lost_urls)}건: {sorted(lost_urls)[:5]}")
+    # Canonical migrations must still resolve to real, indexable sitemap pages.
+    for url in cur["site"]["sitemap_urls"]:
+        parsed = urlsplit(url)
+        rel = unquote(parsed.path).lstrip("/")
+        if not rel or rel.endswith("/"):
+            rel += "index.html"
+        page = cur["pages"].get(rel)
+        if parsed.scheme != "https" or parsed.netloc != "spacebogam.kr" or page is None:
+            errs.append(f"sitemap 정본 페이지 없음: {url}")
+        elif page["canonical"] != url:
+            errs.append(f"sitemap canonical 불일치: {url}")
+        elif "noindex" in (ROBOTS_RE.search((ROOT / rel).read_text(encoding="utf-8")) or [None, ""])[1].lower():
+            errs.append(f"sitemap noindex 페이지: {url}")
     lost_files = set(base["site"]["site_files"]) - set(cur["site"]["site_files"])
     if lost_files:
         errs.append(f"사이트 파일 유실: {sorted(lost_files)}")
@@ -135,6 +150,20 @@ def main():
     for rel, c in cur["pages"].items():
         if rel not in base["pages"] and c["jsonld_parse_errors"]:
             errs.append(f"{rel}: (신규) JSON-LD 파싱 실패 {c['jsonld_parse_errors']}건")
+
+    # Both sides of the blog migration keep an explicit contract, including new pages.
+    for rel, page in cur["pages"].items():
+        if rel == "blog.html":
+            directory, filename = "blog", "index.html"
+        elif rel.startswith(("blog/", "insights/")):
+            directory, filename = rel.split("/", 1)
+        else:
+            continue
+        target = "https://spacebogam.kr/insights/" + ("" if filename == "index.html" else filename)
+        if page["canonical"] != target or page["noindex"] != (directory == "blog"):
+            errs.append(f"{rel}: blog/insights 정본·색인 계약 위반")
+        if filename != "index.html" and "BlogPosting" not in page["jsonld_types"]:
+            errs.append(f"{rel}: BlogPosting 타입 누락")
 
     n_new = len(set(cur["pages"]) - set(base["pages"]))
     if errs:

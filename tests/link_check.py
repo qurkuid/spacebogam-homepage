@@ -3,28 +3,17 @@
 # 사용: python3 tests/link_check.py
 # 검사: 모든 HTML 의 로컬 href/src 가 실제 파일로 존재하는지 (디렉토리 링크는 index.html),
 #       앵커(#id) 는 무시, 외부(http/mailto/tel/data) 무시.
-import re, sys, pathlib
+import re, sys
+from seo_baseline import ROOT, pages
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
 REF_RE = re.compile(r'''(?:href|src)=["']([^"']+)["']''')
-SKIP_DIRS = {".git", ".claude", "logs", "node_modules", ".context", "tools", "tests"}
-
-
-def pages():
-    out = list(ROOT.glob("*.html"))
-    for sub in ROOT.iterdir():
-        if sub.is_dir() and sub.name not in SKIP_DIRS:
-            out.extend(sub.rglob("index.html"))
-    out.extend((ROOT / "blog").glob("*.html"))
-    return sorted(set(out))
-
 
 def check(page):
     html = page.read_text(encoding="utf-8")
     missing = []
     for m in REF_RE.finditer(html):
         ref = m.group(1)
-        if not ref or ref.startswith(("http://", "https://", "mailto:", "tel:", "#", "data:", "//")):
+        if not ref or ref.startswith(("http://", "https://", "mailto:", "tel:", "sms:", "#", "data:", "//")):
             continue
         path = ref.split("?")[0].split("#")[0]
         if not path:
