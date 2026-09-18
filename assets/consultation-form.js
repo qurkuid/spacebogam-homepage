@@ -117,7 +117,10 @@
 
   function isTestTraffic(){
     var value = (params.get(TEST_TRAFFIC_KEY) || '').trim().toLowerCase();
-    return TEST_TRUTHY.indexOf(value) !== -1;
+    if (TEST_TRUTHY.indexOf(value) !== -1) return true;
+    // Preserve the same-session QA marker used by funnel-tracking and callback forms.
+    try { return !!(session && session.getItem('spacebogam_funnel_is_test') === 'true'); }
+    catch(e) { return false; }
   }
   var isTest = isTestTraffic();
 
@@ -899,9 +902,12 @@
     // 다르면 서버가 자체 파생한 것이므로 그쪽이 원장의 진실이다.
     var leadEventId = body.leadEventId || submitEventId;
     submitSucceeded = true;
-    trackPixel('Lead', {eventID: leadEventId});
-    trackGtag('lead_submit_success', {lead_event_id: leadEventId});
-    trackNaverConversion();
+    // QA successes stay observable internally, but must not train ad conversions.
+    if (!isTest) {
+      trackPixel('Lead', {eventID: leadEventId});
+      trackGtag('lead_submit_success', {lead_event_id: leadEventId});
+      trackNaverConversion();
+    }
     sendFunnelEvent('lead_submit_success');
     // 같은 세션에서 한 건 더 신청하면 별개의 상담 건이다 — id 를 비워 다음 건이 새로 뽑게 한다.
     try { if (session) session.removeItem(EVENT_IDS_KEY); } catch(e) {}

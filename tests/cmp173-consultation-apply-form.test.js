@@ -50,7 +50,7 @@ const LANDING_QUERY =
   '?type=residential&utm_source=meta&utm_medium=paid_social&utm_campaign=busan_remodeling' +
   '&utm_id=CMP173&campaign_id=111&adset_id=222&ad_id=333&asset_id=444&is_test=1';
 
-function bootstrap({ search = '?type=residential', submitResponse, page = 'apply', questionList = QUESTIONS } = {}) {
+function bootstrap({ search = '?type=residential', submitResponse, page = 'apply', questionList = QUESTIONS, sessionTest = false } = {}) {
   const direct = page === 'consultation';
   const source = direct ? consultationPageSource : pageSource;
   const pathname = direct ? '/consultation/' : '/consultation/apply/';
@@ -61,7 +61,8 @@ function bootstrap({ search = '?type=residential', submitResponse, page = 'apply
   });
   const { window } = dom;
 
-  const calls = { funnel: [], submit: [], pixel: [], gtag: [], questions: 0 };
+  const calls = { funnel: [], submit: [], pixel: [], gtag: [], naver: [], questions: 0 };
+  if (sessionTest) window.sessionStorage.setItem('spacebogam_funnel_is_test', 'true');
 
   window.fetch = (url, init) => {
     const body = init && init.body ? JSON.parse(init.body) : null;
@@ -95,6 +96,7 @@ function bootstrap({ search = '?type=residential', submitResponse, page = 'apply
 
   window.fbq = (...args) => calls.pixel.push(args);
   window.gtag = (...args) => calls.gtag.push(args);
+  window.wcs_do = (...args) => calls.naver.push(args);
 
   window.eval(formSource);
   return { window, calls, document: window.document };
@@ -353,7 +355,7 @@ test('유효한 submit 이벤트가 겹쳐도 API 요청은 한 번만 보낸다
 });
 
 test('Pixel Lead 의 eventID 와 서버가 돌려준 leadEventId 가 같은 값이다', async () => {
-  const { document, calls } = bootstrap({ search: LANDING_QUERY });
+  const { document, calls } = bootstrap({ search: LANDING_QUERY.replace('&is_test=1', '') });
   await settle();
 
   fillRequired(document);
@@ -539,4 +541,48 @@ test('문구가 바뀌거나 유사 질문이 추가되어도 확인된 ID만 �
   for (const id of [7, 21, 32, 31, 101]) {
     assert.ok(document.querySelector('[data-question-id="' + id + '"]'));
   }
+});
+
+for (const marker of ['1', 'true', 'yes', 'y', 'on', 'TRUE']) {
+  test(`QA success (${marker}) keeps internal tracking but suppresses external conversions`, async () => {
+    const { document, calls } = bootstrap({ search: '?type=residential&is_test=' + marker });
+    await settle();
+    fillRequired(document);
+    document.querySelector('form').dispatchEvent(new document.defaultView.Event('submit', { bubbles: true, cancelable: true }));
+    await settle();
+    assert.equal(calls.submit.length, 1);
+    assert.equal(calls.submit[0].marketingAttribution.is_test, 'true');
+    assert.ok(document.querySelector('.cf-success'));
+    assert.equal(calls.pixel.filter(c => c[1] === 'Lead').length, 0);
+    assert.equal(calls.gtag.filter(c => c[1] === 'lead_submit_success').length, 0);
+    assert.equal(calls.naver.length, 0);
+    const success = calls.funnel.filter(e => e.eventName === 'lead_submit_success');
+    assert.equal(success.length, 1);
+    assert.equal(success[0].isTest, true);
+    assert.equal(success[0].eventId, calls.submit[0].marketingAttribution.sbSubmitEventId);
+  });
+}
+
+test('same-session test marker survives a missing query flag', async () => {
+  const { document, calls } = bootstrap({ sessionTest: true });
+  await settle();
+  fillRequired(document);
+  document.querySelector('form').dispatchEvent(new document.defaultView.Event('submit', { bubbles: true, cancelable: true }));
+  await settle();
+  assert.equal(calls.submit[0].marketingAttribution.is_test, 'true');
+  assert.equal(calls.pixel.filter(c => c[1] === 'Lead').length, 0);
+  assert.equal(calls.naver.length, 0);
+  assert.equal(calls.funnel.find(e => e.eventName === 'lead_submit_success').isTest, true);
+});
+
+test('normal success retains all external conversion destinations', async () => {
+  const { document, calls } = bootstrap();
+  await settle();
+  fillRequired(document);
+  document.querySelector('form').dispatchEvent(new document.defaultView.Event('submit', { bubbles: true, cancelable: true }));
+  await settle();
+  assert.equal(calls.pixel.filter(c => c[1] === 'Lead').length, 1);
+  assert.equal(calls.gtag.filter(c => c[1] === 'lead_submit_success').length, 1);
+  assert.equal(calls.naver.length, 1);
+  assert.equal(calls.funnel.find(e => e.eventName === 'lead_submit_success').isTest, false);
 });

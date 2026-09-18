@@ -72,6 +72,8 @@ function postedPayloads(search, options = {}) {
   sandbox.window.innerWidth = 1200;
   sandbox.window.scrollY = 0;
   sandbox.window.setTimeout = () => 1;
+  sandbox.window.setInterval = () => 1;
+  sandbox.window.clearInterval = () => {};
   sandbox.window.addEventListener = () => {};
   sandbox.window.crypto = {
     getRandomValues(values) {

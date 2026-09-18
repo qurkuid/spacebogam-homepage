@@ -369,6 +369,13 @@
     details.appendChild(detailsBody);
     form.appendChild(details);
 
+    var disclosure = el('p', 'cc-note',
+      '필수 입력: 성함, 연락처, 현장 주소, 평수/면적, 계약 여부, 공사 시작일. ' +
+      '선택 입력: 통화 가능한 시간대, 오픈 희망일, 추가 요청사항. ' +
+      '업종과 예산은 기본값이 선택되어 있으며 변경할 수 있고, 변경하지 않아도 해당 값이 전송됩니다.'
+    );
+    form.appendChild(disclosure);
+
     var consentWrap = el('div', 'cc-consent');
     var consentLabel = el('label', 'cc-choice');
     var consentInput = document.createElement('input');
@@ -376,9 +383,14 @@
     consentInput.id = 'cc-callback-consent';
     consentLabel.appendChild(consentInput);
     consentLabel.appendChild(document.createTextNode(
-      '개인정보 수집·이용에 동의합니다. (상담 콜백 및 대면상담 일정 안내 목적, 상담 종료 후 파기)'
+      '개인정보 수집·이용에 동의합니다. (상담 콜백 및 대면상담 일정 안내 목적, 보유 기간: 상담 종료 후 1년 또는 이용자의 삭제 요청 시까지 (둘 중 먼저 도래하는 시점))'
     ));
     consentWrap.appendChild(consentLabel);
+    var privacyLink = el('a', 'cc-note', '개인정보처리방침 (보유 기간의 예외 등 상세 내용)');
+    privacyLink.href = '/privacy/';
+    privacyLink.target = '_blank';
+    privacyLink.rel = 'noopener';
+    consentWrap.appendChild(privacyLink);
     form.appendChild(consentWrap);
 
     var status = el('p', 'cc-callback-status');
