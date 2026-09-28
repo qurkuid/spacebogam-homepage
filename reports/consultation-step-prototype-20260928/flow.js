@@ -255,8 +255,8 @@
 
   function startLookup(query) {
     const run = ++lookupRun;
-    lookup = { status: 'loading', candidates: [] };
     const selected = answers.apartmentSelected;
+    lookup = { status: 'loading', candidates: selected && planUrl(selected) ? [selected] : [], source: 'snapshot' };
     if (!selected || answers.apartmentUnmatched) {
       lookup = { status: 'ready', candidates: [], source: 'none' };
       return;
@@ -264,7 +264,7 @@
     const fallback = () => {
       if (run !== lookupRun) return;
       lookup = { status: 'ready', candidates: planUrl(selected) ? [selected] : [], source: 'snapshot' };
-      if (current === 'planReview') render();
+      if (current === 'planReview' && !stage.querySelector('.plan-dialog')) render();
     };
     if (!/^https?:$/.test(window.location?.protocol || '') || typeof fetch !== 'function') { fallback(); return; }
     fetch('/api/apartments/' + encodeURIComponent(selected[1]) + '/plans')
@@ -275,18 +275,18 @@
         const candidates = plans.map(plan => [selected[0], selected[1], selected[2], plan.type, plan.planPic, plan.planId])
           .filter(row => planUrl(row));
         lookup = { status: 'ready', candidates, source: 'live' };
-        if (current === 'planReview') render();
+        if (current === 'planReview' && !stage.querySelector('.plan-dialog')) render();
       }).catch(fallback);
+    if (typeof setTimeout === 'function') setTimeout(() => {
+      if (run === lookupRun && lookup.status === 'loading') fallback();
+    }, 8000);
   }
 
   function nextNode(key) {
     if (key === 'type') return answers.type === '주거 공간' ? 'housing' : nextQuestion(0);
     if (key === 'housing') return isApartment() ? 'apartmentQuery' : nextQuestion(0);
     if (key === 'apartmentQuery') return 'dong';
-    if (key === 'dong') {
-      if (lookup.status === 'loading') { answers.planDeferred = true; return nextQuestion(0); }
-      return 'planReview';
-    }
+    if (key === 'dong') return 'planReview';
     if (key === 'planReview') {
       if (!answers.planDeferred) return nextQuestion(0);
       if (answers.planAreaAuto) return 'consent';
@@ -460,15 +460,18 @@
     manual.value = '__manual__';
     select.appendChild(manual);
     select.value = answers.dongManual ? '__manual__' : answers.dong || '';
-    select.addEventListener('change', () => {
+    const chooseDong = () => {
+      if (current !== 'dong') return;
       answers.dongManual = select.value === '__manual__';
       answers.dong = answers.dongManual ? '' : select.value;
       if (answers.dong) advance(); else render();
-    });
+    };
+    select.addEventListener('input', chooseDong);
+    select.addEventListener('change', chooseDong);
     label.appendChild(select);
     stage.appendChild(label);
     if (answers.dongManual) renderDongInput();
-    stage.appendChild(el('p', 'hint', '동 목록: 한국부동산원 2026.08.31 자료. 목록에 없으면 직접 입력하고, 도면은 마지막에 확인해 주세요.'));
+    stage.appendChild(el('p', 'hint', '동 목록: 한국부동산원 2026.08.31 자료. 목록에 없으면 직접 입력하고, 도면은 다음 단계에서 확인해 주세요.'));
   }
 
   function renderDongInput() {
@@ -570,6 +573,7 @@
     dialog.addEventListener('close', () => {
       if (item.source === 'upload' && !saved && answers.planAttachment?.url !== item.url) URL.revokeObjectURL(item.url);
       dialog.remove();
+      if (!saved && current === 'planReview' && lookup.status === 'ready') render();
     });
     stage.appendChild(dialog);
     applyFlip();
@@ -646,7 +650,7 @@
   }
 
   function renderPlan() {
-    const rows = lookup.status === 'ready' ? lookup.candidates.filter(row => planUrl(row)) : [];
+    const rows = lookup.candidates.filter(row => planUrl(row));
     if (rows.length) {
       const list = el('div', 'plan-list');
       rows.forEach(row => {
@@ -669,11 +673,23 @@
         list.appendChild(button);
       });
       stage.appendChild(list);
+      if (lookup.status === 'loading') stage.appendChild(el('p', 'lookup-note', '다른 평형 도면도 확인하고 있어요. 먼저 보이는 도면을 확인할 수 있습니다.'));
     } else {
       stage.appendChild(el('p', 'lookup-note', lookup.status === 'loading'
         ? '도면을 찾고 있어요. 기다리는 동안 직접 업로드할 수도 있습니다.'
         : '단지명으로 확인 가능한 도면이 없어 주소로 전체 도면 목록을 다시 조회합니다.'));
       if (lookup.status === 'ready') renderAddressLookup();
+    }
+    if (lookup.status === 'loading' && !answers.planDeferred) {
+      const defer = el('button', 'manual-option', '도면은 마지막에 확인하고 계속하기');
+      defer.type = 'button';
+      defer.addEventListener('click', () => {
+        answers.planDeferred = true;
+        trail.push({ key: current, index: questionIndex });
+        current = nextQuestion(0);
+        render();
+      });
+      stage.appendChild(defer);
     }
     if (answers.planAttachment) stage.appendChild(el('p', 'selected-apartment', '상담 신청 데이터에 저장된 도면 · ' + answers.planAttachment.name + (answers.planAttachment.flipX ? ' · 좌우 반전' : '') + (answers.planAttachment.flipY ? ' · 상하 반전' : '') + (answers.planAreaAuto ? ' · 공급평형 약 ' + answers.planAreaValue + '평 자동 입력' : '')));
     const upload = el('input', 'plan-upload');
@@ -1064,7 +1080,7 @@
     back.hidden = trail.length === 0 || current === 'success';
     skip.hidden = current !== 'question' || question.isRequired;
     next.hidden = current === 'success';
-    next.textContent = current === 'summary' ? '상담 신청하기 →' : current === 'consent' ? '입력 내용 확인 →' : '다음 →';
+    next.textContent = current === 'summary' ? '상담 신청하기 →' : current === 'consent' ? '입력 내용 확인 →' : current === 'dong' && answers.dong ? '도면 확인하기 →' : '다음 →';
     next.disabled = current === 'summary' ? false
       : current === 'planReview' ? !['saved', 'none'].includes(answers.planStatus)
         : current === 'apartmentQuery' ? !answers.apartmentSelected && !answers.apartmentUnmatched

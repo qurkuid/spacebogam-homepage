@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const canvasScales = [];
+const timers = [];
 
 class Element {
   constructor(tag = 'div') {
@@ -58,7 +59,7 @@ const apartmentRows = [
   ['도면없는단지', 'apt-missing', '부산시 수영구 광안동 100', '면적 미기재', '']
 ];
 const storage = () => { const values = new Map(); return { getItem: key => values.get(key) || null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) }; };
-const context = { document, window: { SB_APT_INDEX: apartmentRows }, location: { search: '', pathname: '/consultation/', href: 'https://spacebogam.kr/consultation/' }, innerWidth: 1200, localStorage: storage(), sessionStorage: storage(), URLSearchParams, Blob, FormData, createImageBitmap: async () => ({ width: 100, height: 80, close() {} }), crypto: require('node:crypto').webcrypto, URL: {
+const context = { document, window: { SB_APT_INDEX: apartmentRows }, location: { search: '', pathname: '/consultation/', href: 'https://spacebogam.kr/consultation/' }, innerWidth: 1200, localStorage: storage(), sessionStorage: storage(), URLSearchParams, Blob, FormData, setTimeout: callback => { timers.push(callback); }, createImageBitmap: async () => ({ width: 100, height: 80, close() {} }), crypto: require('node:crypto').webcrypto, URL: {
   createObjectURL: file => 'blob:test/' + file.name,
   revokeObjectURL: () => {}
 } };
@@ -225,6 +226,7 @@ async function run() {
   const select = stage().querySelector('.dong-select');
   assert.equal(select.children.length, 16);
   assert.equal(nodes.next.disabled, true);
+  select.input('111동');
   select.change('111동');
   assert.match(title(), /도면을 확인/);
   await settle();
@@ -515,6 +517,11 @@ async function run() {
   context.fetch = () => new Promise(() => {});
   await startApartment('해맞이로');
   stage().querySelector('.dong-select').change('111동');
+  assert.match(title(), /도면을 확인/);
+  assert.equal(stage().querySelectorAll('.plan-card').length, 1);
+  assert.match(stage().querySelector('.lookup-note').textContent, /다른 평형 도면도 확인/);
+  stage().querySelectorAll('.manual-option').find(button => /마지막에 확인/.test(button.textContent)).click();
+  timers.at(-1)();
   assert.match(title(), /성함/);
   answer('홍길동'); next(); answer('010-1234-5678'); next();
   assert.match(title(), /세부주소/); nodes.skip.click();
@@ -525,7 +532,7 @@ async function run() {
     nodes.skip.click();
     assert.ok(++deferredSteps < 30);
   }
-  assert.match(stage().querySelector('.lookup-note').textContent, /도면을 찾고/);
+  assert.equal(stage().querySelectorAll('.plan-card').length, 1);
   stage().querySelectorAll('.manual-option')[1].click();
   assert.match(title(), /공급평형/);
   answer('32'); next();
