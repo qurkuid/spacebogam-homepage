@@ -23,8 +23,6 @@
   var EXPERIMENT_ID = 'homepage_headline_v1';
   // 전 페이지 공통 페이지뷰 스니펫(tools/inject_naver_wcs.py)과 같은 wa 값.
   var NAVER_WCS_ID = 's_7702568df18';
-  // CMP-1244(네이버 검색광고 프리미엄 로그분석 연동)에서 실제 전환유형 코드를 받으면 채운다.
-  var NAVER_CONV_TYPE = '';
 
   // funnel-tracking.js 와 반드시 같은 키여야 한다.
   var CLIENT_KEY = 'spacebogam_funnel_client_id';
@@ -315,15 +313,17 @@
   }
 
   function trackNaverConversion(){
-    try {
-      if (typeof window.wcs_do !== 'function') return;
-      window.wcs_do({
-        wcs_id: NAVER_WCS_ID,
-        conv_type: NAVER_CONV_TYPE,
-        conv_value: '',
-        conv_currency: 'KRW'
-      });
-    } catch(e) {}
+    function send(){
+      try {
+        if (!window.wcs || typeof window.wcs.trans !== 'function') return;
+        window.wcs_add = window.wcs_add || {};
+        window.wcs_add.wa = NAVER_WCS_ID;
+        window.wcs.trans({type: 'lead'});
+      } catch(e) {}
+    }
+    if (window.wcs) return send();
+    var script = document.querySelector('script[data-spacebogam-naver-wcs="1"], script[src*="wcslog.js"]');
+    if (script) script.addEventListener('load', send, {once:true});
   }
 
   function trackGtag(eventName, extra){

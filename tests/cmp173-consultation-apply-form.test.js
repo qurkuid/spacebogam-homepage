@@ -96,7 +96,8 @@ function bootstrap({ search = '?type=residential', submitResponse, page = 'apply
 
   window.fbq = (...args) => calls.pixel.push(args);
   window.gtag = (...args) => calls.gtag.push(args);
-  window.wcs_do = (...args) => calls.naver.push(args);
+  window.wcs = { trans: (event) => calls.naver.push({ account: window.wcs_add?.wa, type: event.type }) };
+  window.wcs_do = (...args) => calls.naver.push({ legacyPageView: args });
 
   window.eval(formSource);
   return { window, calls, document: window.document };
@@ -576,13 +577,31 @@ test('same-session test marker survives a missing query flag', async () => {
 });
 
 test('normal success retains all external conversion destinations', async () => {
-  const { document, calls } = bootstrap();
+  const { window, document, calls } = bootstrap();
   await settle();
   fillRequired(document);
   document.querySelector('form').dispatchEvent(new document.defaultView.Event('submit', { bubbles: true, cancelable: true }));
   await settle();
   assert.equal(calls.pixel.filter(c => c[1] === 'Lead').length, 1);
   assert.equal(calls.gtag.filter(c => c[1] === 'lead_submit_success').length, 1);
-  assert.equal(calls.naver.length, 1);
+  assert.deepEqual(calls.naver, [{ account: 's_7702568df18', type: 'lead' }]);
+  assert.equal(window.wcs_add.wa, 's_7702568df18');
   assert.equal(calls.funnel.find(e => e.eventName === 'lead_submit_success').isTest, false);
+});
+
+test('Naver script loading after a successful submit still sends one lead', async () => {
+  const { window, document, calls } = bootstrap();
+  await settle();
+  delete window.wcs;
+  const script = document.createElement('script');
+  script.dataset.spacebogamNaverWcs = '1';
+  document.head.appendChild(script);
+  fillRequired(document);
+  document.querySelector('form').dispatchEvent(new document.defaultView.Event('submit', { bubbles: true, cancelable: true }));
+  await settle();
+  assert.equal(calls.naver.length, 0);
+  window.wcs = { trans: (event) => calls.naver.push({ account: window.wcs_add?.wa, type: event.type }) };
+  script.dispatchEvent(new window.Event('load'));
+  script.dispatchEvent(new window.Event('load'));
+  assert.deepEqual(calls.naver, [{ account: 's_7702568df18', type: 'lead' }]);
 });
