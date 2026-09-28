@@ -3,7 +3,6 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const canvasScales = [];
-const timers = [];
 
 class Element {
   constructor(tag = 'div') {
@@ -59,7 +58,7 @@ const apartmentRows = [
   ['도면없는단지', 'apt-missing', '부산시 수영구 광안동 100', '면적 미기재', '']
 ];
 const storage = () => { const values = new Map(); return { getItem: key => values.get(key) || null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) }; };
-const context = { document, window: { SB_APT_INDEX: apartmentRows }, location: { search: '', pathname: '/consultation/', href: 'https://spacebogam.kr/consultation/' }, innerWidth: 1200, localStorage: storage(), sessionStorage: storage(), URLSearchParams, Blob, FormData, setTimeout: callback => { timers.push(callback); }, createImageBitmap: async () => ({ width: 100, height: 80, close() {} }), crypto: require('node:crypto').webcrypto, URL: {
+const context = { document, window: { SB_APT_INDEX: apartmentRows }, location: { search: '', pathname: '/consultation/', href: 'https://spacebogam.kr/consultation/' }, innerWidth: 1200, localStorage: storage(), sessionStorage: storage(), URLSearchParams, Blob, FormData, createImageBitmap: async () => ({ width: 100, height: 80, close() {} }), crypto: require('node:crypto').webcrypto, URL: {
   createObjectURL: file => 'blob:test/' + file.name,
   revokeObjectURL: () => {}
 } };
@@ -519,24 +518,14 @@ async function run() {
   stage().querySelector('.dong-select').change('111동');
   assert.match(title(), /도면을 확인/);
   assert.equal(stage().querySelectorAll('.plan-card').length, 1);
-  assert.match(stage().querySelector('.lookup-note').textContent, /다른 평형 도면도 확인/);
-  stage().querySelectorAll('.manual-option').find(button => /마지막에 확인/.test(button.textContent)).click();
-  timers.at(-1)();
+  assert.equal(stage().querySelectorAll('.manual-option').length, 2);
+  stage().querySelectorAll('.manual-option')[1].click();
   assert.match(title(), /성함/);
   answer('홍길동'); next(); answer('010-1234-5678'); next();
   assert.match(title(), /세부주소/); nodes.skip.click();
-  assert.doesNotMatch(title(), /공급평형/);
-  let deferredSteps = 0;
-  while (!/도면을 확인/.test(title())) {
-    assert.equal(nodes.skip.hidden, false, title());
-    nodes.skip.click();
-    assert.ok(++deferredSteps < 30);
-  }
-  assert.equal(stage().querySelectorAll('.plan-card').length, 1);
-  stage().querySelectorAll('.manual-option')[1].click();
   assert.match(title(), /공급평형/);
   answer('32'); next();
-  assert.match(title(), /상담 준비/);
+  assert.match(title(), /예산 구간/);
   console.log('consultation prototype: plan, conditional questions, combined consultation schedule, calendars passed');
 }
 

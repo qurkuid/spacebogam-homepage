@@ -169,7 +169,6 @@
     return hiddenByBranch(question)
       || /연락 가능한 시간대/.test(question.question) && !!answers.responses['34']
       || String(question.id) === '38' && !!answers.responses['33']
-      || isApartment() && answers.planDeferred && !answers.planStatus && /평형|평수/.test(question.question)
       || isApartment() && answers.address && question.questionType === 'address' && hasResponse(question)
       || isApartment() && answers.planAreaAuto && /평형|평수/.test(question.question) && hasResponse(question);
   }
@@ -277,9 +276,6 @@
         lookup = { status: 'ready', candidates, source: 'live' };
         if (current === 'planReview' && !stage.querySelector('.plan-dialog')) render();
       }).catch(fallback);
-    if (typeof setTimeout === 'function') setTimeout(() => {
-      if (run === lookupRun && lookup.status === 'loading') fallback();
-    }, 8000);
   }
 
   function nextNode(key) {
@@ -287,20 +283,8 @@
     if (key === 'housing') return isApartment() ? 'apartmentQuery' : nextQuestion(0);
     if (key === 'apartmentQuery') return 'dong';
     if (key === 'dong') return 'planReview';
-    if (key === 'planReview') {
-      if (!answers.planDeferred) return nextQuestion(0);
-      if (answers.planAreaAuto) return 'consent';
-      const areaIndex = questionList().findIndex(question => /평형|평수/.test(question.question));
-      if (areaIndex < 0) return 'consent';
-      answers.planDeferredArea = true;
-      questionIndex = areaIndex;
-      return 'question';
-    }
-    if (key === 'question') {
-      if (answers.planDeferredArea && /평형|평수/.test(questionList()[questionIndex].question)) return 'consent';
-      const following = nextQuestion(questionIndex + 1);
-      return following === 'consent' && answers.planDeferred && !answers.planStatus ? 'planReview' : following;
-    }
+    if (key === 'planReview') return nextQuestion(0);
+    if (key === 'question') return nextQuestion(questionIndex + 1);
     if (key === 'consent') return 'summary';
     return 'summary';
   }
@@ -673,23 +657,11 @@
         list.appendChild(button);
       });
       stage.appendChild(list);
-      if (lookup.status === 'loading') stage.appendChild(el('p', 'lookup-note', '다른 평형 도면도 확인하고 있어요. 먼저 보이는 도면을 확인할 수 있습니다.'));
     } else {
       stage.appendChild(el('p', 'lookup-note', lookup.status === 'loading'
         ? '도면을 찾고 있어요. 기다리는 동안 직접 업로드할 수도 있습니다.'
         : '단지명으로 확인 가능한 도면이 없어 주소로 전체 도면 목록을 다시 조회합니다.'));
       if (lookup.status === 'ready') renderAddressLookup();
-    }
-    if (lookup.status === 'loading' && !answers.planDeferred) {
-      const defer = el('button', 'manual-option', '도면은 마지막에 확인하고 계속하기');
-      defer.type = 'button';
-      defer.addEventListener('click', () => {
-        answers.planDeferred = true;
-        trail.push({ key: current, index: questionIndex });
-        current = nextQuestion(0);
-        render();
-      });
-      stage.appendChild(defer);
     }
     if (answers.planAttachment) stage.appendChild(el('p', 'selected-apartment', '상담 신청 데이터에 저장된 도면 · ' + answers.planAttachment.name + (answers.planAttachment.flipX ? ' · 좌우 반전' : '') + (answers.planAttachment.flipY ? ' · 상하 반전' : '') + (answers.planAreaAuto ? ' · 공급평형 약 ' + answers.planAreaValue + '평 자동 입력' : '')));
     const upload = el('input', 'plan-upload');
