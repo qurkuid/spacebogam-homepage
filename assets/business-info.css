@@ -1,0 +1,9 @@
+[data-business-info="spacebogam"] {
+  width: calc(100% - 40px);
+  max-width: 1160px;
+  margin: 18px auto 0;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.8;
+  word-break: keep-all;
+}
