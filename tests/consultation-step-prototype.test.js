@@ -57,8 +57,9 @@ const apartmentRows = [
   ['거제유림아시아드', '3FO4KH04F1JS', '부산시 연제구 해맞이로 23', '64㎡', 'fph/20230222/5ee2aded7d7eeeee.jpg'],
   ['도면없는단지', 'apt-missing', '부산시 수영구 광안동 100', '면적 미기재', '']
 ];
+const stepEvents = [];
 const storage = () => { const values = new Map(); return { getItem: key => values.get(key) || null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) }; };
-const context = { document, window: { SB_APT_INDEX: apartmentRows }, location: { search: '', pathname: '/consultation/', href: 'https://spacebogam.kr/consultation/' }, innerWidth: 1200, localStorage: storage(), sessionStorage: storage(), URLSearchParams, Blob, FormData, createImageBitmap: async () => ({ width: 100, height: 80, close() {} }), crypto: require('node:crypto').webcrypto, URL: {
+const context = { document, window: { SB_APT_INDEX: apartmentRows }, location: { search: '', pathname: '/consultation/', href: 'https://spacebogam.kr/consultation/' }, innerWidth: 1200, localStorage: storage(), sessionStorage: storage(), gtag: (...args) => stepEvents.push(args), URLSearchParams, Blob, FormData, createImageBitmap: async () => ({ width: 100, height: 80, close() {} }), crypto: require('node:crypto').webcrypto, URL: {
   createObjectURL: file => 'blob:test/' + file.name,
   revokeObjectURL: () => {}
 } };
@@ -220,14 +221,21 @@ async function run() {
   assert.equal(snapshot.residential.length, 22);
   assert.equal(snapshot.commercial.length, 17);
   assert.deepEqual(Array.from(snapshot.residential.filter(q => q.isRequired), q => q.id), [13, 10, 15, 4]);
+  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_view_type' && data.step_id === 'type').length, 1);
 
   await startApartment('해맞이로');
+  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_complete_type' && data.step_id === 'type').length, 1);
+  assert.deepEqual(Object.keys(stepEvents.find(([, name, data]) => name === 'consult_view_apartmentQuery' && data.step_id === 'apartmentQuery')[2]).sort(),
+    ['form_id', 'journey_type', 'progress_percent', 'step_id', 'step_number']);
   const select = stage().querySelector('.dong-select');
   assert.equal(select.children.length, 16);
   assert.equal(nodes.next.disabled, true);
   select.input('111동');
   select.change('111동');
   assert.match(title(), /도면을 확인/);
+  const planViews = stepEvents.filter(([, name, data]) => name === 'consult_view_planReview' && data.step_id === 'planReview').length;
+  nodes.back.click(); next();
+  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_view_planReview' && data.step_id === 'planReview').length, planViews);
   await settle();
   stage().querySelector('.plan-card').click();
   const dialog = stage().querySelector('.plan-dialog');
@@ -243,6 +251,8 @@ async function run() {
   assert.match(stage().querySelector('.selected-apartment').textContent, /공급평형 약 19\.4평 자동 입력/);
   next();
   finishResidential({ autoArea: true, features: true });
+  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_skip_q_8' && data.step_id === 'question_8').length, 1);
+  assert.doesNotMatch(JSON.stringify(stepEvents), /홍길동|010-1234-5678|해맞이로 23/);
   assert.equal(summary('동'), '111동');
   assert.match(summary('도면'), /좌우 반전/);
   assert.equal(summary('시공장소 주소'), '부산시 연제구 해맞이로 23');
@@ -281,6 +291,8 @@ async function run() {
   };
   next(); await new Promise(setImmediate);
   assert.match(title(), /접수되었습니다/, error());
+  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_complete_summary' && data.step_id === 'summary').length, 1);
+  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_view_success' && data.step_id === 'success').length, 1);
   assert.equal(catalogImageFetched, true);
   assert.equal(catalogImageUploaded, true);
   assert.deepEqual(canvasScales.at(-1), [-1, 1]);
@@ -526,6 +538,10 @@ async function run() {
   assert.match(title(), /공급평형/);
   answer('32'); next();
   assert.match(title(), /예산 구간/);
+  const trackedCount = stepEvents.filter(([, name]) => name.startsWith('consult_')).length;
+  context.sessionStorage.setItem('spacebogam_funnel_is_test', 'true');
+  nodes.restart.click(); choose(0);
+  assert.equal(stepEvents.filter(([, name]) => name.startsWith('consult_')).length, trackedCount);
   console.log('consultation prototype: plan, conditional questions, combined consultation schedule, calendars passed');
 }
 

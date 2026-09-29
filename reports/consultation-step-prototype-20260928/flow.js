@@ -49,6 +49,9 @@
     try { sessionStorage.setItem(eventKey, JSON.stringify(eventIds)); } catch {}
   }
   let started = false;
+  let viewedSteps = new Set();
+  let completedSteps = new Set();
+  let skippedSteps = new Set();
   function trackingValue(key) {
     const direct = params.get(key);
     if (direct && !(key === 'utm_source' && direct === 'spacebogam.kr')) return direct;
@@ -72,6 +75,23 @@
     const data = { eventId: eventIds[name], clientId, sessionId, eventName: name, pagePath: location.pathname, pageTitle: document.title, occurredAt: new Date().toISOString(), experimentId: 'homepage_headline_v1', experimentVariant: stored(sessionStorage, 'spacebogam_homepage_headline_v1_variant') || '', ctaLocation: '', ctaText: '', pageVariant: params.get('page_variant') || '', deviceType: innerWidth < 768 ? 'mobile' : innerWidth < 1024 ? 'tablet' : 'desktop', isTest: /^(1|true|yes|y|on)$/i.test(params.get('is_test') || '') };
     ['utmSource', 'utmMedium', 'utmCampaign', 'utmContent', 'utmTerm'].forEach((field, index) => { data[field] = trackingValue(['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'][index]); });
     fetch('https://intm.kr/api/marketing/funnel-events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), keepalive: true }).catch(() => {});
+  }
+  function trackStep(action) {
+    const stepId = current === 'question' ? 'question_' + String(questionList()[questionIndex].id) : current;
+    const seen = action === 'view' ? viewedSteps : action === 'skip' ? skippedSteps : completedSteps;
+    if (seen.has(stepId)) return;
+    seen.add(stepId);
+    if (/^(1|true|yes|y|on)$/i.test(params.get('is_test') || '') || stored(sessionStorage, 'spacebogam_funnel_is_test') === 'true') return;
+    const journeyType = answers.type === '상업 공간' ? 'commercial' : answers.type === '주거 공간'
+      ? answers.housing === '아파트' ? 'residential_apartment' : answers.housing ? 'residential_other' : 'residential' : 'undecided';
+    const eventStep = (current === 'question' ? 'q_' + String(questionList()[questionIndex].id) : current)
+      .replace(/[^a-z0-9_]/gi, '_').slice(0, 23);
+    try {
+      if (typeof gtag === 'function') gtag('event', 'consult_' + action + '_' + eventStep, {
+        form_id: 'spacebogam_consultation', step_id: stepId, step_number: trail.length + 1,
+        progress_percent: Number(progress.getAttribute('aria-valuenow') || 0), journey_type: journeyType
+      });
+    } catch {}
   }
   const dongLists = window.SB_APT_DONGS || {};
 
@@ -1023,6 +1043,7 @@
       try { if (typeof fbq === 'function') fbq('track', 'Lead', { currency: 'KRW' }, { eventID: result.leadEventId || eventIds.lead_submit_success }); } catch {}
       try { if (typeof gtag === 'function') gtag('event', 'lead_submit_success', { event_category: 'lead', lead_event_id: result.leadEventId || eventIds.lead_submit_success }); } catch {}
       funnel('lead_submit_success');
+      trackStep('complete');
       try { sessionStorage.removeItem(eventKey); } catch {}
       current = 'success';
       render();
@@ -1063,9 +1084,10 @@
     const percent = current === 'summary' || current === 'success' ? 100 : Math.min(95, Math.round(trail.length / total * 100));
     progress.setAttribute('aria-valuenow', String(percent));
     progressFill.style.width = percent + '%';
+    trackStep('view');
   }
 
-  function advance() {
+  function advance(action = 'complete') {
     if (current === 'summary') { submitConsultation(); return; }
     if (current === 'success') return;
     if (current === 'question') {
@@ -1099,6 +1121,7 @@
       if (current === 'apartmentQuery' && !answers.apartmentSelected && !answers.apartmentUnmatched) { showError('검색 결과에서 아파트를 선택해 주세요.'); return; }
       if (current === 'apartmentQuery') startLookup(value);
     }
+    trackStep(action);
     trail.push({ key: current, index: questionIndex });
     current = nextNode(current);
     render();
@@ -1116,7 +1139,7 @@
     if (questionList()[questionIndex].questionType === 'household') delete answers.responses.pet;
     if (key === 'expansion') delete answers.responses.expansion_spaces;
     if (key === 'system_ac') delete answers.responses.system_ac_count;
-    advance();
+    advance('skip');
   });
   document.getElementById('restart').addEventListener('click', () => {
     lookupRun++;
@@ -1124,6 +1147,9 @@
     answers = { responses: {} };
     submitted = false;
     started = false;
+    viewedSteps = new Set();
+    completedSteps = new Set();
+    skippedSteps = new Set();
     eventIds = { lead_form_view: id(), lead_form_start: id(), lead_submit_success: id() };
     try { sessionStorage.setItem(eventKey, JSON.stringify(eventIds)); } catch {}
     lookup = { status: 'idle', candidates: [] };
