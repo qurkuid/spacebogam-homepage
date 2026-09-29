@@ -90,6 +90,7 @@
       if (typeof gtag === 'function') gtag('event', 'consult_' + action + '_' + eventStep, {
         form_id: 'spacebogam_consultation', step_id: stepId, step_number: trail.length + 1,
         progress_percent: Number(progress.getAttribute('aria-valuenow') || 0), journey_type: journeyType,
+        sb_session_id: sessionId,
         send_to: 'G-EJGXDD5C1T'
       });
     } catch {}

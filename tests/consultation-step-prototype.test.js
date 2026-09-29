@@ -226,8 +226,10 @@ async function run() {
   await startApartment('해맞이로');
   assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_complete_type' && data.step_id === 'type').length, 1);
   assert.deepEqual(Object.keys(stepEvents.find(([, name, data]) => name === 'consult_view_apartmentQuery' && data.step_id === 'apartmentQuery')[2]).sort(),
-    ['form_id', 'journey_type', 'progress_percent', 'send_to', 'step_id', 'step_number']);
+    ['form_id', 'journey_type', 'progress_percent', 'sb_session_id', 'send_to', 'step_id', 'step_number']);
   assert.equal(stepEvents.find(([, name]) => name === 'consult_view_apartmentQuery')[2].send_to, 'G-EJGXDD5C1T');
+  assert.equal(stepEvents.find(([, name]) => name === 'consult_view_apartmentQuery')[2].sb_session_id,
+    context.sessionStorage.getItem('spacebogam_funnel_session_id'));
   const select = stage().querySelector('.dong-select');
   assert.equal(select.children.length, 16);
   assert.equal(nodes.next.disabled, true);
