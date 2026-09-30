@@ -106,7 +106,7 @@ function finishResidential({ needsAddress = false, autoArea = false, features = 
     assert.doesNotMatch(title(), /비밀번호/);
     if (features) assert.doesNotMatch(title(), /연락 가능한 시간대/);
     if (/상담 일정을 선택/.test(title())) scheduleCount++;
-    if (firstOptional.length < 5) firstOptional.push(title());
+    if (firstOptional.length < 5 && !/시공 희망 시기/.test(title())) firstOptional.push(title());
     if (features && /예산 구간/.test(title())) {
       stage().querySelector('.question-input').change('4천만원 미만');
       assert.match(title(), /시공장소를 모두/);
@@ -156,6 +156,11 @@ function finishResidential({ needsAddress = false, autoArea = false, features = 
       next();
     } else if (features && /시공 희망 시기|상담을 원하는 날짜/.test(title())) {
       const before = title();
+      assert.equal(nodes.skip.hidden, true);
+      assert.equal(nodes.next.disabled, true);
+      next(); assert.equal(title(), before);
+      assert.match(error(), /입력/);
+      nodes.skip.click(); assert.equal(title(), before);
       const calendar = stage().querySelector('.calendar');
       assert.ok(calendar, before);
       assert.equal(calendar.querySelector('.calendar-weekdays').children.length, 7);
@@ -175,6 +180,13 @@ function finishResidential({ needsAddress = false, autoArea = false, features = 
       nodes.back.click();
       assert.equal(title(), before);
       assert.equal(stage().querySelectorAll('.calendar-day').find(day => day.textContent === '15').getAttribute('aria-pressed'), 'true');
+      next();
+    } else if (/시공 희망 시기/.test(title())) {
+      assert.equal(nodes.skip.hidden, true);
+      assert.equal(nodes.next.disabled, true);
+      stage().querySelector('.manual-option').click();
+      nodes.back.click();
+      assert.equal(stage().querySelector('.manual-option').getAttribute('aria-pressed'), 'true');
       next();
     } else if (declineFeatures && /발코니 확장 계획/.test(title())) {
       choose(1); assert.match(title(), /시스템에어컨을 설치/);
@@ -214,6 +226,7 @@ function finishResidential({ needsAddress = false, autoArea = false, features = 
   next(); assert.match(error(), /동의/);
   stage().querySelector('.consent').querySelector('input').change(true);
   next(); assert.match(title(), /입력 내용을 확인/);
+  assert.match(summary('시공 희망 시기'), features ? /^\d{4}-\d{2}-15$/ : /^미정$/);
 }
 
 async function run() {
@@ -301,6 +314,7 @@ async function run() {
   assert.deepEqual(canvasScales.at(-1), [-1, 1]);
   assert.equal(submittedPayload.type, 'residential');
   assert.equal(submittedPayload.answers['9999'], 'true');
+  assert.match(submittedPayload.answers['5'], /^\d{4}-\d{2}-15$/);
   assert.match(submittedPayload.answers['7'], /아파트: 거제유림아시아드 \/ 111동/);
   assert.match(submittedPayload.answers['7'], /좌우 반전/);
   assert.equal(submittedPayload.filePath, '/api/uploads/consultation/catalog.jpg');
@@ -350,6 +364,7 @@ async function run() {
   assert.match(title(), /접수되었습니다/);
   assert.equal(uploadedImage.type, 'image/jpeg');
   assert.equal(uploadedPayload.filePath, '/api/uploads/consultation/upload.jpg');
+  assert.equal(uploadedPayload.answers['5'], '미정');
   context.fetch = undefined;
 
   await startApartment('도면없는단지');
@@ -475,6 +490,8 @@ async function run() {
   choose(0); choose(1);
   answer('홍길동'); next(); answer('010-1234-5678'); next();
   answer('부산시 연제구 해맞이로 23'); next(); nodes.skip.click(); answer('32'); next();
+  assert.match(title(), /시공 희망 시기/);
+  stage().querySelector('.manual-option').click();
   nodes.skip.click();
   assert.match(title(), /시공장소를 모두/);
   const scope = name => stage().querySelectorAll('.choice').find(option => option.children[1].textContent === name);
@@ -540,6 +557,8 @@ async function run() {
   assert.match(title(), /세부주소/); nodes.skip.click();
   assert.match(title(), /공급평형/);
   answer('32'); next();
+  assert.match(title(), /시공 희망 시기/);
+  stage().querySelector('.manual-option').click();
   assert.match(title(), /예산 구간/);
   const trackedCount = stepEvents.filter(([, name]) => name.startsWith('consult_')).length;
   context.sessionStorage.setItem('spacebogam_funnel_is_test', 'true');

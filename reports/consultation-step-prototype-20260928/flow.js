@@ -108,7 +108,8 @@
       q.isRequired = q.questionType === 'short_answer' && /성함|이름/.test(q.question)
         || q.questionType === 'phonenumber' || /연락처/.test(q.question)
         || (q.questionType === 'address' || /주소/.test(q.question)) && !/세부/.test(q.question)
-        || /평형|평수/.test(q.question);
+        || /평형|평수/.test(q.question)
+        || String(q.id) === '5' && q.questionType === 'date';
       if (q.questionType === 'select' && /예산/.test(q.question)) q.options = ['4천만원 미만', '4천만~5천만원', '5천만~6천만원', '6천만~7천만원', '7천만~8천만원', '8천만~9천만원', '9천만~1억원', '1억~1.5억원', '1.5억~2억원', '2억원 이상'];
       if (q.questionType === 'multiple_choice' && /시공장소|공사 범위/.test(q.question)) {
         q.options = questionOptions(q).filter(option => !/확장|시스템에어컨|샤시|샷시|창호/.test(option));
@@ -777,6 +778,13 @@
     }
     if (type === 'date') {
       renderDateCalendar(question);
+      if (key === '5') {
+        const undecided = el('button', 'manual-option', '아직 미정이에요');
+        undecided.type = 'button';
+        undecided.setAttribute('aria-pressed', String(response(question) === '미정'));
+        undecided.addEventListener('click', () => { answers.responses[key] = '미정'; advance(); });
+        stage.appendChild(undecided);
+      }
       return;
     }
     const label = el('label', 'field');
@@ -1059,7 +1067,7 @@
   function render() {
     stage.replaceChildren();
     const question = current === 'question' ? questionList()[questionIndex] : null;
-    const node = question ? { title: question.question, lead: question.questionType === 'schedule' ? '가능한 요일과 원하는 날짜·시간을 한 화면에서 선택해 주세요. 아직 정하지 않았다면 건너뛰어도 됩니다.' : question.isRequired ? '상담에 필요한 정보입니다.' : '선택 입력입니다. 아직 정하지 않았다면 건너뛰어도 됩니다.' } : nodes[current];
+    const node = question ? { title: question.question, lead: String(question.id) === '5' ? '공사를 시작하고 싶은 날짜를 선택해 주세요. 정하지 않았다면 ‘아직 미정이에요’를 선택해 주세요.' : question.questionType === 'schedule' ? '가능한 요일과 원하는 날짜·시간을 한 화면에서 선택해 주세요. 아직 정하지 않았다면 건너뛰어도 됩니다.' : question.isRequired ? '상담에 필요한 정보입니다.' : '선택 입력입니다. 아직 정하지 않았다면 건너뛰어도 됩니다.' } : nodes[current];
     stage.appendChild(el('p', 'step-meta', current === 'summary' ? '입력 내용 확인' : current === 'success' ? '접수 완료' : '질문 ' + String(trail.length + 1).padStart(2, '0')));
     stage.appendChild(el('h1', null, node.title));
     stage.appendChild(el('p', 'lead', node.lead));
