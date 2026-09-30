@@ -417,13 +417,13 @@
     var isLiving = /^living(?:-|\.html|\/)/.test(file) || /pyeong|py/.test(file);
     var isCommercial = /commercial|office|clinic|cafe|shop|hospital/.test(file);
     var isRegion = /interior|remodeling/.test(file) || /dong|gu|busan|haeundae|centum|marine|sajik|jwa|jung|u-|geoje|guseo|hwamyeong|buk/.test(file);
-    if (isConsultation) return {key:'consultation', text:'전화로 상담 일정 잡기', location:'consultation_global_call'};
-    if (isPortfolio) return {key:'portfolio', text:'비슷한 현장 전화 상담하기', location:'portfolio_global_call'};
-    if (isEstimate) return {key:'estimate', text:'견적 범위 전화로 먼저 확인하기', location:'estimate_global_call'};
-    if (isLiving) return {key:'living', text:'우리 집 평형 상담하기', location:'living_global_call'};
-    if (isCommercial) return {key:'commercial', text:'상업공간 전화 상담하기', location:'commercial_global_call'};
-    if (isRegion) return {key:'region', text:'이 지역 공사 조건 전화 상담하기', location:'region_global_call'};
-    return {key:'general', text:'전화 상담하기', location:'global_call'};
+    if (isConsultation) return {key:'consultation', text:'방문 상담 일정 문의', location:'consultation_global_call'};
+    if (isPortfolio) return {key:'portfolio', text:'방문 상담 일정 문의', location:'portfolio_global_call'};
+    if (isEstimate) return {key:'estimate', text:'방문 상담 일정 문의', location:'estimate_global_call'};
+    if (isLiving) return {key:'living', text:'방문 상담 일정 문의', location:'living_global_call'};
+    if (isCommercial) return {key:'commercial', text:'방문 상담 일정 문의', location:'commercial_global_call'};
+    if (isRegion) return {key:'region', text:'방문 상담 일정 문의', location:'region_global_call'};
+    return {key:'general', text:'방문 상담 일정 문의', location:'global_call'};
   }
 
   function decoratePhoneLink(a, locationName){
@@ -458,8 +458,8 @@
     a.className = className;
     a.href = 'tel:050713881252';
     decoratePhoneLink(a, locationName);
-    a.setAttribute('aria-label', '공간보감 전화 상담 1551-0163');
-    a.textContent = text || '전화 상담하기';
+    a.setAttribute('aria-label', '공간보감 방문 상담 일정 문의 1551-0163');
+    a.textContent = text || '방문 상담 일정 문의';
     return a;
   }
 
@@ -560,11 +560,10 @@
       existingHeaderCall.setAttribute('href', 'tel:050713881252');
       decoratePhoneLink(existingHeaderCall, existingHeaderCall.dataset.ctaLocation || context.location + '_header');
       // 전화번호는 노출하지 않는다 — 버튼 라벨만 유지 (2026-07-04 사장님 지시)
-      if ((existingHeaderCall.textContent || '').indexOf('1551-0163') !== -1 || !(existingHeaderCall.textContent || '').trim()) {
-        existingHeaderCall.textContent = '전화 상담';
-      }
+      existingHeaderCall.textContent = '방문 상담 일정 문의';
+      existingHeaderCall.setAttribute('aria-label', '공간보감 방문 상담 일정 문의 1551-0163');
     } else if (headerWrap) {
-      existingHeaderCall = buildPhoneLink('spacebogam-header-call', context.location + '_header', '전화 상담');
+      existingHeaderCall = buildPhoneLink('spacebogam-header-call', context.location + '_header', '방문 상담 일정 문의');
       var headerConsult = headerWrap.querySelector('.top-cta, .cta');
       if (headerConsult && headerConsult.parentNode === headerWrap) headerWrap.insertBefore(existingHeaderCall, headerConsult.nextSibling);
       else headerWrap.appendChild(existingHeaderCall);
@@ -588,8 +587,12 @@
     }
     var mobileCall = mobileActions.querySelector('.spacebogam-mobile-call') || document.querySelector('body > .spacebogam-mobile-call');
     if (mobileCall && mobileCall.parentNode !== mobileActions) mobileActions.appendChild(mobileCall);
-    if (!mobileCall) mobileActions.appendChild(buildPhoneLink('spacebogam-mobile-call', context.location + '_mobile_sticky_call', '전화 상담'));
-    else decoratePhoneLink(mobileCall, mobileCall.dataset.ctaLocation || context.location + '_mobile_sticky_call');
+    if (!mobileCall) mobileActions.appendChild(buildPhoneLink('spacebogam-mobile-call', context.location + '_mobile_sticky_call', '방문 상담 일정 문의'));
+    else {
+      mobileCall.textContent = '방문 상담 일정 문의';
+      mobileCall.setAttribute('aria-label', '공간보감 방문 상담 일정 문의 1551-0163');
+      decoratePhoneLink(mobileCall, mobileCall.dataset.ctaLocation || context.location + '_mobile_sticky_call');
+    }
 
     var mobileKakao = mobileActions.querySelector('.spacebogam-mobile-kakao');
     if (!mobileKakao) mobileActions.appendChild(buildKakaoLink('spacebogam-mobile-kakao', context.location + '_mobile_sticky_kakao', '카카오톡 상담'));

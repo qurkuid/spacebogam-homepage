@@ -1,0 +1,60 @@
+{
+  "baseline_release": "releases/consult-construction-date-20260930-ad81b5f7",
+  "files": [
+    {
+      "path": "index.html",
+      "before_sha256": "9d752030f9fdd8c3fe86bfc909b40a36264850680a54aae4824e1649faf44128",
+      "after_sha256": "3ba67a9c1b7c7a18f322407f31ed9dba72f5e398e3ed3fc3125e15ad1a59c405"
+    },
+    {
+      "path": "consultation/index.html",
+      "before_sha256": "c2885d4e8c45b69190f78f16397bed02c878704495f4ec066300dc40a9f7822d",
+      "after_sha256": "d5e520e58184e18b7688b422dc93c6ecd8139a0a7b21315408bacb637eb54379"
+    },
+    {
+      "path": "consultation.html",
+      "before_sha256": "2532bc81ed034ed9d03bd349f65de80f59f8cfc6b5e130828e884df1bce75df8",
+      "after_sha256": "e2b97aafd760eb2b12b0367bd0185aa2d5a6a2aa3fc8eb52baaa0884e54a556e"
+    },
+    {
+      "path": "qna.html",
+      "before_sha256": "d4abdef49bd20b90e592d1cfbe7e04bf6b0f65a8540a62793cd33f30b7daf699",
+      "after_sha256": "2ad9cfc1ea7a320840358c154d9d50d6d686335c7a48a761b647f8d1703322e9"
+    },
+    {
+      "path": "process.html",
+      "before_sha256": "d71fd6a60bcbf8f5b8d765a1596f1730a693b8b0e964983d0959507363f04812",
+      "after_sha256": "0e003a1deff81125a55a75a50ee926ac257c2ca48e51a33ae767354cdf09edd4"
+    },
+    {
+      "path": "case-hwamyeong-kolong.html",
+      "before_sha256": "bc6527c0c28520b41f7599c27f1f1a22e45a4f4feb262fb1d3a0f3612cb7f074",
+      "after_sha256": "f77d810dceda03c5a000abbd73ea4a8125a1f8ebde9158cf113462dd6bc0bc05"
+    },
+    {
+      "path": "contact.html",
+      "before_sha256": "5f975ee7f523f3083990da4f330877e067f24fb2901ad785687c3fee2519ad13",
+      "after_sha256": "4a32e2d85544187d3ad1d6dfc940a59fcb9ffade46a87b669eb2ec4dcb7c6c66"
+    },
+    {
+      "path": "assets/site-tracking.js",
+      "before_sha256": "2efdb329e971c6a619d8091a180c7aeff729b046a5a320a11e5d56beb4c29e21",
+      "after_sha256": "dfbfb597441fbfa90bdadde9bb8b9376ebdddb159bef25eb756a561aa74252eb"
+    },
+    {
+      "path": "assets/consultation-form.js",
+      "before_sha256": "200bc04138a241d327d0eeaf10cc97a9107a98d3147e1c295f29c4dbe90b5821",
+      "after_sha256": "01725c582cba9752323dd6d839761235019a0d3abb29aa71eb66f76dede9c0a5"
+    },
+    {
+      "path": "reports/consultation-step-prototype-20260928/flow.js",
+      "before_sha256": "ad81b5f733a7f51c32354f11730d72e7038e999b8e04f4f532206af4d5dca02e",
+      "after_sha256": "1b12f20c04e71b8f6f071ce8e3e9efcd0552432ba9456d5eb21c559ff5dc8dfc"
+    },
+    {
+      "path": "data/faq.json",
+      "before_sha256": "20d0dd4d86898bcbe00b9c3687e4abf3e69afb7befb834d6de38a8b08bc46972",
+      "after_sha256": "e4cd2c2f6b1fe87f4e1a354c47f4c28d17c754251fbef8188398ae454c1b90a3"
+    }
+  ]
+}

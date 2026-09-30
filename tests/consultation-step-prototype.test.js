@@ -105,7 +105,7 @@ function finishResidential({ needsAddress = false, autoArea = false, features = 
     assert.doesNotMatch(title(), /상담을 원하는 (?:요일|날짜|시간)/);
     assert.doesNotMatch(title(), /비밀번호/);
     if (features) assert.doesNotMatch(title(), /연락 가능한 시간대/);
-    if (/상담 일정을 선택/.test(title())) scheduleCount++;
+    if (/방문 상담 희망 일정을 선택/.test(title())) scheduleCount++;
     if (firstOptional.length < 5 && !/시공 희망 시기/.test(title())) firstOptional.push(title());
     if (features && /예산 구간/.test(title())) {
       stage().querySelector('.question-input').change('4천만원 미만');
@@ -133,23 +133,23 @@ function finishResidential({ needsAddress = false, autoArea = false, features = 
       choose(0); assert.doesNotMatch(title(), /샤시를 교체/);
     } else if (features && /원하는 상담 시기는 언제인가요/.test(title())) {
       choose(0); assert.doesNotMatch(title(), /원하는 상담 시기는 언제인가요/);
-    } else if (features && /상담 일정을 선택/.test(title())) {
+    } else if (features && /방문 상담 희망 일정을 선택/.test(title())) {
       assert.ok(stage().querySelector('.schedule'));
       const weekdays = stage().querySelectorAll('.schedule-weekday');
       const match = nextMonthWeekday(15);
       weekdays[(match + 2) % 7].click();
-      assert.match(title(), /상담 일정을 선택/);
+      assert.match(title(), /방문 상담 희망 일정을 선택/);
       pickNextMonthDay(15);
-      assert.match(title(), /상담 일정을 선택/);
+      assert.match(title(), /방문 상담 희망 일정을 선택/);
       stage().querySelectorAll('.schedule-time')[1].click();
-      assert.match(title(), /상담 일정을 선택/);
+      assert.match(title(), /방문 상담 희망 일정을 선택/);
       next();
-      assert.match(title(), /상담 일정을 선택/);
+      assert.match(title(), /방문 상담 희망 일정을 선택/);
       assert.match(error(), /가능한 요일에 추가/);
       weekdays[match].click();
       next();
       nodes.back.click();
-      assert.match(title(), /상담 일정을 선택/);
+      assert.match(title(), /방문 상담 희망 일정을 선택/);
       assert.equal(stage().querySelectorAll('.schedule-weekday')[match].getAttribute('aria-pressed'), 'true');
       assert.equal(stage().querySelectorAll('.calendar-day').find(day => day.textContent === '15').getAttribute('aria-pressed'), 'true');
       assert.equal(stage().querySelectorAll('.schedule-time')[1].getAttribute('aria-pressed'), 'true');
@@ -194,7 +194,7 @@ function finishResidential({ needsAddress = false, autoArea = false, features = 
       choose(1); assert.match(title(), /샤시를 교체/);
     } else if (declineFeatures && /샤시를 교체/.test(title())) {
       choose(1); assert.doesNotMatch(title(), /샤시를 교체/);
-    } else if (declineFeatures && /상담 일정을 선택/.test(title())) {
+    } else if (declineFeatures && /방문 상담 희망 일정을 선택/.test(title())) {
       const match = nextMonthWeekday(15);
       stage().querySelectorAll('.schedule-weekday')[match].click();
       pickNextMonthDay(15);
@@ -306,7 +306,9 @@ async function run() {
     return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: true, consultReqId: 'test-residential', leadEventId: 'test-lead' }) });
   };
   next(); await new Promise(setImmediate);
-  assert.match(title(), /접수되었습니다/, error());
+  assert.match(title(), /방문 상담 예약 신청이 접수되었습니다/, error());
+  assert.match(stage().children[2].textContent, /전화로 기본 정보와 사무실 방문 일정을 확인/);
+  assert.match(stage().children[2].textContent, /신청 접수만으로 방문 예약이 확정되지는 않습니다/);
   assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_complete_summary' && data.step_id === 'summary').length, 1);
   assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_view_success' && data.step_id === 'success').length, 1);
   assert.equal(catalogImageFetched, true);

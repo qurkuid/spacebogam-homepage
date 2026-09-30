@@ -792,7 +792,7 @@
     status.setAttribute('role', 'status');
     form.appendChild(status);
 
-    var submit = element('button', 'button cf-submit', '상담 신청하기');
+    var submit = element('button', 'button cf-submit', '방문 상담 예약 신청 접수');
     submit.type = 'submit';
     form.appendChild(submit);
 
@@ -881,7 +881,7 @@
       }).catch(function(error){
         submitting = false;
         submit.disabled = false;
-        submit.textContent = '상담 신청하기';
+        submit.textContent = '방문 상담 예약 신청 접수';
         status.textContent = '접수에 실패했습니다. 잠시 후 다시 시도하시거나 전화로 문의해주세요. (' +
           ((error && error.message) || 'network error') + ')';
         status.classList.add('cf-status-error');
@@ -914,9 +914,9 @@
 
     root.innerHTML = '';
     var box = element('div', 'cf-success');
-    box.appendChild(element('h2', null, '상담 신청이 접수되었습니다.'));
+    box.appendChild(element('h2', null, '방문 상담 예약 신청이 접수되었습니다.'));
     box.appendChild(element('p', null,
-      '담당자가 확인 후 상담 일정을 안내해 드립니다. 접수 안내 알림톡이 곧 도착합니다.'));
+      '신청 후 전화로 기본 정보와 사무실 방문 일정을 확인합니다. 신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다. 접수 안내 알림톡이 곧 도착합니다.'));
     box.appendChild(element('p', 'cf-help', '추가로 확인할 내용이 있으면 담당자가 안내 과정에서 함께 여쭙습니다.'));
     var link = element('a', 'button', '공간보감 홈으로');
     link.href = '/';

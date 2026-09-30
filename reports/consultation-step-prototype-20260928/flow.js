@@ -6,8 +6,8 @@
     dong: { title: '아파트 몇 동인가요?', lead: '해당 단지의 동을 선택해 주세요.', label: '동', placeholder: '예: 101동' },
     planReview: { title: '도면을 확인해 주세요', lead: '도면을 크게 보고 방향을 맞춘 뒤 저장하거나 직접 업로드할 수 있습니다.' },
     consent: { title: '상담 준비를 마칠까요?', lead: '답변을 확인하기 전에 개인정보 수집·이용에 동의해 주세요.' },
-    summary: { title: '입력 내용을 확인해 주세요', lead: '내용이 맞으면 상담 신청을 접수해 주세요.' },
-    success: { title: '상담 신청이 접수되었습니다', lead: '담당자가 내용을 확인한 뒤 상담 일정을 안내해 드립니다.' }
+    summary: { title: '입력 내용을 확인해 주세요', lead: '내용이 맞으면 방문 상담 예약 신청을 접수해 주세요. 신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.' },
+    success: { title: '방문 상담 예약 신청이 접수되었습니다', lead: '신청 후 전화로 기본 정보와 사무실 방문 일정을 확인합니다. 신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.' }
   };
   const stage = document.getElementById('stage');
   const next = document.getElementById('next');
@@ -144,7 +144,7 @@
     const date = remaining.find(q => q.questionType === 'date' && /상담을 원하는 날짜/.test(q.question));
     const time = remaining.find(q => q.questionType === 'single_choice' && /상담을 원하는 시간/.test(q.question));
     const callback = remaining.find(q => /연락 가능한 시간대/.test(q.question));
-    const schedule = day && date && time ? { ...day, question: '상담 일정을 선택해 주세요.', questionType: 'schedule', parts: [day, date, time] } : null;
+    const schedule = day && date && time ? { ...day, question: '방문 상담 희망 일정을 선택해 주세요.', questionType: 'schedule', parts: [day, date, time] } : null;
     const tail = schedule ? remaining.flatMap(q => q === day ? [schedule, ...(callback ? [callback] : [])]
       : q === date || q === time || q === callback ? [] : [q]) : remaining;
     return ordered.concat(featured.slice(0, 2), separate, featured.slice(2), tail);
@@ -1065,9 +1065,11 @@
   }
 
   function render() {
+    const visitIntro = document.getElementById('visit-intro');
+    if (visitIntro) visitIntro.hidden = current !== 'type';
     stage.replaceChildren();
     const question = current === 'question' ? questionList()[questionIndex] : null;
-    const node = question ? { title: question.question, lead: String(question.id) === '5' ? '공사를 시작하고 싶은 날짜를 선택해 주세요. 정하지 않았다면 ‘아직 미정이에요’를 선택해 주세요.' : question.questionType === 'schedule' ? '가능한 요일과 원하는 날짜·시간을 한 화면에서 선택해 주세요. 아직 정하지 않았다면 건너뛰어도 됩니다.' : question.isRequired ? '상담에 필요한 정보입니다.' : '선택 입력입니다. 아직 정하지 않았다면 건너뛰어도 됩니다.' } : nodes[current];
+    const node = question ? { title: question.question, lead: String(question.id) === '5' ? '공사를 시작하고 싶은 날짜를 선택해 주세요. 정하지 않았다면 ‘아직 미정이에요’를 선택해 주세요.' : question.questionType === 'schedule' ? '사무실 방문이 가능한 요일과 희망 날짜·시간을 선택해 주세요. 아직 정하지 않았다면 건너뛰어도 됩니다. 신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.' : question.isRequired ? '상담에 필요한 정보입니다.' : '선택 입력입니다. 아직 정하지 않았다면 건너뛰어도 됩니다.' } : nodes[current];
     stage.appendChild(el('p', 'step-meta', current === 'summary' ? '입력 내용 확인' : current === 'success' ? '접수 완료' : '질문 ' + String(trail.length + 1).padStart(2, '0')));
     stage.appendChild(el('h1', null, node.title));
     stage.appendChild(el('p', 'lead', node.lead));
@@ -1083,7 +1085,7 @@
     back.hidden = trail.length === 0 || current === 'success';
     skip.hidden = current !== 'question' || question.isRequired;
     next.hidden = current === 'success';
-    next.textContent = current === 'summary' ? '상담 신청하기 →' : current === 'consent' ? '입력 내용 확인 →' : current === 'dong' && answers.dong ? '도면 확인하기 →' : '다음 →';
+    next.textContent = current === 'summary' ? '방문 상담 예약 신청 접수 →' : current === 'consent' ? '입력 내용 확인 →' : current === 'dong' && answers.dong ? '도면 확인하기 →' : '다음 →';
     next.disabled = current === 'summary' ? false
       : current === 'planReview' ? !['saved', 'none'].includes(answers.planStatus)
         : current === 'apartmentQuery' ? !answers.apartmentSelected && !answers.apartmentUnmatched
