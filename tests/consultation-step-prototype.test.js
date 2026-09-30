@@ -82,8 +82,25 @@ const pickNextMonthDay = day => {
   stage().querySelectorAll('.calendar-day').find(item => item.textContent === String(day)).click();
 };
 
-async function startApartment(name) {
+function restart() {
   nodes.restart.click();
+  assert.match(title(), /공간보감에서는 이렇게 상담/);
+  assert.equal(nodes.next.textContent, '상담 신청 시작하기 →');
+  assert.equal(nodes.next.disabled, false);
+  assert.equal(nodes.back.hidden, true);
+  assert.equal(nodes.skip.hidden, true);
+  const steps = stage().querySelector('.consult-process');
+  assert.equal(steps.children.length, 2);
+  assert.equal(steps.children[0].children[0].textContent, '전화 상담 · 방문 일정 조율');
+  assert.equal(steps.children[1].children[0].textContent, '사무실 방문 상담');
+  next();
+  assert.match(title(), /어떤 공간을 바꾸실 계획/);
+  assert.equal(stage().children[0].textContent, '질문 01');
+  assert.equal(progress.getAttribute('aria-valuenow'), '0');
+}
+
+async function startApartment(name) {
+  restart();
   choose(0); assert.match(title(), /주거 공간/);
   choose(0); assert.match(title(), /아파트를 찾아/);
   answer(name); await settle(); result();
@@ -234,9 +251,11 @@ async function run() {
   assert.equal(snapshot.residential.length, 22);
   assert.equal(snapshot.commercial.length, 17);
   assert.deepEqual(Array.from(snapshot.residential.filter(q => q.isRequired), q => q.id), [13, 10, 15, 4]);
-  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_view_type' && data.step_id === 'type').length, 1);
+  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_view_intro' && data.step_id === 'intro').length, 1);
+  assert.equal(stepEvents.filter(([, name]) => name === 'consult_view_type').length, 0);
 
   await startApartment('해맞이로');
+  assert.equal(stepEvents.filter(([, name]) => name === 'consult_complete_intro').length, 1);
   assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_complete_type' && data.step_id === 'type').length, 1);
   assert.deepEqual(Object.keys(stepEvents.find(([, name, data]) => name === 'consult_view_apartmentQuery' && data.step_id === 'apartmentQuery')[2]).sort(),
     ['form_id', 'journey_type', 'progress_percent', 'sb_session_id', 'send_to', 'step_id', 'step_number']);
@@ -406,7 +425,7 @@ async function run() {
   assert.equal(summary('시공장소 주소'), '부산시 수영구 광안동 100');
   assert.match(summary('공급평형'), /^19\.4평/);
 
-  nodes.restart.click();
+  restart();
   choose(0); choose(0);
   answer('검색에없는아파트'); await settle();
   stage().querySelector('.search-manual').click();
@@ -425,7 +444,7 @@ async function run() {
 
   context.fetch = undefined;
 
-  nodes.restart.click();
+  restart();
   choose(0); choose(0);
   answer('검색에없는아파트'); await settle();
   stage().querySelector('.search-manual').click();
@@ -443,7 +462,7 @@ async function run() {
   assert.match(error(), /JPG·PNG·WebP 이미지/);
   assert.equal(stage().querySelector('.plan-dialog'), null);
 
-  nodes.restart.click();
+  restart();
   choose(1);
   assert.match(title(), /성명/);
   answer('   '); next(); assert.match(error(), /입력/);
@@ -488,7 +507,7 @@ async function run() {
   assert.equal(submittedPayload.commercialLead.facilityNeeds[0], 'plumbing');
   context.fetch = undefined;
 
-  nodes.restart.click();
+  restart();
   choose(0); choose(1);
   answer('홍길동'); next(); answer('010-1234-5678'); next();
   answer('부산시 연제구 해맞이로 23'); next(); nodes.skip.click(); answer('32'); next();
@@ -506,7 +525,7 @@ async function run() {
   assert.equal(scope('전체 수리').getAttribute('aria-pressed'), 'true');
   assert.equal(scope('현관').getAttribute('aria-pressed'), 'false');
 
-  nodes.restart.click();
+  restart();
   choose(1);
   answer('김고객'); next(); answer('010-2222-3333'); next();
   stage().querySelector('.question-input').change('office');
@@ -564,7 +583,7 @@ async function run() {
   assert.match(title(), /예산 구간/);
   const trackedCount = stepEvents.filter(([, name]) => name.startsWith('consult_')).length;
   context.sessionStorage.setItem('spacebogam_funnel_is_test', 'true');
-  nodes.restart.click(); choose(0);
+  restart(); choose(0);
   assert.equal(stepEvents.filter(([, name]) => name.startsWith('consult_')).length, trackedCount);
   console.log('consultation prototype: plan, conditional questions, combined consultation schedule, calendars passed');
 }

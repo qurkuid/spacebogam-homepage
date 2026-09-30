@@ -65,6 +65,11 @@
     .step-meta:before{content:"";width:34px;height:1px;background:var(--accent)}
     h1{max-width:650px;margin:0;font-size:clamp(38px,3.8vw,62px);font-weight:400;line-height:1.18;letter-spacing:-.055em}
     .lead{max-width:590px;margin:20px 0 40px;color:var(--muted);font-size:16px;line-height:1.75}
+    .consult-process{max-width:590px;margin:0;padding:0;list-style:none;counter-reset:consult-step}
+    .consult-process li{position:relative;padding:22px 0 22px 46px;border-top:1px solid var(--line);counter-increment:consult-step}
+    .consult-process li:before{content:counter(consult-step,decimal-leading-zero);position:absolute;left:0;top:24px;color:var(--muted);font-size:13px}
+    .consult-process h2{margin:0 0 10px;font-size:20px;font-weight:650;line-height:1.4}
+    .consult-process p{margin:0;color:var(--muted);font-size:15px;line-height:1.75}
     .choices{display:grid;gap:12px;max-width:580px}
     .choice{position:relative;width:100%;min-height:75px;display:flex;align-items:center;gap:17px;padding:16px 20px;border:1px solid #c8c0b3;background:transparent;color:var(--ink);text-align:left;font-size:17px;transition:background .15s,border-color .15s,transform .15s}
     .choice:hover{border-color:var(--ink);transform:translateX(3px)}
@@ -184,6 +189,6 @@
   </div>
   <script src="/reports/consultation-step-prototype-20260928/apt-busan-dongs.js"></script>
   <script src="/reports/consultation-step-prototype-20260928/consultation-questions.js"></script>
-  <script src="/reports/consultation-step-prototype-20260928/flow.js?v=1b12f20c04e7"></script>
+  <script src="/reports/consultation-step-prototype-20260928/flow.js?v=10c446584f3d"></script>
 </body>
 </html>
