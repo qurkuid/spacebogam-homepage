@@ -91,7 +91,9 @@ function restart() {
   assert.equal(nodes.skip.hidden, true);
   const steps = stage().querySelector('.consult-process');
   assert.equal(steps.children.length, 2);
-  assert.equal(steps.children[0].children[0].textContent, '전화 상담 · 방문 일정 조율');
+  assert.match(stage().children[2].textContent, /신청 후 담당자가 개인 휴대전화로 연락드려/);
+  assert.match(steps.children[0].children[1].textContent, /기본 정보와 사무실 방문 일정을 확인/);
+  assert.equal(steps.children[0].children[0].textContent, '방문 일정 확인 전화');
   assert.equal(steps.children[1].children[0].textContent, '사무실 방문 상담');
   next();
   assert.match(title(), /어떤 공간을 바꾸실 계획/);
@@ -243,6 +245,7 @@ function finishResidential({ needsAddress = false, autoArea = false, features = 
   next(); assert.match(error(), /동의/);
   stage().querySelector('.consent').querySelector('input').change(true);
   next(); assert.match(title(), /입력 내용을 확인/);
+  assert.match(stage().children[2].textContent, /신청 후 담당자가 개인 휴대전화로 연락드려/);
   assert.match(summary('시공 희망 시기'), features ? /^\d{4}-\d{2}-15$/ : /^미정$/);
 }
 
@@ -326,7 +329,7 @@ async function run() {
   };
   next(); await new Promise(setImmediate);
   assert.match(title(), /방문 상담 예약 신청이 접수되었습니다/, error());
-  assert.match(stage().children[2].textContent, /전화로 기본 정보와 사무실 방문 일정을 확인/);
+  assert.match(stage().children[2].textContent, /담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인/);
   assert.match(stage().children[2].textContent, /신청 접수만으로 방문 예약이 확정되지는 않습니다/);
   assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_complete_summary' && data.step_id === 'summary').length, 1);
   assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_view_success' && data.step_id === 'success').length, 1);
