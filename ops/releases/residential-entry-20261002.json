@@ -1,0 +1,85 @@
+{
+  "base_commit": "a71d6e5e8083c3f16d3c0e1c92e9664babc594ab",
+  "deployed": false,
+  "css_version": "0b047463e574",
+  "files": [
+    {
+      "path": "portfolio.html",
+      "before_sha256": "9966c628bfc9a935478fbea674a96ecccc69278cb89732031f1f0626563402c7",
+      "after_sha256": "ca6081597d28c5f03e7a4c6a63b096f8ca78464cd6f16805ae589f50a35fc5ea",
+      "images_preserved": 14
+    },
+    {
+      "path": "case-daewoo-ian-35py.html",
+      "before_sha256": "8667bf2103fadefeb37fafe4372ba33cc3361e2a7b8ff0fe7407f9989bdcca28",
+      "after_sha256": "4f713db76c4125881844171c43ab2c406e74c903f1ed01f97928645a48976b35",
+      "images_preserved": 49
+    },
+    {
+      "path": "case-geoje-hyundai-hometown.html",
+      "before_sha256": "07b6f8e47e1fedaeeefd9e2f3435a6324961893a84ed1d66b357f412b4012ea4",
+      "after_sha256": "af541c057faab995e2ec421e36863bab5f55effe1a605235c2429c8072b6e65c",
+      "images_preserved": 19
+    },
+    {
+      "path": "case-geoje-yurim-asiad-47py.html",
+      "before_sha256": "3162e92dbc095c3fedf3261fe43c264d07df52b72cc6ef99d1c9418c36142a9f",
+      "after_sha256": "e95a633576b9db813165d5035de9aa7aa0406de1cfb7522b01e1dedeb3810786",
+      "images_preserved": 132
+    },
+    {
+      "path": "case-guseo-ssangyong.html",
+      "before_sha256": "b41c2a363ccd25ec3b27401fd1b02174b3aa110620a689d8b91b599cbae24f98",
+      "after_sha256": "377728ac69bc9df96831e928499018a15f74990a979b46f785d7171d62a0b2ac",
+      "images_preserved": 31
+    },
+    {
+      "path": "case-hwamyeong-kolong.html",
+      "before_sha256": "f77d810dceda03c5a000abbd73ea4a8125a1f8ebde9158cf113462dd6bc0bc05",
+      "after_sha256": "e9da3d67f8182f56e36ed409594b177cc4f8b4726ba06cb478241c583f11a71e",
+      "images_preserved": 36
+    },
+    {
+      "path": "case-hwamyeong-lottecastle.html",
+      "before_sha256": "523b04fb08c46ec79eb1be2745ce1efbd4ec8f655ef00dcde90ac8d220515f63",
+      "after_sha256": "41bf7cd63f333cdd3436bc2f4bcc6a979ee67fb4ce1b982fa69f4cc6f3adba0c",
+      "images_preserved": 34
+    },
+    {
+      "path": "case-mega-centum-49py.html",
+      "before_sha256": "44e9cc577a4a55d7e8d61f3fcfb92701ad97fe695c23c2a0a2012ff4c1c5a25b",
+      "after_sha256": "0858d6723432d923f5f6157e975d7cdeb02ff9defc702f3ea83d33396411e3f2",
+      "images_preserved": 76
+    },
+    {
+      "path": "case-oryukdo-sk-view.html",
+      "before_sha256": "8b1250bf48cff83a7f53a7f6a6d548760b529751d4889665c1ddf95fbf6a2e49",
+      "after_sha256": "f171412fd5ede94263ae25af2e91a6336b698fcd5444446559e0395df44ca209",
+      "images_preserved": 25
+    },
+    {
+      "path": "case-sajik-32py.html",
+      "before_sha256": "7b0156d270458393470f5812db97b1af4610a8f9344e74e5293999361f25f6f3",
+      "after_sha256": "18ed02b1a55d02819a9167ea10e5f5dd31533ea0222347f6827b971dfe94c892",
+      "images_preserved": 57
+    },
+    {
+      "path": "case-sajik-ssangyong.html",
+      "before_sha256": "5c6da9dc2b7bfcb536b2bb681844b3270b353ee9861b553535eaa371510d42f8",
+      "after_sha256": "fe423e21d77100cc8615896482473e1230c1c9bbc5153a10de4f2ee7da57de5b",
+      "images_preserved": 3
+    },
+    {
+      "path": "case-samhan-goldenview.html",
+      "before_sha256": "aae2c637dc4d3d1eb5950803bda0ecfb222e1bf4b1a9c933b4581573b58a208f",
+      "after_sha256": "ba2f79f1fbd45f45ef8c4b4cce7a31f9b517534264c010b6281667a3e4f2bf27",
+      "images_preserved": 21
+    },
+    {
+      "path": "assets/residential-entry.css",
+      "after_sha256": "0b047463e574ee7d04cbc1cb1ebc01a99b2c119728326f67c8087bbf961deef7",
+      "new_file": true
+    }
+  ],
+  "expected_release": "releases/intake-a71d6e5e8083"
+}

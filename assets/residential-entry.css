@@ -1,0 +1,31 @@
+/* Residential case and portfolio entry points. Existing photos and galleries stay intact. */
+body[data-sb-consult-entry]{--sb-entry-ink:#1e1d1a;--sb-entry-paper:#f6f3ed;--sb-entry-line:#d9d4ca}
+body[data-sb-consult-entry] .sb-entry-primary{display:inline-flex;align-items:center;justify-content:center;gap:16px;min-height:52px;padding:12px 20px;background:var(--sb-entry-ink);color:var(--sb-entry-paper)!important;border:1px solid var(--sb-entry-ink);border-radius:0;box-shadow:none;font-size:16px;font-weight:500;line-height:1.5;text-align:center;text-decoration:none;white-space:normal;box-sizing:border-box}
+body[data-sb-consult-entry] .sb-entry-primary:hover{background:#35332e}
+body[data-sb-consult-entry] .sb-entry-primary:focus-visible,body[data-sb-consult-entry] .sb-entry-secondary a:focus-visible{outline:2px solid var(--sb-entry-ink);outline-offset:3px}
+body[data-sb-consult-entry] .sb-entry-hero{margin:22px 0 0}
+body[data-sb-consult-entry] .sb-entry-note{max-width:680px;margin:12px 0 0;font-size:14px;line-height:1.8;color:var(--sb-entry-ink);font-weight:400;overflow-wrap:break-word}
+body[data-sb-consult-entry] .sb-entry-middle{padding:32px 0;border-bottom:1px solid var(--sb-entry-line)}
+body[data-sb-consult-entry] .sb-entry-middle h2{margin:0 0 18px;font-size:clamp(24px,3vw,32px);line-height:1.35;font-weight:400}
+body[data-sb-consult-entry] .sb-entry-secondary{display:flex;flex-wrap:wrap;gap:8px 24px}
+body[data-sb-consult-entry] .sb-entry-secondary a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;font-size:13px;font-weight:400;text-decoration:underline;text-underline-offset:4px;color:var(--sb-entry-ink)}
+body[data-sb-consult-entry] .sb-entry-hero .sb-entry-secondary{margin-top:8px}
+body[data-sb-consult-entry] .phone-cta-panel .sb-entry-secondary .phone-cta-link{background:transparent;color:var(--sb-entry-ink);border:0;border-radius:0;box-shadow:none;padding:0;font-weight:400;font-size:13px}
+body[data-sb-consult-entry] .sb-entry-dock{display:none}
+/* This scoped dock replaces the old two equal phone/chat buttons. */
+body[data-sb-consult-entry] .spacebogam-mobile-actions,body[data-sb-consult-entry]>.spacebogam-mobile-call,body[data-sb-consult-entry] .hw-mobile-cta{display:none!important}
+body[data-sb-consult-entry] .top .spacebogam-header-call,body[data-sb-consult-entry] .top .spacebogam-header-kakao{display:none}
+body[data-sb-consult-entry] .top .cta.sb-entry-primary{font-size:14px;min-height:44px;padding:10px 14px;white-space:nowrap}
+body[data-sb-consult-entry] .v8-header .v8-consult{min-height:44px;display:inline-flex;align-items:center;text-decoration:underline;text-underline-offset:4px}
+@media(max-width:800px){
+  body[data-sb-consult-entry]{padding-bottom:calc(134px + env(safe-area-inset-bottom))!important}
+  body[data-sb-consult-entry] .sb-entry-dock{display:block;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:8px 16px calc(8px + env(safe-area-inset-bottom));background:var(--sb-entry-paper);border-top:1px solid var(--sb-entry-line)}
+  body[data-sb-consult-entry] .sb-entry-dock .sb-entry-primary{display:flex;width:100%}
+  body[data-sb-consult-entry] .sb-entry-dock .sb-entry-secondary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+  body[data-sb-consult-entry] .sb-entry-hero .sb-entry-primary,body[data-sb-consult-entry] .sb-entry-middle .sb-entry-primary{display:flex;width:100%}
+  body[data-sb-consult-entry] .sb-entry-hero .sb-entry-secondary{display:none}
+  body[data-sb-consult-entry] .top .cta.sb-entry-primary{display:none}
+  body[data-sb-consult-entry] .v8-header .v8-consult{font-size:13px;max-width:150px;text-align:right}
+  /* Leave the existing full-screen photo viewer above the entry dock. */
+  body[data-sb-consult-entry]:has(.lb.open) .sb-entry-dock{visibility:hidden}
+}
