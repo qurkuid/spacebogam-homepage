@@ -1,0 +1,6 @@
+.sb-consult-entry{padding:28px;margin:0 0 32px;border:1px solid var(--line,#d8d3c9);background:var(--paper,#f4f1ea)}
+.sb-consult-entry h2{font-size:clamp(23px,3vw,32px);font-weight:500;line-height:1.35;letter-spacing:-.035em;margin:0 0 12px}
+.sb-consult-entry p{color:var(--muted,#69645b);font-size:15px;line-height:1.7;margin:0 0 18px;max-width:680px}
+.sb-consult-entry .sb-consult-entry-link{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:12px 18px;border:1px solid var(--ink,#27241f);background:var(--ink,#27241f);color:var(--paper,#f4f1ea);font-weight:650;font-size:16px;text-align:center;text-decoration:none}
+.v8-grid>.sb-consult-entry{grid-column:1/-1;margin:0}
+@media(max-width:720px){.sb-consult-entry{padding:22px 18px}.sb-consult-entry .sb-consult-entry-link{display:flex;width:100%;box-sizing:border-box}.sb-consult-entry p{font-size:14px}}

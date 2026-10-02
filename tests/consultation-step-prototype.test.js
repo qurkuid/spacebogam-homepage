@@ -2,45 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
-const canvasScales = [];
-
-class Element {
-  constructor(tag = 'div') {
-    this.tag = tag;
-    this.children = [];
-    this.listeners = {};
-    this.attributes = {};
-    this.style = {};
-    this.className = '';
-    this.textContent = '';
-    this.value = '';
-  }
-  appendChild(child) { this.children.push(child); child.parent = this; return child; }
-  replaceChildren(...children) { this.children = []; children.forEach(child => this.appendChild(child)); }
-  remove() { if (this.parent) this.parent.children = this.parent.children.filter(child => child !== this); }
-  setAttribute(name, value) { this.attributes[name] = value; }
-  removeAttribute(name) { delete this.attributes[name]; }
-  getAttribute(name) { return this.attributes[name]; }
-  addEventListener(name, listener) { this.listeners[name] = listener; }
-  click() { this.listeners.click?.({ preventDefault() {} }); }
-  input(value) { this.value = value; this.listeners.input?.({}); }
-  change(value) { if (this.type === 'checkbox') this.checked = value; else this.value = value; this.listeners.change?.({}); }
-  showModal() { this.open = true; }
-  close() { this.open = false; this.listeners.close?.({}); }
-  focus() {}
-  getContext() { return { fillRect() {}, translate() {}, scale(x, y) { canvasScales.push([x, y]); }, drawImage() {} }; }
-  toBlob(callback, type) { callback(new Blob(['flipped-image'], { type })); }
-  querySelector(selector) { return this.querySelectorAll(selector)[0] || null; }
-  querySelectorAll(selector) {
-    const match = node => selector === 'input' ? node.tag === 'input'
-      : selector === '.input-row input' ? node.tag === 'input' && node.parent?.className === 'input-row'
-        : node.className === selector.slice(1);
-    const result = [];
-    const visit = node => node.children.forEach(child => { if (match(child)) result.push(child); visit(child); });
-    visit(this);
-    return result;
-  }
-}
+const { Element, canvasScales } = require('./helpers/consultation-dom');
 
 const root = path.join(__dirname, '../reports/consultation-step-prototype-20260928');
 const read = name => fs.readFileSync(path.join(root, name), 'utf8');
@@ -59,7 +21,7 @@ const apartmentRows = [
 ];
 const stepEvents = [];
 const storage = () => { const values = new Map(); return { getItem: key => values.get(key) || null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) }; };
-const context = { document, window: { SB_APT_INDEX: apartmentRows }, location: { search: '', pathname: '/consultation/', href: 'https://spacebogam.kr/consultation/' }, innerWidth: 1200, localStorage: storage(), sessionStorage: storage(), gtag: (...args) => stepEvents.push(args), URLSearchParams, Blob, FormData, createImageBitmap: async () => ({ width: 100, height: 80, close() {} }), crypto: require('node:crypto').webcrypto, URL: {
+const context = { document, window: { SB_APT_INDEX: apartmentRows }, location: { search: '?details=1', pathname: '/consultation/', href: 'https://spacebogam.kr/consultation/' }, innerWidth: 1200, localStorage: storage(), sessionStorage: storage(), gtag: (...args) => stepEvents.push(args), URLSearchParams, AbortController, setTimeout, clearTimeout, Blob, FormData, createImageBitmap: async () => ({ width: 100, height: 80, close() {} }), crypto: require('node:crypto').webcrypto, URL: {
   createObjectURL: file => 'blob:test/' + file.name,
   revokeObjectURL: () => {}
 } };
@@ -75,7 +37,7 @@ const answer = value => (stage().querySelector('.question-input') || stage().que
 const result = () => stage().querySelector('.search-result').click();
 const error = () => stage().querySelector('.error')?.textContent;
 const summary = label => stage().querySelector('.summary').children.find(row => row.children[0].textContent === label)?.children[1].textContent;
-const settle = async () => { await Promise.resolve(); await Promise.resolve(); };
+const settle = async () => { for (let turn = 0; turn < 12; turn++) await Promise.resolve(); };
 const nextMonthWeekday = day => (new Date(new Date().getFullYear(), new Date().getMonth() + 1, day).getDay() + 6) % 7;
 const pickNextMonthDay = day => {
   stage().querySelectorAll('.calendar-nav')[1].click();

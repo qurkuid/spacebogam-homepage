@@ -31,6 +31,11 @@
   const companyId = '4206bdfd-b51d-4433-9f8e-c854131948cc';
   const params = new URLSearchParams(location.search);
   const eventKey = 'spacebogam.consultationApply.eventIds.v1';
+  let intakeOnly = params.get('details') !== '1';
+  let pendingBody = null;
+  let uncertainSubmission = false;
+  let submitAttempts = 0;
+  const naverConversions = new Set();
   const attributionKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'gbraid', 'wbraid', 'fbclid', 'msclkid', 'n_keyword', 'n_query', 'n_campaign_type', 'n_ad_group', 'n_keyword_id', 'utm_id', 'campaign_id', 'adset_id', 'ad_id', 'asset_id'];
   const id = () => crypto.randomUUID();
   function stored(store, key) { try { return store.getItem(key); } catch { return null; } }
@@ -67,22 +72,56 @@
   function marketingAttribution() {
     let journey = {};
     try { journey = JSON.parse(sessionStorage.getItem('spacebogam_funnel_journey') || 'null') || {}; } catch {}
-    const data = { form_path: location.pathname, source_page: location.pathname, landing_page: String(journey.landing_page || location.href).slice(0, 1000), referrer: String(journey.referrer || document.referrer || '').slice(0, 1000), submitted_at: new Date().toISOString(), device_type: innerWidth < 768 ? 'mobile' : innerWidth < 1024 ? 'tablet' : 'desktop', experiment_id: 'homepage_headline_v1', experiment_variant: stored(sessionStorage, 'spacebogam_homepage_headline_v1_variant') || '', page_variant: params.get('page_variant') || '', sbClientId: clientId, sbSessionId: sessionId, sbSubmitEventId: eventIds.lead_submit_success, is_test: /^(1|true|yes|y|on)$/i.test(params.get('is_test') || '') ? 'true' : '' };
+    const data = { form_path: location.pathname, source_page: location.pathname, landing_page: String(journey.landing_page || location.href).slice(0, 1000), referrer: String(journey.referrer || document.referrer || '').slice(0, 1000), submitted_at: new Date().toISOString(), device_type: innerWidth < 768 ? 'mobile' : innerWidth < 1024 ? 'tablet' : 'desktop', experiment_id: 'homepage_headline_v1', experiment_variant: stored(sessionStorage, 'spacebogam_homepage_headline_v1_variant') || '', page_variant: params.get('page_variant') || '', sbClientId: clientId, sbSessionId: sessionId, sbSubmitEventId: eventIds.lead_submit_success, is_test: isTestTraffic() ? 'true' : '' };
     attributionKeys.forEach(key => { data[key] = trackingValue(key); });
     return data;
   }
   function funnel(name) {
     if (typeof fetch !== 'function') return;
-    const data = { eventId: eventIds[name], clientId, sessionId, eventName: name, pagePath: location.pathname, pageTitle: document.title, occurredAt: new Date().toISOString(), experimentId: 'homepage_headline_v1', experimentVariant: stored(sessionStorage, 'spacebogam_homepage_headline_v1_variant') || '', ctaLocation: '', ctaText: '', pageVariant: params.get('page_variant') || '', deviceType: innerWidth < 768 ? 'mobile' : innerWidth < 1024 ? 'tablet' : 'desktop', isTest: /^(1|true|yes|y|on)$/i.test(params.get('is_test') || '') };
+    const data = { eventId: eventIds[name], clientId, sessionId, eventName: name, pagePath: location.pathname, pageTitle: document.title, occurredAt: new Date().toISOString(), experimentId: 'homepage_headline_v1', experimentVariant: stored(sessionStorage, 'spacebogam_homepage_headline_v1_variant') || '', ctaLocation: '', ctaText: '', pageVariant: params.get('page_variant') || '', deviceType: innerWidth < 768 ? 'mobile' : innerWidth < 1024 ? 'tablet' : 'desktop', isTest: isTestTraffic() };
     ['utmSource', 'utmMedium', 'utmCampaign', 'utmContent', 'utmTerm'].forEach((field, index) => { data[field] = trackingValue(['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'][index]); });
     fetch('https://intm.kr/api/marketing/funnel-events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), keepalive: true }).catch(() => {});
   }
+  function isTestTraffic() {
+    return /^(1|true|yes|y|on)$/i.test(params.get('is_test') || '')
+      || stored(sessionStorage, 'spacebogam_funnel_is_test') === 'true'
+      || stored(localStorage, 'spacebogam_funnel_is_test') === 'true';
+  }
+  function trackAction(name, detail = {}) {
+    if (isTestTraffic()) return;
+    try { if (typeof gtag === 'function') gtag('event', name, {
+      form_id: 'spacebogam_consultation', form_mode: intakeOnly ? 'intake' : 'detailed',
+      sb_session_id: sessionId, send_to: 'G-EJGXDD5C1T', ...detail,
+    }); } catch {}
+  }
+  function trackNaverLead(eventId) {
+    if (isTestTraffic() || naverConversions.has(eventId)) return;
+    const key = 'spacebogam.naverLead.' + eventId;
+    if (stored(sessionStorage, key) === 'true') return;
+    naverConversions.add(eventId);
+    const send = () => {
+      if (!window.wcs || typeof window.wcs.trans !== 'function') return;
+      try {
+        window.wcs_add = window.wcs_add || {};
+        window.wcs_add.wa = 's_7702568df18';
+        window.wcs.trans({ type: 'lead' });
+        try { sessionStorage.setItem(key, 'true'); } catch {}
+      } catch {}
+    };
+    if (window.wcs && typeof window.wcs.trans === 'function') send();
+    else {
+      const script = document.querySelector('script[data-spacebogam-naver-wcs]')
+        || document.querySelector('script[src*="wcs.naver.net/wcslog.js"]');
+      if (script) script.addEventListener('load', send, { once: true });
+    }
+  }
   function trackStep(action) {
+    action = ['view', 'complete', 'skip'].includes(action) ? action : 'complete';
     const stepId = current === 'question' ? 'question_' + String(questionList()[questionIndex].id) : current;
     const seen = action === 'view' ? viewedSteps : action === 'skip' ? skippedSteps : completedSteps;
     if (seen.has(stepId)) return;
     seen.add(stepId);
-    if (/^(1|true|yes|y|on)$/i.test(params.get('is_test') || '') || stored(sessionStorage, 'spacebogam_funnel_is_test') === 'true') return;
+    if (isTestTraffic()) return;
     const journeyType = answers.type === '상업 공간' ? 'commercial' : answers.type === '주거 공간'
       ? answers.housing === '아파트' ? 'residential_apartment' : answers.housing ? 'residential_other' : 'residential' : 'undecided';
     const eventStep = (current === 'question' ? 'q_' + String(questionList()[questionIndex].id) : current)
@@ -185,12 +224,18 @@
     return new Date(year, month - 1, day) < new Date(today.getFullYear(), today.getMonth(), today.getDate());
   }
   function isApartment() { return answers.type === '주거 공간' && answers.housing === '아파트'; }
-  function questionList() { return answers.type === '상업 공간' ? window.SB_CONSULTATION_QUESTIONS.commercial : questions; }
+  function questionList() {
+    const list = answers.type === '상업 공간' ? window.SB_CONSULTATION_QUESTIONS.commercial : questions;
+    return intakeOnly ? window.SB_CONSULTATION_QUESTIONS[answers.type === '상업 공간' ? 'commercial' : 'residential']
+      .filter(q => q.questionType === 'phonenumber' || q.questionType === 'address'
+        || q.questionType === 'short_answer' && /성함|성명|이름/.test(q.question)) : list;
+  }
   function hiddenByBranch(question) {
     return question.showIf && !(question.showIf.values || [question.showIf.value]).includes(answers.responses[question.showIf.id]);
   }
   function skipQuestion(question) {
-    return hiddenByBranch(question)
+    return !intakeOnly && ['13', '10', '15', 'name', 'phone', 'address'].includes(String(question.id)) && hasResponse(question)
+      || hiddenByBranch(question)
       || /연락 가능한 시간대/.test(question.question) && !!answers.responses['34']
       || String(question.id) === '38' && !!answers.responses['33']
       || isApartment() && answers.address && question.questionType === 'address' && hasResponse(question)
@@ -305,7 +350,7 @@
   function nextNode(key) {
     if (key === 'intro') return 'type';
     if (key === 'type') return answers.type === '주거 공간' ? 'housing' : nextQuestion(0);
-    if (key === 'housing') return isApartment() ? 'apartmentQuery' : nextQuestion(0);
+    if (key === 'housing') return !intakeOnly && isApartment() ? 'apartmentQuery' : nextQuestion(0);
     if (key === 'apartmentQuery') return 'dong';
     if (key === 'dong') return 'planReview';
     if (key === 'planReview') return nextQuestion(0);
@@ -382,14 +427,31 @@
     const results = el('div', 'search-results');
     stage.appendChild(results);
 
+    function offerManual() {
+      const manual = el('button', 'search-manual', '검색 결과에 없어요 · 직접 입력하기');
+      manual.type = 'button';
+      manual.addEventListener('click', () => {
+        clearPlan();
+        answers.apartmentSelected = null;
+        answers.apartmentUnmatched = true;
+        delete answers.address;
+        const addressQuestion = questions.find(q => q.questionType === 'address');
+        if (addressQuestion) delete answers.responses[String(addressQuestion.id)];
+        advance();
+      });
+      results.appendChild(manual);
+    }
+
     function showResults(query) {
       results.replaceChildren();
       if (normalize(query).length < 2) { results.appendChild(el('p', 'hint', '두 글자 이상 입력하면 단지 이름과 주소를 함께 검색합니다.')); return; }
       results.appendChild(el('p', 'hint', '아파트 목록을 검색하고 있어요.'));
+      offerManual();
       loadDataset().then(rows => {
         if (current !== 'apartmentQuery' || input.value !== query) return;
         results.replaceChildren();
         const matches = findCandidates(query, rows);
+        trackAction('consult_search_complete', { search_result: matches.length ? 'found' : 'empty', result_count: matches.length });
         results.appendChild(el('p', 'result-caption', matches.length ? '검색 결과 · 단지를 선택해 주세요' : '일치하는 단지가 없습니다.'));
         matches.forEach(match => {
           const button = el('button', 'search-result');
@@ -408,27 +470,18 @@
             const addressQuestion = questions.find(q => q.questionType === 'address');
             if (addressQuestion) answers.responses[String(addressQuestion.id)] = match[2];
             startLookup(match[0]);
-            trail.push({ key: current, index: questionIndex });
+            trail.push({ key: current, index: questionIndex, intakeOnly });
             current = 'dong';
             render();
           });
           results.appendChild(button);
         });
-        const manual = el('button', 'search-manual', '검색 결과에 없어요 · 직접 입력하기');
-        manual.type = 'button';
-        manual.addEventListener('click', () => {
-          clearPlan();
-          answers.apartmentSelected = null;
-          answers.apartmentUnmatched = true;
-          delete answers.address;
-          const addressQuestion = questions.find(q => q.questionType === 'address');
-          if (addressQuestion) delete answers.responses[String(addressQuestion.id)];
-          advance();
-        });
-        results.appendChild(manual);
+        offerManual();
       }).catch(() => {
         if (current !== 'apartmentQuery' || input.value !== query) return;
-        results.replaceChildren(el('p', 'hint', '검색 목록을 열지 못했습니다. 잠시 후 다시 시도해 주세요.'));
+        results.replaceChildren(el('p', 'hint', '검색 목록을 열지 못했습니다. 아파트 이름을 직접 입력하고 계속할 수 있습니다.'));
+        trackAction('consult_search_complete', { search_result: 'unavailable', result_count: 0 });
+        offerManual();
       });
     }
 
@@ -641,7 +694,7 @@
             if (previousId !== match[1]) {
               delete answers.dong;
               delete answers.dongManual;
-              trail.push({ key: current, index: questionIndex });
+              trail.push({ key: current, index: questionIndex, intakeOnly });
               current = 'dong';
             }
             render();
@@ -957,6 +1010,20 @@
     });
     rows.forEach(item => { const row = el('div'); row.appendChild(el('dt', null, item[0])); row.appendChild(el('dd', null, item[1] || '—')); list.appendChild(row); });
     stage.appendChild(list);
+    if (intakeOnly) {
+      stage.appendChild(el('p', 'hint', '공급평형, 예산, 도면과 취향은 이후 상담에서 확인할 수 있습니다.'));
+      const details = el('button', 'manual-option', '도면·상세 정보도 남기기 (선택)');
+      details.type = 'button';
+      details.disabled = submitting || uncertainSubmission;
+      details.addEventListener('click', () => {
+        if (submitting || uncertainSubmission) return;
+        trail.push({ key: current, index: questionIndex, intakeOnly });
+        intakeOnly = false;
+        current = isApartment() ? 'apartmentQuery' : nextQuestion(0);
+        render();
+      });
+      stage.appendChild(details);
+    }
     const attachment = answers.planAttachment;
     if (attachment) {
       const button = el('button', 'summary-plan-button');
@@ -973,6 +1040,17 @@
   }
 
   function submissionPayload(filePath) {
+    if (intakeOnly) {
+      const list = questionList();
+      const value = match => response(list.find(match)) || '';
+      return { type: 'intake', companyId, intake: {
+        name: value(q => q.questionType === 'short_answer'),
+        phone: value(q => q.questionType === 'phonenumber'),
+        address: value(q => q.questionType === 'address'),
+        spaceType: answers.type === '상업 공간' ? 'commercial' : isApartment() ? 'apartment' : 'house',
+        consent: answers.consent === true,
+      }, marketingAttribution: marketingAttribution() };
+    }
     const saved = Object.fromEntries(Object.entries(answers.responses)
       .filter(([key, value]) => /^\d+$/.test(key) && value !== '' && value != null)
       .map(([key, value]) => [key, Array.isArray(value) ? value.join(', ') : String(value)]));
@@ -997,9 +1075,9 @@
   async function imageForSubmission(attachment) {
     let image = attachment.file;
     if (attachment.source === 'catalog') {
-      const response = await fetch('/api/consultation/plan-image?url=' + encodeURIComponent(attachment.url));
+      const response = await timedFetch('/api/consultation/plan-image?url=' + encodeURIComponent(attachment.url), {}, 'blob');
       if (!response.ok) throw new Error('선택한 도면 이미지를 가져오지 못했습니다. 다시 시도하거나 직접 업로드해 주세요.');
-      image = await response.blob();
+      image = response.data;
     }
     if (!image || !['image/png', 'image/jpeg', 'image/webp'].includes(image.type) || image.size > 15 * 1024 * 1024) {
       throw new Error('도면 이미지를 확인할 수 없습니다. JPG·PNG·WebP 이미지를 다시 선택해 주세요.');
@@ -1023,12 +1101,33 @@
     } finally { bitmap.close(); }
   }
 
+  async function timedFetch(url, options = {}, bodyType = 'json') {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30000);
+    try {
+      const response = await fetch(url, { ...options, signal: controller.signal });
+      let data;
+      try { data = await (bodyType === 'blob' ? response.blob() : response.json()); }
+      catch (error) { error.responseStatus = response.status; throw error; }
+      return { ok: response.ok, status: response.status, data };
+    }
+    finally { clearTimeout(timer); }
+  }
+
   async function submitConsultation() {
     if (submitting || submitted) return;
     submitting = true;
     next.disabled = true;
-    next.textContent = '접수 중…';
+    back.disabled = true;
+    document.getElementById('restart').disabled = true;
+    stage.querySelectorAll('button').forEach(button => { button.disabled = true; });
+    next.textContent = uncertainSubmission ? '접수 결과 확인 중…' : '접수 중…';
     clearError();
+    submitAttempts++;
+    trackAction('consult_submit_attempt', { attempt_number: submitAttempts });
+    let phase = 'upload';
+    let responseStatus = 0;
+    const delayed = setTimeout(() => showError('접수 결과를 기다리고 있습니다. 중복 신청하지 않고 잠시만 기다려 주세요.'), 8000);
     try {
       let filePath = null;
       if (answers.planAttachment) {
@@ -1037,33 +1136,61 @@
           const image = await imageForSubmission(answers.planAttachment);
           const name = answers.planAttachment.name.replace(/\.[^.]+$/, '') + (image.type === 'image/jpeg' ? '.jpg' : image.type === 'image/png' ? '.png' : '.webp');
           body.append('file', image, name);
-          const uploaded = await fetch('/api/consultation/upload', { method: 'POST', body });
-          const result = await uploaded.json();
+          const uploaded = await timedFetch('/api/consultation/upload', { method: 'POST', body });
+          const result = uploaded.data;
           if (!uploaded.ok || !result.success || !result.filePath) throw new Error('도면 업로드에 실패했습니다. 다시 시도해 주세요.');
           answers.planAttachment.filePath = result.filePath;
         }
         filePath = answers.planAttachment.filePath;
       }
-      const response = await fetch('https://intm.kr/api/consultation/submit', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(submissionPayload(filePath))
+      if (!pendingBody) pendingBody = JSON.stringify(submissionPayload(filePath));
+      phase = 'submit';
+      const response = await timedFetch('https://intm.kr/api/consultation/submit', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: pendingBody,
       });
-      const result = await response.json();
-      if (!response.ok || result.success !== true) throw new Error(result.error || '접수에 실패했습니다.');
+      responseStatus = response.status;
+      const result = response.data;
+      if (!response.ok || result.success !== true) {
+        if (response.status >= 400 && response.status < 500) pendingBody = null;
+        throw new Error(response.status === 429 ? '요청이 많습니다. 잠시 후 다시 확인해 주세요.' : '접수 결과를 확인하지 못했습니다. 다시 확인해 주세요.');
+      }
       submitted = true;
+      uncertainSubmission = false;
+      pendingBody = null;
       answers.receiptId = result.consultReqId;
-      try { if (typeof fbq === 'function') fbq('track', 'Lead', { currency: 'KRW' }, { eventID: result.leadEventId || eventIds.lead_submit_success }); } catch {}
-      try { if (typeof gtag === 'function') gtag('event', 'lead_submit_success', { event_category: 'lead', lead_event_id: result.leadEventId || eventIds.lead_submit_success }); } catch {}
-      funnel('lead_submit_success');
+      answers.portalPath = result.portalPath;
+      const conversionId = result.leadEventId || eventIds.lead_submit_success;
+      const conversionKey = 'spacebogam.conversion.' + conversionId;
+      if (!isTestTraffic() && stored(sessionStorage, conversionKey) !== 'true') {
+        trackNaverLead(conversionId);
+        try { sessionStorage.setItem(conversionKey, 'true'); } catch {}
+        try { if (typeof fbq === 'function') fbq('track', 'Lead', { currency: 'KRW' }, { eventID: result.leadEventId || eventIds.lead_submit_success }); } catch {}
+        trackAction('lead_submit_success', { lead_event_id: result.leadEventId || eventIds.lead_submit_success });
+      }
       trackStep('complete');
       try { sessionStorage.removeItem(eventKey); } catch {}
       current = 'success';
       render();
     } catch (error) {
-      showError(error.message || '접수에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+      responseStatus = responseStatus || error.responseStatus || 0;
+      if (phase === 'submit' && responseStatus >= 400 && responseStatus < 500) pendingBody = null;
+      uncertainSubmission = phase === 'submit' && !(responseStatus >= 400 && responseStatus < 500);
+      trackAction('consult_submit_failure', { attempt_number: submitAttempts,
+        failure_type: error.name === 'AbortError' ? 'timeout' : phase === 'upload' ? 'upload' : responseStatus ? 'response' : 'network',
+        http_status: responseStatus });
+      showError(uncertainSubmission
+        ? '접수 결과 확인이 지연되고 있습니다. 아래 버튼으로 같은 신청의 결과를 다시 확인해 주세요. 중복으로 접수되지 않습니다.'
+        : phase === 'upload' ? '도면을 가져오거나 업로드하지 못했습니다. 다시 시도하거나 도면 없이 진행해 주세요.'
+          : responseStatus === 429 ? '요청이 많습니다. 잠시 후 다시 접수해 주세요.' : '접수하지 못했습니다. 입력 내용을 확인하고 다시 시도해 주세요.');
       next.disabled = false;
-      next.textContent = '다시 접수하기 →';
-    } finally { submitting = false; }
+      next.textContent = uncertainSubmission ? '접수 결과 다시 확인하기 →' : '다시 접수하기 →';
+      stage.querySelectorAll('button').forEach(button => { button.disabled = uncertainSubmission; });
+    } finally {
+      clearTimeout(delayed);
+      submitting = false;
+      back.disabled = uncertainSubmission;
+      document.getElementById('restart').disabled = uncertainSubmission;
+    }
   }
 
   function render() {
@@ -1087,7 +1214,7 @@
         steps.appendChild(item);
       });
       stage.appendChild(steps);
-      stage.appendChild(el('p', 'hint', '아래 질문에 답해 주시면 상담 준비에 도움이 됩니다.'));
+      stage.appendChild(el('p', 'hint', '공사 위치·유형, 성함과 연락처만 먼저 남겨 주세요. 도면과 상세 정보는 선택입니다.'));
     } else if (['type', 'housing'].includes(current)) renderChoices(current);
     else if (current === 'apartmentQuery') renderApartmentSearch();
     else if (current === 'dong') renderDong();
@@ -1095,9 +1222,17 @@
     else if (current === 'question') renderQuestion();
     else if (current === 'consent') renderConsent();
     else if (current === 'summary') renderSummary();
-    else if (current === 'success') stage.appendChild(el('p', 'selected-apartment', '접수번호 · ' + (answers.receiptId || '발급 완료')));
-    if (current !== 'success') stage.appendChild(el('p', 'error'));
+    else if (current === 'success') {
+      stage.appendChild(el('p', 'selected-apartment', '접수번호 · ' + (answers.receiptId || '발급 완료')));
+      if (/^\/consultation\/progress\/[a-f0-9]{64}$/.test(answers.portalPath || '')) {
+        const link = el('a', 'manual-option', '접수 내용 확인·추가 작성');
+        link.href = 'https://intm.kr' + answers.portalPath;
+        stage.appendChild(link);
+      }
+    }
+    if (current !== 'success') { const error = el('p', 'error'); error.setAttribute('role', 'status'); stage.appendChild(error); }
     back.hidden = trail.length === 0 || current === 'success';
+    back.disabled = submitting || uncertainSubmission;
     skip.hidden = current !== 'question' || question.isRequired;
     next.hidden = current === 'success';
     next.textContent = current === 'intro' ? '상담 신청 시작하기 →' : current === 'summary' ? '방문 상담 예약 신청 접수 →' : current === 'consent' ? '입력 내용 확인 →' : current === 'dong' && answers.dong ? '도면 확인하기 →' : '다음 →';
@@ -1115,6 +1250,8 @@
   }
 
   function advance(action = 'complete') {
+    action = ['complete', 'skip'].includes(action) ? action : 'complete';
+    if (submitting) return;
     if (current === 'summary') { submitConsultation(); return; }
     if (current === 'success') return;
     if (current === 'question') {
@@ -1149,13 +1286,13 @@
       if (current === 'apartmentQuery') startLookup(value);
     }
     trackStep(action);
-    trail.push({ key: current, index: questionIndex });
+    trail.push({ key: current, index: questionIndex, intakeOnly });
     current = nextNode(current);
     render();
   }
 
   next.addEventListener('click', () => advance());
-  back.addEventListener('click', () => { if (trail.length) { const previous = trail.pop(); current = previous.key; questionIndex = previous.index; render(); } });
+  back.addEventListener('click', () => { if (!submitting && !uncertainSubmission && trail.length) { const previous = trail.pop(); current = previous.key; questionIndex = previous.index; intakeOnly = previous.intakeOnly ?? intakeOnly; render(); } });
   skip.addEventListener('click', () => {
     if (current !== 'question' || questionList()[questionIndex].isRequired) return;
     const key = String(questionList()[questionIndex].id);
@@ -1169,6 +1306,11 @@
     advance('skip');
   });
   document.getElementById('restart').addEventListener('click', () => {
+    if (submitting || uncertainSubmission) return;
+    intakeOnly = params.get('details') !== '1';
+    pendingBody = null;
+    uncertainSubmission = false;
+    submitAttempts = 0;
     lookupRun++;
     clearPlan();
     answers = { responses: {} };
