@@ -1,0 +1,5 @@
+/* Shared public navigation; horizontal scrolling keeps every link reachable on mobile. */
+header nav{min-width:0;gap:clamp(10px,1.5vw,22px)!important;white-space:nowrap;overflow-x:auto;scrollbar-width:thin}
+header nav a{flex-shrink:0}
+@media(min-width:861px){.v8-header{gap:20px}.v8-header nav{font-size:13px}.v8-header .v8-consult{flex-shrink:0}}
+@media(max-width:860px){header nav{max-width:100%;justify-content:flex-start!important}}

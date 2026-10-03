@@ -58,6 +58,42 @@
   let viewedSteps = new Set();
   let completedSteps = new Set();
   let skippedSteps = new Set();
+  const draftKey = 'spacebogam.consultationDraft.v1';
+  function clearDraft() { try { sessionStorage.removeItem(draftKey); } catch {} }
+  function saveDraft() {
+    if (submitted || current === 'success') { clearDraft(); return; }
+    if (current === 'intro' && !answers.type && !Object.keys(answers.responses || {}).length) return;
+    try {
+      const savedAnswers = JSON.parse(JSON.stringify(answers));
+      if (savedAnswers.planAttachment) delete savedAnswers.planAttachment.file;
+      sessionStorage.setItem(draftKey, JSON.stringify({ version: 1, updatedAt: Date.now(), answers: savedAnswers,
+        current, trail, questionIndex, intakeOnly, pendingBody, uncertainSubmission: uncertainSubmission || !!pendingBody,
+        eventIds, submitAttempts }));
+    } catch {}
+  }
+  function restoreDraft() {
+    try {
+      const draft = JSON.parse(sessionStorage.getItem(draftKey) || 'null');
+      if (!draft) return;
+      if (draft.version !== 1 || Date.now() - draft.updatedAt > 2 * 60 * 60 * 1000 || !draft.answers?.responses ||
+        !['intro','type','housing','apartmentQuery','dong','planReview','question','consent','summary'].includes(draft.current)) { clearDraft(); return; }
+      answers = draft.answers;
+      current = draft.current;
+      trail = Array.isArray(draft.trail) ? draft.trail : [];
+      questionIndex = Number.isInteger(draft.questionIndex) ? draft.questionIndex : 0;
+      intakeOnly = draft.intakeOnly !== false;
+      pendingBody = typeof draft.pendingBody === 'string' ? draft.pendingBody : null;
+      uncertainSubmission = !!pendingBody;
+      submitAttempts = Number(draft.submitAttempts) || 0;
+      if (draft.eventIds?.lead_submit_success) { eventIds = draft.eventIds; sessionStorage.setItem(eventKey, JSON.stringify(eventIds)); }
+      if (answers.planAttachment?.source === 'upload' && !answers.planAttachment.filePath && !pendingBody) {
+        delete answers.planAttachment; answers.planStatus = ''; current = 'planReview';
+      }
+      if (current === 'question' && !questionList()[questionIndex]) current = 'summary';
+      if (pendingBody) current = 'summary';
+    } catch { clearDraft(); }
+  }
+
   function trackingValue(key) {
     const direct = params.get(key);
     if (direct && !(key === 'utm_source' && direct === 'spacebogam.kr')) return direct;
@@ -777,6 +813,7 @@
     const key = String(question.id);
     const type = question.questionType;
     const options = questionOptions(question);
+    if (type === 'detailed_address' && isApartment() && answers.dong && !hasResponse(question)) answers.responses[key] = answers.dong + ' ';
     if (type === 'schedule') {
       renderSchedule(question);
       return;
@@ -858,6 +895,7 @@
       if (type === 'address') input.placeholder = '현장 주소를 입력해 주세요';
     }
     input.value = response(question) || '';
+    if (type === 'detailed_address' && isApartment() && answers.dong) stage.appendChild(el('p', 'hint', '선택한 동이 입력되어 있습니다. 호수를 덧붙여 주세요.'));
     input.addEventListener(type === 'select' ? 'change' : 'input', () => {
       answers.responses[key] = input.value;
       clearError();
@@ -1145,6 +1183,7 @@
       }
       if (!pendingBody) pendingBody = JSON.stringify(submissionPayload(filePath));
       phase = 'submit';
+      saveDraft();
       const response = await timedFetch('https://intm.kr/api/consultation/submit', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: pendingBody,
       });
@@ -1155,6 +1194,7 @@
         throw new Error(response.status === 429 ? '요청이 많습니다. 잠시 후 다시 확인해 주세요.' : '접수 결과를 확인하지 못했습니다. 다시 확인해 주세요.');
       }
       submitted = true;
+      clearDraft();
       uncertainSubmission = false;
       pendingBody = null;
       answers.receiptId = result.consultReqId;
@@ -1188,6 +1228,7 @@
     } finally {
       clearTimeout(delayed);
       submitting = false;
+      saveDraft();
       back.disabled = uncertainSubmission;
       document.getElementById('restart').disabled = uncertainSubmission;
     }
@@ -1214,7 +1255,8 @@
         steps.appendChild(item);
       });
       stage.appendChild(steps);
-      stage.appendChild(el('p', 'hint', '공사 위치·유형, 성함과 연락처만 먼저 남겨 주세요. 도면과 상세 정보는 선택입니다.'));
+      stage.appendChild(el('p', 'hint', '작성 중인 내용은 이 탭에서 임시로 보관합니다. 처음부터 다시 시작하거나 접수가 완료되면 지워집니다.'));
+      stage.appendChild(el('p', 'hint', '공간 유형을 선택하고 성함·연락처·주소를 남겨 주세요. 개인정보 수집·이용 동의가 필요합니다. 도면과 상세 정보는 선택입니다.'));
     } else if (['type', 'housing'].includes(current)) renderChoices(current);
     else if (current === 'apartmentQuery') renderApartmentSearch();
     else if (current === 'dong') renderDong();
@@ -1246,6 +1288,8 @@
     const percent = current === 'summary' || current === 'success' ? 100 : Math.min(95, Math.round(Math.max(0, trail.length - 1) / total * 100));
     progress.setAttribute('aria-valuenow', String(percent));
     progressFill.style.width = percent + '%';
+    if (uncertainSubmission) { next.disabled = false; next.textContent = '접수 결과 다시 확인하기 →'; back.disabled = true; document.getElementById('restart').disabled = true; stage.querySelectorAll('button').forEach(button => { button.disabled = true; }); }
+    saveDraft();
     trackStep('view');
   }
 
@@ -1307,6 +1351,7 @@
   });
   document.getElementById('restart').addEventListener('click', () => {
     if (submitting || uncertainSubmission) return;
+    clearDraft();
     intakeOnly = params.get('details') !== '1';
     pendingBody = null;
     uncertainSubmission = false;
@@ -1329,6 +1374,10 @@
     render();
   });
   questions = effectiveQuestions(window.SB_CONSULTATION_QUESTIONS.residential);
+  restoreDraft();
+  stage.addEventListener('input', saveDraft);
+  stage.addEventListener('change', saveDraft);
+  if (typeof window.addEventListener === 'function') window.addEventListener('pagehide', saveDraft);
   loadQuestions();
   if (typeof fetch === 'function') funnel('lead_form_view');
   render();
