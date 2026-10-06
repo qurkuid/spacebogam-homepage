@@ -129,6 +129,7 @@ button{font:inherit}
   .v8-phone-note{margin-top:14px;font-size:12px}
   .v8-consult-hero-image{display:none}
   .v8-footer{align-items:flex-start;flex-direction:column;padding:24px 20px}
+  .v8-footer div{flex-wrap:wrap}
   .v8-footer nav{flex-wrap:wrap;gap:16px}
 }
 @media(prefers-reduced-motion:no-preference){.v8-grid img{transition:opacity .2s}.v8-grid a:hover img{opacity:.88}}

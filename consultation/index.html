@@ -170,6 +170,16 @@
     @media(max-width:430px){.footer{gap:12px}.primary{min-width:146px}.summary div{grid-template-columns:85px 1fr;gap:12px}}
     .visit-intro:not([hidden]) + .stage{min-height:0}
     @media(prefers-reduced-motion:reduce){.progress span,.choice{transition:none}}
+
+    .stage{margin:0 auto;padding-top:30px}.stage h1{font-size:clamp(28px,3vw,40px)}.stage .lead{margin:14px 0 24px}.step-meta{margin-bottom:16px}
+    .question-grid,.contact-types{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.contact-types{margin-bottom:20px}
+    .question-block{min-width:0;margin:0;padding:16px;border:1px solid var(--line);background:#fffdf8}.question-block legend{max-width:100%;padding:0 5px;font-size:14px;font-weight:650;line-height:1.5}.question-block>.field>.field-label{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .question-wide{grid-column:1/-1}.question-input{min-height:48px;font-size:16px}.question-block .choice{min-height:42px;padding:8px 10px;font-size:14px;gap:9px}.question-block .choices{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.question-block .choice-key{display:none}.question-block .manual-option{min-height:42px;font-size:14px}.question-block .schedule{grid-template-columns:1fr 1fr;gap:16px}.schedule-section:first-child{grid-column:1/-1}.question-block .schedule-section{padding-top:0;border:0}.question-block .schedule-section h2{font-size:14px}.question-block .schedule .field-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}.question-block .schedule .schedule-hint{line-height:1.6}
+    .question-input[aria-invalid="true"]{border-color:var(--error)}.main .footer{position:sticky;bottom:0;background:var(--paper);z-index:2;margin-top:auto;padding:16px 0}.aside{position:sticky;top:0;height:100svh}.aside-content{height:100svh}
+    @media(max-width:800px){.stage{min-height:0;padding-top:24px}.stage h1{font-size:30px}.question-grid,.contact-types{gap:14px}.question-block{padding:12px}}
+    @media(max-width:560px){.question-grid{grid-template-columns:1fr}.question-block .schedule{grid-template-columns:1fr}.question-block .choice{font-size:13px}.main .footer{gap:12px}.question-block .schedule-section:first-child{grid-column:auto}.contact-types .question-input{font-size:16px}.stage h1{font-size:28px}}
+    .question-block{scroll-margin-block:90px}.question-block[aria-invalid="true"]{border-color:#9e3428}.field-error{margin:10px 0 0}.question-block .choice,.question-block .manual-option,.schedule-weekday,.schedule-time,.plan-close,.flip-button,.plan-save{min-height:44px}
+    .plan-dialog[open]{display:flex;flex-direction:column;overflow:hidden}.plan-dialog-header,.plan-controls,.plan-zoom-controls,.plan-confirm-note{flex-shrink:0}.plan-viewer{display:block;place-items:normal;flex:1 1 auto;min-height:120px;overscroll-behavior:contain}.plan-zoom-canvas{width:100%;height:100%}.plan-zoom-canvas .plan-large{width:100%;height:100%;max-width:none;max-height:none;object-fit:contain}.plan-zoom-controls{display:flex;align-items:center;gap:8px;padding:10px 12px}.plan-zoom-label{font-size:12px;white-space:nowrap}
   </style>
 </head>
 <body data-no-auto-cta="true">
@@ -177,8 +187,8 @@
 <a class="v8-skip" href="#stage">상담 질문 바로가기</a>
   <div class="shell">
     <aside class="aside" aria-hidden="true">
-      <img src="../../assets/portfolio/mega-centum-49py.jpg" alt="">
-      <div class="aside-content"><span class="brand">공간보감</span><div class="aside-copy"><p class="aside-kicker">SPACEBOGAM · CONSULTATION</p><p>어떤 집을 만들고 싶은지,<br>한 가지씩 알려주세요.</p></div></div>
+      <img src="/assets/portfolio/mega-centum-49py.jpg" alt="">
+      <div class="aside-content"><span class="brand">공간보감</span><div class="aside-copy"><p class="aside-kicker">SPACEBOGAM · CONSULTATION</p><p>어떤 집을 만들고 싶은지,<br>필요한 정보를 함께 알려주세요.</p></div></div>
     </aside>
     <main class="main">
       <div class="topbar"><span class="brand">공간보감</span><span class="prototype">방문 상담 예약 신청</span><button class="close" id="restart" type="button">처음부터</button></div>
@@ -189,6 +199,6 @@
   </div>
   <script src="/reports/consultation-step-prototype-20260928/apt-busan-dongs.js"></script>
   <script src="/reports/consultation-step-prototype-20260928/consultation-questions.js"></script>
-  <script src="/reports/consultation-step-prototype-20260928/flow.js?v=8c6910b6c682"></script>
+  <script src="/reports/consultation-step-prototype-20260928/flow.js?v=f92540942f29"></script>
 </body>
 </html>
