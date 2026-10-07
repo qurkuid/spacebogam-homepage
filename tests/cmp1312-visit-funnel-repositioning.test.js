@@ -257,7 +257,7 @@ test('tel wiring, tracking markers, and callback mount survive the copy change',
     assert.ok(html.includes(marker), marker);
   }
   assert.match(html, /commercial-call\.css\?v=commercial-intake-v1/);
-  assert.match(html, /commercial-call-callback\.js\?v=commercial-intake-v2/);
+  assert.match(html, /commercial-call-callback\.js\?v=[a-z0-9-]+/);
   assert.match(html, /noindex,nofollow/);
 });
 

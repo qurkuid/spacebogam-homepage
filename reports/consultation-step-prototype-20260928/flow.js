@@ -1,16 +1,16 @@
 (function () {
   const nodes = {
-    intro: { title: '공간보감에서는 이렇게 상담합니다.', lead: '신청 후 담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다.' },
+    intro: { title: '공간보감에서는 이렇게 상담합니다.', lead: '담당자가 내용을 확인한 뒤 상담 일정을 안내해 드립니다.' },
     type: { title: '어떤 공간을 바꾸실 계획인가요?', lead: '가장 가까운 항목을 골라주세요.', options: ['주거 공간', '상업 공간'] },
     housing: { title: '어떤 주거 공간인가요?', lead: '아파트라면 단지 정보로 도면 후보를 찾아볼게요.', options: ['아파트', '주택·빌라·기타'] },
     apartmentQuery: { title: '아파트를 찾아볼까요?', lead: '아파트 이름이나 도로명주소로 검색한 뒤 단지를 선택해 주세요.', label: '아파트 이름 또는 주소', placeholder: '예: 거제유림아시아드 또는 해맞이로 23', hint: '부산 단지 목록에 없거나 도면이 없으면 주소로 전체 도면 목록을 다시 조회합니다.' },
     dong: { title: '아파트 몇 동인가요?', lead: '해당 단지의 동을 선택해 주세요.', label: '동', placeholder: '예: 101동' },
     planReview: { title: '원하는 공간과 도면을 알려주세요.', lead: '스타일과 생활 방식, 요청사항을 함께 남겨 주세요. 도면은 필수이며 그 외 항목은 정하지 않았다면 비워 두셔도 됩니다.' },
     consent: { title: '상담 준비를 마칠까요?', lead: '답변을 확인하기 전에 개인정보 수집·이용에 동의해 주세요.' },
-    summary: { title: '입력 내용을 확인해 주세요', lead: '내용이 맞으면 방문 상담 예약 신청을 접수해 주세요. 신청 후 담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다. 신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.' },
+    summary: { title: '입력 내용을 확인해 주세요', lead: '내용이 맞으면 상담 신청을 접수해 주세요.' },
     contact: { title: '연락처와 시공장소를 알려주세요.', lead: '성함·연락처·주소를 한 번에 입력해 주세요.' },
-    planning: { title: '일정과 공사 계획을 알려주세요.', lead: '일정·예산과 공사 범위를 함께 작성해 주세요. 별표가 있는 항목은 필수이며 그 외 항목은 비워 두셔도 됩니다. 방문 일정은 담당자와 확인 후 확정됩니다.' },
-    success: { title: '방문 상담 예약 신청이 접수되었습니다', lead: '신청 후 담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다. 신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.' }
+    planning: { title: '일정과 공사 계획을 알려주세요.', lead: '일정·예산과 공사 범위를 함께 작성해 주세요. 별표가 있는 항목은 필수이며 그 외 항목은 비워 두셔도 됩니다.' },
+    success: { title: '상담 신청이 접수되었습니다', lead: '담당자가 내용을 확인한 뒤 상담 일정을 안내해 드립니다.' }
   };
   const stage = document.getElementById('stage');
   const next = document.getElementById('next');
@@ -228,7 +228,7 @@
     const date = unique.find(q => q.questionType === 'date' && /상담을 원하는 날짜/.test(q.question));
     const time = unique.find(q => q.questionType === 'single_choice' && /상담을 원하는 시간/.test(q.question));
     const callback = unique.find(q => /연락 가능한 시간대/.test(q.question));
-    const schedule = day && date && time ? { ...day, question: '방문 상담 희망 일정을 선택해 주세요.', questionType: 'schedule', isRequired: true, parts: [day, date, time] } : null;
+    const schedule = day && date && time ? { ...day, question: '상담 희망 일정을 선택해 주세요.', questionType: 'schedule', isRequired: true, parts: [day, date, time] } : null;
     return unique.filter(q => q.questionType !== 'password' && q !== day && q !== date && q !== time)
       .concat(separate, schedule ? [schedule] : []);
   }
@@ -1231,19 +1231,17 @@
   function render() {
     const stepChanged = renderedStep !== current;
     renderedStep = current;
-    const visitIntro = document.getElementById('visit-intro');
-    if (visitIntro) visitIntro.hidden = current !== 'type';
     stage.replaceChildren();
     const question = current === 'question' ? questionList()[questionIndex] : null;
-    const node = question ? { title: question.question, lead: String(question.id) === '5' ? '공사를 시작하고 싶은 날짜를 선택해 주세요.' : question.questionType === 'schedule' ? '사무실 방문이 가능한 요일과 희망 날짜·시간을 선택해 주세요. 아직 정하지 않았다면 건너뛰어도 됩니다. 신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.' : question.isRequired ? '상담에 필요한 정보입니다.' : '선택 입력입니다. 아직 정하지 않았다면 건너뛰어도 됩니다.' } : nodes[current];
+    const node = question ? { title: question.question, lead: String(question.id) === '5' ? '공사를 시작하고 싶은 날짜를 선택해 주세요.' : question.questionType === 'schedule' ? '상담이 가능한 요일과 희망 날짜·시간을 선택해 주세요.' : question.isRequired ? '상담에 필요한 정보입니다.' : '선택 입력입니다. 아직 정하지 않았다면 건너뛰어도 됩니다.' } : nodes[current];
     stage.appendChild(el('p', 'step-meta', current === 'intro' ? '상담 진행 안내' : current === 'summary' ? '입력 내용 확인' : current === 'success' ? '접수 완료' : ({ contact: '상담 정보 1 / 3', planning: '상담 정보 2 / 3', planReview: '상담 정보 3 / 3' }[current] || '상담 신청')));
     stage.appendChild(el('h1', null, node.title));
     stage.appendChild(el('p', 'lead', node.lead));
     if (current === 'intro') {
       const steps = el('ol', 'consult-process');
       [
-        ['방문 일정 확인 전화', '담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다.'],
-        ['사무실 방문 상담', '사무실에서 원하시는 공간과 공사 범위, 예산, 일정을 구체적으로 상담합니다.']
+        ['신청 내용 확인', '담당자가 내용을 확인한 뒤 상담 일정을 안내해 드립니다.'],
+        ['상담 진행', '원하시는 공간과 공사 범위, 예산, 일정을 함께 상담합니다.']
       ].forEach(([title, description]) => {
         const item = el('li');
         item.appendChild(el('h2', null, title));
@@ -1275,7 +1273,7 @@
     back.disabled = submitting || uncertainSubmission;
     skip.hidden = true;
     next.hidden = current === 'success';
-    next.textContent = current === 'intro' ? '상담 신청 시작하기 →' : current === 'summary' ? '방문 상담 예약 신청 접수 →' : current === 'consent' ? '입력 내용 확인 →' : current === 'dong' && answers.dong ? '도면 확인하기 →' : '다음 →';
+    next.textContent = current === 'intro' ? '상담 신청 시작하기 →' : current === 'summary' ? '상담 신청하기 →' : current === 'consent' ? '입력 내용 확인 →' : current === 'dong' && answers.dong ? '도면 확인하기 →' : '다음 →';
     next.disabled = ['intro','contact','planning','summary'].includes(current) ? false
       : current === 'planReview' ? !answers.planAttachment || answers.planStatus !== 'saved'
         : current === 'apartmentQuery' ? !answers.apartmentSelected && !answers.apartmentUnmatched
