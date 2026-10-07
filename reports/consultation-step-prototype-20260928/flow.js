@@ -1,6 +1,5 @@
 (function () {
   const nodes = {
-    intro: { title: '공간보감에서는 이렇게 상담합니다.', lead: '신청 후 담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다.' },
     type: { title: '어떤 공간을 바꾸실 계획인가요?', lead: '가장 가까운 항목을 골라주세요.', options: ['주거 공간', '상업 공간'] },
     housing: { title: '어떤 주거 공간인가요?', lead: '아파트라면 단지 정보로 도면 후보를 찾아볼게요.', options: ['아파트', '주택·빌라·기타'] },
     apartmentQuery: { title: '아파트를 찾아볼까요?', lead: '아파트 이름이나 도로명주소로 검색한 뒤 단지를 선택해 주세요.', label: '아파트 이름 또는 주소', placeholder: '예: 거제유림아시아드 또는 해맞이로 23', hint: '부산 단지 목록에 없거나 도면이 없으면 주소로 전체 도면 목록을 다시 조회합니다.' },
@@ -17,7 +16,7 @@
   const progress = document.querySelector('.progress');
   const progressFill = document.getElementById('progress-fill');
   let answers = { responses: {} };
-  let current = 'intro';
+  let current = 'type';
   let trail = [];
   let questionIndex = 0;
   let questions = [];
@@ -303,7 +302,6 @@
   }
 
   function nextNode(key) {
-    if (key === 'intro') return 'type';
     if (key === 'type') return answers.type === '주거 공간' ? 'housing' : nextQuestion(0);
     if (key === 'housing') return isApartment() ? 'apartmentQuery' : nextQuestion(0);
     if (key === 'apartmentQuery') return 'dong';
@@ -1099,23 +1097,10 @@
     stage.replaceChildren();
     const question = current === 'question' ? questionList()[questionIndex] : null;
     const node = question ? { title: question.question, lead: String(question.id) === '5' ? '공사를 시작하고 싶은 날짜를 선택해 주세요. 정하지 않았다면 ‘아직 미정이에요’를 선택해 주세요.' : question.questionType === 'schedule' ? '사무실 방문이 가능한 요일과 희망 날짜·시간을 선택해 주세요. 아직 정하지 않았다면 건너뛰어도 됩니다. 신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.' : question.isRequired ? '상담에 필요한 정보입니다.' : '선택 입력입니다. 아직 정하지 않았다면 건너뛰어도 됩니다.' } : nodes[current];
-    stage.appendChild(el('p', 'step-meta', current === 'intro' ? '상담 진행 안내' : current === 'summary' ? '입력 내용 확인' : current === 'success' ? '접수 완료' : '질문 ' + String(trail.length).padStart(2, '0')));
+    stage.appendChild(el('p', 'step-meta', current === 'summary' ? '입력 내용 확인' : current === 'success' ? '접수 완료' : '질문 ' + String(trail.length + 1).padStart(2, '0')));
     stage.appendChild(el('h1', null, node.title));
     stage.appendChild(el('p', 'lead', node.lead));
-    if (current === 'intro') {
-      const steps = el('ol', 'consult-process');
-      [
-        ['방문 일정 확인 전화', '담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다.'],
-        ['사무실 방문 상담', '사무실에서 원하시는 공간과 공사 범위, 예산, 일정을 구체적으로 상담합니다.']
-      ].forEach(([title, description]) => {
-        const item = el('li');
-        item.appendChild(el('h2', null, title));
-        item.appendChild(el('p', null, description));
-        steps.appendChild(item);
-      });
-      stage.appendChild(steps);
-      stage.appendChild(el('p', 'hint', '아래 질문에 답해 주시면 상담 준비에 도움이 됩니다.'));
-    } else if (['type', 'housing'].includes(current)) renderChoices(current);
+    if (['type', 'housing'].includes(current)) renderChoices(current);
     else if (current === 'apartmentQuery') renderApartmentSearch();
     else if (current === 'dong') renderDong();
     else if (current === 'planReview') renderPlan();
@@ -1127,15 +1112,15 @@
     back.hidden = trail.length === 0 || current === 'success';
     skip.hidden = current !== 'question' || question.isRequired;
     next.hidden = current === 'success';
-    next.textContent = current === 'intro' ? '상담 신청 시작하기 →' : current === 'summary' ? '방문 상담 예약 신청 접수 →' : current === 'consent' ? '입력 내용 확인 →' : current === 'dong' && answers.dong ? '도면 확인하기 →' : '다음 →';
-    next.disabled = current === 'intro' || current === 'summary' ? false
+    next.textContent = current === 'summary' ? '방문 상담 예약 신청 접수 →' : current === 'consent' ? '입력 내용 확인 →' : current === 'dong' && answers.dong ? '도면 확인하기 →' : '다음 →';
+    next.disabled = current === 'summary' ? false
       : current === 'planReview' ? !['saved', 'none'].includes(answers.planStatus)
         : current === 'apartmentQuery' ? !answers.apartmentSelected && !answers.apartmentUnmatched
           : current === 'question' ? question.isRequired && !hasResponse(question)
             : current === 'consent' ? !answers.consent
               : !String(answers[current] || '').trim();
     const total = questionList().filter(q => !skipQuestion(q)).length + (isApartment() ? 5 : answers.type === '주거 공간' ? 2 : 1) + 1;
-    const percent = current === 'summary' || current === 'success' ? 100 : Math.min(95, Math.round(Math.max(0, trail.length - 1) / total * 100));
+    const percent = current === 'summary' || current === 'success' ? 100 : Math.min(95, Math.round(trail.length / total * 100));
     progress.setAttribute('aria-valuenow', String(percent));
     progressFill.style.width = percent + '%';
     trackStep('view');
@@ -1168,7 +1153,7 @@
       if (!['saved', 'none'].includes(answers.planStatus)) { showError('도면을 저장하거나 도면 없이 진행을 선택해 주세요.'); return; }
     } else if (current === 'consent') {
       if (!answers.consent) { showError('개인정보 수집·이용 동의가 필요합니다.'); return; }
-    } else if (current !== 'intro') {
+    } else {
       const value = String(answers[current] || '').trim();
       if (!value) { showError('이 항목을 입력해 주세요.'); return; }
       if (current === 'apartmentQuery' && normalize(value).length < 2) { showError('아파트 이름이나 주소를 두 글자 이상 입력해 주세요.'); return; }
@@ -1209,7 +1194,7 @@
     lookup = { status: 'idle', candidates: [] };
     trail = [];
     questionIndex = 0;
-    current = 'intro';
+    current = 'type';
     funnel('lead_form_view');
     render();
   });

@@ -84,22 +84,18 @@ const pickNextMonthDay = day => {
 
 function restart() {
   nodes.restart.click();
-  assert.match(title(), /공간보감에서는 이렇게 상담/);
-  assert.equal(nodes.next.textContent, '상담 신청 시작하기 →');
-  assert.equal(nodes.next.disabled, false);
+  assert.match(title(), /어떤 공간을 바꾸실 계획/);
+  assert.equal(nodes.next.textContent, '다음 →');
+  assert.equal(nodes.next.disabled, true);
   assert.equal(nodes.back.hidden, true);
   assert.equal(nodes.skip.hidden, true);
-  const steps = stage().querySelector('.consult-process');
-  assert.equal(steps.children.length, 2);
-  assert.match(stage().children[2].textContent, /신청 후 담당자가 개인 휴대전화로 연락드려/);
-  assert.match(steps.children[0].children[1].textContent, /기본 정보와 사무실 방문 일정을 확인/);
-  assert.equal(steps.children[0].children[0].textContent, '방문 일정 확인 전화');
-  assert.equal(steps.children[1].children[0].textContent, '사무실 방문 상담');
-  next();
-  assert.match(title(), /어떤 공간을 바꾸실 계획/);
+  assert.equal(stage().querySelector('.consult-process'), null);
   assert.equal(stage().children[0].textContent, '질문 01');
   assert.equal(progress.getAttribute('aria-valuenow'), '0');
 }
+
+assert.match(title(), /어떤 공간을 바꾸실 계획/, '처음 열 때 바로 첫 질문');
+assert.equal(nodes.back.hidden, true);
 
 async function startApartment(name) {
   restart();
@@ -254,11 +250,11 @@ async function run() {
   assert.equal(snapshot.residential.length, 22);
   assert.equal(snapshot.commercial.length, 17);
   assert.deepEqual(Array.from(snapshot.residential.filter(q => q.isRequired), q => q.id), [13, 10, 15, 4]);
-  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_view_intro' && data.step_id === 'intro').length, 1);
-  assert.equal(stepEvents.filter(([, name]) => name === 'consult_view_type').length, 0);
+  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_view_intro' && data.step_id === 'intro').length, 0);
+  assert.equal(stepEvents.filter(([, name]) => name === 'consult_view_type').length, 1);
 
   await startApartment('해맞이로');
-  assert.equal(stepEvents.filter(([, name]) => name === 'consult_complete_intro').length, 1);
+  assert.equal(stepEvents.filter(([, name]) => name === 'consult_complete_intro').length, 0);
   assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_complete_type' && data.step_id === 'type').length, 1);
   assert.deepEqual(Object.keys(stepEvents.find(([, name, data]) => name === 'consult_view_apartmentQuery' && data.step_id === 'apartmentQuery')[2]).sort(),
     ['form_id', 'journey_type', 'progress_percent', 'sb_session_id', 'send_to', 'step_id', 'step_number']);
@@ -596,6 +592,9 @@ async function run() {
   const trackedCount = stepEvents.filter(([, name]) => name.startsWith('consult_')).length;
   context.sessionStorage.setItem('spacebogam_funnel_is_test', 'true');
   restart(); choose(0);
+  nodes.back.click();
+  assert.match(title(), /어떤 공간을 바꾸실 계획/, '이전 버튼도 안내 화면으로 돌아가지 않는다');
+  assert.equal(nodes.back.hidden, true);
   assert.equal(stepEvents.filter(([, name]) => name.startsWith('consult_')).length, trackedCount);
   console.log('consultation prototype: plan, conditional questions, combined consultation schedule, calendars passed');
 }
