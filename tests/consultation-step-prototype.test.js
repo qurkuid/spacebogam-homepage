@@ -279,6 +279,15 @@ async function run() {
   const dialog = stage().querySelector('.plan-dialog');
   assert.equal(dialog.open, true);
   assert.match(dialog.querySelector('.plan-large').src, /\.jpg$/);
+  const zoomButtons = dialog.querySelectorAll('.plan-zoom-button');
+  assert.equal(zoomButtons[0].disabled, true);
+  zoomButtons[1].click();
+  assert.equal(dialog.querySelector('.plan-zoom-canvas').style.width, '150%');
+  for (let i = 0; i < 5; i++) zoomButtons[1].click();
+  assert.equal(dialog.querySelector('.plan-zoom-label').textContent, '300%');
+  assert.equal(zoomButtons[1].disabled, true);
+  zoomButtons[2].click();
+  assert.equal(dialog.querySelector('.plan-zoom-canvas').style.width, '100%');
   dialog.querySelectorAll('.flip-button')[0].click();
   assert.equal(dialog.querySelector('.plan-large').style.transform, 'scale(-1,1)');
   dialog.querySelector('.plan-save').click();

@@ -536,12 +536,38 @@
     header.appendChild(close);
     dialog.appendChild(header);
     const viewer = el('div', 'plan-viewer');
+    viewer.tabIndex = 0;
+    viewer.setAttribute('aria-label', '도면 보기 · 확대 후 좌우와 위아래로 이동할 수 있습니다');
+    const canvas = el('div', 'plan-zoom-canvas');
     const visual = el('img', 'plan-large');
     visual.src = item.url;
     visual.title = item.name + ' 크게 보기';
     visual.alt = item.name + ' 도면 크게 보기';
-    viewer.appendChild(visual);
+    canvas.appendChild(visual);
+    viewer.appendChild(canvas);
     dialog.appendChild(viewer);
+    const zoomControls = el('div', 'plan-zoom-controls');
+    const zoomOut = el('button', 'plan-zoom-button', '축소 −');
+    const zoomIn = el('button', 'plan-zoom-button', '확대 +');
+    const fit = el('button', 'plan-zoom-button', '전체 보기');
+    const zoomLabel = el('span', 'plan-zoom-label', '100%');
+    zoomLabel.setAttribute('aria-live', 'polite');
+    let zoom = 1;
+    function setZoom(value) {
+      zoom = Math.max(1, Math.min(3, value));
+      canvas.style.width = canvas.style.height = zoom * 100 + '%';
+      zoomLabel.textContent = Math.round(zoom * 100) + '%';
+      zoomOut.disabled = zoom === 1;
+      zoomIn.disabled = zoom === 3;
+      viewer.scrollLeft = (viewer.scrollWidth - viewer.clientWidth) / 2;
+      viewer.scrollTop = (viewer.scrollHeight - viewer.clientHeight) / 2;
+    }
+    [zoomOut, zoomIn, fit].forEach(button => { button.type = 'button'; zoomControls.appendChild(button); });
+    zoomOut.addEventListener('click', () => setZoom(zoom - .5));
+    zoomIn.addEventListener('click', () => setZoom(zoom + .5));
+    fit.addEventListener('click', () => setZoom(1));
+    zoomControls.appendChild(zoomLabel);
+    dialog.appendChild(zoomControls);
     dialog.appendChild(el('p', 'plan-confirm-note', '상담할 공간의 도면이 맞는지 확인해 주세요. 목록 도면은 선택한 동이나 평형과 다를 수 있습니다.'));
     const controls = el('div', 'plan-controls');
     let flipX = item.flipX || false;
@@ -587,6 +613,7 @@
     stage.appendChild(dialog);
     applyFlip();
     dialog.showModal();
+    setZoom(1);
   }
 
   function renderAddressLookup() {
