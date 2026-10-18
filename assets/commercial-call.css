@@ -153,3 +153,16 @@ body.commercial-call{background:var(--paper);color:var(--ink)}
   .cc-header .cc-tel{display:none}
   .cc-sticky-bar{display:block}
 }
+
+/* Keep the short request easy to reach without covering mobile fields. */
+#cc-request{scroll-margin-top:20px}
+.cc-fallback .cc-note{margin:0 0 28px}
+.cc-primary-hint{font-size:13px;font-weight:400}
+.cc-vertical-nav{display:flex;gap:24px;margin-top:24px;font-size:14px}
+.cc-vertical-nav a{border-bottom:1px solid var(--line)}
+body[data-commercial-vertical="office"] [data-vertical-link="office"],
+body[data-commercial-vertical="shop"] [data-vertical-link="shop"]{border-bottom-color:var(--ink);font-weight:650}
+
+.cc-consent-details{margin-top:12px;font-size:13px;line-height:1.8}
+.cc-consent-details summary{cursor:pointer;text-decoration:underline}
+.cc-consent-details a{text-decoration:underline}

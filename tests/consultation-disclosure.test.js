@@ -31,7 +31,7 @@ test('callback consent quotes canonical retention, not destruction immediately a
   assert.ok(callback.includes('보유 기간: ' + retention));
   assert.doesNotMatch(callback, /상담 종료 후 파기/);
   assert.match(callback, /privacyLink\.href = '\/privacy\/'/);
-  assert.match(callback, /보유 기간의 예외 등 상세 내용/);
+  assert.match(callback, /보유 기간 예외 등/);
   assert.match(callback, /if \(!consentInput\.checked\)/);
 });
 
@@ -61,14 +61,13 @@ test('commercial disclosure covers the existing nine required fields and optiona
   assert.deepEqual(fields.filter((m) => m[2] === 'false').map((m) => m[1]), ['requestNote']);
 });
 
-test('callback disclosure matches all six existing mandatory validations', () => {
-  const required = '성함, 연락처, 현장 주소, 평수/면적, 계약 여부, 공사 시작일';
-  assert.equal(row('commercial-callback').required, required + ' (6개)');
-  assert.ok(callback.includes('필수 입력: ' + required + '.'));
+test('callback disclosure matches name, phone and consent required controls', () => {
+  assert.equal(row('commercial-callback').required, '성함, 연락처 (2개)');
+  assert.deepEqual([...callback.matchAll(/([a-zA-Z]+)\.required = true/g)].map(m => m[1]), ['nameInput', 'phoneInput', 'consentInput']);
   const submitHandler = callback.slice(callback.indexOf("form.addEventListener('submit'"));
-  assert.deepEqual([...submitHandler.matchAll(/if \(!([a-zA-Z]+)\) \{/g)].map((m) => m[1]), ['name', 'phone', 'address', 'area', 'leaseStatus', 'constructionStartDate']);
-  for (const input of ['nameInput', 'phoneInput', 'addressInput', 'areaInput', 'leaseStatusSelect', 'constructionStartDateInput']) {
-    assert.ok(submitHandler.includes(input + ".setAttribute('aria-invalid', 'true')"));
+  for (const field of ['address', 'area', 'leaseStatus', 'constructionStartDate']) {
+    assert.ok(row('commercial-callback').optional.includes({address:'현장 주소',area:'평수/면적',leaseStatus:'계약 여부',constructionStartDate:'공사 시작 희망일'}[field]));
+    assert.ok(!submitHandler.includes('if (!' + field + ')'));
   }
 });
 

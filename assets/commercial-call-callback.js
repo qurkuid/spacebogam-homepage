@@ -1,7 +1,6 @@
-/* CMP-1315 상업 상담 랜딩 — 연결 실패용 최소 콜백 폼
+/* 상업 상담 랜딩 — 최소 상담 요청 폼
  *
- * 전화가 어려운 방문자를 위한 콜백 폼. 성함/연락처와 현장 주소/면적/계약 여부/
- * 공사 시작일을 필수로 받고, 나머지 정보는 선택 또는 기본값으로 받는다.
+ * 전화가 어려운 방문자를 위한 콜백 폼. 성함/연락처와 필수 동의를 먼저 받고, 현장 상세는 선택 입력으로 받는다.
  * CMP-1312 재포지셔닝: 콜백은 담당자가
  * 전화드려 조건을 확인하고 대면상담 일정을 잡기 위한 요청이다 — 카피만
  * 그 프레임으로 쓰고, 제출 API·질문 ID·이벤트명 계약은 그대로 둔다. 주거형 28문항 상담폼(/consultation/apply/,
@@ -228,6 +227,7 @@
     nameInput.id = 'cc-callback-name';
     nameInput.autocomplete = 'name';
     nameInput.maxLength = 60;
+    nameInput.required = true;
     nameLabel.setAttribute('for', nameInput.id);
     nameField.appendChild(nameLabel);
     nameField.appendChild(nameInput);
@@ -243,53 +243,14 @@
     phoneInput.autocomplete = 'tel';
     phoneInput.placeholder = '010-0000-0000';
     phoneInput.maxLength = 20;
+    phoneInput.required = true;
     phoneLabel.setAttribute('for', phoneInput.id);
     phoneField.appendChild(phoneLabel);
     phoneField.appendChild(phoneInput);
     form.appendChild(phoneField);
 
-    function requiredInput(id, labelText, type, placeholder, maxLength){
-      var field = el('div', 'cc-field');
-      var label = el('label', 'cc-label', labelText + ' ');
-      label.appendChild(el('span', 'cc-required', '*'));
-      var input = document.createElement('input');
-      input.type = type;
-      input.className = 'cc-input';
-      input.id = id;
-      input.required = true;
-      if (placeholder) input.placeholder = placeholder;
-      if (maxLength) input.maxLength = maxLength;
-      label.setAttribute('for', id);
-      field.appendChild(label);
-      field.appendChild(input);
-      form.appendChild(field);
-      return input;
-    }
-
-    var addressInput = requiredInput('cc-callback-address', '현장 주소', 'text', '예: 부산 해운대구', 200);
-    addressInput.autocomplete = 'street-address';
-    var areaInput = requiredInput('cc-callback-area', '평수/면적', 'text', '예: 30평 또는 99㎡', 60);
-
-    var leaseStatusField = el('div', 'cc-field');
-    var leaseStatusLabel = el('label', 'cc-label', '계약 여부 ');
-    leaseStatusLabel.appendChild(el('span', 'cc-required', '*'));
-    var leaseStatusSelect = document.createElement('select');
-    leaseStatusSelect.className = 'cc-input cc-select';
-    leaseStatusSelect.id = 'cc-callback-lease-status';
-    leaseStatusSelect.required = true;
-    leaseStatusSelect.appendChild(option('', '계약 상태를 선택해주세요'));
-    LEASE_STATUS_OPTIONS.forEach(function(item){ leaseStatusSelect.appendChild(option(item.value, item.label)); });
-    leaseStatusLabel.setAttribute('for', leaseStatusSelect.id);
-    leaseStatusField.appendChild(leaseStatusLabel);
-    leaseStatusField.appendChild(leaseStatusSelect);
-    form.appendChild(leaseStatusField);
-
-    var constructionStartDateInput = requiredInput(
-      'cc-callback-construction-start-date', '공사 시작일', 'date', '', 0
-    );
-
     var verticalField = el('div', 'cc-field');
-    var verticalLabel = el('label', 'cc-label', '업종');
+    var verticalLabel = el('label', 'cc-label', '업종 (선택)');
     var verticalSelect = document.createElement('select');
     verticalSelect.className = 'cc-input cc-select';
     verticalSelect.id = 'cc-callback-vertical';
@@ -302,7 +263,7 @@
     form.appendChild(verticalField);
 
     var budgetField = el('div', 'cc-field');
-    var budgetLabel = el('label', 'cc-label', '예산');
+    var budgetLabel = el('label', 'cc-label', '예산 (선택)');
     var budgetSelect = document.createElement('select');
     budgetSelect.className = 'cc-input cc-select';
     budgetSelect.id = 'cc-callback-budget';
@@ -352,6 +313,22 @@
       return input;
     }
 
+    var addressInput = detailInput('cc-callback-address', '현장 주소', 'text', '예: 부산 해운대구', 200);
+    addressInput.autocomplete = 'street-address';
+    var areaInput = detailInput('cc-callback-area', '평수/면적', 'text', '예: 30평 또는 99㎡', 50);
+    var leaseStatusField = el('div', 'cc-field');
+    var leaseStatusLabel = el('label', 'cc-label', '계약 여부 (선택)');
+    var leaseStatusSelect = document.createElement('select');
+    leaseStatusSelect.className = 'cc-input cc-select';
+    leaseStatusSelect.id = 'cc-callback-lease-status';
+    leaseStatusSelect.appendChild(option('', '미정 / 나중에 안내'));
+    LEASE_STATUS_OPTIONS.forEach(function(item){ leaseStatusSelect.appendChild(option(item.value, item.label)); });
+    leaseStatusLabel.setAttribute('for', leaseStatusSelect.id);
+    leaseStatusField.appendChild(leaseStatusLabel);
+    leaseStatusField.appendChild(leaseStatusSelect);
+    detailsBody.appendChild(leaseStatusField);
+    var constructionStartDateInput = detailInput('cc-callback-construction-start-date', '공사 시작 희망일', 'date', '', 0);
+
     var openDateInput = detailInput('cc-callback-open-date', '오픈 희망일', 'date', '', 0);
 
     var noteField = el('div', 'cc-field');
@@ -366,46 +343,47 @@
     noteField.appendChild(noteLabel);
     noteField.appendChild(requestNoteInput);
     detailsBody.appendChild(noteField);
+    [verticalField, budgetField, timeField].forEach(function(field){ detailsBody.appendChild(field); });
     details.appendChild(detailsBody);
     form.appendChild(details);
 
-    var disclosure = el('p', 'cc-note',
-      '필수 입력: 성함, 연락처, 현장 주소, 평수/면적, 계약 여부, 공사 시작일. ' +
-      '선택 입력: 통화 가능한 시간대, 오픈 희망일, 추가 요청사항. ' +
-      '업종과 예산은 기본값이 선택되어 있으며 변경할 수 있고, 변경하지 않아도 해당 값이 전송됩니다.'
-    );
-    form.appendChild(disclosure);
+    detailsBody.appendChild(el('p', 'cc-note', '업종과 예산은 기본값이 선택되어 있으며 변경할 수 있습니다. 변경하지 않아도 해당 값이 전송됩니다. 선택 정보는 입력하지 않아도 신청할 수 있습니다.'));
 
     var consentWrap = el('div', 'cc-consent');
     var consentLabel = el('label', 'cc-choice');
     var consentInput = document.createElement('input');
     consentInput.type = 'checkbox';
     consentInput.id = 'cc-callback-consent';
+    consentInput.required = true;
     consentLabel.appendChild(consentInput);
-    consentLabel.appendChild(document.createTextNode(
-      '개인정보 수집·이용에 동의합니다. (상담 콜백 및 대면상담 일정 안내 목적, 보유 기간: 상담 종료 후 1년 또는 이용자의 삭제 요청 시까지 (둘 중 먼저 도래하는 시점))'
-    ));
+    consentLabel.appendChild(document.createTextNode('상담 요청을 위한 개인정보 수집·이용에 동의합니다. (필수)'));
     consentWrap.appendChild(consentLabel);
-    var privacyLink = el('a', 'cc-note', '개인정보처리방침 (보유 기간의 예외 등 상세 내용)');
+    var consentDetails = el('details', 'cc-consent-details');
+    consentDetails.appendChild(el('summary', '', '수집 항목·목적·보유 기간 확인'));
+    consentDetails.appendChild(el('p', '', '필수: 성함·연락처. 선택: 직접 입력한 현장·일정·예산·요청 정보. 목적: 상담 요청 확인 및 희망 시 사무실 상담 일정 협의. 보유 기간: 상담 종료 후 1년 또는 이용자의 삭제 요청 시까지 (둘 중 먼저 도래하는 시점). 동의를 거부할 수 있으나 상담 요청 접수는 제한됩니다.'));
+    var privacyLink = el('a', '', '개인정보처리방침 (보유 기간 예외 등)');
     privacyLink.href = '/privacy/';
     privacyLink.target = '_blank';
     privacyLink.rel = 'noopener';
-    consentWrap.appendChild(privacyLink);
+    consentDetails.appendChild(privacyLink);
+    consentWrap.appendChild(consentDetails);
     form.appendChild(consentWrap);
 
     var status = el('p', 'cc-callback-status');
     status.setAttribute('role', 'status');
     form.appendChild(status);
 
-    var submit = el('button', 'cc-secondary cc-callback-submit', '콜백으로 대면상담 잡기');
+    var submit = el('button', 'cc-secondary cc-callback-submit', '상담 요청 남기기');
     submit.type = 'submit';
     form.appendChild(submit);
 
     form.addEventListener('input', trackStart);
     form.addEventListener('change', trackStart);
 
+    var submitting = false;
     form.addEventListener('submit', function(event){
       event.preventDefault();
+      if (submitting) return;
       status.textContent = '';
       status.classList.remove('cc-status-error');
       nameInput.removeAttribute('aria-invalid');
@@ -435,39 +413,11 @@
         nameInput.focus();
         return;
       }
-      if (!phone) {
-        status.textContent = '연락처를 입력해주세요.';
+      if (!/^01\d[-\d\s]{7,}$/.test(phone)) {
+        status.textContent = '휴대전화 번호를 확인해주세요.';
         status.classList.add('cc-status-error');
         phoneInput.setAttribute('aria-invalid', 'true');
         phoneInput.focus();
-        return;
-      }
-      if (!address) {
-        status.textContent = '현장 주소를 입력해주세요.';
-        status.classList.add('cc-status-error');
-        addressInput.setAttribute('aria-invalid', 'true');
-        addressInput.focus();
-        return;
-      }
-      if (!area) {
-        status.textContent = '평수/면적을 입력해주세요.';
-        status.classList.add('cc-status-error');
-        areaInput.setAttribute('aria-invalid', 'true');
-        areaInput.focus();
-        return;
-      }
-      if (!leaseStatus) {
-        status.textContent = '계약 여부를 선택해주세요.';
-        status.classList.add('cc-status-error');
-        leaseStatusSelect.setAttribute('aria-invalid', 'true');
-        leaseStatusSelect.focus();
-        return;
-      }
-      if (!constructionStartDate) {
-        status.textContent = '공사 시작일을 선택해주세요.';
-        status.classList.add('cc-status-error');
-        constructionStartDateInput.setAttribute('aria-invalid', 'true');
-        constructionStartDateInput.focus();
         return;
       }
       if (!consentInput.checked) {
@@ -503,6 +453,7 @@
       });
       marketingAttribution.is_test = isTest ? 'true' : '';
 
+      submitting = true;
       submit.disabled = true;
       submit.textContent = '접수 중…';
 
@@ -540,8 +491,9 @@
         }
         renderSuccess();
       }).catch(function(error){
+        submitting = false;
         submit.disabled = false;
-        submit.textContent = '콜백으로 대면상담 잡기';
+        submit.textContent = '상담 요청 남기기';
         status.textContent = '접수에 실패했습니다. 잠시 후 다시 시도하시거나 전화로 문의해주세요. (' +
           ((error && error.message) || 'network error') + ')';
         status.classList.add('cc-status-error');
@@ -557,9 +509,9 @@
     root.innerHTML = '';
     var box = el('div', 'cc-callback-success');
     box.appendChild(el('p', 'cc-callback-success-title', '콜백 요청이 접수되었습니다.'));
-    box.appendChild(el('p', 'cc-note', '남겨주신 연락처로 담당자가 전화드려 조건을 확인하고, 대면상담 일정을 함께 잡아드립니다.'));
+    box.appendChild(el('p', 'cc-note', '남겨주신 연락처로 담당자가 요청 내용을 확인합니다. 사무실 방문 상담을 원하시면 가능한 일정을 함께 협의합니다. 신청만으로 방문 일정이나 계약이 확정되지 않습니다.'));
     root.appendChild(box);
-    sendFunnelEvent('lead_submit_success');
+    // The submit API records the successful lead with this event ID and applies test/admin exclusions.
     try { if (session) session.removeItem(EVENT_IDS_KEY); } catch(e) {}
   }
 

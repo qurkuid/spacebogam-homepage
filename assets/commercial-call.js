@@ -69,7 +69,7 @@
     office: {
       eyebrow: '부산 사무실 인테리어',
       headline: ['직원이 늘었는데,', '사무실은 그대로인가요?'],
-      lead: '이전·확장·재배치는 인원수, 전용면적, 입주 희망일부터 확인해야 방향이 잡힙니다. 전화로 이 조건들을 먼저 확인하고, 대면상담 일정을 잡아드립니다. 조건 확인 없이 금액부터 말씀드리지 않습니다.',
+      lead: '이전·확장·재배치, 우리 팀에 필요한 공간부터 함께 정리합니다. 좌석과 회의실 구성, 전기·통신, 입주 일정을 상담하며 공사 계획의 방향을 잡아보세요. 아직 면적이나 일정이 정해지지 않아도 요청을 남길 수 있습니다.',
       whyTitle: '업무 방식과 전기·통신 계획을 먼저 맞춥니다',
       cards: [
         ['설비 조건', '전기 용량, 통신·네트워크, 공조, 소방, 냉난방 위치를 도면보다 먼저 확인합니다.'],
@@ -86,7 +86,7 @@
     shop: {
       eyebrow: '부산 카페·매장 인테리어',
       headline: ['공사가 하루 늦어지면,', '매출도 하루 늦게 시작됩니다.'],
-      lead: '업종, 전용면적, 오픈 희망일을 전화로 먼저 확인하고, 대면상담 일정을 잡아드립니다. 급배수·환기·간판 같은 세부 조건은 대면상담에서 함께 확인합니다. 조건 확인 없이 금액부터 말씀드리지 않습니다.',
+      lead: '매장을 준비하며 막막한 동선과 설비, 오픈 일정부터 함께 정리합니다. 고객과 직원의 움직임, 급배수·환기·간판을 상담하며 공사 계획의 방향을 잡아보세요. 아직 계약 전이거나 일정이 미정이어도 요청을 남길 수 있습니다.',
       whyTitle: '고객 동선과 주방·백룸 설비를 먼저 맞춥니다',
       cards: [
         ['설비 조건', '전기 용량, 급배수, 후드·환기, 소방, 간판·파사드를 도면보다 먼저 확인합니다.'],
@@ -117,22 +117,22 @@
     office_a: {
       vertical: 'office',
       headline: ['입주일은 정해졌는데,', '공사 계획은 아직인가요?'],
-      lead: '입주일을 기준으로 좌석 수, 전기·통신 조건, 건물의 공사 가능 시간부터 확인해야 일정이 구체화됩니다. 전화로 기본 조건을 먼저 확인하고, 대면상담 일정을 잡아드립니다.'
+      lead: '정해진 입주일에 맞춰 무엇부터 준비할지 함께 정리해보세요. 좌석 배치와 전기·통신, 건물의 공사 가능 시간을 살펴 공사 계획을 구체화합니다. 성함과 연락처를 남기면 담당자가 요청 내용을 확인합니다.'
     },
     office_b: {
       vertical: 'office',
       headline: ['직원이 늘었는데,', '사무실은 그대로인가요?'],
-      lead: '회의실, 집중석, 전기·통신 배선이 실제 업무 흐름과 맞아야 합니다. 현재 사용 방식과 필요한 공간을 전화로 먼저 확인하고, 대면상담 일정을 잡아드립니다.'
+      lead: '늘어난 인원에 맞는 좌석과 회의실, 집중할 공간을 함께 생각합니다. 현재 업무 방식과 필요한 공간부터 상담해보세요. 성함과 연락처를 남기면 담당자가 요청 내용을 확인합니다.'
     },
     shop_a: {
       vertical: 'shop',
       headline: ['공사가 하루 늦어지면,', '매출도 하루 늦게 시작됩니다.'],
-      lead: '업종, 전용면적, 오픈 희망일을 전화로 먼저 확인하고, 대면상담 일정을 잡아드립니다. 입점·설비·공사 조건을 확인한 뒤 현장에 맞는 견적을 안내합니다.'
+      lead: '오픈 준비에서 빠뜨리기 쉬운 입점·설비·공사 일정을 함께 정리해보세요. 현장 조건에 따라 필요한 준비와 공사 범위를 상담합니다. 성함과 연락처를 남기면 담당자가 요청 내용을 확인합니다.'
     },
     shop_b: {
       vertical: 'shop',
       headline: ['예쁜 매장보다 먼저,', '설비와 운영 동선입니다.'],
-      lead: '주문·픽업·백룸 동선과 급배수·환기·전기 조건을 전화로 먼저 확인하고, 대면상담 일정을 잡아드립니다. 세부 조건은 대면상담과 현장 확인에서 구체화합니다.'
+      lead: '주문·픽업·백룸이 편리하게 이어지는 매장을 함께 생각합니다. 급배수·환기·전기와 운영 동선을 상담해보세요. 성함과 연락처를 남기면 담당자가 요청 내용을 확인합니다.'
     }
   };
 
@@ -156,7 +156,7 @@
     var tagged = (params.get('commercial_vertical') || '').toLowerCase().trim();
     if (isAllowed(tagged)) return tagged;
 
-    // 실제 광고 URL에는 위의 두 파라미터가 없으므로 소재 라벨이 유일한 업종 판별 수단이다.
+    // 명시적 업종 파라미터가 없으면 소재 라벨에서 업종 토큰을 찾는다.
     // 라벨 표기는 운영 중에도 바뀐다 — shop_a, shop__a1_condition, 사진형 v5 의 v5_shop_a.
     // 그래서 첫 구간만 보지 않고 구분자로 쪼갠 모든 구간에서 업종 토큰을 찾는다.
     // 여기서 못 읽으면 office 로 떨어져 shop 광고가 사무실 랜딩에 붙고,
@@ -172,7 +172,9 @@
   function readCreative() {
     try {
       var content = (new URLSearchParams(location.search).get('utm_content') || '').toLowerCase().trim();
-      return CREATIVE_OVERRIDES[content] ? content : null;
+      if (CREATIVE_OVERRIDES[content]) return content;
+      var match = content.match(/(?:^|_)(office|shop)_([ab])(?:_|$)/);
+      return match ? match[1] + '_' + match[2] : null;
     } catch (error) {
       return null;
     }
@@ -227,7 +229,7 @@
       askList.innerHTML = '';
       if (v.askGroups && v.askGroups.length) {
         askList.classList.add('cc-asklist--grouped');
-        setText('cc-ask-title', '전화에서 이 ' + v.askGroups.length + '가지 큰 틀만 확인하면 대면상담을 잡을 수 있습니다');
+        setText('cc-ask-title', '상담에서 함께 정리할 ' + v.askGroups.length + '가지');
         v.askGroups.forEach(function (group) {
           var li = document.createElement('li');
           li.className = 'cc-askgroup';
@@ -251,7 +253,7 @@
       } else {
         askList.classList.remove('cc-asklist--grouped');
         var askItems = v.askItems || [];
-        setText('cc-ask-title', '전화에서 이 ' + askItems.length + '가지만 확인하면 대면상담을 잡을 수 있습니다');
+        setText('cc-ask-title', '상담에서 함께 정리할 ' + askItems.length + '가지');
         askItems.forEach(function (pair) {
           var li = document.createElement('li');
           var b = document.createElement('b');
@@ -323,21 +325,15 @@
     });
   }
 
-  function wireCommercialFormLinks(key) {
-    Array.prototype.forEach.call(document.querySelectorAll('[data-commercial-form-link]'), function (link) {
-      var target = new URL('/consultation/', location.origin);
-      new URLSearchParams(location.search).forEach(function (value, name) { target.searchParams.set(name, value); });
-      target.searchParams.set('type', 'commercial');
-      target.searchParams.set('vertical', key);
-      target.searchParams.set('channel', 'commercial_landing');
-      link.href = target.pathname + target.search;
-    });
-  }
-
   function init() {
     var key = readVertical() || 'office';
     apply(key, readCreative());
-    wireCommercialFormLinks(key);
+    Array.prototype.forEach.call(document.querySelectorAll('[data-vertical-link]'), function(link){
+      var target = new URL(location.href);
+      target.searchParams.set('vertical', link.getAttribute('data-vertical-link'));
+      target.hash = '';
+      link.href = target.pathname + target.search;
+    });
     wireSmsCallback();
     wireTelPixel();
   }
