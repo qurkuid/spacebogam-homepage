@@ -95,7 +95,7 @@ test('policy collection inventory includes the existing commercial and callback 
 
 test('callback script cache version is the content SHA256 prefix', () => {
   const hash = crypto.createHash('sha256').update(callback).digest('hex').slice(0, 8);
-  const reference = read('commercial/call/index.html').match(/\/assets\/commercial-call-callback\.js\?v=([^"']+)/);
+  const reference = read('commercial/call/index.html').match(/\/assets\/commercial-call-callback\.js\?v=([^"'&]+)/);
   assert.ok(reference);
   assert.equal(reference[1], hash);
 });
