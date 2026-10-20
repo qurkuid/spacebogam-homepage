@@ -128,6 +128,8 @@ function finishResidential({ needsAddress = false, autoArea = false, features = 
       next(); assert.match(title(), /예산 구간/);
       nodes.skip.click(); assert.match(title(), /예산 구간/, '건너뛰기로도 우회 불가');
       const select = stage().querySelector('.question-input');
+      assert.equal(select.value, '기타(직접입력)', '미입력 예산은 기타가 기본 선택');
+      assert.equal(stage().querySelectorAll('.question-input')[1].parent.hidden, false, '직접입력란을 처음부터 표시');
       assert.ok(select.children.some(item => item.value === '기타(직접입력)'));
       select.change('기타(직접입력)');
       const custom = stage().querySelectorAll('.question-input')[1];
@@ -501,6 +503,7 @@ async function run() {
     if (nodes.skip.hidden) {
       const calendar = stage().querySelector('.calendar');
       if (/예산 구간/.test(title())) {
+        assert.equal(stage().querySelector('.question-input').value, '기타(직접입력)', '상업 예산도 기타가 기본 선택');
         stage().querySelector('.question-input').change('기타(직접입력)');
         assert.equal(nodes.next.disabled, true);
         stage().querySelectorAll('.question-input')[1].input('7,500만원');

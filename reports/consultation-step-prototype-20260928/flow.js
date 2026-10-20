@@ -786,7 +786,7 @@
         item.value = option; select.appendChild(item);
       });
       const value = response(question) || '';
-      select.value = value && !options.includes(value) ? other : value;
+      select.value = !value || !options.includes(value) ? other : value;
       select.required = true;
       label.appendChild(select); stage.appendChild(label);
       const customLabel = el('label', 'field');
