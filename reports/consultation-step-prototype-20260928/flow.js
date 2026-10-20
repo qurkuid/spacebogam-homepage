@@ -171,7 +171,8 @@
     const schedule = day && date && time ? { ...day, question: '방문 상담 희망 일정을 선택해 주세요.', questionType: 'schedule', parts: [day, date, time] } : null;
     const tail = schedule ? remaining.flatMap(q => q === day ? [schedule, ...(callback ? [callback] : [])]
       : q === date || q === time || q === callback ? [] : [q]) : remaining;
-    return ordered.concat(featured.slice(0, 2), separate, featured.slice(2), tail);
+    return ordered.concat(featured.slice(0, 2), separate, featured.slice(2), tail)
+      .map(q => isBudgetQuestion(q) ? { ...q, isRequired: true } : q);
   }
 
   function questionOptions(question) {
@@ -197,8 +198,10 @@
   }
 
   function response(question) { return answers.responses[String(question.id)]; }
+  function isBudgetQuestion(question) { return question.questionType === 'select' && /예산 구간/.test(question.question); }
   function hasResponse(question) {
     const value = response(question);
+    if (isBudgetQuestion(question) && value === '기타(직접입력)') return false;
     return Array.isArray(value) ? value.length > 0 : !!String(value || '').trim();
   }
   function isPastDate(value) {
@@ -773,6 +776,45 @@
     const key = String(question.id);
     const type = question.questionType;
     const options = questionOptions(question);
+    if (isBudgetQuestion(question)) {
+      const other = '기타(직접입력)';
+      const label = el('label', 'field');
+      label.appendChild(el('span', 'field-label', question.question + ' *'));
+      const select = el('select', 'question-input');
+      ['', ...options, other].forEach(option => {
+        const item = el('option', null, question.optionLabels?.[option] || option || '선택해 주세요');
+        item.value = option; select.appendChild(item);
+      });
+      const value = response(question) || '';
+      select.value = value && !options.includes(value) ? other : value;
+      select.required = true;
+      label.appendChild(select); stage.appendChild(label);
+      const customLabel = el('label', 'field');
+      customLabel.appendChild(el('span', 'field-label', '예산 직접입력 *'));
+      const custom = el('input', 'question-input');
+      custom.type = 'text'; custom.maxLength = 100;
+      custom.placeholder = '예: 3,500만원 또는 4천만~5천만원';
+      custom.value = select.value === other && value !== other ? value : '';
+      customLabel.hidden = select.value !== other;
+      custom.required = !customLabel.hidden;
+      customLabel.appendChild(custom); stage.appendChild(customLabel);
+      select.addEventListener('change', () => {
+        customLabel.hidden = select.value !== other;
+        custom.required = !customLabel.hidden;
+        answers.responses[key] = select.value === other ? custom.value.trim() || other : select.value;
+        clearError(); next.disabled = !hasResponse(question);
+        if (select.value === other) custom.focus();
+        else if (select.value) advance();
+      });
+      custom.addEventListener('input', () => {
+        answers.responses[key] = custom.value.trim() || other;
+        clearError(); next.disabled = !hasResponse(question);
+      });
+      custom.addEventListener('keydown', event => {
+        if (event.key === 'Enter' && !event.isComposing) { event.preventDefault(); advance(); }
+      });
+      return;
+    }
     if (type === 'schedule') {
       renderSchedule(question);
       return;

@@ -122,8 +122,27 @@ function finishResidential({ needsAddress = false, autoArea = false, features = 
     if (features) assert.doesNotMatch(title(), /연락 가능한 시간대/);
     if (/방문 상담 희망 일정을 선택/.test(title())) scheduleCount++;
     if (firstOptional.length < 5 && !/시공 희망 시기/.test(title())) firstOptional.push(title());
-    if (features && /예산 구간/.test(title())) {
-      stage().querySelector('.question-input').change('4천만원 미만');
+    if (/예산 구간/.test(title())) {
+      assert.equal(nodes.skip.hidden, true, '예산 선택은 필수');
+      assert.equal(nodes.next.disabled, true);
+      next(); assert.match(title(), /예산 구간/);
+      nodes.skip.click(); assert.match(title(), /예산 구간/, '건너뛰기로도 우회 불가');
+      const select = stage().querySelector('.question-input');
+      assert.ok(select.children.some(item => item.value === '기타(직접입력)'));
+      select.change('기타(직접입력)');
+      const custom = stage().querySelectorAll('.question-input')[1];
+      assert.equal(custom.required, true);
+      assert.equal(custom.parent.hidden, false);
+      assert.equal(nodes.next.disabled, true, '기타 선택만으로 진행 불가');
+      custom.input('   '); next(); assert.match(title(), /예산 구간/);
+      custom.input('  3,500만원  ');
+      assert.equal(nodes.next.disabled, false);
+      next();
+      nodes.back.click();
+      assert.equal(stage().querySelector('.question-input').value, '기타(직접입력)');
+      assert.equal(stage().querySelectorAll('.question-input')[1].value, '3,500만원');
+      if (features) stage().querySelector('.question-input').change('4천만원 미만');
+      else next();
       assert.match(title(), /시공장소를 모두/);
     } else if (features && /시공장소를 모두/.test(title())) {
       assert.equal(stage().querySelectorAll('.choice').some(item => /확장|시스템에어컨/.test(item.children[1].textContent)), false);
@@ -243,6 +262,7 @@ function finishResidential({ needsAddress = false, autoArea = false, features = 
   next(); assert.match(title(), /입력 내용을 확인/);
   assert.match(stage().children[2].textContent, /신청 후 담당자가 개인 휴대전화로 연락드려/);
   assert.match(summary('시공 희망 시기'), features ? /^\d{4}-\d{2}-15$/ : /^미정$/);
+  assert.equal(summary('예산 구간을 선택해주세요'), features ? '4천만원 미만' : '3,500만원');
 }
 
 async function run() {
@@ -394,6 +414,7 @@ async function run() {
   assert.equal(uploadedImage.type, 'image/jpeg');
   assert.equal(uploadedPayload.filePath, '/api/uploads/consultation/upload.jpg');
   assert.equal(uploadedPayload.answers['5'], '미정');
+  assert.equal(uploadedPayload.answers['21'], '3,500만원', '직접입력 예산을 기존 답변 필드로 전송');
   context.fetch = undefined;
 
   await startApartment('도면없는단지');
@@ -479,7 +500,12 @@ async function run() {
   while (!/상담 준비/.test(title())) {
     if (nodes.skip.hidden) {
       const calendar = stage().querySelector('.calendar');
-      if (calendar) {
+      if (/예산 구간/.test(title())) {
+        stage().querySelector('.question-input').change('기타(직접입력)');
+        assert.equal(nodes.next.disabled, true);
+        stage().querySelectorAll('.question-input')[1].input('7,500만원');
+        next();
+      } else if (calendar) {
         pickNextMonthDay(15);
       } else if (stage().querySelector('.choice')) {
         choose(0);
@@ -499,7 +525,7 @@ async function run() {
   assert.equal(count, 17);
   stage().querySelector('.consent').querySelector('input').change(true); next();
   assert.equal(summary('업종·공간 유형을 선택해주세요.'), '사무실');
-  assert.equal(summary('예산 구간을 선택해주세요.'), '3천만원 미만');
+  assert.equal(summary('예산 구간을 선택해주세요.'), '7,500만원');
   assert.match(summary('오픈·입주 희망일'), /^\d{4}-\d{2}-15$/);
   assert.equal(summary('전용면적(평)'), '20평');
   submittedPayload = null;
@@ -511,6 +537,7 @@ async function run() {
   assert.match(title(), /접수되었습니다/);
   assert.equal(submittedPayload.type, 'commercial');
   assert.equal(submittedPayload.commercialLead.consent, true);
+  assert.equal(submittedPayload.commercialLead.budget, '7,500만원');
   assert.equal(submittedPayload.commercialLead.leaseStatus, 'leased');
   assert.equal(submittedPayload.commercialLead.facilityNeeds[0], 'plumbing');
   context.fetch = undefined;
@@ -521,7 +548,7 @@ async function run() {
   answer('부산시 연제구 해맞이로 23'); next(); nodes.skip.click(); answer('32'); next();
   assert.match(title(), /시공 희망 시기/);
   stage().querySelector('.manual-option').click();
-  nodes.skip.click();
+  stage().querySelector('.question-input').change('4천만원 미만');
   assert.match(title(), /시공장소를 모두/);
   const scope = name => stage().querySelectorAll('.choice').find(option => option.children[1].textContent === name);
   scope('전체 수리').click();
