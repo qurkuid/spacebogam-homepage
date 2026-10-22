@@ -1,0 +1,23 @@
+/* 각 현장의 실제 기록에 근거한 비실측 설명용 개념도. 디테일 텍스트는 HTML로 중복 제공. */
+.sb-dossier .sb-concept-figure{margin:0;padding:52px 0 58px;border-bottom:1px solid var(--sbline);color:var(--sbink)}
+.sb-dossier .sb-concept-figure-heading{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:22px}
+.sb-dossier .sb-concept-figure-eyebrow{font-size:12px;letter-spacing:.14em;color:#726d65;margin:0 0 10px}
+.sb-dossier .sb-concept-figure h3{font-size:clamp(24px,2.8vw,32px);font-weight:450;letter-spacing:-.025em;line-height:1.4;margin:0}
+.sb-dossier .sb-concept-figure-enlarge{font-size:13px;text-underline-offset:4px;text-decoration:underline;color:#5a544c;white-space:nowrap}
+.sb-dossier .sb-concept-figure-window{width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;background:#f6f3ed;border:1px solid #d9d4ca}
+.sb-dossier .sb-concept-figure-window>a{display:block;width:100%;outline-offset:-4px}
+.sb-dossier .sb-concept-figure-window img{display:block;width:100%;height:auto;aspect-ratio:1200/740}
+.sb-dossier .sb-concept-figure figcaption{font-size:15px;line-height:1.9;color:#5d574f;margin:15px 0 0;word-break:keep-all}
+.sb-dossier .sb-concept-figure-note{font-size:12px;line-height:1.75;color:#847b70;margin:10px 0 0}
+.sb-dossier .sb-concept-figure a:focus-visible{outline:2px solid #1e1d1a;outline-offset:4px}
+@media(max-width:650px){
+ .sb-dossier .sb-concept-figure{padding:38px 0 42px}
+ .sb-dossier .sb-concept-figure-heading{margin-bottom:16px;gap:12px}
+ .sb-dossier .sb-concept-figure h3{font-size:23px}
+ .sb-dossier .sb-concept-figure-eyebrow{font-size:11px}
+ .sb-dossier .sb-concept-figure-window>a{min-width:780px}
+ .sb-dossier .sb-concept-figure-window img{width:100%}
+ .sb-dossier .sb-concept-figure figcaption{font-size:14px}
+ .sb-dossier .sb-concept-figure-enlarge{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){.sb-dossier .sb-concept-figure-window{scroll-behavior:auto}}

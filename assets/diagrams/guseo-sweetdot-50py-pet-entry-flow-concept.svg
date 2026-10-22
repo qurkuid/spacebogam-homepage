@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="740" viewBox="0 0 1200 740" role="img" aria-labelledby="svg-title svg-desc"><title id="svg-title">반려견과 함께 돌아오는 길도 설계하다</title><desc id="svg-desc">구서 쌍용스윗닷홈 50평은 중문 위치를 조정하여 산책 후 현관 영역에서 손과 반려견의 발을 씻고 거실로 이동하는 흐름을 계획했습니다. 실제 도면이 아닌 이동 순서 개념도입니다.</desc><style>.bg{fill:#f6f3ed}.paper{fill:#fffdf9}.pale{fill:#ebe7de}.line{stroke:#d2cdc2;stroke-width:2;fill:none}.inkline{stroke:#383630;stroke-width:3;fill:none}.dash{stroke:#847e75;stroke-width:2.6;stroke-dasharray:10 10;fill:none}.h{fill:#1e1d1a;font-family:SUIT,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;font-weight:500}.body{fill:#48443d;font-family:SUIT,'Apple SD Gothic Neo','Noto Sans KR',sans-serif}.muted{fill:#777167;font-family:SUIT,'Apple SD Gothic Neo','Noto Sans KR',sans-serif}.small{font-size:19px}.mid{font-size:23px}.label{font-size:25px;font-weight:600}.big{font-size:43px;font-weight:500;letter-spacing:-1.8px}</style><rect width="1200" height="740" class="bg"/><text x="62" y="55" class="h small" letter-spacing="3">SPACE BOGAM   /   PROJECT STUDY</text><path d="M62 76 H1138" class="line"/>
+<text x="62" y="139" class="h big">산책 후 귀가하는 순간부터 다시 설계</text>
+<text x="62" y="183" class="body mid">구서 쌍용스윗닷홈 50평  /  반려견과 가족의 생활 동선</text>
+<rect x="62" y="220" width="390" height="404" class="paper" stroke="#d9d4ca" stroke-width="2"/><rect x="479" y="220" width="659" height="404" class="paper" stroke="#d9d4ca" stroke-width="2"/>
+<text x="88" y="265" class="muted small" letter-spacing="2">귀가 동선의 설계 기준</text>
+<text x="88" y="318" class="h label">01  반려견과 함께 외출</text><text x="120" y="348" class="body small">귀가 후 손·발 씻을 자리 필요</text><path d="M88 377 H424" class="line"/>
+<text x="88" y="418" class="h label">02  현관에서 먼저 세면</text><text x="120" y="449" class="body small">중문 바깥에 욕실 동선</text><path d="M88 479 H424" class="line"/>
+<text x="88" y="520" class="h label">03  정리한 뒤 실내로</text><text x="120" y="551" class="body small">거실로 들어가는 흐름 구분</text>
+<text x="502" y="265" class="muted small">귀가 순서 이해를 위한 도식 / 실제 위치·거리 아님</text>
+<rect x="514" y="324" width="167" height="177" fill="#f1ede5" stroke="#afa79b" stroke-width="2"/>
+<rect x="719" y="324" width="167" height="177" fill="#dfd8cd" stroke="#908779" stroke-width="2"/>
+<rect x="925" y="324" width="169" height="177" fill="#f1ede5" stroke="#afa79b" stroke-width="2"/>
+<text x="598" y="378" class="h label" text-anchor="middle">외출</text><text x="598" y="416" class="body mid" text-anchor="middle">산책</text>
+<text x="803" y="378" class="h label" text-anchor="middle">현관</text><text x="803" y="412" class="body small" text-anchor="middle">손·발 씻기</text><text x="803" y="448" class="muted small" text-anchor="middle">세면 동선</text>
+<text x="1009" y="378" class="h label" text-anchor="middle">실내</text><text x="1009" y="415" class="body mid" text-anchor="middle">거실</text>
+<path d="M683 412 H718 M888 412 H925" class="inkline"/><path d="M705 402 L718 412 L705 422 M912 402 L925 412 L912 422" class="inkline"/>
+<path d="M908 309 V533" class="dash"/><text x="907" y="552" class="muted small" text-anchor="middle">중문 경계</text>
+<text x="803" y="593" class="body small" text-anchor="middle">현관과 거실 사이에서 생활 동선을 한 번 더 구분</text>
+<path d="M62 656 H1138" class="line"/><text x="62" y="688" class="muted small">설계 원리 설명을 위한 개념도 · 실제 실측 도면, 벽체 위치 및 치수 아님</text><text x="1138" y="709" class="muted small" text-anchor="end">© SPACE BOGAM  /  2026</text></svg>

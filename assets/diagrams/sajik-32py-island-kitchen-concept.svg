@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="740" viewBox="0 0 1200 740" role="img" aria-labelledby="svg-title svg-desc"><title id="svg-title">대면형 주방을 가능하게 한 세 가지 판단</title><desc id="svg-desc">사직쌍용예가 1차 32평의 대면형 아일랜드와 후드, 양면 수납을 설명하는 개념도입니다. 실제 평면도는 아닙니다.</desc><style>
+.bg{fill:#f6f3ed}.paper{fill:#fffdf9}.pale{fill:#ebe7de}.line{stroke:#d2cdc2;stroke-width:2;fill:none}.inkline{stroke:#383630;stroke-width:3;fill:none}.dash{stroke:#847e75;stroke-width:2.6;stroke-dasharray:10 10;fill:none}.h{fill:#1e1d1a;font-family:SUIT,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;font-weight:500}.body{fill:#48443d;font-family:SUIT,'Apple SD Gothic Neo','Noto Sans KR',sans-serif}.muted{fill:#777167;font-family:SUIT,'Apple SD Gothic Neo','Noto Sans KR',sans-serif}.no{fill:#a5a095;font-family:SUIT,'Apple SD Gothic Neo',sans-serif;letter-spacing:2px}.small{font-size:19px}.mid{font-size:23px}.label{font-size:25px;font-weight:600}.big{font-size:43px;font-weight:500;letter-spacing:-1.8px}
+</style><rect width="1200" height="740" class="bg"/><text x="62" y="55" class="h small" letter-spacing="3">SPACE BOGAM   /   PROJECT STUDY</text><path d="M62 76 H1138" class="line"/>
+<text x="62" y="139" class="h big">대면형 주방을 가능하게 한 세 가지 판단</text><text x="62" y="183" class="body mid">사직쌍용예가 1차 32평  /  구조·설비·수납을 함께 검토한 설계</text><rect x="62" y="220" width="390" height="404" rx="0" class="paper" stroke="#d9d4ca" stroke-width="2"/><rect x="479" y="220" width="659" height="404" rx="0" class="paper" stroke="#d9d4ca" stroke-width="2"/><text x="88" y="265" class="muted small" letter-spacing="2">설계의 조건</text>
+<text x="88" y="317" class="h label">01  거실을 마주 보는 주방</text>
+<text x="120" y="350" class="body small">조리 중에도 가족과 시야 연결</text><path d="M88 378 H424" class="line"/>
+<text x="88" y="418" class="h label">02  시야를 가리지 않는 후드</text>
+<text x="120" y="450" class="body small">후드 일체형 인덕션 적용</text><path d="M88 478 H424" class="line"/>
+<text x="88" y="520" class="h label">03  양쪽에서 쓰는 수납</text>
+<text x="120" y="553" class="body small">아일랜드 앞·뒤 수납 확보</text>
+<text x="510" y="265" class="muted small" letter-spacing="1">구성 요소의 관계 / 평면 형상은 표현하지 않음</text>
+<rect x="550" y="295" width="515" height="87" class="pale" stroke="#c6beb1" stroke-width="2"/>
+<text x="807" y="330" class="h label" text-anchor="middle">거실 / 가족을 바라보는 방향</text>
+<text x="807" y="363" class="muted small" text-anchor="middle">소통과 개방감</text>
+<path d="M807 480 V400" class="inkline"/><path d="M793 416 L807 397 L821 416" class="inkline"/>
+<rect x="638" y="484" width="338" height="62" rx="0" fill="#f1eee7" stroke="#686258" stroke-width="3"/>
+<text x="807" y="511" class="h mid" text-anchor="middle">대면형 아일랜드</text><text x="807" y="536" class="body small" text-anchor="middle">후드 일체형 인덕션 + 양면 수납</text>
+<rect x="608" y="576" width="400" height="28" fill="#c9c2b6" opacity=".65"/><text x="808" y="597" class="body small" text-anchor="middle">뒤쪽 가전·수납 / 조리 동선</text><path d="M62 656 H1138" class="line"/><text x="62" y="688" class="muted small">설계 원리 설명을 위한 개념도 · 실제 실측 도면, 벽체 위치 및 치수 아님</text><text x="1138" y="709" class="muted small" text-anchor="end">© SPACE BOGAM  /  2026</text></svg>
