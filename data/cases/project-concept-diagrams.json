@@ -1,0 +1,46 @@
+{
+  "createdOn": "2026-10-22",
+  "notice": "개념도는 공개된 시공 기록의 설계 원리만 시각화한 자료로서, 실제 평면·치수·벽체의 정확한 위치·준공도면이 아닙니다.",
+  "diagrams": {
+    "case-sajik-32py.html": {
+      "path": "/assets/diagrams/sajik-32py-island-kitchen-concept.svg",
+      "step": 4,
+      "title": "사직 32평 대면형 주방 설계 개념도",
+      "summary": "기존 구조의 제약을 해결하기 위해 거실을 향한 아일랜드, 후드 일체형 인덕션, 양면 수납을 함께 계획했습니다. 도식은 세 요소의 관계만 설명합니다.",
+      "alt": "사직쌍용예가 1차 32평 설명용 개념도. 거실을 마주 보는 아일랜드 주방, 후드 일체형 인덕션, 양면 수납의 관계를 표시합니다. 실제 평면이 아닙니다.",
+      "source": "/insights/224136390525-부산-사직쌍용예가-1차-인테리어-32평-iot와-공조.html"
+    },
+    "case-sajik-ssangyong.html": {
+      "path": "/assets/diagrams/sajik-42py-family-glass-concept.svg",
+      "step": 2,
+      "title": "사직 42평 곡면 유리 놀이방과 가족 공간",
+      "summary": "놀이방과 가족 테이블 사이의 시야를 열고, 철거할 수 없는 내력기둥을 우드 수납과 연결한 설계 원리를 이해하기 위한 관계도입니다.",
+      "alt": "사직쌍용예가 1차 42평 설명용 개념도. 아이들의 곡면 유리 놀이방, 거실 가족 테이블, 내력기둥과 맞춤 수납의 관계를 나타냅니다. 실측 도면은 아닙니다.",
+      "source": "/insights/223940283554-40평대아파트리모델링-5인가족-안성맞춤-인테리어-완성.html"
+    },
+    "case-mega-centum-49py.html": {
+      "path": "/assets/diagrams/mega-centum-49py-living-kitchen-concept.svg",
+      "step": 3,
+      "title": "메가센텀 49평 거실·주방·복도의 기능 구분",
+      "summary": "TV 없는 거실과 빌트인 주방, 밤에 사용하는 복도 발목등의 역할을 나눠 설명합니다. 실제 공간의 연결 순서나 크기를 나타내는 도면이 아닙니다.",
+      "alt": "해운대 메가센텀꿈에그린 49평 공간 설계 개념도. TV 없는 거실, 가전이 수납된 주방, 낮은 발목등을 둔 복도의 기능 구분을 표시합니다.",
+      "source": "/insights/224114449260-부산-아파트-인테리어-해운대-메가센텀-한화꿈에그린-49평.html"
+    },
+    "case-daewoo-ian-35py.html": {
+      "path": "/assets/diagrams/daewoo-ian-35py-bearing-wall-kitchen-concept.svg",
+      "step": 3,
+      "title": "대우이안 35평 내력벽을 활용한 주방 개념도",
+      "summary": "내력벽을 철거하지 않고 냉장고를 그 뒤편에 배치하여 거실에서의 시야를 정리하고, 대면형 아일랜드를 계획한 판단을 설명합니다.",
+      "alt": "화명 대우이안 35평 주방 설명용 개념도. 철거하지 않은 내력벽 뒤 냉장고 위치, 대면형 아일랜드와 거실을 향한 동선 관계를 보여줍니다. 실제 위치와 치수는 아닙니다.",
+      "source": "/insights/224254948259-부산-화명동-대우이안-35평-화이트-앤-우드.html"
+    },
+    "case-guseo-ssangyong-sweetdot-home.html": {
+      "path": "/assets/diagrams/guseo-sweetdot-50py-pet-entry-flow-concept.svg",
+      "step": 2,
+      "title": "구서 스윗닷홈 50평 반려견 귀가 동선",
+      "summary": "산책에서 돌아온 뒤 현관 영역에서 손과 반려견의 발을 씻고 거실로 들어갈 수 있도록 중문과 세면 동선을 나누었습니다. 단계의 순서를 표시한 개념도입니다.",
+      "alt": "구서 쌍용스윗닷홈 50평 현관 동선 개념도. 산책 후 귀가하여 현관 영역에서 손과 반려견의 발을 씻은 다음 중문을 거쳐 거실로 이동하는 순서입니다.",
+      "source": "/insights/224211725948-구서동인테리어-금정구-구서쌍용스윗닷홈-50평-반려견을-위한-배려가.html"
+    }
+  }
+}
