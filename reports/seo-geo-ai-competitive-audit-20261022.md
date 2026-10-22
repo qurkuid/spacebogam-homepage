@@ -46,3 +46,23 @@
 
 ## 점수 상태
 **95/100: 아직 검증 불가.** 코드 오류 몇 건의 해결을 SEO/AEO/GEO 실제 우위나 정량적 95점 달성으로 주장하지 않는다.
+
+## 2026-10-22 추가: 도면이 아닌 설계 원리 설명 이미지 5개
+
+실측 도면과 혼동하지 않도록 모든 이미지 내부, alt, figure 캡션에 **‘설명용 개념도 / 실제 벽체 위치·축척·치수 아님’**을 명시했다. 사진 수 642장은 변경하지 않는다.
+
+| 사례 | 새 설명 이미지 | 설명의 근거 |
+|---|---|---|
+| 사직쌍용예가 32평 | 대면형 주방·후드 일체형 인덕션·양면 수납 관계도 | 동일 현장 공개 완공 블로그 |
+| 사직쌍용예가 42평 | 곡면 유리 놀이방·가족 테이블·내력기둥 수납 관계도 | 동일 현장 공개 완공 블로그 |
+| 메가센텀 49평 | TV 없는 거실·빌트인 주방·복도 낮은 조명 기능도 | 동일 현장 공개 완공 블로그 |
+| 대우이안 35평 | 내력벽 보존·냉장고·대면형 아일랜드 관계도 | 동일 현장 공개 완공 블로그 |
+| 구서 스윗닷홈 50평 | 산책 후 현관 세면·중문·거실 이동 순서도 | 동일 현장 공개 완공 블로그 |
+
+- 파일 정본: `data/cases/project-concept-diagrams.json`.
+- 제공 형식: 텍스트 선택·확대에 강한 자체 제작 SVG, 원본 보기 링크, 본문 HTML 설명/alt/figcaption.
+- `sitemap.xml`의 5개 현장에 Google image sitemap 확장을 사용해 SVG 이미지 URL을 명시. 변경 전 134개 기존 페이지 URL은 유지.
+- `tests/case-concept-diagrams.test.js`로 사진 수·실파일·명시적인 면책 문구·추적 코드·페이지 링크를 검사하도록 추가.
+- Google 공식 이미지 검색 권장사항: https://developers.google.com/search/docs/appearance/google-images
+- image sitemap 공식 형식: https://developers.google.com/search/docs/crawling-indexing/sitemaps/image-sitemaps
+- 개념도를 추가했다고 해서 AI 추천 점수·검색 결과 순위·Core Web Vitals 통과가 자동으로 향상되었다는 주장은 하지 않는다.
