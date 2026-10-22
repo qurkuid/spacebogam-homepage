@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="740" viewBox="0 0 1200 740" role="img" aria-labelledby="svg-title svg-desc"><title id="svg-title">아이들의 놀이와 가족의 시간을 연결하다</title><desc id="svg-desc">사직쌍용예가 1차 42평의 곡면 유리 놀이방, 가족 테이블, 내력기둥을 활용한 맞춤 수납의 관계를 나타낸 설명용 개념도. 실측 도면은 아닙니다.</desc><style>
+.bg{fill:#f6f3ed}.paper{fill:#fffdf9}.pale{fill:#ebe7de}.line{stroke:#d2cdc2;stroke-width:2;fill:none}.inkline{stroke:#383630;stroke-width:3;fill:none}.dash{stroke:#847e75;stroke-width:2.6;stroke-dasharray:10 10;fill:none}.h{fill:#1e1d1a;font-family:SUIT,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;font-weight:500}.body{fill:#48443d;font-family:SUIT,'Apple SD Gothic Neo','Noto Sans KR',sans-serif}.muted{fill:#777167;font-family:SUIT,'Apple SD Gothic Neo','Noto Sans KR',sans-serif}.no{fill:#a5a095;font-family:SUIT,'Apple SD Gothic Neo',sans-serif;letter-spacing:2px}.small{font-size:19px}.mid{font-size:23px}.label{font-size:25px;font-weight:600}.big{font-size:43px;font-weight:500;letter-spacing:-1.8px}
+</style><rect width="1200" height="740" class="bg"/><text x="62" y="55" class="h small" letter-spacing="3">SPACE BOGAM   /   PROJECT STUDY</text><path d="M62 76 H1138" class="line"/>
+<text x="62" y="139" class="h big">아이들의 놀이와 가족의 시간을 연결하다</text><text x="62" y="183" class="body mid">사직쌍용예가 1차 42평  /  다섯 식구의 생활 관계 개념도</text><rect x="62" y="220" width="390" height="404" rx="0" class="paper" stroke="#d9d4ca" stroke-width="2"/><rect x="479" y="220" width="659" height="404" rx="0" class="paper" stroke="#d9d4ca" stroke-width="2"/><text x="88" y="265" class="muted small" letter-spacing="2">설계의 기준</text>
+<text x="88" y="315" class="h label">01  아이들의 안전한 놀이</text>
+<text x="120" y="346" class="body small">곡면 유리로 시야를 연결</text><path d="M88 375 H424" class="line"/>
+<text x="88" y="418" class="h label">02  가족이 모이는 자리</text>
+<text x="120" y="449" class="body small">TV 대신 맞춤 테이블</text><path d="M88 477 H424" class="line"/>
+<text x="88" y="521" class="h label">03  남겨야 하는 내력기둥</text>
+<text x="120" y="551" class="body small">맞춤 수납과 함께 구성</text>
+<text x="505" y="265" class="muted small" letter-spacing="1">가족의 생활 연결 / 실제 실내 배치와 위치 다름</text>
+<rect x="544" y="306" width="242" height="195" fill="#ede9e1" stroke="#aaa397" stroke-width="2"/>
+<text x="665" y="351" class="h mid" text-anchor="middle">아이들 놀이방</text><text x="665" y="384" class="body small" text-anchor="middle">책 · 장난감 수납</text>
+<path d="M784 309 Q920 402 782 502" fill="none" stroke="#817668" stroke-width="8" stroke-linecap="round"/>
+<text x="896" y="322" class="muted small" text-anchor="middle">곡면 유리</text>
+<path d="M912 400 H971" class="dash"/><path d="M958 389 L976 400 L958 411" class="inkline"/>
+<ellipse cx="1031" cy="400" rx="79" ry="116" fill="#f1eee7" stroke="#888175" stroke-width="3"/>
+<text x="1031" y="383" class="h mid" text-anchor="middle">가족</text><text x="1031" y="417" class="h mid" text-anchor="middle">테이블</text><text x="1031" y="454" class="muted small" text-anchor="middle">거실</text>
+<rect x="555" y="545" width="453" height="55" fill="#e8e2d8" stroke="#92897b" stroke-width="2"/>
+<rect x="574" y="550" width="48" height="45" fill="#aaa294" stroke="#777066" stroke-width="1.5"/>
+<text x="720" y="581" class="h mid" text-anchor="middle">내력기둥 + 맞춤 수납</text><path d="M62 656 H1138" class="line"/><text x="62" y="688" class="muted small">설계 원리 설명을 위한 개념도 · 실제 실측 도면, 벽체 위치 및 치수 아님</text><text x="1138" y="709" class="muted small" text-anchor="end">© SPACE BOGAM  /  2026</text></svg>
