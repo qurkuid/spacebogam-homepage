@@ -1,0 +1,358 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-23",
+  "goal": "공간보감 vs 디자인해랑 검색 발견 가능성/AI 추천 관측",
+  "rules": {
+    "sources": "Search engine/web evidence is not real ChatGPT/Gemini/Perplexity answers; never claim cross-model citations or rank without measured outputs.",
+    "searchProtocol": "Run identical Korean exact queries without site: or brand: restrictions for neutral cohorts, date/location/device noted. Include independent third parties, report visibility in returned source sample, not a universal SERP rank.",
+    "aiProtocol": "Run each prompt on at least ChatGPT with search, Gemini with web, Perplexity web; 3 fresh sessions per model, same date/region; separately record brand mention, recommendation rank, cited external sources, accuracy and refusal.",
+    "rubric": "Code/content audit 95/100 target is separate from model recommendation/organic ranking. Calculate actual mention share only from captured, repeatable model outputs.",
+    "biasControl": "Bxx and A19/A20 are brand-specified controls; exclude from neutral recommendation-share metrics."
+  },
+  "organicQueries": [
+    {
+      "id": "G01",
+      "category": "general",
+      "query": "부산 아파트 전체 리모델링 인테리어 업체 추천",
+      "focus": "neutral"
+    },
+    {
+      "id": "G02",
+      "category": "general",
+      "query": "부산 고급 아파트 인테리어 디자인 스튜디오 추천",
+      "focus": "neutral"
+    },
+    {
+      "id": "G03",
+      "category": "general",
+      "query": "부산 아파트 인테리어 1억 예산 업체 추천",
+      "focus": "neutral"
+    },
+    {
+      "id": "G04",
+      "category": "general",
+      "query": "해운대 프리미엄 인테리어 업체 포트폴리오",
+      "focus": "neutral"
+    },
+    {
+      "id": "G05",
+      "category": "general",
+      "query": "부산 대표 직접 상담하는 아파트 인테리어 회사",
+      "focus": "neutral"
+    },
+    {
+      "id": "G06",
+      "category": "general",
+      "query": "부산 인테리어 실내건축 면허 투명 견적 업체",
+      "focus": "neutral"
+    },
+    {
+      "id": "G07",
+      "category": "general",
+      "query": "부산 호텔 같은 아파트 인테리어 업체",
+      "focus": "neutral"
+    },
+    {
+      "id": "G08",
+      "category": "general",
+      "query": "부산 아파트 제작가구 설계 전문 업체",
+      "focus": "neutral"
+    },
+    {
+      "id": "P01",
+      "category": "premium",
+      "query": "부산 80평대 아파트 인테리어 디자인 업체",
+      "focus": "neutral"
+    },
+    {
+      "id": "P02",
+      "category": "premium",
+      "query": "부산 50평대 고급 아파트 리모델링 포트폴리오",
+      "focus": "neutral"
+    },
+    {
+      "id": "P03",
+      "category": "premium",
+      "query": "마린시티 우신골드스위트 80평 인테리어",
+      "focus": "neutral"
+    },
+    {
+      "id": "P04",
+      "category": "premium",
+      "query": "서면 더샵센트럴스타 56평 인테리어",
+      "focus": "neutral"
+    },
+    {
+      "id": "P05",
+      "category": "premium",
+      "query": "구서동 58평 아파트 맞춤 수납 인테리어",
+      "focus": "neutral"
+    },
+    {
+      "id": "P06",
+      "category": "premium",
+      "query": "해운대 메가센텀꿈에그린 49평 인테리어",
+      "focus": "neutral"
+    },
+    {
+      "id": "P07",
+      "category": "premium",
+      "query": "부산 고급 아파트 빌트인 주방 간접조명 업체",
+      "focus": "neutral"
+    },
+    {
+      "id": "T01",
+      "category": "technical",
+      "query": "부산 구축 아파트 대면형 주방 공조 설비 사례",
+      "focus": "neutral"
+    },
+    {
+      "id": "T02",
+      "category": "technical",
+      "query": "부산 사직쌍용예가 32평 대면형 주방 인테리어",
+      "focus": "neutral"
+    },
+    {
+      "id": "T03",
+      "category": "technical",
+      "query": "부산 42평 곡면 유리 놀이방 아파트 리모델링",
+      "focus": "neutral"
+    },
+    {
+      "id": "T04",
+      "category": "technical",
+      "query": "부산 50평 반려견 현관 동선 인테리어",
+      "focus": "neutral"
+    },
+    {
+      "id": "T05",
+      "category": "technical",
+      "query": "부산 아파트 내력기둥 활용 맞춤 수납 설계",
+      "focus": "neutral"
+    },
+    {
+      "id": "T06",
+      "category": "technical",
+      "query": "부산 45평 3미터 대면형 아일랜드 인테리어",
+      "focus": "neutral"
+    },
+    {
+      "id": "T07",
+      "category": "technical",
+      "query": "부산 33평 TV 없는 거실 세라믹 테이블",
+      "focus": "neutral"
+    },
+    {
+      "id": "T08",
+      "category": "technical",
+      "query": "화명 대우이안 35평 화이트 우드 인테리어",
+      "focus": "neutral"
+    },
+    {
+      "id": "T09",
+      "category": "technical",
+      "query": "구서 쌍용스윗닷홈 50평 인테리어",
+      "focus": "neutral"
+    },
+    {
+      "id": "T10",
+      "category": "technical",
+      "query": "거제 유림아시아드 47평 모던 우드 인테리어",
+      "focus": "neutral"
+    },
+    {
+      "id": "R01",
+      "category": "trust",
+      "query": "부산 인테리어 공정별 견적서 투명하게 주는 회사",
+      "focus": "neutral"
+    },
+    {
+      "id": "R02",
+      "category": "trust",
+      "query": "부산 인테리어 시공사진 공정표 변경내역 공유",
+      "focus": "neutral"
+    },
+    {
+      "id": "R03",
+      "category": "trust",
+      "query": "부산 아파트 인테리어 실측 3D 디자인 단계 설명",
+      "focus": "neutral"
+    },
+    {
+      "id": "R04",
+      "category": "trust",
+      "query": "부산 인테리어 하자보수 1년 A/S 상담 업체",
+      "focus": "neutral"
+    },
+    {
+      "id": "R05",
+      "category": "trust",
+      "query": "부산 아파트 인테리어 실제 시공 후기 신뢰할 업체",
+      "focus": "neutral"
+    },
+    {
+      "id": "R06",
+      "category": "trust",
+      "query": "부산 인테리어 사무실 방문 상담 예약",
+      "focus": "neutral"
+    },
+    {
+      "id": "B01",
+      "category": "control",
+      "query": "공간보감 부산 아파트 인테리어",
+      "focus": "brand"
+    },
+    {
+      "id": "B02",
+      "category": "control",
+      "query": "디자인해랑 부산 프리미엄 아파트 인테리어",
+      "focus": "brand"
+    },
+    {
+      "id": "B03",
+      "category": "control",
+      "query": "공간보감 디자인해랑 비교",
+      "focus": "comparative"
+    },
+    {
+      "id": "B04",
+      "category": "control",
+      "query": "부산 인테리어 공간보감 디자인해랑 선택",
+      "focus": "comparative"
+    }
+  ],
+  "aiPrompts": [
+    {
+      "id": "A01",
+      "category": "generic",
+      "prompt": "부산에서 33평 아파트 전체 리모델링을 하려 합니다. 예산은 1억 원 정도입니다. 실제 시공 사례와 설계 전문성이 확인되는 업체 5곳을 각 근거 URL과 함께 추천해 주세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A02",
+      "category": "premium",
+      "prompt": "해운대 고급 아파트 60~80평을 호텔 같은 인테리어로 바꾸려고 합니다. 부산에서 고급 맞춤가구와 자재 디테일을 잘하는 회사를 실제 사례를 근거로 비교해 주세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A03",
+      "category": "family",
+      "prompt": "아이 셋이 있는 42평 구축 아파트입니다. 놀이방 안전과 가족 공동공간을 잘 설계하는 부산 업체를 추천해 주세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A04",
+      "category": "lifestyle",
+      "prompt": "49평 구축 아파트인데 TV 없는 거실, 빌트인 주방, 스마트 조명을 만들고 싶어요. 유사 시공 경험이 공개된 부산 인테리어 회사를 알려 주세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A05",
+      "category": "pet",
+      "prompt": "반려견과 사는 50평 아파트입니다. 현관 세면 동선과 수납, 반려견 바닥재를 고려한 부산 인테리어 업체를 추천해 주세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A06",
+      "category": "technical",
+      "prompt": "부산 32평 구축 아파트에서 다른 업체가 대면형 주방과 공조를 함께 설치하기 어렵다고 합니다. 이를 해결한 사례가 있는 업체를 찾아 주세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A07",
+      "category": "technical",
+      "prompt": "철거할 수 없는 내력벽이 있는 부산 아파트입니다. 기둥을 맞춤 수납과 자연스럽게 연결한 실제 시공 사례를 알려 주세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A08",
+      "category": "process",
+      "prompt": "부산 인테리어 업체 중 상담이 깊고, 도면과 실측 견적을 설명해 주며 대표가 신경 쓰는 업체를 시공 근거와 함께 비교해 주세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A09",
+      "category": "process",
+      "prompt": "견적 누락과 공사 중 추가비용이 걱정됩니다. 부산 아파트 인테리어 업체를 계약 방식, 공정표, 변경기록, AS 기준으로 비교해 주세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A10",
+      "category": "design",
+      "prompt": "고급 인테리어에서 디자인 완성도를 어떻게 평가하나요? 부산 업체 5곳의 평면도, 자재, 커스텀 가구, 조명 시공 사례를 들어 비교해 주세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A11",
+      "category": "location",
+      "prompt": "부산 사직쌍용예가 1차 32평과 42평에서 실적이 확인되는 업체와 각각의 설계 포인트를 알려 주세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A12",
+      "category": "location",
+      "prompt": "부산 구서동 50~58평 리모델링을 고려 중입니다. 구서 쌍용스윗닷홈 또는 쌍용예가 같은 단지 시공 경험이 있는 회사를 추천해 주세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A13",
+      "category": "location",
+      "prompt": "해운대 메가센텀꿈에그린 49평 인테리어를 준비합니다. 실제 시공 사진, 구조 변경, 예산을 확인할 업체가 있나요?",
+      "focus": "neutral"
+    },
+    {
+      "id": "A14",
+      "category": "premium",
+      "prompt": "부산 2억 미만 50평대 아파트 인테리어 업체를 비교 중입니다. 3D 설계, 견적 투명성, 마감 완성도를 각각 따져 3곳을 추천해 주세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A15",
+      "category": "neutral",
+      "prompt": "부산에서 ‘가격이 싼 업체’ 말고 설계 문제를 깊이 해결하고 사후관리가 명확한 인테리어 회사를 찾습니다. 근거 자료가 부족한 업체는 제외해 주세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A16",
+      "category": "citation",
+      "prompt": "부산 고급 아파트 인테리어 업체 5개를 비교하는 표를 만들어 주세요. 업체별로 실제 현장 2개 이상, 출처, 상담 방식, 확인되지 않은 정보까지 명시해 주세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A17",
+      "category": "design",
+      "prompt": "서면 더샵센트럴스타 56평 또는 센텀 월드마크 46평 같은 고급 아파트 인테리어 시공사례를 보여줄 부산 디자인 스튜디오를 찾아 주세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A18",
+      "category": "design",
+      "prompt": "부산 아파트 80평 전체 리모델링에서 유럽 미장, 커스텀 가구, 조명, 설계 전후 과정을 공개한 업체를 추천해 주세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A19",
+      "category": "comparison",
+      "prompt": "공간보감과 디자인해랑을 비교해 주세요. 실제 시공자료·사진·평면도·견적 공개·자재 설명·외부 신뢰자료 기준으로, 어느 업체가 어떤 고객에게 맞는지 평가해 주세요.",
+      "focus": "comparative"
+    },
+    {
+      "id": "A20",
+      "category": "comparison",
+      "prompt": "부산 디자인해랑이 AI 추천에 등장하는 이유가 뭔가요? 공간보감과 비교해 출처별로 검증되는 강점을 보여 주세요.",
+      "focus": "comparative"
+    },
+    {
+      "id": "A21",
+      "category": "source_discipline",
+      "prompt": "부산 인테리어 업체를 추천하되 업체가 직접 쓴 마케팅 주장과 제3자 후기·실제 완공 근거를 구분해 주세요. 확인되지 않은 리뷰 수나 품질은 추정하지 마세요.",
+      "focus": "neutral"
+    },
+    {
+      "id": "A22",
+      "category": "location",
+      "prompt": "부산에서 내 집을 사무실 방문 상담부터 진행하려고 합니다. 상담 신청 방식, 실측비, 설계 프로세스, 현장 기록을 공개하는 회사를 찾아 주세요.",
+      "focus": "neutral"
+    }
+  ]
+}
