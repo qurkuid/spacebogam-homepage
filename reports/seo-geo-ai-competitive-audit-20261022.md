@@ -66,3 +66,14 @@
 - Google 공식 이미지 검색 권장사항: https://developers.google.com/search/docs/appearance/google-images
 - image sitemap 공식 형식: https://developers.google.com/search/docs/crawling-indexing/sitemaps/image-sitemaps
 - 개념도를 추가했다고 해서 AI 추천 점수·검색 결과 순위·Core Web Vitals 통과가 자동으로 향상되었다는 주장은 하지 않는다.
+
+## 2026-10-23 추가: 실사진을 직접 검수한 6개 현장 18개 장면 설명 보강
+
+- 프로젝트: 메가센텀꿈에그린 49평, 사직쌍용예가 32평, 구서 쌍용스윗닷홈 50평, 거제유림아시아드 47평, 사직 롯데캐슬 더클래식 33평, 화명 대우이안 35평
+- 각 현장의 원본 사진과 썸네일을 실제로 확인하여 현장별 대표 장면 3컷씩 총 18컷을 선별했다.
+- 기존 완공 사진과 동일한 사진을 사용한다. 프로젝트의 시공 건수, 갤러리 사진 수, 13개 현장 합계 642장은 변하지 않는다.
+- 갤러리 앞에 편집형 사진 3컷과 디자인 판단 설명을 추가하고, 동일한 18개 사진의 기존 갤러리 alt를 사진별로 구체화했다.
+- 이미지 원본 18개를 동일 프로젝트 정본 URL의 이미지 사이트맵에 추가하고 해당 6개 현장의 lastmod만 2026-10-23으로 변경했다. 이미지 사이트맵은 기존 개념도 5개 + 검수 원본 18개 = 23개이고 일반 페이지 URL은 134개 유지한다.
+- 대응표: `data/cases/verified-photo-stories-20261023.json`; 테스트: `tests/verified-photo-editorial.test.js`; 공통 스타일: `assets/case-photo-editorial.css`
+- 모든 alt/캡션은 확인한 사진 속 구성과 이미 게시한 동일 현장 설명 범위에서만 작성했다. 공간의 실제 치수, 시공가격, 상담 발언, 신뢰도·만족도·순위는 만들어내지 않았다.
+- **남은 과제:** 나머지 사진의 개별 맥락, 사진 중복 검사, 실제 모바일/Core Web Vitals 측정, INTM 원본 설계 도면 검증, 외부 업체 정보와 전화번호 정합성 확인.
