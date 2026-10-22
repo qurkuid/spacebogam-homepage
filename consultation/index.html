@@ -180,9 +180,8 @@
     .kakao-quick__heading{max-width:590px}.kakao-quick__eyebrow{margin:0 0 10px;color:#6b5840;font-size:11px;font-weight:750;letter-spacing:.11em}.kakao-quick h2{margin:0;font-size:clamp(24px,2.4vw,34px);font-weight:650;letter-spacing:-.04em}.kakao-quick__heading>p:last-child,.kakao-quick__success>p:last-of-type{margin:12px 0 0;color:var(--muted);font-size:14px;line-height:1.7}
     .kakao-quick__actions{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-top:20px}.kakao-quick__actions a,.kakao-quick__success a{color:var(--ink);font-size:13px;text-decoration:underline;text-underline-offset:4px}
     .kakao-quick__start,.kakao-quick__submit{min-height:50px;padding:12px 20px;border:1px solid #191600;border-radius:4px;background:#fee500;color:#191600;font-weight:750}.kakao-quick__submit{background:var(--ink);color:var(--paper)}.kakao-quick__start:disabled,.kakao-quick__submit:disabled{opacity:.55;cursor:wait}
-    .kakao-quick__form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:24px}.kakao-quick__form>label{display:grid;gap:8px;color:var(--muted);font-size:13px;font-weight:650}.kakao-quick__form input:not([type="checkbox"]),.kakao-quick__form select{width:100%;min-width:0;min-height:50px;padding:10px 12px;border:1px solid #c8c0b3;background:#fff;color:var(--ink);font-size:16px}.kakao-quick__consent,.kakao-quick__notice,.kakao-quick__status,.kakao-quick__form .kakao-quick__actions{grid-column:1/-1}.kakao-quick__consent{display:flex!important;grid-template-columns:none!important;flex-direction:row;align-items:flex-start;gap:10px!important;padding-top:4px;color:var(--ink)!important;font-size:12px!important;font-weight:400!important;line-height:1.6}.kakao-quick__consent input{width:18px;height:18px;margin:1px 0 0;flex:none;accent-color:var(--ink)}.kakao-quick__consent a{color:inherit}.kakao-quick__notice{margin:0;padding:12px 14px;background:#f0ece4;color:var(--muted);font-size:12px;line-height:1.65}.kakao-quick__status{min-height:20px;margin:0;color:var(--muted);font-size:13px;font-weight:650}.kakao-quick__status[data-kind="error"]{color:var(--error)}.kakao-quick__success p{max-width:590px;line-height:1.7}
+    .kakao-quick__form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:24px}.kakao-quick__form>label{display:grid;gap:8px;color:var(--muted);font-size:13px;font-weight:650}.kakao-quick__form input,.kakao-quick__form select{width:100%;min-width:0;min-height:50px;padding:10px 12px;border:1px solid #c8c0b3;background:#fff;color:var(--ink);font-size:16px}.kakao-quick__notice,.kakao-quick__status,.kakao-quick__form .kakao-quick__actions{grid-column:1/-1}.kakao-quick__notice{margin:0;padding:12px 14px;background:#f0ece4;color:var(--muted);font-size:12px;line-height:1.65}.kakao-quick__status{min-height:20px;margin:0;color:var(--muted);font-size:13px;font-weight:650}.kakao-quick__status[data-kind="error"]{color:var(--error)}.kakao-quick__success p{max-width:590px;line-height:1.7}
     .kakao-quick.kakao-quick--entry{padding:0;border:0;background:transparent}.kakao-quick--entry>.kakao-quick__start{width:100%}.kakao-quick__status:empty{display:none}
-    .kakao-consent-dialog{width:min(480px,calc(100% - 32px));max-height:calc(100svh - 32px);padding:24px;border:1px solid var(--line);background:var(--paper);color:var(--ink);overflow:auto}.kakao-consent-dialog::backdrop{background:#0007}.kakao-consent-dialog h2{font-size:22px}.kakao-consent-dialog .kakao-quick__actions{justify-content:flex-end}.kakao-consent-dialog .kakao-quick__status{margin-top:12px}
     .plan-dialog[open]{display:flex;flex-direction:column;height:min(94svh,960px);overflow:hidden}
     .plan-dialog-header,.plan-controls,.plan-zoom-controls,.plan-confirm-note{flex-shrink:0}
     .plan-viewer{display:block;flex:1;min-height:0;height:auto;overscroll-behavior:contain}
@@ -207,14 +206,9 @@
       <div class="topbar"><span class="brand">공간보감</span><span class="prototype">방문 상담 예약 신청</span><button class="close" id="restart" type="button">처음부터</button></div>
       <div class="progress" role="progressbar" aria-label="입력 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progress-fill"></span></div>
       <div id="visit-intro" class="visit-intro" style="padding:16px clamp(22px,5vw,84px);border-bottom:1px solid var(--line);font-size:14px;line-height:1.75"><strong>공간보감 사무실 방문 상담 예약</strong><p style="margin:8px 0">상담은 공간보감 사무실 방문을 기본으로 진행합니다. 신청 후 담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다.</p><p style="margin:8px 0">신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.</p><p style="margin:8px 0">사무실 · 부산광역시 해운대구 좌동순환로 457, 402호 · <a href="/contact.html">오시는 길</a></p><a href="tel:050713881252">방문 상담 일정 문의 1551-0163</a></div>
-      <section class="kakao-quick kakao-quick--entry" id="kakao-quick-consultation" aria-label="카카오 상담 신청">
+      <!-- 카카오 승인 및 실제 연결 검증 완료 후 hidden을 제거하여 공개합니다. -->
+      <section class="kakao-quick kakao-quick--entry" id="kakao-quick-consultation" aria-label="카카오 상담 신청" hidden>
         <button class="kakao-quick__start" type="button" data-kakao-start>카카오톡으로 빠르게 신청하기</button>
-        <dialog class="kakao-consent-dialog" data-kakao-consent-dialog aria-labelledby="kakao-consent-title">
-          <h2 id="kakao-consent-title">카카오 계정 연결</h2>
-          <label class="kakao-quick__consent"><input type="checkbox" data-kakao-account-consent><span>카카오 회원 식별자와 닉네임을 INTM에 저장하여 고객 계정을 만들고 로그인과 상담 신청을 연결하는 데 동의합니다. 기존 고객은 로그인 후 기존 계정과 연결됩니다. 선택적으로 제공되는 카카오 프로필 이메일은 로그인 확인에 사용하지만 영구 저장하지 않습니다. <a href="/privacy/" target="_blank" rel="noopener">개인정보 처리방침</a></span></label>
-          <p class="kakao-quick__status" data-kakao-consent-status aria-live="polite"></p>
-          <div class="kakao-quick__actions"><form method="dialog"><button class="back" type="submit">취소</button></form><button class="kakao-quick__start" type="button" data-kakao-continue>동의하고 계속</button></div>
-        </dialog>
         <p class="kakao-quick__status" data-kakao-status aria-live="polite"></p>
       </section>
       <section class="stage" id="stage" aria-live="polite"></section>
@@ -224,6 +218,6 @@
   <script src="/reports/consultation-step-prototype-20260928/apt-busan-dongs.js"></script>
   <script src="/reports/consultation-step-prototype-20260928/consultation-questions.js"></script>
   <script src="/reports/consultation-step-prototype-20260928/flow.js?v=d61432472658"></script>
-  <script src="/assets/kakao-consultation.js?v=9a8ecdda961d"></script>
+  <script src="/assets/kakao-consultation.js?v=5c619dde8030"></script>
 </body>
 </html>

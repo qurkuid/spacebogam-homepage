@@ -86,7 +86,7 @@
 
   var document = root.document;
   var panel = document.getElementById('kakao-quick-consultation');
-  if (!panel) return;
+  if (!panel || panel.hidden) return;
 
   var grant = '';
   var profile = null;
@@ -193,7 +193,6 @@
       '<label><span>연락받을 휴대전화</span><input name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="010-1234-5678" required></label>',
       '<label><span>현장 주소</span><input name="address" autocomplete="street-address" maxlength="500" placeholder="시·구·동 또는 도로명 주소" required></label>',
       '<label><span>공간 유형</span><select name="spaceType" required><option value="">선택해 주세요</option><option value="apartment">아파트</option><option value="house">주택·빌라</option><option value="commercial">상업 공간</option></select></label>',
-      '<label class="kakao-quick__consent"><input name="consent" type="checkbox" required><span>직접 입력한 연락처와 현장 정보를 INTM에 저장하여 상담 진행과 카카오 고객 계정의 상담 신청 연결에 사용하는 데 동의합니다. <a href="/privacy/" target="_blank" rel="noopener">개인정보 처리방침</a></span></label>',
       '<p class="kakao-quick__notice">입력한 휴대전화는 카카오에서 인증된 번호가 아닙니다. 접수 후 담당자가 전화로 내용을 확인하며, 이 신청만으로 방문 일정이 확정되지는 않습니다.</p>',
       '<p class="kakao-quick__status" data-kakao-status aria-live="polite"></p>',
       '<div class="kakao-quick__actions"><button class="kakao-quick__submit" type="submit">상담 신청 접수</button><a href="#stage" data-detailed-form>기존 자세한 상담 신청</a></div>',
@@ -217,7 +216,6 @@
     if (!isValidPhone(intake.phone)) return { error: '휴대전화 번호를 010-1234-5678 형식으로 입력해 주세요.' };
     if (!intake.address) return { error: '현장 주소를 입력해 주세요.' };
     if (['apartment', 'house', 'commercial'].indexOf(intake.spaceType) === -1) return { error: '공간 유형을 선택해 주세요.' };
-    if (!form.elements.consent.checked) return { error: '개인정보 수집·이용에 동의해 주세요.' };
     return { intake: intake };
   }
 
@@ -278,19 +276,6 @@
   async function startKakao() {
     if (busy) return;
     var button = panel.querySelector('[data-kakao-start]');
-    var consent = panel.querySelector('[data-kakao-account-consent]');
-    var dialog = panel.querySelector('[data-kakao-consent-dialog]');
-    if (!consent || !consent.checked) {
-      if (dialog && !dialog.open) dialog.showModal();
-      else if (dialog) {
-        var consentStatus = dialog.querySelector('[data-kakao-consent-status]');
-        consentStatus.textContent = '카카오 고객 계정 생성 및 연결에 동의해 주세요.';
-        consentStatus.dataset.kind = 'error';
-        if (consent) consent.focus();
-      }
-      return;
-    }
-    if (dialog && dialog.open) dialog.close();
     busy = true;
     setButtonBusy(button, true, '카카오 연결 중…');
     setStatus('', '');
@@ -344,11 +329,7 @@
 
   function init() {
     var startButton = panel.querySelector('[data-kakao-start]');
-    if (startButton) startButton.addEventListener('click', function () {
-      if (!busy) panel.querySelector('[data-kakao-consent-dialog]').showModal();
-    });
-    var continueButton = panel.querySelector('[data-kakao-continue]');
-    if (continueButton) continueButton.addEventListener('click', startKakao);
+    if (startButton) startButton.addEventListener('click', startKakao);
     bindDetailedLinks();
 
     var callback = readStorage(CALLBACK_KEY);
