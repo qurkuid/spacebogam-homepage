@@ -1,0 +1,15 @@
+/* 공간보감 : 확인 가능한 현장 설계 지식을 메인에 자연스럽게 배치 */
+.sb-home-expertise{width:min(1240px,calc(100% - 64px));margin:0 auto;padding:100px 0 74px;border-bottom:1px solid var(--line)}
+.sb-home-expertise-head{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);align-items:end;column-gap:60px;row-gap:18px;padding-bottom:35px}
+.sb-home-expertise-kicker{grid-column:1/-1;font-size:11px;letter-spacing:.18em;color:#6d685f;margin:0}
+.sb-home-expertise h2{font-size:clamp(29px,3.5vw,48px);line-height:1.25;letter-spacing:-.045em;font-weight:400;margin:0}
+.sb-home-expertise-head>p:last-child{margin:0 0 3px;max-width:370px;font-size:15px;line-height:1.8;color:#5d5850}
+.sb-home-expertise-list{border-top:1px solid var(--ink)}
+.sb-home-expertise-list article{display:grid;grid-template-columns:220px minmax(0,1fr);gap:32px;border-bottom:1px solid var(--line);padding:37px 0}
+.sb-home-expertise-list article>span{color:#857d73;font-size:12px;letter-spacing:.055em}
+.sb-home-expertise-list h3{font-size:clamp(20px,2vw,26px);letter-spacing:-.025em;font-weight:450;margin:0 0 13px;line-height:1.45}
+.sb-home-expertise-list p{max-width:720px;margin:0 0 17px;color:#514d46;font-size:15px;line-height:1.9;word-break:keep-all}
+.sb-home-expertise-list a,.sb-home-expertise-footer a{font-size:13px;text-decoration:underline;text-underline-offset:5px}
+.sb-home-expertise-footer{margin:29px 0 0;color:#777168;font-size:13px;line-height:1.8}
+@media(max-width:860px){.sb-home-expertise-head{grid-template-columns:1fr}.sb-home-expertise-list article{grid-template-columns:145px minmax(0,1fr);gap:15px}}
+@media(max-width:600px){.sb-home-expertise{width:calc(100% - 36px);padding:65px 0 58px}.sb-home-expertise-head{padding-bottom:25px}.sb-home-expertise-list article{grid-template-columns:1fr;gap:12px;padding:28px 0}.sb-home-expertise-list article>span{font-size:11px}.sb-home-expertise-list p{font-size:14px}.sb-home-expertise-footer{font-size:12px}}

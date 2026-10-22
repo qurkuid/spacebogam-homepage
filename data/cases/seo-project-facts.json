@@ -1,0 +1,130 @@
+{
+  "purpose": "공간보감 시공 프로젝트별 표준 검색/AI 팩트시트. 공개된 해당 현장 페이지와 블로그로 확인된 정보만 수록하고 확인되지 않은 연도/기간/가족수는 표시하지 않는다.",
+  "lastVerified": "2026-10-22",
+  "cases": {
+    "case-mega-centum-49py.html": {
+      "project": "해운대 메가센텀꿈에그린",
+      "region": "부산 해운대구 반여동",
+      "area": "49평",
+      "residents": "아이와 반려견이 있는 가족",
+      "goal": "TV 없는 거실·일체형 주방·IoT 생활 환경",
+      "decision": "빌트인 가전, 포켓 중문, 발목등과 스마트홈 기기 위치 통합 설계",
+      "material": "대형 타일·맞춤 제작가구·간접조명",
+      "evidence": "동일 현장 공개 블로그"
+    },
+    "case-sajik-32py.html": {
+      "project": "사직쌍용예가 1차",
+      "region": "부산 동래구 사직동",
+      "area": "32평",
+      "goal": "대면형 주방·공조 환경·오랜 거주를 위한 마감",
+      "decision": "후드 일체형 인덕션과 양면 수납 아일랜드, 무몰딩 복도",
+      "material": "포세린 타일·세라믹 상판·매립 수전",
+      "evidence": "동일 현장 공개 블로그"
+    },
+    "case-sajik-ssangyong.html": {
+      "project": "사직쌍용예가 1차",
+      "region": "부산 동래구 사직동",
+      "area": "42평",
+      "residents": "부부와 세 아이, 5인 가족",
+      "goal": "부모와 아이가 함께 머무는 공용부·수납·안전",
+      "decision": "곡면 유리 놀이방, 2.4m 맞춤 테이블, 내력기둥 일체형 수납",
+      "material": "곡면 유리·우드 맞춤가구·대형 타일",
+      "duration": "공사 7주(공개 완공 기록 기준)",
+      "evidence": "동일 현장 공개 블로그"
+    },
+    "case-geoje-yurim-asiad-47py.html": {
+      "project": "거제유림아시아드",
+      "region": "부산 연제구 거제동",
+      "area": "47평",
+      "goal": "오래 거주한 집의 현관·주방·낮은 층고 개선",
+      "decision": "현관 벤치·루버, 곡면 아트월, 11자 개방형 주방",
+      "material": "600×1200 타일·세라믹 마감·간접조명",
+      "evidence": "동일 현장 공개 블로그"
+    },
+    "case-hwamyeong-kolong.html": {
+      "project": "화명 코오롱하늘채2차",
+      "region": "부산 북구 화명동",
+      "area": "20평대",
+      "goal": "작은 면적에서 거실·주방·현관 수납을 정돈",
+      "decision": "TV 아래 바닥을 비우고 거실을 향한 아일랜드와 열린 현관 선반 구성",
+      "material": "간접조명·유리 중문·맞춤 수납",
+      "evidence": "실제 완공 사진과 공개 현장 설명"
+    },
+    "case-guseo-ssangyong-sweetdot-home.html": {
+      "project": "구서 쌍용스윗닷홈",
+      "region": "부산 금정구 구서동",
+      "area": "50평",
+      "residents": "반려견과 함께 거주",
+      "goal": "핑크 취향·넉넉한 수납·반려견의 생활 동선",
+      "decision": "현관 중문 위치 조정, 낮은 맞춤 수납, 다운드래프트 후드",
+      "material": "LX Z:IN 엑스컴포트·라인 조명·맞춤가구",
+      "evidence": "동일 현장 공개 블로그"
+    },
+    "case-sajik-lottecastle-the-classic.html": {
+      "project": "사직 롯데캐슬 더클래식",
+      "region": "부산 동래구 사직동",
+      "area": "33평",
+      "residents": "부부와 딸, 3인 가족",
+      "goal": "TV 없는 거실과 호텔처럼 차분한 주거공간",
+      "decision": "2.6m 세라믹 테이블, 숨은 보조주방, 현관 벤치",
+      "material": "1200×600 대형 타일·세라믹 상판·간접조명",
+      "evidence": "동일 현장 공개 블로그"
+    },
+    "case-hwamyeong-lottecastle.html": {
+      "project": "화명 롯데캐슬멤버스",
+      "region": "부산 북구 화명동",
+      "area": "45평",
+      "goal": "거실 돌출 요소 정리·대면형 주방·고급 현관",
+      "decision": "기둥 사이 TV 매립, 3m 이상 아일랜드, 마그네틱 레일 조명",
+      "material": "백자갈·대형 타일·간접조명",
+      "evidence": "동일 현장 공개 블로그"
+    },
+    "case-guseo-ssangyong.html": {
+      "project": "구서 쌍용예가 2단지",
+      "region": "부산 금정구 구서동",
+      "area": "58평",
+      "residents": "부부와 세 아이, 5인 가족",
+      "goal": "아이들을 위한 수납·밝은 거실·동시 사용 가능한 욕실",
+      "decision": "TV 반매립, 맞춤 수납, 두 개의 세면대와 복도 하부조명",
+      "material": "히든도어·마그네틱 조명·맞춤가구",
+      "evidence": "동일 현장 공개 블로그"
+    },
+    "case-oryukdo-sk-view.html": {
+      "project": "오륙도 SK뷰",
+      "region": "부산 남구 용호동",
+      "area": "49평 B형",
+      "goal": "거실·다이닝·주방을 차분한 톤으로 통합",
+      "decision": "그레이지 톤온톤, 패널형 냉장고, 맞춤 미디어월",
+      "material": "패브릭 질감 패널·우드 슬랫·간접조명",
+      "evidence": "실제 완공 사진과 공개 현장 설명"
+    },
+    "case-samhan-goldenview.html": {
+      "project": "삼한골든뷰센트럴파크",
+      "region": "부산 부산진구 범전동",
+      "area": "35평 C형",
+      "goal": "크림 톤의 밝은 공용부·포인트 가구·공간별 다른 욕실 무드",
+      "decision": "우물천장 간접조명, 아치형 중문, 주방 가전 가구화",
+      "material": "스톤 질감 타일·맞춤가구·간접조명",
+      "evidence": "실제 완공 사진과 공개 현장 설명"
+    },
+    "case-geoje-hyundai-hometown.html": {
+      "project": "거제 현대홈타운 2차",
+      "region": "부산 연제구 거제동",
+      "area": "35평",
+      "goal": "우드 바닥과 밝은 벽면으로 연결되는 단정한 생활",
+      "decision": "매립 니치, 벽면에 맞춘 붙박이장, 유리 파티션 욕실",
+      "material": "우드 바닥·간접조명·수납 가구",
+      "evidence": "실제 완공 사진과 공개 현장 설명"
+    },
+    "case-daewoo-ian-35py.html": {
+      "project": "화명 대우이안",
+      "region": "부산 북구 화명동",
+      "area": "35평",
+      "residents": "신혼부부와 반려견",
+      "goal": "낮은 층고·내력벽·좁은 욕실의 제약 해결",
+      "decision": "내력벽 뒤 냉장고 배치, 거실 벽면 간접조명, 건식 세면대",
+      "material": "화이트·우드 마감·유리 블록·대형 타일",
+      "evidence": "동일 현장 공개 블로그"
+    }
+  }
+}
