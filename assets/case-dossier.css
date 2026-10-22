@@ -1,0 +1,42 @@
+/* 공간보감 시공사례 장문 편집형 사례집: 디자인, 설계 판단, 실제 시공 결과를 구분해 기록 */
+@font-face{font-family:SBCaseSuit;src:url('/assets/SUIT-Variable.woff2') format('woff2');font-style:normal;font-weight:100 900;font-display:swap}
+.sb-dossier,.sb-dossier *{box-sizing:border-box}
+.sb-dossier{--sbpaper:#f6f3ed;--sbink:#1e1d1a;--sbline:#d9d4ca;--sbmuted:#69645b;padding:100px 0 92px!important;background:var(--sbpaper);color:var(--sbink);font-family:SBCaseSuit,'SUIT',-apple-system,BlinkMacSystemFont,sans-serif;letter-spacing:-.012em;border-top:1px solid var(--sbline);border-bottom:1px solid var(--sbline)}
+.sb-dossier .sb-dossier-inner{width:min(1170px,calc(100% - 48px));margin:0 auto}
+.sb-dossier .sb-dossier-kicker{font-size:12px;font-weight:500;letter-spacing:.17em;color:var(--sbmuted);margin:0 0 22px}
+.sb-dossier .sb-dossier-opening{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(36px,6vw,100px);padding-bottom:66px;align-items:start}
+.sb-dossier .sb-dossier-heading{font-size:clamp(34px,4.1vw,58px);font-weight:400;letter-spacing:-.048em;line-height:1.28;color:var(--sbink);margin:0}
+.sb-dossier .sb-dossier-summary{font-size:clamp(16px,1.5vw,18px);line-height:1.95;color:#4c4841;margin:0;max-width:670px;word-break:keep-all}
+.sb-dossier .sb-dossier-stages{border-top:1px solid var(--sbink)}
+.sb-dossier .sb-dossier-stage{display:grid;grid-template-columns:180px minmax(0,1fr);gap:clamp(24px,5vw,74px);padding:43px 0 53px;border-bottom:1px solid var(--sbline)}
+.sb-dossier .sb-dossier-stage-label{font-size:12px;letter-spacing:.07em;color:#746e64;font-weight:500;margin:5px 0 0}
+.sb-dossier .sb-dossier-stage-head{font-size:clamp(23px,2.6vw,34px);font-weight:400;line-height:1.35;letter-spacing:-.033em;color:var(--sbink);margin:0 0 22px}
+.sb-dossier .sb-dossier-stage-copy{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(25px,3.5vw,64px)}
+.sb-dossier .sb-dossier-stage-copy p{font-size:15px;line-height:1.95;color:#5a554e;word-break:keep-all;margin:0}
+.sb-dossier .sb-dossier-source{display:flex;justify-content:space-between;align-items:flex-start;gap:30px;margin-top:28px;padding-top:5px}
+.sb-dossier .sb-dossier-source p{font-size:12px;color:#79746c;line-height:1.75;margin:0;max-width:730px}
+.sb-dossier .sb-dossier-source a{font-size:13px;font-weight:500;color:var(--sbink);text-decoration:none;border-bottom:1px solid var(--sbink);padding-bottom:3px;white-space:nowrap}
+.sb-dossier .sb-dossier-source a:focus-visible{outline:2px solid var(--sbink);outline-offset:5px}
+.sb-dossier .sb-dossier-photo{margin-top:20px;font-size:14px;color:#6f685e}
+.sb-dossier .sb-dossier-photo a{color:var(--sbink);text-decoration:underline;text-underline-offset:4px}
+@media(max-width:900px){
+ .sb-dossier{padding:74px 0 70px!important}
+ .sb-dossier .sb-dossier-opening{grid-template-columns:1fr;gap:25px;padding-bottom:43px}
+ .sb-dossier .sb-dossier-stage{grid-template-columns:95px minmax(0,1fr);gap:22px;padding:33px 0 39px}
+ .sb-dossier .sb-dossier-stage-copy{gap:28px}
+}
+@media(max-width:650px){
+ .sb-dossier{padding:60px 0 60px!important}
+ .sb-dossier .sb-dossier-inner{width:calc(100% - 36px)}
+ .sb-dossier .sb-dossier-kicker{font-size:10px;margin-bottom:15px}
+ .sb-dossier .sb-dossier-heading{font-size:35px;line-height:1.27}
+ .sb-dossier .sb-dossier-summary{font-size:15px;line-height:1.9}
+ .sb-dossier .sb-dossier-stage{grid-template-columns:1fr;gap:12px;padding:32px 0 36px}
+ .sb-dossier .sb-dossier-stage-label{font-size:11px;margin:0}
+ .sb-dossier .sb-dossier-stage-head{font-size:25px;margin-bottom:17px}
+ .sb-dossier .sb-dossier-stage-copy{grid-template-columns:1fr;gap:14px}
+ .sb-dossier .sb-dossier-stage-copy p{font-size:14px;line-height:1.9}
+ .sb-dossier .sb-dossier-source{flex-direction:column;gap:16px}
+ .sb-dossier .sb-dossier-source a{white-space:normal}
+}
+@media(prefers-reduced-motion:reduce){.sb-dossier *{scroll-behavior:auto}}
