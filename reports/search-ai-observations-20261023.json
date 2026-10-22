@@ -1,0 +1,446 @@
+{
+  "date": "2026-10-23",
+  "sampleEngine": "Web retrieval sample only, NOT Google/네이버 rank, NOT ChatGPT/Gemini/Perplexity answer",
+  "protocol": "Only verified URL presence in tool-returned results. No consistent top-K or independent browser session; boolean false means not observed in sample, NOT that site cannot rank.",
+  "organic": [
+    {
+      "id": "G01",
+      "query": "부산 아파트 전체 리모델링 인테리어 업체 추천",
+      "category": "general",
+      "focus": "neutral",
+      "status": "observed_web_sample",
+      "spacebogam_found": false,
+      "haerang_found": false,
+      "observed_url_samples": [
+        "https://monoze.co.kr/monoze_portfolio"
+      ],
+      "note": "Broad query sample surfaced MONOZE and informational pages, neither target verified."
+    },
+    {
+      "id": "G02",
+      "query": "부산 고급 아파트 인테리어 디자인 스튜디오 추천",
+      "category": "general",
+      "focus": "neutral",
+      "status": "observed_web_sample",
+      "spacebogam_found": false,
+      "haerang_found": false,
+      "observed_url_samples": [
+        "https://designour.co.kr/"
+      ],
+      "note": "General premium studio sample surfaced Design Our and unrelated results."
+    },
+    {
+      "id": "G03",
+      "query": "부산 아파트 인테리어 1억 예산 업체 추천",
+      "category": "general",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "G04",
+      "query": "해운대 프리미엄 인테리어 업체 포트폴리오",
+      "category": "general",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "G05",
+      "query": "부산 대표 직접 상담하는 아파트 인테리어 회사",
+      "category": "general",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "G06",
+      "query": "부산 인테리어 실내건축 면허 투명 견적 업체",
+      "category": "general",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "G07",
+      "query": "부산 호텔 같은 아파트 인테리어 업체",
+      "category": "general",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "G08",
+      "query": "부산 아파트 제작가구 설계 전문 업체",
+      "category": "general",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "P01",
+      "query": "부산 80평대 아파트 인테리어 디자인 업체",
+      "category": "premium",
+      "focus": "neutral",
+      "status": "observed_web_sample",
+      "spacebogam_found": false,
+      "haerang_found": false,
+      "observed_url_samples": [
+        "https://ggid.co.kr/large-apartment-interior-record/"
+      ],
+      "note": "80py broad query returned competing content but neither of the two direct sites in observed sample."
+    },
+    {
+      "id": "P02",
+      "query": "부산 50평대 고급 아파트 리모델링 포트폴리오",
+      "category": "premium",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "P03",
+      "query": "마린시티 우신골드스위트 80평 인테리어",
+      "category": "premium",
+      "focus": "neutral",
+      "status": "observed_web_sample",
+      "spacebogam_found": false,
+      "haerang_found": true,
+      "observed_url_samples": [
+        "https://design-haerang.com/portfolio/busan-haeundae-marincity-80py/"
+      ],
+      "note": "Haerang named 80py completed project detected."
+    },
+    {
+      "id": "P04",
+      "query": "서면 더샵센트럴스타 56평 인테리어",
+      "category": "premium",
+      "focus": "neutral",
+      "status": "observed_web_sample",
+      "spacebogam_found": false,
+      "haerang_found": false,
+      "observed_url_samples": [
+        "https://realty.daangn.com/articles/1084549"
+      ],
+      "note": "Real-estate listing intent dominated this 56py query; competitor project not detected in sample."
+    },
+    {
+      "id": "P05",
+      "query": "구서동 58평 아파트 맞춤 수납 인테리어",
+      "category": "premium",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "P06",
+      "query": "해운대 메가센텀꿈에그린 49평 인테리어",
+      "category": "premium",
+      "focus": "neutral",
+      "status": "observed_web_sample",
+      "spacebogam_found": true,
+      "haerang_found": false,
+      "observed_url_samples": [
+        "https://spacebogam.kr/case-mega-centum-49py.html",
+        "https://spacebogam.kr/"
+      ],
+      "note": "Spacebogam actual 49py completed project and homepage detected; indexed snippet may be stale."
+    },
+    {
+      "id": "P07",
+      "query": "부산 고급 아파트 빌트인 주방 간접조명 업체",
+      "category": "premium",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "T01",
+      "query": "부산 구축 아파트 대면형 주방 공조 설비 사례",
+      "category": "technical",
+      "focus": "neutral",
+      "status": "observed_web_sample",
+      "spacebogam_found": true,
+      "haerang_found": false,
+      "observed_url_samples": [
+        "https://spacebogam.kr/"
+      ],
+      "note": "Spacebogam homepage surfaced, not necessarily relevant deeper 32py page. Cached text is older than deployed version."
+    },
+    {
+      "id": "T02",
+      "query": "부산 사직쌍용예가 32평 대면형 주방 인테리어",
+      "category": "technical",
+      "focus": "neutral",
+      "status": "observed_web_sample",
+      "spacebogam_found": true,
+      "haerang_found": false,
+      "observed_url_samples": [
+        "https://contents.ohou.se/projects/191233"
+      ],
+      "note": "Spacebogam's distinct third-party Ohouse case mentioning kitchen/HVAC surfaced."
+    },
+    {
+      "id": "T03",
+      "query": "부산 42평 곡면 유리 놀이방 아파트 리모델링",
+      "category": "technical",
+      "focus": "neutral",
+      "status": "observed_web_sample",
+      "spacebogam_found": false,
+      "haerang_found": false,
+      "observed_url_samples": [],
+      "note": "Long natural language specifics returned unrelated documents; neither target surfaced in sample."
+    },
+    {
+      "id": "T04",
+      "query": "부산 50평 반려견 현관 동선 인테리어",
+      "category": "technical",
+      "focus": "neutral",
+      "status": "observed_web_sample",
+      "spacebogam_found": true,
+      "haerang_found": false,
+      "observed_url_samples": [
+        "https://spacebogam.kr/living-50py.html"
+      ],
+      "note": "Spacebogam 50py landing surfaced, but pre-fix content misclassified 35py and omitted genuine 50py Sweetdot."
+    },
+    {
+      "id": "T05",
+      "query": "부산 아파트 내력기둥 활용 맞춤 수납 설계",
+      "category": "technical",
+      "focus": "neutral",
+      "status": "observed_web_sample",
+      "spacebogam_found": false,
+      "haerang_found": false,
+      "observed_url_samples": [],
+      "note": "Structural column query surfaced unrelated real-estate data pages; neither brand in observed sample."
+    },
+    {
+      "id": "T06",
+      "query": "부산 45평 3미터 대면형 아일랜드 인테리어",
+      "category": "technical",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "T07",
+      "query": "부산 33평 TV 없는 거실 세라믹 테이블",
+      "category": "technical",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "T08",
+      "query": "화명 대우이안 35평 화이트 우드 인테리어",
+      "category": "technical",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "T09",
+      "query": "구서 쌍용스윗닷홈 50평 인테리어",
+      "category": "technical",
+      "focus": "neutral",
+      "status": "observed_web_sample",
+      "spacebogam_found": true,
+      "haerang_found": false,
+      "observed_url_samples": [
+        "https://spacebogam.kr/insights/",
+        "https://spacebogam.kr/guseo-dong-apartment-interior.html"
+      ],
+      "note": "Spacebogam blog hub and Guseo neighborhood content surfaced."
+    },
+    {
+      "id": "T10",
+      "query": "거제 유림아시아드 47평 모던 우드 인테리어",
+      "category": "technical",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "R01",
+      "query": "부산 인테리어 공정별 견적서 투명하게 주는 회사",
+      "category": "trust",
+      "focus": "neutral",
+      "status": "observed_web_sample",
+      "spacebogam_found": false,
+      "haerang_found": false,
+      "observed_url_samples": [
+        "https://www.sinteriorcafe.com/"
+      ],
+      "note": "Trust/transparent itemized estimate query sample surfaced other competitors."
+    },
+    {
+      "id": "R02",
+      "query": "부산 인테리어 시공사진 공정표 변경내역 공유",
+      "category": "trust",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "R03",
+      "query": "부산 아파트 인테리어 실측 3D 디자인 단계 설명",
+      "category": "trust",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "R04",
+      "query": "부산 인테리어 하자보수 1년 A/S 상담 업체",
+      "category": "trust",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "R05",
+      "query": "부산 아파트 인테리어 실제 시공 후기 신뢰할 업체",
+      "category": "trust",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "R06",
+      "query": "부산 인테리어 사무실 방문 상담 예약",
+      "category": "trust",
+      "focus": "neutral",
+      "status": "not_run"
+    },
+    {
+      "id": "B01",
+      "query": "공간보감 부산 아파트 인테리어",
+      "category": "control",
+      "focus": "brand",
+      "status": "not_run"
+    },
+    {
+      "id": "B02",
+      "query": "디자인해랑 부산 프리미엄 아파트 인테리어",
+      "category": "control",
+      "focus": "brand",
+      "status": "not_run"
+    },
+    {
+      "id": "B03",
+      "query": "공간보감 디자인해랑 비교",
+      "category": "control",
+      "focus": "comparative",
+      "status": "not_run"
+    },
+    {
+      "id": "B04",
+      "query": "부산 인테리어 공간보감 디자인해랑 선택",
+      "category": "control",
+      "focus": "comparative",
+      "status": "not_run"
+    }
+  ],
+  "ai": [
+    {
+      "id": "A01",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A02",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A03",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A04",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A05",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A06",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A07",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A08",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A09",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A10",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A11",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A12",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A13",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A14",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A15",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A16",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A17",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A18",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A19",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A20",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A21",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    },
+    {
+      "id": "A22",
+      "status": "not_run_external_ai",
+      "modelOutputs": []
+    }
+  ],
+  "summary": {
+    "tested": 13,
+    "spacebogamObserved": 5,
+    "haerangObserved": 1,
+    "neither": 7
+  }
+}
