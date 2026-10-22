@@ -51,3 +51,10 @@
 @media(prefers-reduced-motion:reduce){
  .v8-portfolio .v8-grid .sb-project-gallery img,.v8-portfolio .sb-project-arrow{transition:none!important}
 }
+
+
+/* 프로젝트별 상세 설명: 핵심 설계 포인트 → 실제 배경 → 상세 사례 링크 순 */
+.v8-portfolio .v8-grid .sb-project-context{margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line);font-size:13px;line-height:1.85;color:#716b62;word-break:keep-all}
+.v8-portfolio .sb-project-readmore{display:inline-block;margin-top:18px;padding-bottom:3px;border-bottom:1px solid #8a8379;font-size:12px;letter-spacing:.01em;color:#46423d}
+.v8-portfolio .sb-project-card a:hover .sb-project-readmore{border-color:var(--ink);color:var(--ink)}
+@media(max-width:480px){.v8-portfolio .v8-grid .sb-project-context{font-size:12.5px;line-height:1.8;margin-top:11px;padding-top:11px}}
