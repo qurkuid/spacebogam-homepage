@@ -13,12 +13,17 @@ const expectedCount = {
   'case-geoje-yurim-asiad-47py.html': 130,
   'case-sajik-lottecastle-the-classic.html': 13,
   'case-daewoo-ian-35py.html': 50,
+  'case-guseo-ssangyong.html': 29,
+  'case-oryukdo-sk-view.html': 23,
+  'case-samhan-goldenview.html': 19,
+  'case-geoje-hyundai-hometown.html': 17,
+  'case-hwamyeong-lottecastle.html': 32,
 };
 const sitemap = fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8');
 const decode = (s) => s.replaceAll('&quot;', '"').replaceAll('&amp;', '&').replaceAll('&lt;', '<').replaceAll('&gt;', '>');
 
-test('all 18 curated images are pre-existing actual project photos with meaningful alt and captions', () => {
-  assert.equal(Object.keys(pages).length, 6);
+test('all 33 curated images are pre-existing actual project photos with meaningful alt and captions', () => {
+  assert.equal(Object.keys(pages).length, 11);
   for (const [page, info] of Object.entries(pages)) {
     assert.equal(info.photos.length, 3, page);
     const content = fs.readFileSync(path.join(root, page), 'utf8');
@@ -61,10 +66,10 @@ test('photo stories are visually adjacent to complete galleries and existing bus
   }
 });
 
-test('image sitemap contains exactly the 18 new original files without removing existing pages', () => {
+test('image sitemap contains exactly the 33 new original files without removing existing pages', () => {
   assert.ok(sitemap.includes('xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"'));
   assert.equal((sitemap.match(/<loc>/g)||[]).length, 134, 'site URL preservation');
-  assert.equal((sitemap.match(/<image:loc>/g)||[]).length, 23, 'five existing diagrams plus 18 photo originals');
+  assert.equal((sitemap.match(/<image:loc>/g)||[]).length, 38, 'five existing diagrams plus 33 photo originals');
   for (const [page, info] of Object.entries(pages)) {
     const location = '<loc>https://spacebogam.kr/' + page + '</loc>';
     const blocks = [...sitemap.matchAll(/<url>([\s\S]*?)<\/url>/g)].map(m=>m[1]).filter(b=>b.includes(location));
