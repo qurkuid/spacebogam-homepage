@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ko">
 <head>
+<script data-kakao-callback-scrubber>(function(){try{var u=new URL(location.href),flow=u.searchParams.get('flow'),kakao=u.searchParams.get('kakao');if(flow!==null||kakao!==null){try{sessionStorage.setItem('spacebogam.kakao.consultation.callback.v1',JSON.stringify({flow:(flow||'').slice(0,512),kakao:(kakao||'').slice(0,16)}))}catch(_storageError){}u.searchParams.delete('flow');u.searchParams.delete('kakao');history.replaceState(null,'',u.pathname+(u.search||'')+u.hash)}}catch(_error){}})();</script>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var q=[],fired=false;w.__sbLazyTag=function(fn){fired?fn():q.push(fn)};function go(){if(fired)return;fired=true;while(q.length)q.shift()()}['pointerdown','keydown','touchstart','scroll'].forEach(function(e){w.addEventListener(e,go,{once:true,passive:true})});if(d.readyState==='complete')setTimeout(go,1500);else w.addEventListener('load',function(){setTimeout(go,1500)});setTimeout(go,8000);w.__sbLazyTag(function(){var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);});})(window,document,'script','dataLayer','GTM-PW8GLP8S');</script>
 <!-- End Google Tag Manager -->
@@ -29,7 +30,7 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-EJGXDD5C1T"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-EJGXDD5C1T');</script>
 <!-- Meta Pixel Code -->
-<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];f.__sbLazyTag(function(){t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)});}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','512750840350337');fbq('track','PageView');</script>
+<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];f.__sbLazyTag(function(){t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)});}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('consent','revoke');fbq('init','512750840350337');fbq('track','PageView');</script>
 <!-- End Meta Pixel Code -->
 <script src="//wcs.naver.net/wcslog.js" data-spacebogam-naver-wcs="1"></script>
 <script>if(!window.wcs_add)window.wcs_add={};window.wcs_add.wa='s_7702568df18';if(!window._nasa)window._nasa={};if(window.wcs){window.wcs.inflow('spacebogam.kr');window.wcs_do();window.__spacebogamNaverCtsPvSent=true}</script>
@@ -128,6 +129,12 @@
     .consent{display:flex;gap:11px;align-items:flex-start;max-width:590px;margin-top:28px;padding-top:22px;border-top:1px solid var(--line);font-size:14px;line-height:1.5}
     .consent input{width:19px;height:19px;margin:1px 0 0;accent-color:var(--ink);flex:none}
     .consent a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+    .consent + .consent{margin-top:14px;padding-top:0;border-top:0}
+    .matching-notice{max-width:590px;margin:12px 0 0;padding:12px 14px;border:1px solid var(--line);color:var(--muted);font-size:12px;line-height:1.65}
+    .matching-notice summary{cursor:pointer;color:var(--ink);font-weight:650}
+    .matching-notice p{margin:10px 0 0}.matching-notice a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+    .matching-email{display:block;max-width:590px;margin-top:16px}.matching-email input{width:100%;min-height:48px;padding:10px 12px;border:1px solid var(--line);background:#fffdf8;color:var(--ink)}
+    .matching-email small{display:block;margin-top:7px;color:var(--muted);font-size:12px;line-height:1.5}
     .error{min-height:22px;margin:17px 0 0;color:var(--error);font-size:13px;font-weight:650}
     .summary{max-width:600px;margin:28px 0 0;border-top:1px solid var(--ink)}
     .summary div{display:grid;grid-template-columns:110px 1fr;gap:20px;padding:17px 0;border-bottom:1px solid var(--line)}
@@ -168,7 +175,13 @@
     @media(max-width:800px){.shell{display:block}.aside{display:none}.topbar{height:72px;padding:0 22px}.topbar .brand{display:block;font-size:18px}.prototype{display:none}.stage{width:calc(100% - 44px);min-height:calc(100svh - 196px);padding:48px 0 30px;margin:0 auto}.step-meta{margin-bottom:22px}h1{font-size:clamp(36px,9vw,48px)}.lead{margin:18px 0 34px;font-size:15px}.choice{min-height:70px}.footer{width:calc(100% - 44px);padding:18px 0 24px}.footer-note{display:none}}
     @media(max-width:560px){.calendar{padding:12px}.calendar-grid,.calendar-weekdays{gap:1px}.calendar-day{min-height:38px}.plan-list{grid-template-columns:1fr}.plan-card{display:grid;grid-template-columns:110px 1fr;grid-template-rows:auto auto}.plan-card img{grid-row:1/3;width:110px;height:115px}.plan-card span{align-self:end}.plan-card small{align-self:start}.plan-viewer{height:58svh}.plan-controls{padding:12px}.plan-save{width:100%;margin-left:0}.plan-dialog-header{padding:12px}}
     @media(max-width:430px){.footer{gap:12px}.primary{min-width:146px}.summary div{grid-template-columns:85px 1fr;gap:12px}}
-    .visit-intro:not([hidden]) + .stage{min-height:0}
+    .visit-intro:not([hidden]) ~ .stage{min-height:0}
+    .kakao-quick{width:min(690px,calc(100% - 72px));margin:32px auto 0;padding:28px;border:1px solid #c8c0b3;background:#fffdf8}
+    .kakao-quick__heading{max-width:590px}.kakao-quick__eyebrow{margin:0 0 10px;color:#6b5840;font-size:11px;font-weight:750;letter-spacing:.11em}.kakao-quick h2{margin:0;font-size:clamp(24px,2.4vw,34px);font-weight:650;letter-spacing:-.04em}.kakao-quick__heading>p:last-child,.kakao-quick__success>p:last-of-type{margin:12px 0 0;color:var(--muted);font-size:14px;line-height:1.7}
+    .kakao-quick__actions{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-top:20px}.kakao-quick__actions a,.kakao-quick__success a{color:var(--ink);font-size:13px;text-decoration:underline;text-underline-offset:4px}
+    .kakao-quick__start,.kakao-quick__submit{min-height:50px;padding:12px 20px;border:1px solid #191600;border-radius:4px;background:#fee500;color:#191600;font-weight:750}.kakao-quick__submit{background:var(--ink);color:var(--paper)}.kakao-quick__start:disabled,.kakao-quick__submit:disabled{opacity:.55;cursor:wait}
+    .kakao-quick__form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:24px}.kakao-quick__form>label{display:grid;gap:8px;color:var(--muted);font-size:13px;font-weight:650}.kakao-quick__form input:not([type="checkbox"]),.kakao-quick__form select{width:100%;min-width:0;min-height:50px;padding:10px 12px;border:1px solid #c8c0b3;background:#fff;color:var(--ink);font-size:16px}.kakao-quick__consent,.kakao-quick__notice,.kakao-quick__status,.kakao-quick__form .kakao-quick__actions{grid-column:1/-1}.kakao-quick__consent{display:flex!important;grid-template-columns:none!important;flex-direction:row;align-items:flex-start;gap:10px!important;padding-top:4px;color:var(--ink)!important;font-size:12px!important;font-weight:400!important;line-height:1.6}.kakao-quick__consent input{width:18px;height:18px;margin:1px 0 0;flex:none;accent-color:var(--ink)}.kakao-quick__consent a{color:inherit}.kakao-quick__notice{margin:0;padding:12px 14px;background:#f0ece4;color:var(--muted);font-size:12px;line-height:1.65}.kakao-quick__status{min-height:20px;margin:0;color:var(--muted);font-size:13px;font-weight:650}.kakao-quick__status[data-kind="error"]{color:var(--error)}.kakao-quick__success p{max-width:590px;line-height:1.7}
+    .kakao-quick>.kakao-quick__consent{margin-top:18px}
     .plan-dialog[open]{display:flex;flex-direction:column;height:min(94svh,960px);overflow:hidden}
     .plan-dialog-header,.plan-controls,.plan-zoom-controls,.plan-confirm-note{flex-shrink:0}
     .plan-viewer{display:block;flex:1;min-height:0;height:auto;overscroll-behavior:contain}
@@ -177,7 +190,7 @@
     .plan-zoom-controls{display:flex;align-items:center;gap:8px;padding:10px 12px}
     .plan-zoom-label{font-size:13px;white-space:nowrap}
     .plan-zoom-controls button,.plan-controls button{min-height:44px}
-    @media(max-width:560px){.plan-card{display:block}.plan-card img{width:100%;height:auto;aspect-ratio:4/3}.plan-dialog{width:calc(100vw - 16px)}.plan-confirm-note{padding:8px 12px;font-size:12px}}
+    @media(max-width:560px){.plan-card{display:block}.plan-card img{width:100%;height:auto;aspect-ratio:4/3}.plan-dialog{width:calc(100vw - 16px)}.plan-confirm-note{padding:8px 12px;font-size:12px}.kakao-quick{width:calc(100% - 32px);margin-top:20px;padding:20px}.kakao-quick__form{grid-template-columns:1fr}.kakao-quick__actions{align-items:stretch;flex-direction:column}.kakao-quick__actions>*{width:100%;text-align:center}.kakao-quick__start,.kakao-quick__submit{justify-content:center}}
     @media(prefers-reduced-motion:reduce){.progress span,.choice{transition:none}}
   </style>
 </head>
@@ -192,12 +205,20 @@
     <main class="main">
       <div class="topbar"><span class="brand">공간보감</span><span class="prototype">방문 상담 예약 신청</span><button class="close" id="restart" type="button">처음부터</button></div>
       <div class="progress" role="progressbar" aria-label="입력 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progress-fill"></span></div>
-      <div id="visit-intro" class="visit-intro" style="padding:16px clamp(22px,5vw,84px);border-bottom:1px solid var(--line);font-size:14px;line-height:1.75"><strong>공간보감 사무실 방문 상담 예약</strong><p style="margin:8px 0">상담은 공간보감 사무실 방문을 기본으로 진행합니다. 신청 후 담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다.</p><p style="margin:8px 0">신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.</p><p style="margin:8px 0">사무실 · 부산광역시 해운대구 좌동순환로 457, 402호 · <a href="/contact.html">오시는 길</a></p><a href="tel:050713881252">방문 상담 일정 문의 1551-0163</a></div><section class="stage" id="stage" aria-live="polite"></section>
+      <div id="visit-intro" class="visit-intro" style="padding:16px clamp(22px,5vw,84px);border-bottom:1px solid var(--line);font-size:14px;line-height:1.75"><strong>공간보감 사무실 방문 상담 예약</strong><p style="margin:8px 0">상담은 공간보감 사무실 방문을 기본으로 진행합니다. 신청 후 담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다.</p><p style="margin:8px 0">신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.</p><p style="margin:8px 0">사무실 · 부산광역시 해운대구 좌동순환로 457, 402호 · <a href="/contact.html">오시는 길</a></p><a href="tel:050713881252">방문 상담 일정 문의 1551-0163</a></div>
+      <section class="kakao-quick" id="kakao-quick-consultation" aria-labelledby="kakao-quick-title">
+        <div class="kakao-quick__heading"><p class="kakao-quick__eyebrow">KAKAO QUICK CONSULTATION</p><h2 id="kakao-quick-title">카카오톡으로 빠르게 신청하기</h2><p>카카오 계정으로 본인 정보를 연결한 뒤 연락처와 현장 정보를 확인하여 간단히 접수할 수 있습니다.</p></div>
+        <label class="kakao-quick__consent"><input type="checkbox" data-kakao-account-consent><span>카카오 회원 식별자와 닉네임을 INTM에 저장하여 고객 계정을 만들고 로그인과 상담 신청을 연결하는 데 동의합니다. 기존 고객은 로그인 후 기존 계정과 연결됩니다. 선택적으로 제공되는 카카오 프로필 이메일은 로그인 확인에 사용하지만 영구 저장하지 않습니다. <a href="/privacy/" target="_blank" rel="noopener">개인정보 처리방침</a></span></label>
+        <div class="kakao-quick__actions"><button class="kakao-quick__start" type="button" data-kakao-start>카카오로 시작하기</button><a href="#stage" data-detailed-form>기존 자세한 상담 신청</a></div>
+        <p class="kakao-quick__status" data-kakao-status aria-live="polite"></p>
+      </section>
+      <section class="stage" id="stage" aria-live="polite"></section>
       <div class="footer"><button class="back" id="back" type="button">← 이전</button><button class="primary" id="next" type="button">다음 <span aria-hidden="true">→</span></button><button class="skip" id="skip" type="button" hidden>이 질문 건너뛰기</button><span class="footer-note"><a href="tel:050713881252">방문 상담 일정 문의 1551-0163</a><br>신청 접수 후 방문 일정을 조율합니다.</span></div>
     </main>
   </div>
   <script src="/reports/consultation-step-prototype-20260928/apt-busan-dongs.js"></script>
   <script src="/reports/consultation-step-prototype-20260928/consultation-questions.js"></script>
-  <script src="/reports/consultation-step-prototype-20260928/flow.js?v=f4ded3727040"></script>
+  <script src="/reports/consultation-step-prototype-20260928/flow.js?v=d61432472658"></script>
+  <script src="/assets/kakao-consultation.js?v=c0550a00e9cd"></script>
 </body>
 </html>
