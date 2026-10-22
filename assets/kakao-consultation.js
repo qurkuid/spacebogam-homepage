@@ -181,6 +181,7 @@
 
   function showConnectedForm() {
     var name = text(profile && profile.name);
+    panel.classList.remove('kakao-quick--entry');
     panel.innerHTML = [
       '<div class="kakao-quick__heading">',
       '<p class="kakao-quick__eyebrow">KAKAO QUICK CONSULTATION</p>',
@@ -278,11 +279,18 @@
     if (busy) return;
     var button = panel.querySelector('[data-kakao-start]');
     var consent = panel.querySelector('[data-kakao-account-consent]');
+    var dialog = panel.querySelector('[data-kakao-consent-dialog]');
     if (!consent || !consent.checked) {
-      setStatus('카카오 고객 계정 생성 및 연결에 동의해 주세요.', 'error');
-      if (consent) consent.focus();
+      if (dialog && !dialog.open) dialog.showModal();
+      else if (dialog) {
+        var consentStatus = dialog.querySelector('[data-kakao-consent-status]');
+        consentStatus.textContent = '카카오 고객 계정 생성 및 연결에 동의해 주세요.';
+        consentStatus.dataset.kind = 'error';
+        if (consent) consent.focus();
+      }
       return;
     }
+    if (dialog && dialog.open) dialog.close();
     busy = true;
     setButtonBusy(button, true, '카카오 연결 중…');
     setStatus('', '');
@@ -336,7 +344,11 @@
 
   function init() {
     var startButton = panel.querySelector('[data-kakao-start]');
-    if (startButton) startButton.addEventListener('click', startKakao);
+    if (startButton) startButton.addEventListener('click', function () {
+      if (!busy) panel.querySelector('[data-kakao-consent-dialog]').showModal();
+    });
+    var continueButton = panel.querySelector('[data-kakao-continue]');
+    if (continueButton) continueButton.addEventListener('click', startKakao);
     bindDetailedLinks();
 
     var callback = readStorage(CALLBACK_KEY);

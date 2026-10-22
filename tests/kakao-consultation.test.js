@@ -84,16 +84,22 @@ test('callback scrubber runs before trackers and removes only OAuth callback par
   });
 });
 
-test('page preserves the detailed consultation flow and provides explicit Kakao privacy copy', () => {
+test('entry shows one Kakao button and keeps explicit account consent inside a dialog', () => {
   const html = fs.readFileSync(path.join(projectRoot, 'consultation/index.html'), 'utf8');
   assert.match(html, /id="stage"/);
   assert.match(html, /flow\.js\?v=d61432472658/);
   assert.match(html, /id="kakao-quick-consultation"/);
   assert.match(html, /data-kakao-account-consent/);
-  assert.ok(html.indexOf('data-kakao-account-consent') < html.indexOf('data-kakao-start'), 'account consent must precede OAuth start');
+  const entry = html.match(/<section class="kakao-quick kakao-quick--entry"[\s\S]*?<\/section>/)[0];
+  const dialog = entry.match(/<dialog[\s\S]*?<\/dialog>/)[0];
+  const visibleEntry = entry.replace(dialog, '');
+  assert.match(visibleEntry, /data-kakao-start>카카오톡으로 빠르게 신청하기<\/button>/);
+  assert.doesNotMatch(visibleEntry, /<h2|<a|KAKAO QUICK CONSULTATION|카카오 계정으로 본인/);
+  assert.match(dialog, /data-kakao-account-consent/);
+  assert.match(dialog, /data-kakao-continue/);
+  assert.match(dialog, /method="dialog"/);
   assert.match(html, /카카오 회원 식별자와 닉네임.*INTM/s);
   assert.match(html, /고객 계정을 만들고 로그인과 상담 신청을 연결/);
   assert.match(html, /카카오 프로필 이메일은 로그인 확인에 사용하지만 영구 저장하지 않습니다/);
   assert.doesNotMatch(html, /subject/);
-  assert.match(html, /기존 자세한 상담 신청/);
 });
