@@ -60,7 +60,7 @@ test('Kakao entry starts authorization directly without a separate consent contr
   assert.match(source, /requestJson\(START_ENDPOINT, \{ channel: 'consultation', consent: true \}\)/);
 });
 
-test('unreleased Kakao entry does not initialize authentication or callback handling', () => {
+test('a hidden Kakao entry does not initialize authentication or callback handling', () => {
   const source = fs.readFileSync(path.join(projectRoot, 'assets/kakao-consultation.js'), 'utf8');
   let lookedUp = false;
   vm.runInNewContext(source, { window: { document: { getElementById() {
@@ -94,14 +94,16 @@ test('callback scrubber runs before trackers and removes only OAuth callback par
   });
 });
 
-test('entry is held until approval and contains only a Kakao button when released', () => {
+test('released entry contains only the Kakao start button', () => {
   const html = fs.readFileSync(path.join(projectRoot, 'consultation/index.html'), 'utf8');
   assert.match(html, /id="stage"/);
   assert.match(html, /flow\.js\?v=d61432472658/);
   assert.match(html, /id="kakao-quick-consultation"/);
   const entry = html.match(/<section class="kakao-quick kakao-quick--entry"[\s\S]*?<\/section>/)[0];
-  assert.match(entry, /aria-label="카카오 상담 신청" hidden>/);
+  assert.match(entry, /aria-label="카카오 상담 신청">/);
+  assert.doesNotMatch(entry, /\shidden(?:[\s>])/);
   assert.match(entry, /data-kakao-start>카카오톡으로 빠르게 신청하기<\/button>/);
-  assert.doesNotMatch(entry, /<h2|<a|<dialog|data-kakao-account-consent|KAKAO QUICK CONSULTATION/);
+  assert.doesNotMatch(entry, /<h2|<a|<dialog|<input|data-kakao-account-consent|KAKAO QUICK CONSULTATION/);
+  assert.equal(entry.replace(/<[^>]+>/g, '').trim(), '카카오톡으로 빠르게 신청하기');
   assert.doesNotMatch(html, /subject/);
 });
