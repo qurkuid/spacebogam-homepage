@@ -9,7 +9,8 @@ test('native membership guide distinguishes signup, optional profile and consult
   for (const text of ['가입과 로그인은 앱에서 진행합니다', '회원가입은 상담 신청과 별개입니다', '상담을 신청하거나 공사 계약을 하지 않아도', '제공하지 않아도 회원가입·로그인이 가능합니다', '만 14세 이상', '본인이 확인·수정한 뒤 접수', '기존 고객이나 프로젝트를 자동으로 합치지 않습니다', '메뉴 → 계정 삭제 → 계정 탈퇴']) {
     assert.ok(source.includes(text), text);
   }
-  assert.equal((source.match(/선택 · 제공 기능 준비 중/g) || []).length, 2);
+  assert.equal((source.match(/<td>선택 동의<\/td>/g) || []).length, 2);
+  assert.doesNotMatch(source, /제공 기능 준비 중|제공 기능이 준비되면|승인 후 제공/);
   assert.equal((source.match(/회원프로필 등록·관리, 상담 입력란 자동 입력/g) || []).length, 2);
   assert.doesNotMatch(source, /<input\b|<form\b|<dialog\b/);
 });
