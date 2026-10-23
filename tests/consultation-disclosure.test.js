@@ -37,11 +37,17 @@ test('callback consent quotes canonical retention, not destruction immediately a
   assert.match(callback, /if \(!consentInput\.checked\)/);
 });
 
-test('policy replaces the false blanket optional-input claim with three form-specific disclosures', () => {
+test('policy replaces the false blanket optional-input claim with four form-specific disclosures', () => {
   assert.doesNotMatch(policy, /성함과 연락처를 제외한 항목은[\s\S]{0,40}선택 입력/);
-  assert.equal((policy.match(/data-form-type=/g) || []).length, 3);
+  assert.equal((policy.match(/data-form-type=/g) || []).length, 4);
   assert.match(policy, /일반 상담 신청서에는 개인정보 수집·이용 동의가 필요/);
   assert.match(policy, /수집 항목이나 보유 기간을 새로 늘리는 내용이 아닙니다/);
+});
+
+test('Kakao quick consultation disclosure matches its four direct required fields', () => {
+  assert.equal(row('kakao-quick').required, '이름, 연락처, 상담 주소, 공간 유형 (4개)');
+  assert.match(row('kakao-quick').optional, /모두 신청자가 직접 입력/);
+  assert.match(row('kakao-quick').optional, /카카오 닉네임·이메일·전화번호를 상담 입력값으로 불러오지 않습니다/);
 });
 
 test('residential disclosure names all four core required fields', () => {
