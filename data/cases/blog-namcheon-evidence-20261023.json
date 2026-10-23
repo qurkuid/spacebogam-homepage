@@ -1,0 +1,203 @@
+{
+  "case": "case-namcheon-exllu-56py.html",
+  "officialSource": "https://blog.naver.com/baek1985/223827060300",
+  "sourceId": "223827060300",
+  "sourceBodySha256": "5714ff38615ec5ca3737cafa24dd1a622cf2db22b3863785575a05f4d16ee690",
+  "verifiedAt": "2026-10-23",
+  "matching": "company-scoped INTM project, same name and 56 pyeong, portfolio-enabled photos; original filename plus visual comparison of 12 image pairs",
+  "historicalFacts": [
+    "7-week duration belongs to this completed case, not a current service promise"
+  ],
+  "sections": [
+    {
+      "id": "customer-requirements",
+      "paragraphIndices": [
+        33,
+        34,
+        35,
+        36
+      ]
+    },
+    {
+      "id": "existing-space-problem",
+      "paragraphIndices": [
+        44,
+        50,
+        52,
+        55
+      ]
+    },
+    {
+      "id": "design-direction",
+      "paragraphIndices": [
+        30,
+        59,
+        60
+      ]
+    },
+    {
+      "id": "space-details",
+      "paragraphIndices": [
+        44,
+        50,
+        52,
+        55,
+        56,
+        57,
+        64,
+        65,
+        67,
+        68,
+        70,
+        71
+      ]
+    },
+    {
+      "id": "materials-and-process",
+      "paragraphIndices": [
+        30,
+        44,
+        55,
+        56,
+        68
+      ]
+    },
+    {
+      "id": "completed-result",
+      "paragraphIndices": [
+        44,
+        52,
+        56,
+        60,
+        68,
+        71,
+        76
+      ]
+    },
+    {
+      "id": "design-intent",
+      "paragraphIndices": [
+        7,
+        19,
+        27,
+        33,
+        34,
+        35,
+        36,
+        44,
+        52,
+        55,
+        60,
+        68
+      ]
+    }
+  ],
+  "photos": [
+    {
+      "blogImageIndex": 2,
+      "originalFilename": "BAE04603.jpg",
+      "intmImageWidth": 2000,
+      "intmImageHeight": 1333,
+      "visuallyVerified": true
+    },
+    {
+      "blogImageIndex": 4,
+      "originalFilename": "BAE04624.jpg",
+      "intmImageWidth": 1080,
+      "intmImageHeight": 720,
+      "visuallyVerified": true
+    },
+    {
+      "blogImageIndex": 6,
+      "originalFilename": "BAE04661.jpg",
+      "intmImageWidth": 1080,
+      "intmImageHeight": 720,
+      "visuallyVerified": true
+    },
+    {
+      "blogImageIndex": 8,
+      "originalFilename": "BAE04672.jpg",
+      "intmImageWidth": 2000,
+      "intmImageHeight": 1333,
+      "visuallyVerified": true
+    },
+    {
+      "blogImageIndex": 11,
+      "originalFilename": "BAE04714.jpg",
+      "intmImageWidth": 2000,
+      "intmImageHeight": 1333,
+      "visuallyVerified": true
+    },
+    {
+      "blogImageIndex": 15,
+      "originalFilename": "BAE04729.jpg",
+      "intmImageWidth": 1333,
+      "intmImageHeight": 2000,
+      "visuallyVerified": true
+    },
+    {
+      "blogImageIndex": 17,
+      "originalFilename": "BAE04737.jpg",
+      "intmImageWidth": 1080,
+      "intmImageHeight": 1620,
+      "visuallyVerified": true
+    },
+    {
+      "blogImageIndex": 22,
+      "originalFilename": "BAE04753.jpg",
+      "intmImageWidth": 2000,
+      "intmImageHeight": 1333,
+      "visuallyVerified": true
+    },
+    {
+      "blogImageIndex": 23,
+      "originalFilename": "BAE04754.jpg",
+      "intmImageWidth": 2000,
+      "intmImageHeight": 1333,
+      "visuallyVerified": true
+    },
+    {
+      "blogImageIndex": 34,
+      "originalFilename": "BAE04789.jpg",
+      "intmImageWidth": 2000,
+      "intmImageHeight": 1333,
+      "visuallyVerified": true
+    },
+    {
+      "blogImageIndex": 36,
+      "originalFilename": "BAE04797.jpg",
+      "intmImageWidth": 2000,
+      "intmImageHeight": 1333,
+      "visuallyVerified": true
+    },
+    {
+      "blogImageIndex": 39,
+      "originalFilename": "BAE04806.jpg",
+      "intmImageWidth": 1333,
+      "intmImageHeight": 2000,
+      "visuallyVerified": true
+    }
+  ],
+  "excluded": [
+    "customer identities and unit numbers",
+    "unverified budget and dates",
+    "ceiling fan performance claim",
+    "current policy inferred from old posts"
+  ],
+  "relatedExistingCaseAdditions": [
+    {
+      "case": "사직 쌍용예가 1차 42평",
+      "path": "case-sajik-ssangyong.html",
+      "added": "현관 조명은 따뜻한 3000K 톤으로 맞추고, 직광 대신 간접광이 부드럽게 퍼지도록 계획했습니다.",
+      "sourceId": "223940283554",
+      "sourceParagraph": 47
+    },
+    {
+      "case": "거제동 유림아시아드 47평",
+      "path": "case-geoje-yurim-asiad-47py.html",
+      "added": "중문 옆 벽은 프레임처럼 구성하고, 조명 위치와 각도를 함께 조정해 현관의 시각적 여유를 만들었습니다.",
+      "sourceId": "224049042932",
+      "sourceParagraph": 127
+    }
+  ]
+}
