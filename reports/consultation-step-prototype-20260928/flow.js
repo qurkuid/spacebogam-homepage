@@ -27,6 +27,9 @@
   let addressLookupRun = 0;
   let submitting = false;
   let submitted = false;
+  let kakaoProfile = {};
+  let kakaoGrant = '';
+  let metaMatching = { consent: false, email: '' };
   const companyId = '4206bdfd-b51d-4433-9f8e-c854131948cc';
   const params = new URLSearchParams(location.search);
   const eventKey = 'spacebogam.consultationApply.eventIds.v1';
@@ -63,12 +66,35 @@
     }
     return '';
   }
+  function metaCookie(name, pattern) {
+    let cookies;
+    try { cookies = document.cookie; } catch { return ''; }
+    const match = String(cookies || '').match(new RegExp('(?:^|;\\s*)' + name + '=([^;]*)'));
+    const value = match?.[1] || '';
+    return value.length <= 500 && !/\s/.test(value) && pattern.test(value) ? value : '';
+  }
   function marketingAttribution() {
     let journey = {};
     try { journey = JSON.parse(sessionStorage.getItem('spacebogam_funnel_journey') || 'null') || {}; } catch {}
     const data = { form_path: location.pathname, source_page: location.pathname, landing_page: String(journey.landing_page || location.href).slice(0, 1000), referrer: String(journey.referrer || document.referrer || '').slice(0, 1000), submitted_at: new Date().toISOString(), device_type: innerWidth < 768 ? 'mobile' : innerWidth < 1024 ? 'tablet' : 'desktop', experiment_id: 'homepage_headline_v1', experiment_variant: stored(sessionStorage, 'spacebogam_homepage_headline_v1_variant') || '', page_variant: params.get('page_variant') || '', sbClientId: clientId, sbSessionId: sessionId, sbSubmitEventId: eventIds.lead_submit_success, is_test: /^(1|true|yes|y|on)$/i.test(params.get('is_test') || '') ? 'true' : '' };
     attributionKeys.forEach(key => { data[key] = trackingValue(key); });
+    const fbp = metaCookie('_fbp', /^fb\.\d+\.\d{13}\.\d+$/);
+    const fbc = metaCookie('_fbc', /^fb\.\d+\.\d{13}\.[A-Za-z0-9_-]+$/);
+    if (fbp) data.fbp = fbp;
+    if (fbc) data.fbc = fbc;
     return data;
+  }
+  function metaMatchingPayload() {
+    const email = String(metaMatching.email || '').trim();
+    return {
+      consent: metaMatching.consent === true,
+      version: 'meta-contact-v1',
+      ...(metaMatching.consent && email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? { email } : {})
+    };
+  }
+  function isQaSubmission() {
+    return /^(1|true|yes|y|on)$/i.test(params.get('is_test') || '')
+      || stored(sessionStorage, 'spacebogam_funnel_is_test') === 'true';
   }
   function funnel(name) {
     if (typeof fetch !== 'function') return;
@@ -147,7 +173,8 @@
     const schedule = day && date && time ? { ...day, question: '방문 상담 희망 일정을 선택해 주세요.', questionType: 'schedule', parts: [day, date, time] } : null;
     const tail = schedule ? remaining.flatMap(q => q === day ? [schedule, ...(callback ? [callback] : [])]
       : q === date || q === time || q === callback ? [] : [q]) : remaining;
-    return ordered.concat(featured.slice(0, 2), separate, featured.slice(2), tail);
+    return ordered.concat(featured.slice(0, 2), separate, featured.slice(2), tail)
+      .map(q => isBudgetQuestion(q) ? { ...q, isRequired: true } : q);
   }
 
   function questionOptions(question) {
@@ -164,6 +191,7 @@
       const loaded = effectiveQuestions(body.questions || []);
       if (loaded.length && current !== 'question' && current !== 'summary') {
         questions = loaded;
+        fillKakaoResponses();
         const addressQuestion = questions.find(q => q.questionType === 'address');
         if (answers.apartmentSelected && addressQuestion) answers.responses[String(addressQuestion.id)] = answers.address;
         const areaQuestion = questions.find(q => /평형|평수/.test(q.question));
@@ -172,9 +200,30 @@
     }).catch(() => {});
   }
 
+  function fillKakaoResponses() {
+    questions.concat(window.SB_CONSULTATION_QUESTIONS.commercial).forEach(question => {
+      const key = String(question.id);
+      if (String(answers.responses[key] || '').trim()) return;
+      if (question.questionType === 'short_answer' && /성함|성명|이름/.test(question.question)
+        && typeof kakaoProfile.name === 'string') answers.responses[key] = kakaoProfile.name.trim().slice(0, 100);
+      if (question.questionType === 'phonenumber' && typeof kakaoProfile.phone === 'string'
+        && /^01\d-?\d{3,4}-?\d{4}$/.test(kakaoProfile.phone.trim())) answers.responses[key] = kakaoProfile.phone.trim();
+    });
+  }
+  window.SB_CONSULTATION = {
+    applyKakaoProfile(profile, grant) {
+      kakaoProfile = profile;
+      kakaoGrant = grant;
+      fillKakaoResponses();
+      if (current === 'question') render();
+    }
+  };
+
   function response(question) { return answers.responses[String(question.id)]; }
+  function isBudgetQuestion(question) { return question.questionType === 'select' && /예산 구간/.test(question.question); }
   function hasResponse(question) {
     const value = response(question);
+    if (isBudgetQuestion(question) && value === '기타(직접입력)') return false;
     return Array.isArray(value) ? value.length > 0 : !!String(value || '').trim();
   }
   function isPastDate(value) {
@@ -341,6 +390,7 @@
       answers.responses = {};
     }
     answers[key] = value;
+    fillKakaoResponses();
     if (!started) { started = true; funnel('lead_form_start'); }
     advance();
   }
@@ -749,6 +799,45 @@
     const key = String(question.id);
     const type = question.questionType;
     const options = questionOptions(question);
+    if (isBudgetQuestion(question)) {
+      const other = '기타(직접입력)';
+      const label = el('label', 'field');
+      label.appendChild(el('span', 'field-label', question.question + ' *'));
+      const select = el('select', 'question-input');
+      ['', ...options, other].forEach(option => {
+        const item = el('option', null, question.optionLabels?.[option] || option || '선택해 주세요');
+        item.value = option; select.appendChild(item);
+      });
+      const value = response(question) || '';
+      select.value = !value || !options.includes(value) ? other : value;
+      select.required = true;
+      label.appendChild(select); stage.appendChild(label);
+      const customLabel = el('label', 'field');
+      customLabel.appendChild(el('span', 'field-label', '예산 직접입력 *'));
+      const custom = el('input', 'question-input');
+      custom.type = 'text'; custom.maxLength = 100;
+      custom.placeholder = '예: 3,500만원 또는 4천만~5천만원';
+      custom.value = select.value === other && value !== other ? value : '';
+      customLabel.hidden = select.value !== other;
+      custom.required = !customLabel.hidden;
+      customLabel.appendChild(custom); stage.appendChild(customLabel);
+      select.addEventListener('change', () => {
+        customLabel.hidden = select.value !== other;
+        custom.required = !customLabel.hidden;
+        answers.responses[key] = select.value === other ? custom.value.trim() || other : select.value;
+        clearError(); next.disabled = !hasResponse(question);
+        if (select.value === other) custom.focus();
+        else if (select.value) advance();
+      });
+      custom.addEventListener('input', () => {
+        answers.responses[key] = custom.value.trim() || other;
+        clearError(); next.disabled = !hasResponse(question);
+      });
+      custom.addEventListener('keydown', event => {
+        if (event.key === 'Enter' && !event.isComposing) { event.preventDefault(); advance(); }
+      });
+      return;
+    }
     if (type === 'schedule') {
       renderSchedule(question);
       return;
@@ -961,6 +1050,48 @@
     copy.appendChild(link);
     label.appendChild(copy);
     stage.appendChild(label);
+
+    const matchingLabel = el('label', 'consent consent-optional');
+    const matchingInput = el('input');
+    matchingInput.type = 'checkbox';
+    matchingInput.checked = metaMatching.consent;
+    matchingInput.addEventListener('change', () => {
+      metaMatching.consent = matchingInput.checked;
+      render();
+    });
+    matchingLabel.appendChild(matchingInput);
+    matchingLabel.appendChild(el('span', null, '[선택] 광고 성과 측정을 위한 정보 제공에 동의합니다.'));
+    stage.appendChild(matchingLabel);
+
+    const notice = el('details', 'matching-notice');
+    notice.appendChild(el('summary', null, '제공 및 국외 이전 안내'));
+    const noticeCopy = el('p');
+    noticeCopy.appendChild(document.createTextNode('받는 자: Meta Platforms Inc. (1 Meta Way, Menlo Park, CA 94025, USA) · 목적: 광고 성과 측정, 광고 최적화 및 맞춤 광고 · 제공 항목: 전화번호와 선택 입력한 이메일의 SHA-256 해시값(익명화 정보가 아님), 쿠키 식별자, IP 주소, 브라우저 및 이벤트 정보 · 국외 이전: 상담 접수 완료 시 미국의 Meta 데이터센터로 네트워크 전송 · 처리 및 보유: 연락처 해시는 매칭 후 삭제하고 이벤트 정보는 최대 2년 보유하며, 선택 동의 이력은 상담 종료 후 1년까지 보관합니다. 선택 이메일은 전송 후 공간보감 데이터베이스에 보관하지 않습니다. '));
+    const metaPolicy = el('a', null, 'Meta 개인정보처리방침');
+    metaPolicy.href = 'https://www.facebook.com/privacy/policy/'; metaPolicy.target = '_blank'; metaPolicy.rel = 'noopener';
+    noticeCopy.appendChild(metaPolicy);
+    noticeCopy.appendChild(document.createTextNode(' · '));
+    const businessTerms = el('a', null, 'Meta 비즈니스 도구 약관');
+    businessTerms.href = 'https://www.facebook.com/legal/terms/businesstools'; businessTerms.target = '_blank'; businessTerms.rel = 'noopener';
+    noticeCopy.appendChild(businessTerms);
+    noticeCopy.appendChild(document.createTextNode(' · 선택 동의를 거부해도 상담을 신청할 수 있으며, 철회는 공간보감 1551-0163으로 요청할 수 있습니다. '));
+    const privacyLink = el('a', null, '공간보감 개인정보처리방침');
+    privacyLink.href = '../../privacy/'; privacyLink.target = '_blank'; privacyLink.rel = 'noopener';
+    noticeCopy.appendChild(privacyLink);
+    notice.appendChild(noticeCopy);
+    stage.appendChild(notice);
+
+    if (metaMatching.consent) {
+      const emailLabel = el('label', 'matching-email');
+      emailLabel.appendChild(el('span', 'field-label', '이메일(선택)'));
+      const emailInput = el('input');
+      emailInput.type = 'email'; emailInput.autocomplete = 'email'; emailInput.inputMode = 'email'; emailInput.maxLength = 254;
+      emailInput.value = metaMatching.email;
+      emailInput.addEventListener('input', () => { metaMatching.email = emailInput.value; });
+      emailLabel.appendChild(emailInput);
+      emailLabel.appendChild(el('small', null, '광고 성과 측정에만 사용합니다. 입력하지 않아도 상담을 신청할 수 있습니다.'));
+      stage.appendChild(emailLabel);
+    }
   }
 
   function renderSummary() {
@@ -1004,7 +1135,7 @@
     saved['9999'] = 'true';
     if (answers.type === '상업 공간') {
       const lead = Object.fromEntries(Object.entries(answers.responses).filter(([key]) => !/^\d+$/.test(key)));
-      return { answers: { '9999': 'true' }, filePath: null, companyId, type: 'commercial', commercialLead: { ...lead, consent: true }, marketingAttribution: marketingAttribution() };
+      return { answers: { '9999': 'true' }, filePath: null, companyId, type: 'commercial', commercialLead: { ...lead, consent: true }, marketingAttribution: marketingAttribution(), metaMatching: metaMatchingPayload() };
     }
     const details = [];
     if (answers.apartmentSelected) details.push('아파트: ' + answers.apartmentSelected[0] + ' / ' + (answers.dong || '동 미확인'));
@@ -1016,7 +1147,7 @@
       if (value) details.push(label + ': ' + (Array.isArray(value) ? value.join(', ') : value === true ? '있음' : value));
     });
     if (details.length) saved['7'] = [saved['7'], ...details].filter(Boolean).join('\n');
-    return { answers: saved, filePath, companyId, type: 'residential', marketingAttribution: marketingAttribution() };
+    return { answers: saved, filePath, companyId, type: 'residential', marketingAttribution: marketingAttribution(), metaMatching: metaMatchingPayload() };
   }
 
   async function imageForSubmission(attachment) {
@@ -1049,6 +1180,7 @@
   }
 
   async function submitConsultation() {
+    if (!answers.consent) { showError('개인정보 수집·이용 동의가 필요합니다.'); return; }
     if (submitting || submitted) return;
     submitting = true;
     next.disabled = true;
@@ -1069,15 +1201,22 @@
         }
         filePath = answers.planAttachment.filePath;
       }
+      const payload = submissionPayload(filePath);
+      if (kakaoGrant) payload.kakaoGrant = kakaoGrant;
       const response = await fetch('https://intm.kr/api/consultation/submit', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(submissionPayload(filePath))
+        body: JSON.stringify(payload)
       });
       const result = await response.json();
       if (!response.ok || result.success !== true) throw new Error(result.error || '접수에 실패했습니다.');
       submitted = true;
       answers.receiptId = result.consultReqId;
-      try { if (typeof fbq === 'function') fbq('track', 'Lead', { currency: 'KRW' }, { eventID: result.leadEventId || eventIds.lead_submit_success }); } catch {}
+      try {
+        if (metaMatching.consent && !isQaSubmission() && typeof fbq === 'function' && result.trackMetaLead !== false) {
+          fbq('consent', 'grant');
+          fbq('track', 'Lead', { currency: 'KRW' }, { eventID: result.leadEventId || eventIds.lead_submit_success });
+        }
+      } catch {}
       try { if (typeof gtag === 'function') gtag('event', 'lead_submit_success', { event_category: 'lead', lead_event_id: result.leadEventId || eventIds.lead_submit_success }); } catch {}
       funnel('lead_submit_success');
       trackStep('complete');
@@ -1113,7 +1252,7 @@
     skip.hidden = current !== 'question' || question.isRequired;
     next.hidden = current === 'success';
     next.textContent = current === 'summary' ? '방문 상담 예약 신청 접수 →' : current === 'consent' ? '입력 내용 확인 →' : current === 'dong' && answers.dong ? '도면 확인하기 →' : '다음 →';
-    next.disabled = current === 'summary' ? false
+    next.disabled = current === 'summary' ? !answers.consent
       : current === 'planReview' ? !['saved', 'none'].includes(answers.planStatus)
         : current === 'apartmentQuery' ? !answers.apartmentSelected && !answers.apartmentUnmatched
           : current === 'question' ? question.isRequired && !hasResponse(question)
@@ -1184,6 +1323,8 @@
     lookupRun++;
     clearPlan();
     answers = { responses: {} };
+    fillKakaoResponses();
+    metaMatching = { consent: false, email: '' };
     submitted = false;
     started = false;
     viewedSteps = new Set();

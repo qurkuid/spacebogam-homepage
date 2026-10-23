@@ -94,6 +94,24 @@ function restart() {
   assert.equal(progress.getAttribute('aria-valuenow'), '0');
 }
 
+assert.equal(typeof context.window.SB_CONSULTATION?.applyKakaoProfile, 'function');
+context.window.SB_CONSULTATION.applyKakaoProfile({ name: '자동입력 고객', phone: '01012345678' }, 'verified-grant');
+choose(0); choose(1);
+assert.match(title(), /성함/);
+assert.equal(stage().querySelector('.question-input').value, '자동입력 고객');
+answer('직접 수정한 이름');
+context.window.SB_CONSULTATION.applyKakaoProfile({ name: '덮어쓰면 안 됨', phone: 'invalid' }, 'verified-grant');
+assert.equal(stage().querySelector('.question-input').value, '직접 수정한 이름');
+next();
+assert.equal(stage().querySelector('.question-input').value, '01012345678');
+restart(); choose(1);
+assert.match(title(), /성명/);
+assert.equal(stage().querySelector('.question-input').value, '덮어쓰면 안 됨');
+next();
+assert.equal(stage().querySelector('.question-input').value, '');
+context.window.SB_CONSULTATION.applyKakaoProfile({}, 'verified-grant');
+stepEvents.length = 0;
+restart();
 assert.match(title(), /어떤 공간을 바꾸실 계획/, '처음 열 때 바로 첫 질문');
 assert.equal(nodes.back.hidden, true);
 
@@ -122,7 +140,7 @@ function finishResidential({ needsAddress = false, autoArea = false, features = 
     if (features) assert.doesNotMatch(title(), /연락 가능한 시간대/);
     if (/방문 상담 희망 일정을 선택/.test(title())) scheduleCount++;
     if (firstOptional.length < 5 && !/시공 희망 시기/.test(title())) firstOptional.push(title());
-    if (features && /예산 구간/.test(title())) {
+    if (/예산 구간/.test(title())) {
       stage().querySelector('.question-input').change('4천만원 미만');
       assert.match(title(), /시공장소를 모두/);
     } else if (features && /시공장소를 모두/.test(title())) {
@@ -342,6 +360,7 @@ async function run() {
   assert.equal(catalogImageUploaded, true);
   assert.deepEqual(canvasScales.at(-1), [-1, 1]);
   assert.equal(submittedPayload.type, 'residential');
+  assert.equal(submittedPayload.kakaoGrant, 'verified-grant');
   assert.equal(submittedPayload.answers['9999'], 'true');
   assert.match(submittedPayload.answers['5'], /^\d{4}-\d{2}-15$/);
   assert.match(submittedPayload.answers['7'], /아파트: 거제유림아시아드 \/ 111동/);
@@ -510,6 +529,7 @@ async function run() {
   next(); await settle(); await settle();
   assert.match(title(), /접수되었습니다/);
   assert.equal(submittedPayload.type, 'commercial');
+  assert.equal(submittedPayload.kakaoGrant, 'verified-grant');
   assert.equal(submittedPayload.commercialLead.consent, true);
   assert.equal(submittedPayload.commercialLead.leaseStatus, 'leased');
   assert.equal(submittedPayload.commercialLead.facilityNeeds[0], 'plumbing');
@@ -521,7 +541,7 @@ async function run() {
   answer('부산시 연제구 해맞이로 23'); next(); nodes.skip.click(); answer('32'); next();
   assert.match(title(), /시공 희망 시기/);
   stage().querySelector('.manual-option').click();
-  nodes.skip.click();
+  stage().querySelector('.question-input').change('4천만원 미만');
   assert.match(title(), /시공장소를 모두/);
   const scope = name => stage().querySelectorAll('.choice').find(option => option.children[1].textContent === name);
   scope('전체 수리').click();
