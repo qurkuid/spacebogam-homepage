@@ -60,6 +60,15 @@ test('Kakao entry starts authorization directly without a separate consent contr
   assert.match(source, /requestJson\(START_ENDPOINT, \{ channel: 'consultation', consent: true \}\)/);
 });
 
+test('Kakao profile values populate editable fields without becoming HTML or browser storage', () => {
+  const source = fs.readFileSync(path.join(projectRoot, 'assets/kakao-consultation.js'), 'utf8');
+  assert.match(source, /form\.elements\.name\.value = name\.slice\(0, 100\)/);
+  assert.match(source, /form\.elements\.phone\.value = isValidPhone\(phone\) \? phone : ''/);
+  assert.doesNotMatch(source, /sessionStorage\.(?:setItem|removeItem)\([^)]*(?:profile|name|phone)/);
+  assert.doesNotMatch(source, /localStorage\.(?:setItem|removeItem)\([^)]*(?:profile|name|phone)/);
+  assert.doesNotMatch(source, /(?:name|phone)[^;\n]*innerHTML|innerHTML[^;\n]*(?:name|phone)/);
+});
+
 test('a hidden Kakao entry does not initialize authentication or callback handling', () => {
   const source = fs.readFileSync(path.join(projectRoot, 'assets/kakao-consultation.js'), 'utf8');
   let lookedUp = false;
@@ -102,8 +111,8 @@ test('released entry contains only the Kakao start button', () => {
   const entry = html.match(/<section class="kakao-quick kakao-quick--entry"[\s\S]*?<\/section>/)[0];
   assert.match(entry, /aria-label="카카오 상담 신청">/);
   assert.doesNotMatch(entry, /\shidden(?:[\s>])/);
-  assert.match(entry, /data-kakao-start><img src="\/assets\/kakao-login-ko\.svg" width="224" height="46" alt="카카오 로그인"><\/button>/);
+  assert.match(entry, /data-kakao-start><svg[^>]+aria-hidden="true"/);
   assert.doesNotMatch(entry, /<h2|<a|<dialog|<input|data-kakao-account-consent|KAKAO QUICK CONSULTATION/);
-  assert.equal(entry.replace(/<[^>]+>/g, '').trim(), '');
+  assert.equal(entry.replace(/<[^>]+>/g, '').trim(), '카카오로 빠르게 상담신청하기');
   assert.doesNotMatch(html, /subject/);
 });
