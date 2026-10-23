@@ -176,35 +176,37 @@
     if (!button) return;
     button.disabled = value;
     button.setAttribute('aria-busy', String(value));
-    if (button.querySelector('img')) return;
+    if (button.querySelector('img,svg')) return;
     if (!button.dataset.label) button.dataset.label = button.textContent;
     button.textContent = value ? busyText : button.dataset.label;
   }
 
   function showConnectedForm() {
     var name = text(profile && profile.name);
+    var phone = text(profile && profile.phone);
     panel.classList.remove('kakao-quick--entry');
     panel.innerHTML = [
       '<div class="kakao-quick__heading">',
       '<p class="kakao-quick__eyebrow">KAKAO QUICK CONSULTATION</p>',
       '<h2>상담 내용을 확인해 주세요</h2>',
-      '<p>카카오 계정이 연결되었습니다. 연락처와 현장 정보를 직접 입력한 뒤 신청해 주세요.</p>',
+      '<p>이름과 연락처를 확인하고 현장 정보를 입력해 주세요.</p>',
       '</div>',
       '<form class="kakao-quick__form" data-kakao-form novalidate>',
       '<label><span>이름</span><input name="name" autocomplete="name" maxlength="100" required></label>',
       '<label><span>연락받을 휴대전화</span><input name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="010-1234-5678" required></label>',
       '<label><span>현장 주소</span><input name="address" autocomplete="street-address" maxlength="500" placeholder="시·구·동 또는 도로명 주소" required></label>',
       '<label><span>공간 유형</span><select name="spaceType" required><option value="">선택해 주세요</option><option value="apartment">아파트</option><option value="house">주택·빌라</option><option value="commercial">상업 공간</option></select></label>',
-      '<p class="kakao-quick__notice">입력한 휴대전화는 카카오에서 인증된 번호가 아닙니다. 접수 후 담당자가 전화로 내용을 확인하며, 이 신청만으로 방문 일정이 확정되지는 않습니다.</p>',
+      '<p class="kakao-quick__notice">이름과 연락처는 확인·수정할 수 있습니다. 빈 항목은 직접 입력해 주세요. 접수 후 담당자가 전화로 내용을 확인하며, 이 신청만으로 방문 일정이 확정되지는 않습니다.</p>',
       '<p class="kakao-quick__status" data-kakao-status aria-live="polite"></p>',
       '<div class="kakao-quick__actions"><button class="kakao-quick__submit" type="submit">상담 신청 접수</button><a href="#stage" data-detailed-form>기존 자세한 상담 신청</a></div>',
       '</form>'
     ].join('');
     var form = panel.querySelector('[data-kakao-form]');
-    form.elements.name.value = name;
+    form.elements.name.value = name.slice(0, 100);
+    form.elements.phone.value = isValidPhone(phone) ? phone : '';
     form.addEventListener('submit', submitConsultation);
     bindDetailedLinks();
-    form.elements.phone.focus();
+    (form.elements.name.value ? (form.elements.phone.value ? form.elements.address : form.elements.phone) : form.elements.name).focus();
   }
 
   function validateForm(form) {
