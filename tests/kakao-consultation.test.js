@@ -26,27 +26,6 @@ test('callback requires exact flow match and an unexpired verifier tuple', () =>
   assert.equal(moduleApi.callbackMatches({ flow: 'flow-12345678', kakao: 'success' }, { ...initiation, expiresAt: now - 1 }, now), false);
 });
 
-test('intake payload uses the signed grant and preserves one caller-provided event id', () => {
-  const payload = moduleApi.buildSubmission({
-    intake: { name: '박기범', phone: '010-1234-5678', address: '부산 해운대구', spaceType: 'apartment' },
-    kakaoGrant: 'signed-grant',
-    marketingAttribution: { utm_source: 'test' },
-    eventId: '3de2461b-591a-4639-940f-8f4712874661',
-    isTest: true
-  });
-  assert.deepEqual(payload, {
-    type: 'intake',
-    intake: { name: '박기범', phone: '010-1234-5678', address: '부산 해운대구', spaceType: 'apartment', consent: true },
-    companyId: '4206bdfd-b51d-4433-9f8e-c854131948cc',
-    kakaoGrant: 'signed-grant',
-    marketingAttribution: {
-      utm_source: 'test',
-      sbSubmitEventId: '3de2461b-591a-4639-940f-8f4712874661',
-      is_test: 'true'
-    }
-  });
-});
-
 test('phone validation accepts Korean mobile formats only', () => {
   assert.equal(moduleApi.isValidPhone('010-1234-5678'), true);
   assert.equal(moduleApi.isValidPhone('01012345678'), true);
@@ -60,13 +39,13 @@ test('Kakao entry starts authorization directly without a separate consent contr
   assert.match(source, /requestJson\(START_ENDPOINT, \{ channel: 'consultation', consent: true \}\)/);
 });
 
-test('Kakao profile values populate editable fields without becoming HTML or browser storage', () => {
+test('Kakao only fills the existing questionnaire and never creates a parallel form', () => {
   const source = fs.readFileSync(path.join(projectRoot, 'assets/kakao-consultation.js'), 'utf8');
-  assert.match(source, /form\.elements\.name\.value = name\.slice\(0, 100\)/);
-  assert.match(source, /form\.elements\.phone\.value = isValidPhone\(phone\) \? phone : ''/);
-  assert.doesNotMatch(source, /sessionStorage\.(?:setItem|removeItem)\([^)]*(?:profile|name|phone)/);
-  assert.doesNotMatch(source, /localStorage\.(?:setItem|removeItem)\([^)]*(?:profile|name|phone)/);
-  assert.doesNotMatch(source, /(?:name|phone)[^;\n]*innerHTML|innerHTML[^;\n]*(?:name|phone)/);
+  assert.match(source, /SB_CONSULTATION.applyKakaoProfile/);
+  assert.match(source, /root.open\('about:blank'/);
+  assert.match(source, /new root.BroadcastChannel\('spacebogam.kakao.'/);
+  assert.doesNotMatch(source, /innerHTML|data-kakao-form|type: 'intake'|SUBMIT_ENDPOINT|buildSubmission|기존 자세한 상담/);
+  assert.doesNotMatch(source, /(?:sessionStorage|localStorage)\.setItem\([^)]*(?:profile|name|phone)/);
 });
 
 test('a hidden Kakao entry does not initialize authentication or callback handling', () => {
@@ -106,7 +85,7 @@ test('callback scrubber runs before trackers and removes only OAuth callback par
 test('released entry contains only the Kakao start button', () => {
   const html = fs.readFileSync(path.join(projectRoot, 'consultation/index.html'), 'utf8');
   assert.match(html, /id="stage"/);
-  assert.match(html, /flow\.js\?v=d61432472658/);
+  assert.match(html, /flow\.js\?v=[a-f0-9]{12}/);
   assert.match(html, /id="kakao-quick-consultation"/);
   const entry = html.match(/<section class="kakao-quick kakao-quick--entry"[\s\S]*?<\/section>/)[0];
   assert.match(entry, /aria-label="카카오 상담 신청">/);
@@ -115,4 +94,60 @@ test('released entry contains only the Kakao start button', () => {
   assert.doesNotMatch(entry, /<h2|<a|<dialog|<input|data-kakao-account-consent|KAKAO QUICK CONSULTATION/);
   assert.equal(entry.replace(/<[^>]+>/g, '').trim(), '카카오로 빠르게 상담신청하기');
   assert.doesNotMatch(html, /subject/);
+});
+
+function loginHarness(options = {}) {
+  const channels = [], windows = [], requests = [], values = new Map();
+  let listener, applied;
+  const button = { dataset: {}, disabled: false, setAttribute() {}, querySelector() { return {}; }, addEventListener(_event, fn) { listener = fn; } };
+  const status = { dataset: {}, textContent: '' };
+  const storage = () => ({ getItem: key => values.get(key) || null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) });
+  const root = {
+    document: { getElementById: () => ({ querySelector: selector => selector === '[data-kakao-start]' ? button : status }) },
+    sessionStorage: storage(), location: { search: '' },
+    SB_CONSULTATION: { applyKakaoProfile(profile, grant) { applied = { profile, grant }; } },
+    open() {
+      if (options.blocked) return null;
+      const popup = { sessionStorage: storage(), location: { replace(url) { popup.url = url; } }, close() { popup.closed = true; } };
+      windows.push(popup); return popup;
+    },
+    BroadcastChannel: options.unsupported ? undefined : class {
+      constructor(name) { this.name = name; channels.push(this); }
+      close() { this.closed = true; }
+    },
+    setTimeout: () => 1, clearTimeout() {},
+    async fetch(url, request) {
+      requests.push({ url, body: JSON.parse(request.body) });
+      return { ok: true, json: async () => ({ authorizationUrl: 'https://intm.kr/api/customer/auth/kakao/authorize?flow=flow-12345678', flow: 'flow-12345678', codeVerifier: 'v'.repeat(43) }) };
+    }
+  };
+  vm.runInNewContext(fs.readFileSync(path.join(projectRoot, 'assets/kakao-consultation.js'), 'utf8'), { window: root, URL, URLSearchParams });
+  return { root, button, status, channels, windows, requests, values, click: () => listener(), applied: () => applied };
+}
+
+test('login popup fills the existing questionnaire, clears verifier storage, and permits an immediate retry', async () => {
+  const app = loginHarness();
+  await app.click();
+  assert.equal(app.button.disabled, false, 'closing the popup must not lock the button for ten minutes');
+  assert.equal(app.windows.length, 1);
+  assert.match(app.windows[0].url, /^https:\/\/intm.kr/);
+  await app.click();
+  assert.equal(app.channels[0].closed, true, 'a retry stops listening to the previous flow');
+  assert.equal(app.windows.length, 2);
+  app.channels[1].onmessage({ data: { success: true, consultationGrant: 'signed-grant', profile: { name: '검증고객', phone: '01012345678' } } });
+  assert.equal(app.applied().profile.name, '검증고객');
+  assert.equal(app.applied().grant, 'signed-grant');
+  assert.equal(app.channels[1].closed, true);
+  assert.equal(app.values.size, 0);
+  assert.equal(app.requests.every(request => request.url.endsWith('/kakao/start')), true, 'no consultation is submitted by the Kakao button');
+});
+
+test('blocked popups and unsupported messaging preserve manual input without making requests', async () => {
+  for (const options of [{ blocked: true }, { unsupported: true }]) {
+    const app = loginHarness(options);
+    await app.click();
+    assert.equal(app.requests.length, 0);
+    assert.equal(app.button.disabled, false);
+    assert.match(app.status.textContent, /직접 입력/);
+  }
 });
