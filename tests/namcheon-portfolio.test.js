@@ -11,6 +11,7 @@ test('portfolio visible project/photo counts and schema stay consistent with act
  const cards=[...list.matchAll(/<article\b/g)].length;
  const photos=[...list.matchAll(/사진 (\d+)장/g)].reduce((n,m)=>n+Number(m[1]),0);
  assert.ok(html.includes(`${cards}개 현장 · ${photos}장의 완성 사진`));
+ for(const meta of html.matchAll(/<meta\b[^>]*content="[^"]*?(\d+)장의 완성 사진[^"]*"[^>]*>/g))assert.equal(Number(meta[1]),photos,'photo count in SEO/social description');
  const schema=JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
  assert.equal(schema.mainEntity.numberOfItems,cards);assert.equal(schema.mainEntity.itemListElement.length,cards);
  assert.equal(schema.mainEntity.itemListElement.filter(x=>x.url==='https://spacebogam.kr/'+slug).length,1);
