@@ -18,13 +18,15 @@ function row(type) {
   return { required: match[1], optional: match[2] };
 }
 
-test('privacy routes remain equivalent and preserve existing retention and dates', () => {
+test('privacy routes remain equivalent with preserved retention and consistent effective dates', () => {
   assert.equal(policy, read('privacy/index.html'));
   assert.ok(policy.includes('<td>' + retention + '</td>'));
-  assert.match(policy, /시행일: 2026년 8월 5일 · 공고일: 2026년 7월 29일/);
+  const effectiveDate = policy.match(/시행일: (\d{4}년 \d{1,2}월 \d{1,2}일)/);
+  assert.ok(effectiveDate);
+  assert.ok(policy.includes('본 방침은 ' + effectiveDate[1] + '부터 시행됩니다'));
+  assert.match(policy, /2026년 7월 29일 공고 · 2026년 8월 5일 시행/);
   assert.match(policy, /계약 종료 후 관계 법령이 정하는 기간까지/);
   assert.match(policy, /유입 경로·접속 기록 등 자동 수집 정보<\/td><td>수집일로부터 1년/);
-  assert.match(policy, /본 방침은 2026년 8월 5일부터 시행됩니다/);
 });
 
 test('callback consent quotes canonical retention, not destruction immediately after consultation', () => {
@@ -38,7 +40,7 @@ test('callback consent quotes canonical retention, not destruction immediately a
 test('policy replaces the false blanket optional-input claim with three form-specific disclosures', () => {
   assert.doesNotMatch(policy, /성함과 연락처를 제외한 항목은[\s\S]{0,40}선택 입력/);
   assert.equal((policy.match(/data-form-type=/g) || []).length, 3);
-  assert.match(policy, /개인정보 수집·이용 동의가 별도로 필요/);
+  assert.match(policy, /일반 상담 신청서에는 개인정보 수집·이용 동의가 필요/);
   assert.match(policy, /수집 항목이나 보유 기간을 새로 늘리는 내용이 아닙니다/);
 });
 
