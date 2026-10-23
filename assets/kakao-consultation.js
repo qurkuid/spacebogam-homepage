@@ -174,8 +174,10 @@
 
   function setButtonBusy(button, value, busyText) {
     if (!button) return;
-    if (!button.dataset.label) button.dataset.label = button.textContent;
     button.disabled = value;
+    button.setAttribute('aria-busy', String(value));
+    if (button.querySelector('img')) return;
+    if (!button.dataset.label) button.dataset.label = button.textContent;
     button.textContent = value ? busyText : button.dataset.label;
   }
 

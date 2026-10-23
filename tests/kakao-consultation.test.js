@@ -102,8 +102,8 @@ test('released entry contains only the Kakao start button', () => {
   const entry = html.match(/<section class="kakao-quick kakao-quick--entry"[\s\S]*?<\/section>/)[0];
   assert.match(entry, /aria-label="카카오 상담 신청">/);
   assert.doesNotMatch(entry, /\shidden(?:[\s>])/);
-  assert.match(entry, /data-kakao-start>카카오톡으로 빠르게 신청하기<\/button>/);
+  assert.match(entry, /data-kakao-start><img src="\/assets\/kakao-login-ko\.svg" width="224" height="46" alt="카카오 로그인"><\/button>/);
   assert.doesNotMatch(entry, /<h2|<a|<dialog|<input|data-kakao-account-consent|KAKAO QUICK CONSULTATION/);
-  assert.equal(entry.replace(/<[^>]+>/g, '').trim(), '카카오톡으로 빠르게 신청하기');
+  assert.equal(entry.replace(/<[^>]+>/g, '').trim(), '');
   assert.doesNotMatch(html, /subject/);
 });
