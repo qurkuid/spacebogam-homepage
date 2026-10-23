@@ -30,16 +30,18 @@ test('customer terms describe the persistent account without granting unlinked p
   assert.match(terms, /href="tel:15510163">1551-0163<\/a>/);
 });
 
-test('quick consultation collection consent is addressable and limited to four direct inputs', () => {
+test('Kakao consent describes the existing questionnaire without a separate application form', () => {
   const consent = policy.slice(
     policy.indexOf('id="kakao-quick-consultation-consent"'),
     policy.indexOf('<h3>다. 서비스 이용 과정'),
   );
   assert.ok(consent.length > 0);
-  assert.match(consent, /수집 항목:<\/strong> 이름, 연락처, 상담 주소, 공간 유형/);
+  assert.match(consent, /위 주거·상업 상담 신청서에 안내된 항목/);
+  assert.match(consent, /별도 신청서를 만들지 않습니다/);
+  assert.match(policy, /별도 신청 항목 없음/);
   assert.match(consent, /상담 종료 후 1년 또는 이용자의 삭제 요청 시까지 중 먼저 도래하는 시점/);
   assert.match(consent, /광고성 정보 수신이나 광고 성과 측정 선택 동의가 포함되지 않습니다/);
-  assert.match(consent, /일반 상담 신청/);
+  assert.match(consent, /같은 상담 신청서/);
   assert.doesNotMatch(consent, /카카오 닉네임[^<]*수집|카카오 이메일[^<]*수집|카카오 전화번호[^<]*수집/);
 });
 
