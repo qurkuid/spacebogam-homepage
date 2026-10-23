@@ -44,7 +44,7 @@ class Element {
 
 const root = path.join(__dirname, '../reports/consultation-step-prototype-20260928');
 const read = name => fs.readFileSync(path.join(root, name), 'utf8');
-const nodes = Object.fromEntries(['stage', 'next', 'back', 'skip', 'restart', 'progress-fill'].map(id => [id, new Element()]));
+const nodes = Object.fromEntries(['stage', 'next', 'back', 'skip', 'restart', 'progress-fill', 'kakao-quick-consultation'].map(id => [id, new Element()]));
 const progress = new Element();
 const document = {
   getElementById(id) { return nodes[id]; },
@@ -92,8 +92,17 @@ function restart() {
   assert.equal(stage().querySelector('.consult-process'), null);
   assert.equal(stage().children[0].textContent, '질문 01');
   assert.equal(progress.getAttribute('aria-valuenow'), '0');
+  assert.equal(nodes['kakao-quick-consultation'].hidden, false);
 }
 
+assert.equal(nodes['kakao-quick-consultation'].hidden, false);
+choose(0);
+assert.equal(nodes['kakao-quick-consultation'].hidden, true, 'hide after leaving the first question');
+nodes.back.click();
+assert.equal(nodes['kakao-quick-consultation'].hidden, false, 'show again only when returning to the first question');
+choose(1);
+assert.equal(nodes['kakao-quick-consultation'].hidden, true, 'commercial questions also hide the entry');
+restart();
 assert.equal(typeof context.window.SB_CONSULTATION?.applyKakaoProfile, 'function');
 context.window.SB_CONSULTATION.applyKakaoProfile({ name: '자동입력 고객', phone: '01012345678' }, 'verified-grant');
 choose(0); choose(1);
@@ -259,6 +268,7 @@ function finishResidential({ needsAddress = false, autoArea = false, features = 
   next(); assert.match(error(), /동의/);
   stage().querySelector('.consent').querySelector('input').change(true);
   next(); assert.match(title(), /입력 내용을 확인/);
+  assert.equal(nodes['kakao-quick-consultation'].hidden, true, 'summary keeps the entry hidden');
   assert.match(stage().children[2].textContent, /신청 후 담당자가 개인 휴대전화로 연락드려/);
   assert.match(summary('시공 희망 시기'), features ? /^\d{4}-\d{2}-15$/ : /^미정$/);
 }

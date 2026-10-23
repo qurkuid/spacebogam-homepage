@@ -1231,6 +1231,8 @@
   }
 
   function render() {
+    const kakaoEntry = document.getElementById('kakao-quick-consultation');
+    if (kakaoEntry) kakaoEntry.hidden = current !== 'type';
     const visitIntro = document.getElementById('visit-intro');
     if (visitIntro) visitIntro.hidden = current !== 'type';
     stage.replaceChildren();
