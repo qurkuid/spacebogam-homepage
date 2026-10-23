@@ -47,6 +47,8 @@ test('customer Kakao policy minimizes callback profile data and discloses cleanu
   assert.match(policy, /카카오 닉네임·전화번호도 고객 경로에서 요청하거나 상담 입력값으로 불러오지 않습니다/);
   assert.match(policy, /카카오 연결 해제 완료 시 작업 기록과 회원 식별자를 삭제/);
   assert.match(policy, /자동 재시도가 끝날 때까지 완료되지 않은 경우 운영자가 처리 완료를 확인한 뒤 삭제/);
+  assert.match(policy, /직원 로그인 보호를 위해 최소 연결 해제 정보를 보관하고 정기적으로 재평가/);
+  assert.match(terms, /직원 이용이 끝나면 연결 해제를 진행합니다/);
   assert.match(policy, /연결 해제 후 1일이 지난 뒤 정기 정리 작업에서 파기/);
   assert.match(policy, /공급자 연결 해제 작업이 진행 중이면 해당 작업 완료 후 다음 정리 작업에서 파기/);
   assert.match(policy, /정리 작업은 통상 15분 주기로 실행/);
