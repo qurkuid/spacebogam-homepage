@@ -1,0 +1,108 @@
+{
+  "case": "case-oryukdo-sk-view.html",
+  "publicSize": "59평",
+  "sourceIds": [
+    "223184399498",
+    "223239373749",
+    "223341113595"
+  ],
+  "sizeEvidence": [
+    {
+      "sourceId": "223184399498",
+      "paragraphs": [
+        25,
+        107
+      ]
+    },
+    {
+      "sourceId": "223239373749",
+      "paragraphs": [
+        101
+      ]
+    }
+  ],
+  "conflictResolution": "Public case follows repeated explicit size in official photographic case reports; isolated INTM apartment free-text 49평B형 lacks linked type details/drawing/estimate for this completed project. Raw data was not modified. Separate canceled-consultation record was not merged.",
+  "photoIdentity": {
+    "sourceId": "223239373749",
+    "matchingActivePortfolioOriginalNames": 29,
+    "legacyGalleryRetained": 23,
+    "newGalleryImages": 4,
+    "visualPairsReviewed": 13,
+    "roomMetadataLimit": "Some photos tagged 방1 are kitchen/dining; captions use visible scene and official article, not that tag."
+  },
+  "addedPhotos": [
+    {
+      "originalStem": "BAE03303",
+      "sourceId": "223239373749",
+      "asset": "assets/case/oryukdo-59py/bathroom-mirror.webp",
+      "caption": "욕실의 벽면 거울·세면대·변기 배치",
+      "width": 1333,
+      "height": 2000,
+      "method": "same original filename and visually identical composition; room metadata not used"
+    },
+    {
+      "originalStem": "BAE03312",
+      "sourceId": "223239373749",
+      "asset": "assets/case/oryukdo-59py/bathroom-window.webp",
+      "caption": "창이 있는 욕실의 샤워 공간과 선반",
+      "width": 1333,
+      "height": 2000,
+      "method": "same original filename and visually identical composition; room metadata not used"
+    },
+    {
+      "originalStem": "BAE03447_2",
+      "sourceId": "223239373749",
+      "asset": "assets/case/oryukdo-59py/bathroom-partition.webp",
+      "caption": "벽으로 나눈 욕실 샤워 공간과 간접조명",
+      "width": 1333,
+      "height": 2000,
+      "method": "same original filename and visually identical composition; room metadata not used"
+    },
+    {
+      "originalStem": "BAE03456",
+      "sourceId": "223239373749",
+      "asset": "assets/case/oryukdo-59py/bathroom-vanity.webp",
+      "caption": "밝은 거울장 아래 욕실 세면 공간",
+      "width": 1333,
+      "height": 2000,
+      "method": "same original filename and visually identical composition; room metadata not used"
+    }
+  ],
+  "sections": [
+    {
+      "id": "customer-requirements",
+      "name": "고객 요구"
+    },
+    {
+      "id": "existing-space-problem",
+      "name": "기존 공간 문제"
+    },
+    {
+      "id": "design-direction",
+      "name": "설계 방향"
+    },
+    {
+      "id": "space-details",
+      "name": "공간별 디테일"
+    },
+    {
+      "id": "materials-and-process",
+      "name": "자재·공정"
+    },
+    {
+      "id": "completed-result",
+      "name": "완성 결과"
+    },
+    {
+      "id": "design-intent",
+      "name": "설계 의도"
+    }
+  ],
+  "excludedClaims": [
+    "budget",
+    "product brands and specifications not recorded",
+    "completion of requested child-room bed and bookshelf",
+    "same identity as later canceled consultation",
+    "unrecorded load-bearing-wall demolition"
+  ]
+}
