@@ -19,7 +19,8 @@
     'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
     'gclid', 'gbraid', 'wbraid', 'fbclid', 'msclkid',
     'n_keyword', 'n_query', 'n_campaign_type', 'n_ad_group', 'n_keyword_id',
-    'utm_id', 'campaign_id', 'adset_id', 'ad_id', 'asset_id'
+    'utm_id', 'campaign_id', 'adset_id', 'ad_id', 'asset_id',
+    'placement', 'site_source_name'
   ];
   var STATIC_CHANNEL_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
   var SELF_REFERRAL_SOURCE = 'spacebogam.kr';
@@ -353,11 +354,12 @@
       pagePath: location.pathname,
       pageTitle: document.title,
       occurredAt: new Date().toISOString(),
-      utmSource: attribution.utm_source || '',
+      utmSource: attribution.utm_source || attribution.site_source_name || '',
       utmMedium: attribution.utm_medium || '',
       utmCampaign: attribution.utm_campaign || '',
       utmContent: attribution.utm_content || '',
       utmTerm: attribution.utm_term || '',
+      placement: String(attribution.placement || '').slice(0, 100),
       // 수신 스키마(intm funnelEventInputSchema)는 .strict() 다.
       // camelCase 키만 허용하므로 snake_case 별칭을 추가하면 전량 400 이 된다. (CMP-141)
       experimentId: EXPERIMENT_ID,
@@ -492,15 +494,15 @@
     } catch(error) {}
   }
 
-  function clickDetail(anchor){
+  function clickDetail(anchor, category){
     return {
-      ctaLocation: anchor.dataset.ctaLocation || anchor.className || 'link',
-      ctaText: (anchor.textContent || '').trim().slice(0, 300)
+      ctaLocation: anchor.dataset.ctaLocation || anchor.id || anchor.className || 'link',
+      ctaText: category
     };
   }
 
-  // CMP-1315: phone_click은 Meta 최적화 이벤트이자 CPL 분모다. header/hero/sticky 등
-  // CTA 여러 개를 한 세션에서 누르면 중복 집계돼 가드레일 판정이 부풀려진다.
+  // CMP-1315: phone_click은 전화 관심도를 보는 중간 행동이다. 최종 전환은 저장에
+  // 성공한 consultation_submit 하나뿐이며, CTA 중복 클릭은 중간 행동도 부풀린다.
   // 세션당 1회로 제한 — sessionStorage 접근이 던지면(사파리 등) 열어둔 채로 보낸다.
   var PHONE_CLICK_SESSION_KEY = 'spacebogam_funnel_phone_click_sent';
 
@@ -522,7 +524,10 @@
     var target = event.target;
     if (!(target instanceof Element)) return;
     var anchor = target.closest('a[href]');
-    if (!anchor) return;
+    if (!anchor) {
+      trackGenericContentClick(target);
+      return;
+    }
     var href = anchor.getAttribute('href') || '';
     var url;
     try {
@@ -533,23 +538,231 @@
 
     if (isConsultationUrl(url)) {
       decorateConsultationLink(anchor);
-      send('consultation_click', clickDetail(anchor));
+      send('consultation_click', clickDetail(anchor, 'consultation_cta'));
       return;
     }
     if (url.protocol === 'tel:') {
       if (!phoneClickAlreadySent()) {
         markPhoneClickSent();
-        send('phone_click', clickDetail(anchor));
+        send('phone_click', clickDetail(anchor, 'phone_cta'));
       }
       return;
     }
     if (url.hostname === 'pf.kakao.com') {
-      send('kakao_click', clickDetail(anchor));
+      send('kakao_click', clickDetail(anchor, 'kakao_cta'));
       return;
     }
     if (/portfolio|case/.test(url.pathname)) {
-      send('portfolio_click', clickDetail(anchor));
+      send('portfolio_click', clickDetail(anchor, 'portfolio_cta'));
+      return;
     }
+    trackGenericContentClick(anchor, url);
+  }
+
+  // 일반 콘텐츠 행동은 화면 문구나 입력값을 보내지 않는다. 링크는 query/hash 를
+  // 제거한 pathname, 버튼/FAQ 는 작성자가 붙인 고정 ID 또는 섹션 순번만 사용한다.
+  function fixedLocation(element, fallback){
+    if (!element) return fallback;
+    var dataset = element.dataset || {};
+    return String(dataset.trackSection || dataset.trackLocation || element.id || fallback)
+      .slice(0, 300);
+  }
+
+  function containingSectionLocation(element){
+    var section = element && element.closest && element.closest('[data-track-section], section, article, main');
+    if (!section) return 'page';
+    if (section.__spacebogamTrackingLocation) return section.__spacebogamTrackingLocation;
+    return fixedLocation(section, 'content');
+  }
+
+  function trackGenericContentClick(target, parsedUrl){
+    var interactive = target && target.closest && target.closest('a[href], button, summary, [role="button"]');
+    if (!interactive) return;
+    // preview-v8.js 가 고유 이벤트를 보내는 요소는 generic content_click 을 겹치지 않는다.
+    if (interactive.closest && interactive.closest('[data-v8-event]')) return;
+    // 상담 폼의 버튼과 입력 동작은 폼 전용 계측에서 단계별로 처리한다.
+    if (interactive.closest && interactive.closest('form')) return;
+
+    var tagName = String(interactive.tagName || '').toLowerCase();
+    if (tagName === 'a') {
+      var url = parsedUrl;
+      try { if (!url) url = new URL(interactive.getAttribute('href') || '', location.href); } catch(error) { return; }
+      if (!/^https?:$/.test(url.protocol) || url.hostname !== location.hostname) return;
+      send('content_click', {
+        ctaLocation: (url.pathname || '/').slice(0, 300),
+        ctaText: 'internal_link'
+      });
+      return;
+    }
+
+    if (tagName === 'summary') {
+      var details = interactive.closest && interactive.closest('details');
+      if (!details || details.open) return;
+      send('content_click', {
+        ctaLocation: fixedLocation(details, containingSectionLocation(interactive)),
+        ctaText: 'faq_open'
+      });
+      return;
+    }
+
+    send('content_click', {
+      ctaLocation: fixedLocation(interactive, containingSectionLocation(interactive)),
+      ctaText: 'button_click'
+    });
+  }
+
+  function initContentExposureTracking(){
+    if (typeof window.IntersectionObserver !== 'function') return;
+    // main 안의 모든 section(홈의 중첩 story 포함), main 직속 article, main 밖의
+    // body 직속 section 을 포함한다. 카드 article 하나하나는 별도 단계가 아니다.
+    var rawSections = document.querySelectorAll('main section, main > article, body > section, [data-track-section]');
+    var states = [];
+    Array.prototype.forEach.call(rawSections, function(section){
+      for (var i = 0; i < states.length; i++) {
+        if (states[i].element === section) return;
+      }
+      var locationValue = fixedLocation(section, 'section_' + (states.length + 1));
+      section.__spacebogamTrackingLocation = locationValue;
+      states.push({
+        element: section,
+        location: locationValue,
+        meaningful: false,
+        timer: null,
+        sent: false
+      });
+    });
+    if (!states.length) return;
+
+    function clearExposureTimer(state){
+      if (state.timer === null) return;
+      window.clearTimeout(state.timer);
+      state.timer = null;
+    }
+
+    function scheduleExposure(state){
+      if (state.sent || !state.meaningful || state.timer !== null) return;
+      if (document.visibilityState !== 'visible') return;
+      state.timer = window.setTimeout(function(){
+        state.timer = null;
+        if (state.sent || !state.meaningful || document.visibilityState !== 'visible') return;
+        state.sent = true;
+        send('content_view', {
+          ctaLocation: state.location,
+          ctaText: 'section_view'
+        });
+      }, 1000);
+    }
+
+    var exposureThresholds = [];
+    for (var threshold = 0; threshold <= 100; threshold++) {
+      exposureThresholds.push(threshold / 100);
+    }
+    var observer = new window.IntersectionObserver(function(entries){
+      Array.prototype.forEach.call(entries, function(entry){
+        var state = null;
+        for (var i = 0; i < states.length; i++) {
+          if (states[i].element === entry.target) state = states[i];
+        }
+        if (!state || state.sent) return;
+        var visibleHeight = entry.intersectionRect && Number(entry.intersectionRect.height) || 0;
+        state.meaningful = !!entry.isIntersecting &&
+          (Number(entry.intersectionRatio) >= 0.25 || visibleHeight >= 150);
+        if (state.meaningful) scheduleExposure(state);
+        else clearExposureTimer(state);
+      });
+    }, {threshold: exposureThresholds});
+
+    states.forEach(function(state){ observer.observe(state.element); });
+    document.addEventListener('visibilitychange', function(){
+      states.forEach(function(state){
+        if (document.visibilityState === 'visible') scheduleExposure(state);
+        else clearExposureTimer(state);
+      });
+    });
+  }
+
+  function initPageLifecycleTracking(){
+    var MILESTONES = [5, 15, 30, 60];
+    var milestoneIndex = 0;
+    var visibleMs = 0;
+    var visibleSince = document.visibilityState === 'visible' ? Date.now() : null;
+    var milestoneTimer = null;
+    var exitSentForTransition = false;
+    var exitCount = 0;
+    var MAX_EXIT_EVENTS = 5;
+
+    function elapsedVisibleMs(){
+      return visibleMs + (visibleSince === null ? 0 : Math.max(0, Date.now() - visibleSince));
+    }
+
+    function clearMilestoneTimer(){
+      if (milestoneTimer === null) return;
+      window.clearTimeout(milestoneTimer);
+      milestoneTimer = null;
+    }
+
+    function scheduleMilestone(){
+      clearMilestoneTimer();
+      if (visibleSince === null || milestoneIndex >= MILESTONES.length) return;
+      var remainingMs = Math.max(0, MILESTONES[milestoneIndex] * 1000 - elapsedVisibleMs());
+      milestoneTimer = window.setTimeout(function(){
+        milestoneTimer = null;
+        if (visibleSince === null) return;
+        var elapsed = elapsedVisibleMs();
+        while (milestoneIndex < MILESTONES.length && elapsed >= MILESTONES[milestoneIndex] * 1000) {
+          var milestone = MILESTONES[milestoneIndex++];
+          send('page_engagement', {
+            ctaLocation: 'page',
+            ctaText: 'visible_time_milestone',
+            engagedSeconds: milestone
+          });
+        }
+        scheduleMilestone();
+      }, remainingMs || 1);
+    }
+
+    function pauseVisibleClock(){
+      if (visibleSince === null) return;
+      visibleMs += Math.max(0, Date.now() - visibleSince);
+      visibleSince = null;
+      clearMilestoneTimer();
+    }
+
+    function resumeVisibleClock(){
+      if (visibleSince !== null) return;
+      visibleSince = Date.now();
+      exitSentForTransition = false;
+      scheduleMilestone();
+    }
+
+    function sendPageExit(reason){
+      if (exitSentForTransition || exitCount >= MAX_EXIT_EVENTS) return;
+      exitSentForTransition = true;
+      exitCount++;
+      send('page_exit', {
+        ctaLocation: 'page',
+        ctaText: reason,
+        engagedSeconds: Math.round(elapsedVisibleMs() / 1000)
+      });
+    }
+
+    document.addEventListener('visibilitychange', function(){
+      if (document.visibilityState === 'hidden') {
+        pauseVisibleClock();
+        sendPageExit('visibility_hidden');
+      } else if (document.visibilityState === 'visible') {
+        resumeVisibleClock();
+      }
+    });
+    window.addEventListener('pagehide', function(){
+      pauseVisibleClock();
+      sendPageExit('pagehide');
+    });
+    window.addEventListener('pageshow', function(event){
+      if (!event || !event.persisted) return;
+      if (document.visibilityState === 'visible') resumeVisibleClock();
+    });
+    scheduleMilestone();
   }
 
   function init(){
@@ -558,6 +771,8 @@
     send('page_view');
     applyHomeHeadline();
     applyHeroCtaTrustVariant();
+    initContentExposureTracking();
+    initPageLifecycleTracking();
 
     // CMP-213: 이 스크립트는 페이지마다 새로 실행된다. 진입 페이지에서 연속 10초를
     // 못 채우고 다음 페이지로 넘어가면(예: 6초 뒤 상담 페이지 이동) 세션 전체

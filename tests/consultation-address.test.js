@@ -231,6 +231,9 @@ test('주소 통합 뒤에도 상담 제출 payload의 answers 계약을 유지�
     SUBMIT_URL: 'https://intm.kr/api/consultation/submit',
     COMMERCIAL_QUESTIONS: [],
     submitting: false,
+    completedFields: {},
+    skippedFields: {},
+    lastCompletedQuestionId: '',
     leadType: 'residential',
     questions: [
       { id: 15, question: '주소', questionType: 'address', isRequired: true },
@@ -241,6 +244,8 @@ test('주소 통합 뒤에도 상담 제출 payload의 answers 계약을 유지�
     clearQuestionError() {},
     renderQuestionError() {},
     trackGtag() {},
+    sendStepEvent() {},
+    sendFunnelEvent() {},
     questionTrackingDetail() {},
     element() { return new Node(); },
     marketingAttribution() { return { sbSubmitEventId: 'event-id' }; },
@@ -251,7 +256,7 @@ test('주소 통합 뒤에도 상담 제출 payload의 answers 계약을 유지�
     submit: new Node('button'),
     fetch(url, init) {
       request = { url, body: JSON.parse(init.body) };
-      return Promise.resolve({ ok: true, status: 201, json: () => Promise.resolve({ success: true }) });
+      return Promise.resolve({ ok: true, status: 201, json: () => Promise.resolve({ success: true, consultReqId: 1 }) });
     },
   };
   context.consent.checked = true;

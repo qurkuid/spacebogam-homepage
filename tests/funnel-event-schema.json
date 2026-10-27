@@ -1,7 +1,7 @@
 {
   "_source": "qurkuid/intm — src/lib/spacebogam-funnel/contracts.ts :: funnelEventInputSchema (z.object(...).strict())",
-  "_verified_at": "2026-07-28",
-  "_verified_commit": "f4c473e8",
+  "_verified_at": "2026-10-27",
+  "_verified_commit": "pending-20261027-journey-events",
   "_note": "수신 스키마가 .strict() 이므로 목록에 없는 키가 하나라도 있으면 HTTP 400 'Invalid funnel event.' 로 전량 거부된다. intm 쪽 스키마를 바꾸면 이 파일도 함께 갱신할 것. (CMP-141)",
   "endpoint": "https://intm.kr/api/marketing/funnel-events",
   "required": [
@@ -28,6 +28,12 @@
     "scrollDepth",
     "engagedSeconds",
     "formId",
+    "linkUrl",
+    "storyId",
+    "caseId",
+    "placement",
+    "deviceClass",
+    "project",
     "isTest"
   ],
   "event_names": [
@@ -40,6 +46,30 @@
     "kakao_click",
     "lead_form_view",
     "lead_form_start",
-    "lead_submit_success"
+    "lead_submit_success",
+    "blog_case_open",
+    "blog_consult_click",
+    "blog_filter_select",
+    "blog_naver_source_open",
+    "case_consult_click",
+    "case_related_story_open",
+    "portfolio_related_story_open",
+    "home_portfolio_cta_click",
+    "portfolio_consult_click",
+    "portfolio_project_open",
+    "home_hero_consult_cta_click",
+    "home_case_carousel_consult_click",
+    "home_story_consult_click",
+    "commercial_callback_click",
+    "content_view",
+    "content_click",
+    "page_engagement",
+    "page_exit",
+    "lead_step_view",
+    "lead_step_complete",
+    "lead_step_skip",
+    "lead_step_error",
+    "lead_submit_attempt",
+    "lead_submit_error"
   ]
 }

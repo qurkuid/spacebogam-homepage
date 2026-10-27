@@ -282,10 +282,10 @@ async function run() {
   assert.equal(stepEvents.filter(([, name]) => name === 'consult_view_type').length, 1);
 
   await startApartment('해맞이로');
-  assert.equal(stepEvents.filter(([, name]) => name === 'consult_complete_intro').length, 0);
-  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_complete_type' && data.step_id === 'type').length, 1);
+  assert.equal(stepEvents.filter(([, name]) => name === 'consult_step_complete_intro').length, 0);
+  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_step_complete_type' && data.step_id === 'type').length, 1);
   assert.deepEqual(Object.keys(stepEvents.find(([, name, data]) => name === 'consult_view_apartmentQuery' && data.step_id === 'apartmentQuery')[2]).sort(),
-    ['form_id', 'journey_type', 'progress_percent', 'sb_session_id', 'send_to', 'step_id', 'step_number']);
+    ['event_scope', 'form_id', 'journey_type', 'progress_percent', 'sb_session_id', 'send_to', 'step_action', 'step_id', 'step_number']);
   assert.equal(stepEvents.find(([, name]) => name === 'consult_view_apartmentQuery')[2].send_to, 'G-EJGXDD5C1T');
   assert.equal(stepEvents.find(([, name]) => name === 'consult_view_apartmentQuery')[2].sb_session_id,
     context.sessionStorage.getItem('spacebogam_funnel_session_id'));
@@ -344,10 +344,13 @@ async function run() {
   assert.equal(summary('반려동물'), '함께 살아요');
   assert.equal(summary('원하는 상담 시기는 언제인가요?'), undefined);
   assert.equal(progress.getAttribute('aria-valuenow'), '100');
+  const funnelEvents = [];
   let submittedPayload;
+  let validReceipt = false;
   let catalogImageFetched = false;
   let catalogImageUploaded = false;
   context.fetch = (url, options) => {
+    if (url.includes('/api/marketing/funnel-events')) funnelEvents.push(JSON.parse(options.body));
     if (url.startsWith('/api/consultation/plan-image?url=')) {
       catalogImageFetched = true;
       return Promise.resolve({ ok: true, blob: () => Promise.resolve(new Blob(['catalog-image'], { type: 'image/jpeg' })) });
@@ -358,14 +361,24 @@ async function run() {
       return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: true, filePath: '/api/uploads/consultation/catalog.jpg' }) });
     }
     if (url.endsWith('/api/consultation/submit')) submittedPayload = JSON.parse(options.body);
-    return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: true, consultReqId: 'test-residential', leadEventId: 'test-lead' }) });
+    return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: true, consultReqId: validReceipt ? 900001 : null, leadEventId: 'test-lead' }) });
   };
+  next(); await new Promise(setImmediate);
+  assert.match(title(), /입력 내용을 확인/);
+  assert.ok(funnelEvents.some(event => event.eventName === 'lead_submit_error'));
+  assert.equal(stepEvents.some(([, name]) => name === 'lead_submit_success'), false);
+  validReceipt = true;
   next(); await new Promise(setImmediate);
   assert.match(title(), /방문 상담 예약 신청이 접수되었습니다/, error());
   assert.match(stage().children[2].textContent, /담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인/);
   assert.match(stage().children[2].textContent, /신청 접수만으로 방문 예약이 확정되지는 않습니다/);
-  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_complete_summary' && data.step_id === 'summary').length, 1);
+  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_step_complete_summary' && data.step_id === 'summary').length, 1);
   assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_view_success' && data.step_id === 'success').length, 1);
+  assert.ok(funnelEvents.some(event => event.eventName === 'lead_submit_attempt'));
+  assert.ok(funnelEvents.some(event => event.eventName === 'lead_step_complete' && event.ctaLocation === 'summary'));
+  assert.ok(funnelEvents.some(event => event.eventName === 'lead_step_view' && event.ctaLocation === 'success'));
+  assert.equal(funnelEvents.some(event => event.eventName === 'lead_submit_success'), false, 'only server records saved conversion');
+  assert.ok(funnelEvents.every(event => event.eventId && !JSON.stringify(event).includes('홍길동')));
   assert.equal(catalogImageFetched, true);
   assert.equal(catalogImageUploaded, true);
   assert.deepEqual(canvasScales.at(-1), [-1, 1]);
@@ -416,7 +429,7 @@ async function run() {
       return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: true, filePath: '/api/uploads/consultation/upload.jpg' }) });
     }
     if (url.endsWith('/api/consultation/submit')) uploadedPayload = JSON.parse(options.body);
-    return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: true, consultReqId: 'test-upload', leadEventId: 'test-lead' }) });
+    return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: true, consultReqId: 900002, leadEventId: 'test-lead' }) });
   };
   next(); await new Promise(setImmediate);
   assert.match(title(), /접수되었습니다/);
@@ -530,11 +543,11 @@ async function run() {
   assert.equal(summary('업종·공간 유형을 선택해주세요.'), '사무실');
   assert.equal(summary('예산 구간을 선택해주세요.'), '3천만원 미만');
   assert.match(summary('오픈·입주 희망일'), /^\d{4}-\d{2}-15$/);
-  assert.equal(summary('전용면적(평)'), '20평');
+  assert.equal(summary('예상 전용면적(평)'), '20평');
   submittedPayload = null;
   context.fetch = (url, options) => {
     if (url.endsWith('/api/consultation/submit')) submittedPayload = JSON.parse(options.body);
-    return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: true, consultReqId: 'test-commercial', leadEventId: 'test-lead' }) });
+    return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: true, consultReqId: 900003, leadEventId: 'test-lead' }) });
   };
   next(); await settle(); await settle();
   assert.match(title(), /접수되었습니다/);
@@ -583,7 +596,7 @@ async function run() {
   context.window.location = { protocol: 'http:' };
   let requestedPlans = '';
   context.fetch = url => {
-    requestedPlans = url;
+    if (url.includes('/api/apartments/')) requestedPlans = url;
     return Promise.resolve({ ok: true, json: () => Promise.resolve({ data: [
       { type: '64㎡', planId: 'plan-64', planPic: 'https://fphimage-cos.kujiale.com/fph/20230222/5ee2aded7d7eeeee.jpg' },
       { type: '106A㎡', planId: 'plan-106', planPic: 'https://fphimage-cos.kujiale.com/fph/20230306/d9bc39b39048a997.jpg' }

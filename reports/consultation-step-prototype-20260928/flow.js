@@ -34,7 +34,7 @@
   const requestedCommercial = params.get('type') === 'commercial';
   const requestedVertical = ['shop', 'office'].includes(params.get('vertical')) ? params.get('vertical') : '';
   const eventKey = 'spacebogam.consultationApply.eventIds.v1';
-  const attributionKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'gbraid', 'wbraid', 'fbclid', 'msclkid', 'n_keyword', 'n_query', 'n_campaign_type', 'n_ad_group', 'n_keyword_id', 'utm_id', 'campaign_id', 'adset_id', 'ad_id', 'asset_id'];
+  const attributionKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'gbraid', 'wbraid', 'fbclid', 'msclkid', 'n_keyword', 'n_query', 'n_campaign_type', 'n_ad_group', 'n_keyword_id', 'utm_id', 'campaign_id', 'adset_id', 'ad_id', 'asset_id', 'placement', 'site_source_name'];
   const id = () => crypto.randomUUID();
   function stored(store, key) { try { return store.getItem(key); } catch { return null; } }
   function savedId(store, key) {
@@ -77,7 +77,7 @@
   function marketingAttribution() {
     let journey = {};
     try { journey = JSON.parse(sessionStorage.getItem('spacebogam_funnel_journey') || 'null') || {}; } catch {}
-    const data = { form_path: location.pathname, source_page: location.pathname, landing_page: String(journey.landing_page || location.href).slice(0, 1000), referrer: String(journey.referrer || document.referrer || '').slice(0, 1000), submitted_at: new Date().toISOString(), device_type: innerWidth < 768 ? 'mobile' : innerWidth < 1024 ? 'tablet' : 'desktop', experiment_id: 'homepage_headline_v1', experiment_variant: stored(sessionStorage, 'spacebogam_homepage_headline_v1_variant') || '', page_variant: params.get('page_variant') || '', sbClientId: clientId, sbSessionId: sessionId, sbSubmitEventId: eventIds.lead_submit_success, is_test: /^(1|true|yes|y|on)$/i.test(params.get('is_test') || '') ? 'true' : '' };
+    const data = { form_path: location.pathname, source_page: location.pathname, landing_page: String(journey.landing_page || location.href).slice(0, 1000), referrer: String(journey.referrer || document.referrer || '').slice(0, 1000), submitted_at: new Date().toISOString(), device_type: innerWidth < 768 ? 'mobile' : innerWidth < 1024 ? 'tablet' : 'desktop', experiment_id: 'homepage_headline_v1', experiment_variant: stored(sessionStorage, 'spacebogam_homepage_headline_v1_variant') || '', page_variant: params.get('page_variant') || '', sbClientId: clientId, sbSessionId: sessionId, sbSubmitEventId: eventIds.lead_submit_success, is_test: isTestTracking() ? 'true' : '' };
     attributionKeys.forEach(key => { data[key] = trackingValue(key); });
     const fbp = metaCookie('_fbp', /^fb\.\d+\.\d{13}\.\d+$/);
     const fbc = metaCookie('_fbc', /^fb\.\d+\.\d{13}\.[A-Za-z0-9_-]+$/);
@@ -88,17 +88,28 @@
   function metaMatchingPayload() {
     return { consent: false, version: 'meta-contact-v1' };
   }
-  function funnel(name) {
+  function funnel(name, detail = {}) {
     if (typeof fetch !== 'function') return;
-    const data = { eventId: eventIds[name], clientId, sessionId, eventName: name, pagePath: location.pathname, pageTitle: document.title, occurredAt: new Date().toISOString(), experimentId: 'homepage_headline_v1', experimentVariant: stored(sessionStorage, 'spacebogam_homepage_headline_v1_variant') || '', ctaLocation: '', ctaText: '', pageVariant: params.get('page_variant') || '', deviceType: innerWidth < 768 ? 'mobile' : innerWidth < 1024 ? 'tablet' : 'desktop', isTest: /^(1|true|yes|y|on)$/i.test(params.get('is_test') || '') };
+    const data = { eventId: eventIds[name] || id(), clientId, sessionId, eventName: name, pagePath: location.pathname, pageTitle: document.title, occurredAt: new Date().toISOString(), experimentId: 'homepage_headline_v1', experimentVariant: stored(sessionStorage, 'spacebogam_homepage_headline_v1_variant') || '', placement: trackingValue('placement').slice(0, 100), ctaLocation: detail.step || '', ctaText: detail.action || '', pageVariant: params.get('page_variant') || '', deviceType: innerWidth < 768 ? 'mobile' : innerWidth < 1024 ? 'tablet' : 'desktop', isTest: isTestTracking() };
     ['utmSource', 'utmMedium', 'utmCampaign', 'utmContent', 'utmTerm'].forEach((field, index) => { data[field] = trackingValue(['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'][index]); });
-    fetch('https://intm.kr/api/marketing/funnel-events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), keepalive: true }).catch(() => {});
+    data.utmSource = data.utmSource || trackingValue('site_source_name');
+    const send = (attempt = 0) => fetch('https://intm.kr/api/marketing/funnel-events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), keepalive: true })
+      .then(response => {
+        if (!response.ok) {
+          if (attempt === 0 && (response.status === 429 || response.status >= 500)) return send(1);
+          if (typeof console !== 'undefined') console.warn('[spacebogam] form tracking rejected', response.status);
+        }
+      }).catch(() => {
+        if (attempt === 0) return send(1);
+        if (typeof console !== 'undefined') console.warn('[spacebogam] form tracking unavailable');
+      });
+    void send();
   }
   function isTestTracking() {
     return /^(1|true|yes|y|on)$/i.test(params.get('is_test') || '') || stored(sessionStorage, 'spacebogam_funnel_is_test') === 'true';
   }
   function trackSubmission(result) {
-    if (result.success !== true || !result.consultReqId || result.duplicate || isTestTracking()) return;
+    if (result.success !== true || !Number.isInteger(result.consultReqId) || result.consultReqId <= 0 || result.duplicate || isTestTracking()) return;
     const leadEventId = result.leadEventId || eventIds.lead_submit_success;
     const key = 'spacebogam_ga_lead_sent_' + leadEventId;
     if (stored(sessionStorage, key) === 'true') return;
@@ -109,12 +120,16 @@
       }
     } catch {}
   }
+  function trackingStepId() {
+    return current === 'question' ? 'question_' + String(questionList()[questionIndex].id) : current;
+  }
   function trackStep(action) {
     action = action === 'view' || action === 'skip' ? action : 'complete';
-    const stepId = current === 'question' ? 'question_' + String(questionList()[questionIndex].id) : current;
+    const stepId = trackingStepId();
     const seen = action === 'view' ? viewedSteps : action === 'skip' ? skippedSteps : completedSteps;
     if (seen.has(stepId)) return;
     seen.add(stepId);
+    funnel('lead_step_' + action, { step: stepId, action });
     if (isTestTracking()) return;
     const journeyType = answers.type === '상업 공간' ? 'commercial' : answers.type === '주거 공간'
       ? answers.housing === '아파트' ? 'residential_apartment' : answers.housing ? 'residential_other' : 'residential' : 'undecided';
@@ -387,6 +402,7 @@
   }
 
   function showError(message) {
+    if (!submitting) funnel('lead_step_error', { step: trackingStepId(), action: 'validation' });
     const box = stage.querySelector('.error');
     if (box) box.textContent = message;
     const input = stage.querySelector('.input-row input') || stage.querySelector('.question-input');
@@ -409,7 +425,7 @@
     }
     answers[key] = value;
     fillKakaoResponses();
-    if (!started) { started = true; funnel('lead_form_start'); }
+    markStarted();
     advance();
   }
 
@@ -1160,6 +1176,7 @@
     if (!answers.consent) { showError('개인정보 수집·이용 동의가 필요합니다.'); return; }
     if (submitting || submitted) return;
     submitting = true;
+    funnel('lead_submit_attempt', { step: 'summary', action: 'submit' });
     next.disabled = true;
     back.disabled = true;
     document.getElementById('restart').disabled = true;
@@ -1187,16 +1204,17 @@
         body: JSON.stringify(payload)
       });
       const result = await response.json();
-      if (!response.ok || result.success !== true) throw new Error(result.error || '접수에 실패했습니다.');
+      if (!response.ok || result.success !== true || !Number.isInteger(result.consultReqId) || result.consultReqId <= 0) throw new Error(result.error || '접수에 실패했습니다.');
       submitted = true;
       answers.receiptId = result.consultReqId;
       trackSubmission(result);
-      funnel('lead_submit_success');
+      // Completion is recorded by the server after the consultation row is saved.
       trackStep('complete');
       try { sessionStorage.removeItem(eventKey); } catch {}
       current = 'success';
       render();
     } catch (error) {
+      funnel('lead_submit_error', { step: 'summary', action: 'submission_failed' });
       showError(error.message || '접수에 실패했습니다. 잠시 후 다시 시도해 주세요.');
       next.disabled = false;
       next.textContent = '다시 접수하기 →';
@@ -1251,10 +1269,17 @@
     trackStep('view');
   }
 
+  function markStarted() {
+    if (!started && !submitted) { started = true; funnel('lead_form_start'); }
+  }
+  stage.addEventListener('input', markStarted);
+  stage.addEventListener('change', markStarted);
+
   function advance(action = 'complete') {
     if (submitting) return;
     if (current === 'summary') { submitConsultation(); return; }
     if (current === 'success') return;
+    markStarted();
     if (current === 'question') {
       const question = questionList()[questionIndex];
       const value = response(question);

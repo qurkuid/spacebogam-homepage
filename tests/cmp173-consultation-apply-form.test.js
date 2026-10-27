@@ -48,7 +48,8 @@ const QUESTIONS = [
 
 const LANDING_QUERY =
   '?type=residential&utm_source=meta&utm_medium=paid_social&utm_campaign=busan_remodeling' +
-  '&utm_id=CMP173&campaign_id=111&adset_id=222&ad_id=333&asset_id=444&is_test=1';
+  '&utm_id=CMP173&campaign_id=111&adset_id=222&ad_id=333&asset_id=444' +
+  '&placement=Feed&site_source_name=fb&is_test=1';
 
 function bootstrap({ search = '?type=residential', submitResponse, page = 'apply', questionList = QUESTIONS, sessionTest = false } = {}) {
   const direct = page === 'consultation';
@@ -300,6 +301,8 @@ test('제출 payload 가 intm 계약과 플랫폼 식별자·is_test 를 그대�
   assert.equal(attribution.utm_source, 'meta');
   assert.equal(attribution.utm_medium, 'paid_social');
   assert.equal(attribution.utm_campaign, 'busan_remodeling');
+  assert.equal(attribution.placement, 'Feed');
+  assert.equal(attribution.site_source_name, 'fb');
   // 서버는 'true' / '' 로만 좁힌다. 원본 '1' 을 그대로 보내면 필터가 갈린다.
   assert.equal(attribution.is_test, 'true');
   assert.equal(attribution.form_path, '/consultation/apply/');
@@ -315,15 +318,16 @@ test('제출 payload 가 intm 계약과 플랫폼 식별자·is_test 를 그대�
     'source_page', 'landing_page', 'referrer', 'form_path', 'device_type', 'submitted_at',
     'sbClientId', 'sbSessionId', 'sbSubmitEventId',
     'experiment_id', 'experiment_variant', 'page_variant',
-    'utm_id', 'campaign_id', 'adset_id', 'ad_id', 'asset_id', 'is_test',
+    'utm_id', 'campaign_id', 'adset_id', 'ad_id', 'asset_id',
+    'placement', 'site_source_name', 'is_test',
   ]);
   for (const key of Object.keys(attribution)) {
     assert.ok(ALLOWED.has(key), '서버 허용목록에 없는 키: ' + key);
   }
 });
 
-test('/consultation/ 직접 제출은 현재 페이지를 source_page·form_path·landing_page로 보존한다', async () => {
-  const { document, calls } = bootstrap({ page: 'consultation', search: LANDING_QUERY });
+test('/consultation/apply/ 제출은 현재 페이지를 source_page·form_path·landing_page로 보존한다', async () => {
+  const { document, calls } = bootstrap({ search: LANDING_QUERY });
   await settle();
 
   fillRequired(document);
@@ -332,15 +336,15 @@ test('/consultation/ 직접 제출은 현재 페이지를 source_page·form_path
 
   assert.equal(calls.submit.length, 1);
   const attribution = calls.submit[0].marketingAttribution;
-  assert.equal(attribution.form_path, '/consultation/');
-  assert.equal(attribution.source_page, '/consultation/');
-  assert.match(attribution.landing_page, /^https:\/\/spacebogam\.kr\/consultation\//);
+  assert.equal(attribution.form_path, '/consultation/apply/');
+  assert.equal(attribution.source_page, '/consultation/apply/');
+  assert.match(attribution.landing_page, /^https:\/\/spacebogam\.kr\/consultation\/apply\//);
   assert.equal(attribution.utm_id, 'CMP173');
   assert.equal(attribution.is_test, 'true');
 });
 
 test('유효한 submit 이벤트가 겹쳐도 API 요청은 한 번만 보낸다', async () => {
-  const { document, calls } = bootstrap({ page: 'consultation' });
+  const { document, calls } = bootstrap();
   await settle();
 
   fillRequired(document);
@@ -352,7 +356,9 @@ test('유효한 submit 이벤트가 겹쳐도 API 요청은 한 번만 보낸다
   await settle();
 
   assert.equal(calls.submit.length, 1);
-  assert.equal(calls.funnel.filter((event) => event.eventName === 'lead_submit_success').length, 1);
+  assert.equal(calls.funnel.filter((event) => event.eventName === 'lead_submit_attempt').length, 1);
+  assert.equal(calls.funnel.filter((event) => event.eventName === 'lead_submit_success').length, 0,
+    '저장 성공 전환 원장은 서버만 생성해야 한다');
 });
 
 test('Pixel Lead 의 eventID 와 서버가 돌려준 leadEventId 가 같은 값이다', async () => {
@@ -398,7 +404,7 @@ test('서버가 다른 event_id 를 파생하면 서버 값을 따른다', async
   assert.equal(lead[3].eventID, derived);
 });
 
-test('퍼널 이벤트는 view → start → submit_success 순으로 strict 스키마에 맞춰 나간다', async () => {
+test('퍼널 핵심 이벤트는 view → start → submit_attempt 순으로 strict 스키마에 맞춰 나간다', async () => {
   const { document, calls } = bootstrap({ search: LANDING_QUERY });
   await settle();
 
@@ -410,10 +416,11 @@ test('퍼널 이벤트는 view → start → submit_success 순으로 strict 스
   document.querySelector('form').dispatchEvent(new document.defaultView.Event('submit', { bubbles: true, cancelable: true }));
   await settle();
 
-  const names = calls.funnel.map((event) => event.eventName);
-  assert.deepEqual(names, ['lead_form_view', 'lead_form_start', 'lead_submit_success']);
+  const names = calls.funnel.map((event) => event.eventName)
+    .filter((name) => ['lead_form_view', 'lead_form_start', 'lead_submit_attempt'].includes(name));
+  assert.deepEqual(names, ['lead_form_view', 'lead_form_start', 'lead_submit_attempt']);
 
-  const submitEvent = calls.funnel[2];
+  const submitEvent = calls.funnel.find((event) => event.eventName === 'lead_submit_attempt');
   assert.equal(submitEvent.isTest, true, 'QA 유입이 실적으로 집계되면 안 된다');
   assert.equal(submitEvent.utmSource, 'meta');
   assert.equal(submitEvent.clientId, calls.submit[0].marketingAttribution.sbClientId,
@@ -424,9 +431,7 @@ test('퍼널 이벤트는 view → start → submit_success 순으로 strict 스
   }
 });
 
-test('lead_submit_success 의 eventId 가 sbSubmitEventId 와 같아야 원장에서 중복 제거된다', async () => {
-  // 서버 recordSubmittedLead 가 sbSubmitEventId 로 이미 한 행을 쓴다. 클라이언트가 다른
-  // id 로 같은 이벤트를 또 보내면 ON CONFLICT 에 걸리지 않아 lead 단계가 2배로 잡힌다.
+test('sbSubmitEventId 는 서버 저장 전환에 전달하고 브라우저는 성공 원장 행을 만들지 않는다', async () => {
   const { document, calls } = bootstrap();
   await settle();
 
@@ -434,13 +439,14 @@ test('lead_submit_success 의 eventId 가 sbSubmitEventId 와 같아야 원장�
   document.querySelector('form').dispatchEvent(new document.defaultView.Event('submit', { bubbles: true, cancelable: true }));
   await settle();
 
-  const submitEvent = calls.funnel.find((event) => event.eventName === 'lead_submit_success');
-  assert.equal(submitEvent.eventId, calls.submit[0].marketingAttribution.sbSubmitEventId);
+  const submitEventId = calls.submit[0].marketingAttribution.sbSubmitEventId;
+  assert.match(submitEventId, /^[0-9a-f-]{36}$/);
+  assert.equal(calls.funnel.some((event) => event.eventName === 'lead_submit_success'), false);
 
-  // 나머지 lead 단계도 세션 내에서 고정이어야 새로고침이 중복 집계되지 않는다.
+  // 조회 단계는 제출 전환과 다른 세션 고정 id 를 유지한다.
   const view = calls.funnel.find((event) => event.eventName === 'lead_form_view');
   assert.match(view.eventId, /^[0-9a-f-]{36}$/);
-  assert.notEqual(view.eventId, submitEvent.eventId);
+  assert.notEqual(view.eventId, submitEventId);
 });
 
 test('제출 실패 시 성공 화면을 그리지 않고 Lead 도 발화하지 않는다', async () => {
@@ -457,6 +463,42 @@ test('제출 실패 시 성공 화면을 그리지 않고 Lead 도 발화하지 
   assert.ok(!calls.pixel.some((call) => call[1] === 'Lead'), '실패했는데 Lead 가 나가면 전환이 부풀려진다');
   assert.match(document.querySelector('.cf-status').textContent, /실패/);
   assert.equal(document.querySelector('.cf-submit').disabled, false, '재시도할 수 있어야 한다');
+  const errorEvent = calls.funnel.find((event) => event.eventName === 'lead_submit_error');
+  assert.equal(errorEvent.ctaText, 'server_error');
+  assert.doesNotMatch(JSON.stringify(errorEvent), /저장 실패/);
+});
+
+test('success 응답에 양수 접수번호가 없으면 전환으로 처리하지 않는다', async () => {
+  const { document, calls } = bootstrap({
+    submitResponse: { ok: true, status: 201, payload: { success: true, consultReqId: 0 } },
+  });
+  await settle();
+
+  fillRequired(document);
+  document.querySelector('form').dispatchEvent(new document.defaultView.Event('submit', { bubbles: true, cancelable: true }));
+  await settle();
+
+  assert.equal(document.querySelector('.cf-success'), null);
+  assert.equal(calls.pixel.filter((call) => call[1] === 'Lead').length, 0);
+  assert.equal(calls.gtag.filter((call) => call[1] === 'lead_submit_success').length, 0);
+  assert.equal(calls.funnel.find((event) => event.eventName === 'lead_submit_error').ctaText, 'invalid_response');
+});
+
+test('중복 저장 응답은 완료 화면만 보이고 광고 전환은 다시 보내지 않는다', async () => {
+  const { document, calls } = bootstrap({
+    submitResponse: { ok: true, status: 200, payload: { success: true, consultReqId: 7, duplicate: true } },
+  });
+  await settle();
+
+  fillRequired(document);
+  document.querySelector('form').dispatchEvent(new document.defaultView.Event('submit', { bubbles: true, cancelable: true }));
+  await settle();
+
+  assert.ok(document.querySelector('.cf-success'));
+  assert.equal(calls.pixel.filter((call) => call[1] === 'Lead').length, 0);
+  assert.equal(calls.gtag.filter((call) => call[1] === 'lead_submit_success').length, 0);
+  assert.equal(calls.naver.length, 0);
+  assert.equal(calls.funnel.some((event) => event.eventName === 'lead_submit_success'), false);
 });
 
 test('질문을 못 불러오면 기존 intm 신청서로 빠져나갈 길을 준다', async () => {
@@ -557,10 +599,9 @@ for (const marker of ['1', 'true', 'yes', 'y', 'on', 'TRUE']) {
     assert.equal(calls.pixel.filter(c => c[1] === 'Lead').length, 0);
     assert.equal(calls.gtag.filter(c => c[1] === 'lead_submit_success').length, 0);
     assert.equal(calls.naver.length, 0);
-    const success = calls.funnel.filter(e => e.eventName === 'lead_submit_success');
-    assert.equal(success.length, 1);
-    assert.equal(success[0].isTest, true);
-    assert.equal(success[0].eventId, calls.submit[0].marketingAttribution.sbSubmitEventId);
+    assert.equal(calls.funnel.filter(e => e.eventName === 'lead_submit_success').length, 0);
+    const attempt = calls.funnel.find(e => e.eventName === 'lead_submit_attempt');
+    assert.equal(attempt.isTest, true);
   });
 }
 
@@ -573,7 +614,7 @@ test('same-session test marker survives a missing query flag', async () => {
   assert.equal(calls.submit[0].marketingAttribution.is_test, 'true');
   assert.equal(calls.pixel.filter(c => c[1] === 'Lead').length, 0);
   assert.equal(calls.naver.length, 0);
-  assert.equal(calls.funnel.find(e => e.eventName === 'lead_submit_success').isTest, true);
+  assert.equal(calls.funnel.find(e => e.eventName === 'lead_submit_attempt').isTest, true);
 });
 
 test('normal success retains all external conversion destinations', async () => {
@@ -586,7 +627,8 @@ test('normal success retains all external conversion destinations', async () => 
   assert.equal(calls.gtag.filter(c => c[1] === 'lead_submit_success').length, 1);
   assert.deepEqual(calls.naver, [{ account: 's_7702568df18', type: 'lead' }]);
   assert.equal(window.wcs_add.wa, 's_7702568df18');
-  assert.equal(calls.funnel.find(e => e.eventName === 'lead_submit_success').isTest, false);
+  assert.equal(calls.funnel.find(e => e.eventName === 'lead_submit_attempt').isTest, false);
+  assert.equal(calls.funnel.some(e => e.eventName === 'lead_submit_success'), false);
 });
 
 test('Naver script loading after a successful submit still sends one lead', async () => {
