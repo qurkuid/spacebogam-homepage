@@ -1,7 +1,7 @@
-// CMP-1312 상업 랜딩 재포지셔닝 회귀 — 전화는 대면상담으로 가는 1차 경로다.
-// 퍼널: 광고 → 랜딩 → 전화 사전 확인 → 대면상담 예약 → 현장 확인 → 견적·제안.
+// 상업 영업 랜딩 회귀 — 2026-10-27 사용자 결정: 상담신청 우선, 전화는 보조.
+// 퍼널: 광고 → 랜딩 → 상업 상담 신청 → 담당자 확인 → 방문 일정 조율.
 // 잠그는 것: office/shop 훅, 대면상담 카피, 옛 "전화 상담 완결" 주장 제거,
-// tel:/phone_click 배선 보존, 콜백 폼 API 계약 불변.
+// tel:/phone_click 배선 보존, 중복 콜백 폼 미로딩.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -11,7 +11,6 @@ const vm = require('node:vm');
 const root = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'commercial/call/index.html'), 'utf8');
 const callSource = fs.readFileSync(path.join(root, 'assets/commercial-call.js'), 'utf8');
-const callbackSource = fs.readFileSync(path.join(root, 'assets/commercial-call-callback.js'), 'utf8');
 
 const PHONE_HREF = 'tel:050713881252';
 
@@ -61,7 +60,7 @@ function link(href, ctaLocation) {
 
 function runCommercialCall({ search = '' } = {}) {
   const byId = {};
-  for (const id of ['cc-eyebrow', 'cc-headline', 'cc-lead', 'cc-why-title', 'cc-why-cards', 'cc-ask-title', 'cc-asklist']) {
+  for (const id of ['cc-space-image', 'cc-space-caption', 'cc-eyebrow', 'cc-headline', 'cc-lead', 'cc-why-title', 'cc-why-cards', 'cc-ask-title', 'cc-asklist']) {
     byId[id] = new StubNode(id === 'cc-headline' ? 'h1' : 'div');
   }
   const telLinks = [
@@ -104,43 +103,41 @@ function headlineLines(node) {
 
 test('office is the default variant and renders the office relocation/expansion hook', () => {
   const { byId, doc } = runCommercialCall();
-  assert.deepEqual(headlineLines(byId['cc-headline']), ['직원이 늘었는데,', '사무실은 그대로인가요?']);
-  assert.match(byId['cc-lead'].textContent, /이전·확장/);
-  assert.match(byId['cc-lead'].textContent, /대면상담 일정을 잡아드립니다/);
+  assert.deepEqual(headlineLines(byId['cc-headline']), ['일하는 방식이 달라지면,', '사무실도 달라져야 하니까.']);
+  assert.match(byId['cc-lead'].textContent, /이전 계획/);
+  assert.match(byId['cc-lead'].textContent, /상담|함께/);
   assert.equal(doc.body.getAttribute('data-commercial-vertical'), 'office');
-  assert.equal(doc.title, '부산 사무실 인테리어 상담 예약 | 공간보감');
-  assert.match(byId['cc-ask-title'].textContent, /전화에서 이 4가지만 확인하면 대면상담을 잡을 수 있습니다/);
+  assert.equal(doc.title, '사무실 인테리어 상담 신청 | 공간보감');
 });
 
 test('shop variant renders the approved revenue-delay hook with a matching commercial-risk lead', () => {
   const { byId, doc } = runCommercialCall({ search: '?vertical=shop' });
-  assert.deepEqual(headlineLines(byId['cc-headline']), ['공사가 하루 늦어지면,', '매출도 하루 늦게 시작됩니다.']);
+  assert.deepEqual(headlineLines(byId['cc-headline']), ['오픈을 준비하는 지금,', '공간의 순서부터 잡아보세요.']);
   assert.doesNotMatch(byId['cc-lead'].textContent, /임대료는 계속 나갑니다/);
-  assert.match(byId['cc-lead'].textContent, /업종, 전용면적, 오픈 희망일/);
-  assert.match(byId['cc-lead'].textContent, /대면상담 일정을 잡아드립니다/);
+  assert.match(byId['cc-lead'].textContent, /오픈 희망일/);
+  assert.match(byId['cc-lead'].textContent, /상담|함께/);
   assert.equal(doc.body.getAttribute('data-commercial-vertical'), 'shop');
-  assert.equal(doc.title, '부산 카페·매장 인테리어 상담 예약 | 공간보감');
-  assert.match(byId['cc-ask-title'].textContent, /전화에서 이 3가지 큰 틀만 확인하면 대면상담을 잡을 수 있습니다/);
+  assert.equal(doc.title, '카페·매장 인테리어 상담 신청 | 공간보감');
 });
 
 test('utm_content vertical prefix still switches the variant', () => {
   const { doc, byId } = runCommercialCall({ search: '?utm_content=shop__a1_condition' });
   assert.equal(doc.body.getAttribute('data-commercial-vertical'), 'shop');
-  assert.deepEqual(headlineLines(byId['cc-headline']), ['공사가 하루 늦어지면,', '매출도 하루 늦게 시작됩니다.']);
+  assert.deepEqual(headlineLines(byId['cc-headline']), ['오픈을 준비하는 지금,', '공간의 순서부터 잡아보세요.']);
 });
 
 test('four Meta creative keys keep each ad hook on the landing hero', () => {
   const cases = [
-    ['office_a', 'office', ['입주일은 정해졌는데,', '공사 계획은 아직인가요?']],
-    ['office_b', 'office', ['직원이 늘었는데,', '사무실은 그대로인가요?']],
-    ['shop_a', 'shop', ['공사가 하루 늦어지면,', '매출도 하루 늦게 시작됩니다.']],
-    ['shop_b', 'shop', ['예쁜 매장보다 먼저,', '설비와 운영 동선입니다.']],
+    ['office_a', 'office', ['입주일은 정해졌는데,', '공사 순서는 막막하다면.']],
+    ['office_b', 'office', ['좌석만 늘리는 대신,', '일하는 흐름을 바꿉니다.']],
+    ['shop_a', 'shop', ['오픈일은 정했나요?', '이제 공사의 순서를 잡을 때.']],
+    ['shop_b', 'shop', ['예쁜 매장,', '운영도 편해야 하니까.']],
   ];
   for (const [creative, vertical, hook] of cases) {
     const { doc, byId } = runCommercialCall({ search: `?vertical=${vertical}&utm_content=${creative}` });
     assert.equal(doc.body.getAttribute('data-commercial-creative'), creative);
     assert.deepEqual(headlineLines(byId['cc-headline']), hook);
-    assert.match(byId['cc-lead'].textContent, /대면상담 일정을 잡아드립니다/);
+    assert.match(byId['cc-lead'].textContent, /상담|함께/);
   }
 });
 
@@ -149,10 +146,10 @@ test('four Meta creative keys keep each ad hook on the landing hero', () => {
 // 사무실 랜딩으로 떨어지고 phone_click 의 vertical 집계까지 office 로 오염된다.
 test('creative key alone routes the vertical without the QA-only vertical param', () => {
   const cases = [
-    ['office_a', 'office', ['입주일은 정해졌는데,', '공사 계획은 아직인가요?']],
-    ['office_b', 'office', ['직원이 늘었는데,', '사무실은 그대로인가요?']],
-    ['shop_a', 'shop', ['공사가 하루 늦어지면,', '매출도 하루 늦게 시작됩니다.']],
-    ['shop_b', 'shop', ['예쁜 매장보다 먼저,', '설비와 운영 동선입니다.']],
+    ['office_a', 'office', ['입주일은 정해졌는데,', '공사 순서는 막막하다면.']],
+    ['office_b', 'office', ['좌석만 늘리는 대신,', '일하는 흐름을 바꿉니다.']],
+    ['shop_a', 'shop', ['오픈일은 정했나요?', '이제 공사의 순서를 잡을 때.']],
+    ['shop_b', 'shop', ['예쁜 매장,', '운영도 편해야 하니까.']],
   ];
   for (const [creative, vertical, hook] of cases) {
     const { doc, byId } = runCommercialCall({ search: `?utm_content=${creative}` });
@@ -166,7 +163,7 @@ test('creative key alone routes the vertical without the QA-only vertical param'
 test('commercial_vertical param switches the variant', () => {
   const { doc, byId } = runCommercialCall({ search: '?commercial_vertical=shop' });
   assert.equal(doc.body.getAttribute('data-commercial-vertical'), 'shop');
-  assert.deepEqual(headlineLines(byId['cc-headline']), ['공사가 하루 늦어지면,', '매출도 하루 늦게 시작됩니다.']);
+  assert.deepEqual(headlineLines(byId['cc-headline']), ['오픈을 준비하는 지금,', '공간의 순서부터 잡아보세요.']);
 });
 
 // vertical 집계 오염 회귀: shop 소재 클릭은 shop 으로 보고돼야 한다.
@@ -225,15 +222,12 @@ test('sms callback click still reports commercial_callback_click to the funnel c
   assert.equal(funnelSends[0].payload.ctaLocation, 'commercial_call_sms');
 });
 
-test('landing HTML frames the call as the first step toward an in-person consultation', () => {
-  assert.match(html, /<h1 id="cc-headline">직원이 늘었는데,<br>사무실은 그대로인가요\?<\/h1>/);
-  assert.match(html, /전화 사전 확인/);
-  assert.match(html, /대면상담 예약<\/strong>/);
-  assert.match(html, /현장 확인 · 견적 제안/);
-  assert.match(html, /전화로 대면상담 예약하기/);
-  assert.match(html, /대면상담 예약 안내입니다/);
-  // 콜백은 대면상담 일정을 잡기 위한 보조 경로로 안내한다.
-  assert.match(html, /콜백을 요청하시면 대면상담 일정을 대신 잡아드립니다/);
+test('landing prioritizes the shared commercial form and retains an honest next step', () => {
+  assert.ok((html.match(/data-commercial-form-link/g) || []).length >= 4);
+  assert.match(html, /\/consultation\/\?type=commercial/);
+  assert.match(html, /신청.*확정|확정.*않/);
+  assert.match(html, /현장/);
+  assert.doesNotMatch(html, /전화로 대면상담 예약하기/);
 });
 
 test('old telephone-specialist claims are gone from the landing and the variant script', () => {
@@ -245,70 +239,23 @@ test('old telephone-specialist claims are gone from the landing and the variant 
   assert.doesNotMatch(callSource, /통화에서 함께 확인합니다/);
 });
 
-test('tel wiring, tracking markers, and callback mount survive the copy change', () => {
-  const telHrefs = [...html.matchAll(/href="tel:([^"]+)"/g)].map((m) => m[1]);
-  assert.equal(telHrefs.length, 3, 'header/hero/sticky tel links');
-  assert.ok(telHrefs.every((num) => num === '050713881252'));
-  assert.equal((html.match(/data-v8-event="phone_click"/g) || []).length, 3);
-  for (const cta of ['commercial_call_header', 'commercial_call_hero', 'commercial_call_sticky', 'commercial_call_hero_sms', 'commercial_call_sms']) {
-    assert.ok(html.includes(`data-cta-location="${cta}"`), cta);
-  }
-  for (const marker of ['funnel-tracking.js', 'commercial-call.js', 'commercial-call-callback.js', '512750840350337', 'GTM-PW8GLP8S', 'data-spacebogam-naver-wcs', 'id="cc-callback-root"']) {
-    assert.ok(html.includes(marker), marker);
-  }
-  assert.match(html, /commercial-call\.css\?v=commercial-intake-v1/);
-  assert.match(html, /commercial-call-callback\.js\?v=[a-z0-9-]+/);
+test('tracking stays wired, but the duplicate callback form is not loaded', () => {
+  const targets = [...html.matchAll(/href="tel:([^"]+)"/g)].map(m => m[1]);
+  assert.ok(targets.length >= 1);
+  assert.ok(targets.every(target => target === '050713881252'));
+  for (const marker of ['funnel-tracking.js','commercial-call.js','512750840350337','GTM-PW8GLP8S']) assert.ok(html.includes(marker),marker);
+  assert.doesNotMatch(html, /src="[^"]*commercial-call-callback\.js/);
+  assert.match(html, /commercial-call\.css\?v=commercial-sales-20261027/);
   assert.match(html, /noindex,nofollow/);
 });
 
-test('callback form keeps the commercial contract and adds low-friction intake details', () => {
-  assert.match(callbackSource, /\/api\/consultation\/submit/);
-  assert.match(callbackSource, /COMPANY_ID = '4206bdfd-b51d-4433-9f8e-c854131948cc'/);
-  assert.match(callbackSource, /NAME_QUESTION_ID = '13'/);
-  assert.match(callbackSource, /PHONE_QUESTION_ID = '10'/);
-  assert.match(callbackSource, /CALLBACK_TIME_QUESTION_ID = '17'/);
-  assert.match(callbackSource, /CONSENT_ANSWER_ID = '9999'/);
-  assert.match(callbackSource, /type: 'commercial_callback'/);
-  assert.match(callbackSource, /commercialCallback: \{/);
-  for (const field of ['name', 'phone', 'vertical', 'budget', 'callbackTime', 'address', 'area', 'leaseStatus', 'constructionStartDate', 'openDate', 'requestNote', 'consent']) {
-    assert.match(callbackSource, new RegExp(`\\b${field}:`), field);
+
+test('commercial space image follows the ad vertical and is disclosed as an illustration', () => {
+  for (const [creative, vertical] of [['shop_a','shop'], ['shop_b','shop'], ['office_a','office'], ['office_b','office']]) {
+    const {byId} = runCommercialCall({search: '?utm_content=' + creative});
+    assert.equal(byId['cc-space-image'].src, '/assets/commercial/' + vertical + '-concept-20261027.jpg');
+    assert.match(byId['cc-space-image'].alt, /예시/);
+    assert.ok(fs.statSync(path.join(root, byId['cc-space-image'].src)).size > 10000);
   }
-  assert.match(callbackSource, /params\.get\('vertical'\).*params\.get\('commercial_vertical'\)/);
-  assert.match(callbackSource, /CALLBACK_VERTICALS = \['office', 'shop'\]/);
-  assert.match(callbackSource, /option\('office', '사무실'\)/);
-  assert.match(callbackSource, /option\('shop', '일반상가'\)/);
-  assert.match(callbackSource, /verticalSelect\.value = commercialVertical\(\)/);
-  for (const budget of ['under_30m', '30_50m', '50_100m', '100_200m', 'over_200m', 'undecided']) {
-    assert.ok(callbackSource.includes(`value: '${budget}'`), budget);
-  }
-  assert.match(callbackSource, /budgetSelect\.value = 'undecided'/);
-  for (const status of ['leased', 'deposit_paid', 'negotiating', 'viewing', 'owned']) {
-    assert.ok(callbackSource.includes(`value: '${status}'`), status);
-  }
-  for (const id of ['cc-callback-address', 'cc-callback-area', 'cc-callback-lease-status', 'cc-callback-construction-start-date', 'cc-callback-open-date', 'cc-callback-request-note']) {
-    assert.ok(callbackSource.includes(id), id);
-  }
-  const detailsAt = callbackSource.indexOf("el('details', 'cc-callback-details')");
-  assert.ok(callbackSource.indexOf("requiredInput('cc-callback-address'") < detailsAt);
-  assert.ok(callbackSource.indexOf("requiredInput('cc-callback-area'") < detailsAt);
-  assert.ok(callbackSource.indexOf("'cc-callback-construction-start-date'") < detailsAt);
-  assert.match(callbackSource, /leaseStatusSelect\.required = true/);
-  assert.match(callbackSource, /추가 정보 입력하기 \(선택\)/);
-  for (const input of ['addressInput', 'areaInput', 'leaseStatusSelect', 'constructionStartDateInput']) {
-    assert.match(callbackSource, new RegExp(`${input}\\.setAttribute\\('aria-invalid', 'true'\\)`));
-    assert.match(callbackSource, new RegExp(`${input}\\.focus\\(\\)`));
-  }
-  assert.doesNotMatch(callbackSource, /marketingAttribution\.channel\s*=/);
-  // 이벤트명은 DB CHECK enum에 있는 3개만 쓴다 — 새 이름은 400이 난다.
-  for (const name of ['lead_form_view', 'lead_form_start', 'lead_submit_success']) {
-    assert.ok(callbackSource.includes(`'${name}'`), name);
-  }
-  const eventLiterals = [...callbackSource.matchAll(/sendFunnelEvent\('([^']+)'\)/g)].map((m) => m[1]);
-  assert.deepEqual([...new Set(eventLiterals)].sort(), ['lead_form_start', 'lead_form_view', 'lead_submit_success']);
-  for (const key of ['sbClientId', 'sbSessionId', 'sbSubmitEventId', 'marketingAttribution', 'companyId']) {
-    assert.ok(callbackSource.includes(key), key);
-  }
-  // 고객 대면 카피는 대면상담 프레임이다.
-  assert.match(callbackSource, /대면상담 일정을 함께 잡아드립니다/);
-  assert.match(callbackSource, /콜백으로 대면상담 잡기/);
+  assert.match(html, /AI 생성 공간 예시 · 실제 시공사례 아님/);
 });

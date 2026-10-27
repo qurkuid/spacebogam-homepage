@@ -1,280 +1,69 @@
-/* CMP-1312/1315/1322 상업공간 상담 랜딩 — 업종 variant 스위치
- *
- * CMP-1312 재포지셔닝: 전화는 최종 목적지가 아니라 대면상담으로 가는 1차 경로다.
- * 퍼널: 광고 → 랜딩 → 전화 사전 확인(업종·면적·일정) → 대면상담 예약 → 현장 확인 →
- * 견적·제안. variant 별로 headline(히어로 훅)과 lead(상업 리스크 문장)를 함께 스위치한다.
- *
- * 업종(commercial_vertical)은 utm_content 앞부분에서 읽는다.
- *   utm_content = "<vertical>__<creative>"   예) office__a1_condition
- * ?vertical=office 로도 직접 지정할 수 있다(QA·미리보기용).
- *
- * 왜 utm_content 인가:
- *   spacebogam_funnel_events.page_variant 는 funnel-tracking.js 가 홈 A/B 버킷으로
- *   덮어쓴다(항상 home_a_default / home_b_visit_stage_standard). 업종을 거기 실으면
- *   유실된다. utm_content 는 수집기가 원문 그대로 저장하므로 업종 분해가 가능하다.
- *
- * phone_click 은 funnel-tracking.js 가 tel: 링크 클릭에서 내부 funnel_events 수집기로
- * 자동 전송한다(그대로 유지). 이 페이지는 site-tracking.js 를 로드하지 않아 Meta Pixel
- * 쪽 trackCustom 호출이 빠져 있었다(CMP-1323, CMP-1317에서 실측 발견). wireTelPixel() 이
- * 같은 tel: 클릭에서 fbq('trackCustom','phone_click', ...) 을 병행 발화한다 — 대체가 아니라
- * funnel-tracking.js 전송과 나란히 나가는 것이다.
- * data-cta-location 값이 ctaLocation 으로 그대로 들어간다.
- * 연결 실패용 콜백 폼은 assets/commercial-call-callback.js 가 별도로 담당한다
- * (성함/연락처만 받는 최소 폼, lead_form_view/lead_form_start/lead_submit_success —
- * 전부 기존 DB CHECK 열거형에 있는 이름만 쓴다. 새 이름 추가·마이그레이션 불필요).
- *
- * CMP-1313 전략 정본 (CMP-1322 반영):
- *   - 1차 업종은 office 단독이 기본값이다. 파라미터가 없거나 알 수 없는 값이면
- *     office 로 진입한다(더 이상 일반 카피로 남겨두지 않는다).
- *   - clinic(병원·의원)은 CMP-1312 확인카드 69695e54-e188-417d-870a-820287e18eb5
- *     응답이 B안(사무실+병원)일 때만 켠다. 카드가 pending 인 동안은 HOSPITAL_ENABLED=false
- *     로 막아 두고, clinic 요청은 office 로 폴백한다. 응답이 오면 이 상수만 뒤집는다.
- *   - 미용실·필라테스는 VERTICALS 에 없다 — 정본에서 1차 범위 제외됐으므로 추가하지 않는다.
- *
- * CMP-1315 Impeccable 재검증 반영 (2026-08-22 대표 결정):
- *   - 사진(연출컷·플레이스홀더 포함) 일체 미사용 — 상업 시공 사례 0건이 이유다.
- *   - shop 은 항목이 9개라 통화 장벽이 높다는 지적을 받아 askItems 대신 askGroups
- *     (운영 방식 / 공간·일정 / 필수 설비 3그룹)로 렌더링한다. office/clinic 은 4개뿐이라
- *     기존 askItems 평면 목록을 유지한다. render 쪽에서 askGroups 존재 여부로 분기한다.
- *
- * sms: 콜백 링크 (.cc-sms, commercial/call/index.html) 클릭 계측:
- *   intm spacebogam_funnel_events_event_name_check CHECK 제약에 commercial_callback_click
- *   이 없어 그동안 400 이 났다. intm PR #61 로 열거형에 추가됐으므로 여기서 전송을 켠다.
- *   FUNNEL_ALLOWED 클라 허용목록은 preview-v8.js 전용이고 이 페이지는 그 스크립트를
- *   로드하지 않는다 — window.spacebogamFunnel.send() 를 직접 호출하면 게이트 없이 나간다.
- */
+/* Commercial sales landing: the ad promise leads to the shared commercial consultation form. */
 (function () {
   'use strict';
-
-  var HOSPITAL_ENABLED = false;
-
   var VERTICALS = {
-    clinic: {
-      eyebrow: '부산 병원·의원 인테리어',
-      headline: ['개원일은 다가오는데,', '공사 계획은 아직인가요?'],
-      lead: '개설 신고와 공사 일정은 진료과목, 전용면적, 오픈 희망일부터 확인해야 잡힙니다. 전화로 이 조건들을 먼저 확인하고, 대면상담 일정을 잡아드립니다. 조건 확인 없이 금액부터 말씀드리지 않습니다.',
-      whyTitle: '대기·상담·진료 동선을 먼저 나눕니다',
-      cards: [
-        ['설비 조건', '전기 용량, 급배수, 환기, 소방, 냉난방 위치를 도면보다 먼저 확인합니다.'],
-        ['오픈 일정', '의료기관 개설 신고와 입점 가능일에 맞춰 공정을 역산합니다.'],
-        ['환자·직원 동선', '대기, 접수, 상담, 진료, 수납 흐름과 프라이버시를 함께 봅니다.']
-      ],
-      askItems: [
-        ['진료과목', '운영 방식에 따라 대기·진료 동선이 달라집니다'],
-        ['전용면적', '층수와 엘리베이터 유무'],
-        ['오픈 희망일', '의료기관 개설 신고 일정과 맞물립니다'],
-        ['급배수·환기·소방·의료가스', '개설 신고 심사 항목과 직결됩니다']
-      ]
-    },
-    office: {
-      eyebrow: '부산 사무실 인테리어',
-      headline: ['직원이 늘었는데,', '사무실은 그대로인가요?'],
-      lead: '이전·확장·재배치, 우리 팀에 필요한 공간부터 함께 정리합니다. 좌석과 회의실 구성, 전기·통신, 입주 일정을 상담하며 공사 계획의 방향을 잡아보세요. 아직 면적이나 일정이 정해지지 않아도 요청을 남길 수 있습니다.',
-      whyTitle: '업무 방식과 전기·통신 계획을 먼저 맞춥니다',
-      cards: [
-        ['설비 조건', '전기 용량, 통신·네트워크, 공조, 소방, 냉난방 위치를 도면보다 먼저 확인합니다.'],
-        ['입주 일정', '건물 관리규정과 야간·주말 공사 가능 여부에 맞춰 공정을 역산합니다.'],
-        ['업무 동선', '고정석, 회의실, 집중석, 라운지 비율이 입주 이후 운영을 결정합니다.']
-      ],
-      askItems: [
-        ['좌석 수', '좌석 배치와 필요 면적을 좌우합니다'],
-        ['회의실', '규모·개수와 방음·화상회의 조건'],
-        ['전기·통신', '전기 용량과 통신·네트워크 배선'],
-        ['이전 희망일', '건물 관리규정과 공정 일정']
-      ]
-    },
-    shop: {
-      eyebrow: '부산 카페·매장 인테리어',
-      headline: ['공사가 하루 늦어지면,', '매출도 하루 늦게 시작됩니다.'],
-      lead: '매장을 준비하며 막막한 동선과 설비, 오픈 일정부터 함께 정리합니다. 고객과 직원의 움직임, 급배수·환기·간판을 상담하며 공사 계획의 방향을 잡아보세요. 아직 계약 전이거나 일정이 미정이어도 요청을 남길 수 있습니다.',
-      whyTitle: '고객 동선과 주방·백룸 설비를 먼저 맞춥니다',
-      cards: [
-        ['설비 조건', '전기 용량, 급배수, 후드·환기, 소방, 간판·파사드를 도면보다 먼저 확인합니다.'],
-        ['오픈 일정', '영업신고, 입점 가능일, 야간 공사 가능 여부에 맞춰 공정을 역산합니다.'],
-        ['고객·직원 동선', '입구, 주문, 픽업, 좌석, 백룸 흐름이 체류 시간과 운영 피로도를 좌우합니다.']
-      ],
-      askGroups: [
-        {
-          label: '운영 방식',
-          note: '무엇을 어떻게 운영하실지가 동선과 설비를 정합니다',
-          items: ['업종', '고객·직원 동선']
-        },
-        {
-          label: '공간·일정',
-          note: '필요한 면적과 오픈 희망일이 공정을 정합니다',
-          items: ['전용면적', '오픈 희망일']
-        },
-        {
-          label: '필수 설비',
-          note: '급배수·환기·전기·소방·간판은 개설 인허가와 직결됩니다',
-          items: ['급배수', '환기', '전기', '소방', '간판']
-        }
-      ]
-    }
+    office: { eyebrow: '부산·경남 사무실 인테리어', headline: ['일하는 방식이 달라지면,', '사무실도 달라져야 하니까.'], lead: '회의실, 집중석, 전기·통신까지. 지금 불편한 점과 이전 계획을 남겨주세요. 기본 조건을 확인한 뒤 사무실 방문 상담에서 공간의 방향을 함께 잡습니다.' },
+    shop: { eyebrow: '부산·경남 카페·매장 인테리어', headline: ['오픈을 준비하는 지금,', '공간의 순서부터 잡아보세요.'], lead: '메뉴와 운영 방식, 오픈 희망일을 공간 계획으로 연결합니다. 신청 내용을 바탕으로 먼저 연락드리고, 사무실 방문 상담에서 동선·설비·일정을 함께 살펴봅니다.' }
   };
-
   var CREATIVE_OVERRIDES = {
-    office_a: {
-      vertical: 'office',
-      headline: ['입주일은 정해졌는데,', '공사 계획은 아직인가요?'],
-      lead: '정해진 입주일에 맞춰 무엇부터 준비할지 함께 정리해보세요. 좌석 배치와 전기·통신, 건물의 공사 가능 시간을 살펴 공사 계획을 구체화합니다. 성함과 연락처를 남기면 담당자가 요청 내용을 확인합니다.'
-    },
-    office_b: {
-      vertical: 'office',
-      headline: ['직원이 늘었는데,', '사무실은 그대로인가요?'],
-      lead: '늘어난 인원에 맞는 좌석과 회의실, 집중할 공간을 함께 생각합니다. 현재 업무 방식과 필요한 공간부터 상담해보세요. 성함과 연락처를 남기면 담당자가 요청 내용을 확인합니다.'
-    },
-    shop_a: {
-      vertical: 'shop',
-      headline: ['공사가 하루 늦어지면,', '매출도 하루 늦게 시작됩니다.'],
-      lead: '오픈 준비에서 빠뜨리기 쉬운 입점·설비·공사 일정을 함께 정리해보세요. 현장 조건에 따라 필요한 준비와 공사 범위를 상담합니다. 성함과 연락처를 남기면 담당자가 요청 내용을 확인합니다.'
-    },
-    shop_b: {
-      vertical: 'shop',
-      headline: ['예쁜 매장보다 먼저,', '설비와 운영 동선입니다.'],
-      lead: '주문·픽업·백룸이 편리하게 이어지는 매장을 함께 생각합니다. 급배수·환기·전기와 운영 동선을 상담해보세요. 성함과 연락처를 남기면 담당자가 요청 내용을 확인합니다.'
-    }
+    shop_a: { vertical: 'shop', headline: ['오픈일은 정했나요?', '이제 공사의 순서를 잡을 때.'], lead: '광고에서 보신 오픈일 역산, 내 매장에서는 무엇부터 확인해야 할까요? 입점 가능일·공사 가능 시간·설비 조건을 함께 정리하면 지금 결정할 일과 현장에서 확인할 일이 보입니다.' },
+    shop_b: { vertical: 'shop', headline: ['예쁜 매장,', '운영도 편해야 하니까.'], lead: '광고에서 보신 설비와 운영 동선 이야기, 내 매장에 맞춰 시작합니다. 주문·픽업·백룸의 흐름과 급배수·환기·전기 조건을 디자인과 함께 살펴봅니다.' },
+    office_a: { vertical: 'office', headline: ['입주일은 정해졌는데,', '공사 순서는 막막하다면.'], lead: '좌석 수, 전기·통신, 건물의 공사 가능 시간부터. 광고에서 보신 입주일 기준 계획을 우리 팀의 조건에 맞춰 구체화합니다. 신청 후 기본 조건을 확인하고 사무실 방문 상담을 조율합니다.' },
+    office_b: { vertical: 'office', headline: ['좌석만 늘리는 대신,', '일하는 흐름을 바꿉니다.'], lead: '회의실이 부족한지, 집중할 곳이 없는지, 배선이 불편한지. 광고에서 보신 업무 동선부터 우리 팀의 불편을 짚고 회의·집중·협업 공간의 우선순위를 함께 잡습니다.' }
   };
-
-  function isAllowed(key) {
-    if (!VERTICALS[key]) return false;
-    if (key === 'clinic' && !HOSPITAL_ENABLED) return false;
-    return true;
+  var AD_CREATIVE_KEYS = {
+    '120248665786220650': 'shop_b', '120248665785820650': 'shop_a',
+    '120248665785460650': 'office_a', '120248665785690650': 'office_b',
+    '120249581919310650': 'shop_a', '120249582136150650': 'shop_a', '120248665890730650': 'shop_a'
+  };
+  function readCreative(params) {
+    var fromId = AD_CREATIVE_KEYS[params.get('ad_id')];
+    if (fromId) return fromId;
+    var content = (params.get('utm_content') || '').toLowerCase().replace(/[^a-z0-9]+/g, '_');
+    return Object.keys(CREATIVE_OVERRIDES).find(function (key) { return new RegExp('(^|_)' + key + '(_|$)').test(content); }) || null;
   }
-
-  function readVertical() {
-    var params;
-    try {
-      params = new URLSearchParams(location.search);
-    } catch (error) {
-      return null;
-    }
-    var direct = (params.get('vertical') || '').toLowerCase().trim();
-    if (isAllowed(direct)) return direct;
-
-    // 정본 UTM 스펙의 업종 파라미터. office/shop 분리 집계가 여기에 걸린다.
-    var tagged = (params.get('commercial_vertical') || '').toLowerCase().trim();
-    if (isAllowed(tagged)) return tagged;
-
-    // 명시적 업종 파라미터가 없으면 소재 라벨에서 업종 토큰을 찾는다.
-    // 라벨 표기는 운영 중에도 바뀐다 — shop_a, shop__a1_condition, 사진형 v5 의 v5_shop_a.
-    // 그래서 첫 구간만 보지 않고 구분자로 쪼갠 모든 구간에서 업종 토큰을 찾는다.
-    // 여기서 못 읽으면 office 로 떨어져 shop 광고가 사무실 랜딩에 붙고,
-    // phone_click 의 vertical 집계까지 office 로 오염된다.
-    var content = (params.get('utm_content') || '').toLowerCase().trim();
-    var segments = content.split(/[^a-z0-9]+/);
-    for (var i = 0; i < segments.length; i += 1) {
-      if (isAllowed(segments[i])) return segments[i];
-    }
-    return null;
+  function readVertical(params, creativeKey) {
+    var direct = (params.get('vertical') || params.get('commercial_vertical') || '').toLowerCase();
+    if (VERTICALS[direct]) return direct;
+    if (creativeKey) return CREATIVE_OVERRIDES[creativeKey].vertical;
+    var tokens = (params.get('utm_content') || '').toLowerCase().split(/[^a-z0-9]+/);
+    return tokens.indexOf('shop') >= 0 ? 'shop' : 'office';
   }
-
-  function readCreative() {
-    try {
-      var content = (new URLSearchParams(location.search).get('utm_content') || '').toLowerCase().trim();
-      if (CREATIVE_OVERRIDES[content]) return content;
-      var match = content.match(/(?:^|_)(office|shop)_([ab])(?:_|$)/);
-      return match ? match[1] + '_' + match[2] : null;
-    } catch (error) {
-      return null;
-    }
-  }
-
-  function setText(id, value) {
-    var node = document.getElementById(id);
-    if (node) node.textContent = value;
-  }
-
-  function setHeadline(id, lines) {
-    var node = document.getElementById(id);
-    if (!node || !lines || !lines.length) return;
-    node.textContent = '';
-    lines.forEach(function (line, index) {
-      if (index > 0) node.appendChild(document.createElement('br'));
-      node.appendChild(document.createTextNode(line));
-    });
-  }
-
   function apply(key, creativeKey) {
-    var v = VERTICALS[key];
-    if (!v) return;
-    var creative = CREATIVE_OVERRIDES[creativeKey];
+    var value = VERTICALS[key]; var creative = CREATIVE_OVERRIDES[creativeKey];
     if (creative && creative.vertical !== key) creative = null;
-
     document.body.setAttribute('data-commercial-vertical', key);
-    if (creativeKey && creative) document.body.setAttribute('data-commercial-creative', creativeKey);
-    setText('cc-eyebrow', v.eyebrow);
-    setHeadline('cc-headline', creative ? creative.headline : v.headline);
-    setText('cc-lead', creative ? creative.lead : v.lead);
-    setText('cc-why-title', v.whyTitle);
-
-    var wrap = document.getElementById('cc-why-cards');
-    if (wrap) {
-      wrap.innerHTML = '';
-      v.cards.forEach(function (pair) {
-        var article = document.createElement('article');
-        article.className = 'card';
-        var b = document.createElement('b');
-        b.textContent = pair[0];
-        var p = document.createElement('p');
-        p.textContent = pair[1];
-        article.appendChild(b);
-        article.appendChild(p);
-        wrap.appendChild(article);
+    if (creative) document.body.setAttribute('data-commercial-creative', creativeKey);
+    function text(id, value) { var node = document.getElementById(id); if (node) node.textContent = value; }
+    text('cc-eyebrow', value.eyebrow); text('cc-lead', (creative || value).lead);
+    var spaceImage = document.getElementById('cc-space-image');
+    if (spaceImage) {
+      spaceImage.src = '/assets/commercial/' + key + '-concept-20261027.jpg';
+      spaceImage.alt = key === 'shop'
+        ? '주문 카운터와 창가 좌석 사이의 이동 동선을 표현한 카페 인테리어 예시'
+        : '업무석과 유리 회의실 사이의 이동 동선을 표현한 사무실 인테리어 예시';
+    }
+    text('cc-space-caption', key === 'shop'
+      ? '주문부터 픽업까지, 고객과 직원의 움직임이 편하도록.'
+      : '업무석과 회의실 사이, 이동을 방해하지 않는 여유.');
+    var heading = document.getElementById('cc-headline');
+    if (heading) { heading.textContent = ''; (creative || value).headline.forEach(function (line, index) {
+      if (index) heading.appendChild(document.createElement('br'));
+      heading.appendChild(document.createTextNode(line));
+    }); }
+    Array.prototype.forEach.call(document.querySelectorAll('[data-vertical-panel]'), function (panel) {
+      panel.hidden = panel.getAttribute('data-vertical-panel') !== key;
+      if (!panel.hidden) Array.prototype.forEach.call(panel.querySelectorAll('img[data-src]'), function (img) {
+        img.src = img.getAttribute('data-src');
       });
-    }
-
-    var askList = document.getElementById('cc-asklist');
-    if (askList) {
-      askList.innerHTML = '';
-      if (v.askGroups && v.askGroups.length) {
-        askList.classList.add('cc-asklist--grouped');
-        setText('cc-ask-title', '상담에서 함께 정리할 ' + v.askGroups.length + '가지');
-        v.askGroups.forEach(function (group) {
-          var li = document.createElement('li');
-          li.className = 'cc-askgroup';
-          var b = document.createElement('b');
-          b.textContent = group.label;
-          li.appendChild(b);
-          var note = document.createElement('span');
-          note.className = 'cc-askgroup-note';
-          note.textContent = group.note;
-          li.appendChild(note);
-          var ul = document.createElement('ul');
-          ul.className = 'cc-askgroup-items';
-          group.items.forEach(function (item) {
-            var tag = document.createElement('li');
-            tag.textContent = item;
-            ul.appendChild(tag);
-          });
-          li.appendChild(ul);
-          askList.appendChild(li);
-        });
-      } else {
-        askList.classList.remove('cc-asklist--grouped');
-        var askItems = v.askItems || [];
-        setText('cc-ask-title', '상담에서 함께 정리할 ' + askItems.length + '가지');
-        askItems.forEach(function (pair) {
-          var li = document.createElement('li');
-          var b = document.createElement('b');
-          b.textContent = pair[0];
-          var span = document.createElement('span');
-          span.textContent = pair[1];
-          li.appendChild(b);
-          li.appendChild(span);
-          askList.appendChild(li);
-        });
-      }
-    }
-
-    var title = {
-      clinic: '부산 병원·의원 인테리어 상담 예약 | 공간보감',
-      office: '부산 사무실 인테리어 상담 예약 | 공간보감',
-      shop: '부산 카페·매장 인테리어 상담 예약 | 공간보감'
-    }[key];
-    if (title) document.title = title;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-vertical-link]'), function (link) {
+      var target = new URL(location.href); target.searchParams.set('vertical', link.getAttribute('data-vertical-link'));
+      link.href = target.pathname + target.search;
+      if (link.getAttribute('data-vertical-link') === key) link.setAttribute('aria-current', 'page');
+    });
+    document.title = (key === 'shop' ? '카페·매장' : '사무실') + ' 인테리어 상담 신청 | 공간보감';
   }
-
   function wireSmsCallback() {
     var links = document.querySelectorAll('a.cc-sms[href^="sms:"]');
     Array.prototype.forEach.call(links, function (link) {
@@ -325,22 +114,22 @@
     });
   }
 
-  function init() {
-    var key = readVertical() || 'office';
-    apply(key, readCreative());
-    Array.prototype.forEach.call(document.querySelectorAll('[data-vertical-link]'), function(link){
-      var target = new URL(location.href);
-      target.searchParams.set('vertical', link.getAttribute('data-vertical-link'));
-      target.hash = '';
+  function wireCommercialFormLinks(key) {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-commercial-form-link]'), function (link) {
+      var target = new URL('/consultation/', location.origin);
+      new URLSearchParams(location.search).forEach(function (value, name) { target.searchParams.set(name, value); });
+      target.searchParams.set('type', 'commercial');
+      target.searchParams.set('vertical', key);
+      target.searchParams.set('channel', 'commercial_landing');
       link.href = target.pathname + target.search;
     });
-    wireSmsCallback();
-    wireTelPixel();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
+  function init() {
+    var params = new URLSearchParams(location.search); var creativeKey = readCreative(params);
+    var key = readVertical(params, creativeKey);
+    apply(key, creativeKey); wireCommercialFormLinks(key); wireSmsCallback(); wireTelPixel();
   }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
