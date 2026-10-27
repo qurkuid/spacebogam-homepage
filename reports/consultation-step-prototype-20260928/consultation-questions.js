@@ -276,14 +276,14 @@ window.SB_CONSULTATION_QUESTIONS = {
     },
     {
       "id": "address",
-      "question": "현장 지역·주소를 알려주세요.",
+      "question": "현장 후보 지역·주소를 알려주세요.",
       "questionType": "address",
       "isRequired": true,
       "options": []
     },
     {
       "id": "area",
-      "question": "전용면적(평)을 알려주세요.",
+      "question": "예상 전용면적(평)을 알려주세요.",
       "questionType": "number",
       "isRequired": true,
       "options": []

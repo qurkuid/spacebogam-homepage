@@ -101,9 +101,8 @@ test('policy collection inventory includes the existing commercial and callback 
   for (const label of ['전용면적', '업종·공간 유형', '현재 현장 상태', '계약 여부', '공사 시작일', '오픈·입주 희망일']) assert.ok(inventory.includes(label));
 });
 
-test('callback script cache version is the content SHA256 prefix', () => {
-  const hash = crypto.createHash('sha256').update(callback).digest('hex').slice(0, 8);
-  const reference = read('commercial/call/index.html').match(/\/assets\/commercial-call-callback\.js\?v=([^"'&]+)/);
-  assert.ok(reference);
-  assert.equal(reference[1], hash);
+test('commercial sales landing uses the shared form instead of loading the legacy callback', () => {
+  const html = read('commercial/call/index.html');
+  assert.doesNotMatch(html, /src="[^"]*commercial-call-callback\.js/);
+  assert.match(html, /data-commercial-form-link/);
 });

@@ -29,9 +29,10 @@
   let submitted = false;
   let kakaoProfile = {};
   let kakaoGrant = '';
-  let metaMatching = { consent: false, email: '' };
   const companyId = '4206bdfd-b51d-4433-9f8e-c854131948cc';
   const params = new URLSearchParams(location.search);
+  const requestedCommercial = params.get('type') === 'commercial';
+  const requestedVertical = ['shop', 'office'].includes(params.get('vertical')) ? params.get('vertical') : '';
   const eventKey = 'spacebogam.consultationApply.eventIds.v1';
   const attributionKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'gbraid', 'wbraid', 'fbclid', 'msclkid', 'n_keyword', 'n_query', 'n_campaign_type', 'n_ad_group', 'n_keyword_id', 'utm_id', 'campaign_id', 'adset_id', 'ad_id', 'asset_id'];
   const id = () => crypto.randomUUID();
@@ -85,16 +86,7 @@
     return data;
   }
   function metaMatchingPayload() {
-    const email = String(metaMatching.email || '').trim();
-    return {
-      consent: metaMatching.consent === true,
-      version: 'meta-contact-v1',
-      ...(metaMatching.consent && email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? { email } : {})
-    };
-  }
-  function isQaSubmission() {
-    return /^(1|true|yes|y|on)$/i.test(params.get('is_test') || '')
-      || stored(sessionStorage, 'spacebogam_funnel_is_test') === 'true';
+    return { consent: false, version: 'meta-contact-v1' };
   }
   function funnel(name) {
     if (typeof fetch !== 'function') return;
@@ -102,19 +94,35 @@
     ['utmSource', 'utmMedium', 'utmCampaign', 'utmContent', 'utmTerm'].forEach((field, index) => { data[field] = trackingValue(['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'][index]); });
     fetch('https://intm.kr/api/marketing/funnel-events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), keepalive: true }).catch(() => {});
   }
+  function isTestTracking() {
+    return /^(1|true|yes|y|on)$/i.test(params.get('is_test') || '') || stored(sessionStorage, 'spacebogam_funnel_is_test') === 'true';
+  }
+  function trackSubmission(result) {
+    if (result.success !== true || !result.consultReqId || result.duplicate || isTestTracking()) return;
+    const leadEventId = result.leadEventId || eventIds.lead_submit_success;
+    const key = 'spacebogam_ga_lead_sent_' + leadEventId;
+    if (stored(sessionStorage, key) === 'true') return;
+    try {
+      if (typeof gtag === 'function') {
+        gtag('event', 'lead_submit_success', { event_category: 'lead', form_id: 'spacebogam_consultation', event_scope: 'submission', lead_event_id: leadEventId, event_id: leadEventId });
+        try { sessionStorage.setItem(key, 'true'); } catch {}
+      }
+    } catch {}
+  }
   function trackStep(action) {
+    action = action === 'view' || action === 'skip' ? action : 'complete';
     const stepId = current === 'question' ? 'question_' + String(questionList()[questionIndex].id) : current;
     const seen = action === 'view' ? viewedSteps : action === 'skip' ? skippedSteps : completedSteps;
     if (seen.has(stepId)) return;
     seen.add(stepId);
-    if (/^(1|true|yes|y|on)$/i.test(params.get('is_test') || '') || stored(sessionStorage, 'spacebogam_funnel_is_test') === 'true') return;
+    if (isTestTracking()) return;
     const journeyType = answers.type === '상업 공간' ? 'commercial' : answers.type === '주거 공간'
       ? answers.housing === '아파트' ? 'residential_apartment' : answers.housing ? 'residential_other' : 'residential' : 'undecided';
     const eventStep = (current === 'question' ? 'q_' + String(questionList()[questionIndex].id) : current)
       .replace(/[^a-z0-9_]/gi, '_').slice(0, 23);
     try {
-      if (typeof gtag === 'function') gtag('event', 'consult_' + action + '_' + eventStep, {
-        form_id: 'spacebogam_consultation', step_id: stepId, step_number: trail.length + 1,
+      if (typeof gtag === 'function') gtag('event', 'consult_' + (action === 'complete' ? 'step_complete' : action) + '_' + eventStep, {
+        form_id: 'spacebogam_consultation', event_scope: 'step', step_action: action, step_id: stepId, step_number: trail.length + 1,
         progress_percent: Number(progress.getAttribute('aria-valuenow') || 0), journey_type: journeyType,
         sb_session_id: sessionId,
         send_to: 'G-EJGXDD5C1T'
@@ -234,6 +242,12 @@
   }
   function isApartment() { return answers.type === '주거 공간' && answers.housing === '아파트'; }
   function questionList() { return answers.type === '상업 공간' ? window.SB_CONSULTATION_QUESTIONS.commercial : questions; }
+  function applyEntryIntent() {
+    if (!requestedCommercial) return;
+    answers.type = '상업 공간';
+    if (requestedVertical) answers.responses.vertical = requestedVertical;
+    current = nextQuestion(0);
+  }
   function hiddenByBranch(question) {
     return question.showIf && !(question.showIf.values || [question.showIf.value]).includes(answers.responses[question.showIf.id]);
   }
@@ -368,6 +382,10 @@
     if (input) input.removeAttribute('aria-invalid');
   }
 
+  function isAdvanceKey(event) {
+    return event.key === 'Enter' && !event.isComposing && event.keyCode !== 229;
+  }
+
   function showError(message) {
     const box = stage.querySelector('.error');
     if (box) box.textContent = message;
@@ -494,7 +512,7 @@
       next.disabled = true;
       showResults(input.value);
     });
-    input.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); advance(); } });
+    input.addEventListener('keydown', event => { if (isAdvanceKey(event)) { event.preventDefault(); advance(); } });
     showResults(input.value);
   }
 
@@ -546,7 +564,7 @@
       clearError();
       next.disabled = !input.value.trim();
     });
-    input.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); advance(); } });
+    input.addEventListener('keydown', event => { if (isAdvanceKey(event)) { event.preventDefault(); advance(); } });
     row.appendChild(input);
     label.appendChild(row);
     stage.appendChild(label);
@@ -834,7 +852,7 @@
         clearError(); next.disabled = !hasResponse(question);
       });
       custom.addEventListener('keydown', event => {
-        if (event.key === 'Enter' && !event.isComposing) { event.preventDefault(); advance(); }
+        if (isAdvanceKey(event)) { event.preventDefault(); advance(); }
       });
       return;
     }
@@ -925,7 +943,7 @@
       next.disabled = !!question.isRequired && !input.value.trim();
       if (type === 'select' && input.value) advance();
     });
-    input.addEventListener('keydown', event => { if (event.key === 'Enter' && type !== 'text') { event.preventDefault(); advance(); } });
+    input.addEventListener('keydown', event => { if (isAdvanceKey(event) && type !== 'text') { event.preventDefault(); advance(); } });
     label.appendChild(input);
     stage.appendChild(label);
     if (type === 'address' && answers.apartmentUnmatched) stage.appendChild(el('p', 'hint', '검색 목록에 없는 아파트의 주소를 알려주세요. 도면이 없어도 상담은 진행할 수 있어요.'));
@@ -1051,47 +1069,6 @@
     label.appendChild(copy);
     stage.appendChild(label);
 
-    const matchingLabel = el('label', 'consent consent-optional');
-    const matchingInput = el('input');
-    matchingInput.type = 'checkbox';
-    matchingInput.checked = metaMatching.consent;
-    matchingInput.addEventListener('change', () => {
-      metaMatching.consent = matchingInput.checked;
-      render();
-    });
-    matchingLabel.appendChild(matchingInput);
-    matchingLabel.appendChild(el('span', null, '[선택] 광고 성과 측정을 위한 정보 제공에 동의합니다.'));
-    stage.appendChild(matchingLabel);
-
-    const notice = el('details', 'matching-notice');
-    notice.appendChild(el('summary', null, '제공 및 국외 이전 안내'));
-    const noticeCopy = el('p');
-    noticeCopy.appendChild(document.createTextNode('받는 자: Meta Platforms Inc. (1 Meta Way, Menlo Park, CA 94025, USA) · 목적: 광고 성과 측정, 광고 최적화 및 맞춤 광고 · 제공 항목: 전화번호와 선택 입력한 이메일의 SHA-256 해시값(익명화 정보가 아님), 쿠키 식별자, IP 주소, 브라우저 및 이벤트 정보 · 국외 이전: 상담 접수 완료 시 미국의 Meta 데이터센터로 네트워크 전송 · 처리 및 보유: 연락처 해시는 매칭 후 삭제하고 이벤트 정보는 최대 2년 보유하며, 선택 동의 이력은 상담 종료 후 1년까지 보관합니다. 선택 이메일은 전송 후 공간보감 데이터베이스에 보관하지 않습니다. '));
-    const metaPolicy = el('a', null, 'Meta 개인정보처리방침');
-    metaPolicy.href = 'https://www.facebook.com/privacy/policy/'; metaPolicy.target = '_blank'; metaPolicy.rel = 'noopener';
-    noticeCopy.appendChild(metaPolicy);
-    noticeCopy.appendChild(document.createTextNode(' · '));
-    const businessTerms = el('a', null, 'Meta 비즈니스 도구 약관');
-    businessTerms.href = 'https://www.facebook.com/legal/terms/businesstools'; businessTerms.target = '_blank'; businessTerms.rel = 'noopener';
-    noticeCopy.appendChild(businessTerms);
-    noticeCopy.appendChild(document.createTextNode(' · 선택 동의를 거부해도 상담을 신청할 수 있으며, 철회는 공간보감 1551-0163으로 요청할 수 있습니다. '));
-    const privacyLink = el('a', null, '공간보감 개인정보처리방침');
-    privacyLink.href = '../../privacy/'; privacyLink.target = '_blank'; privacyLink.rel = 'noopener';
-    noticeCopy.appendChild(privacyLink);
-    notice.appendChild(noticeCopy);
-    stage.appendChild(notice);
-
-    if (metaMatching.consent) {
-      const emailLabel = el('label', 'matching-email');
-      emailLabel.appendChild(el('span', 'field-label', '이메일(선택)'));
-      const emailInput = el('input');
-      emailInput.type = 'email'; emailInput.autocomplete = 'email'; emailInput.inputMode = 'email'; emailInput.maxLength = 254;
-      emailInput.value = metaMatching.email;
-      emailInput.addEventListener('input', () => { metaMatching.email = emailInput.value; });
-      emailLabel.appendChild(emailInput);
-      emailLabel.appendChild(el('small', null, '광고 성과 측정에만 사용합니다. 입력하지 않아도 상담을 신청할 수 있습니다.'));
-      stage.appendChild(emailLabel);
-    }
   }
 
   function renderSummary() {
@@ -1184,6 +1161,8 @@
     if (submitting || submitted) return;
     submitting = true;
     next.disabled = true;
+    back.disabled = true;
+    document.getElementById('restart').disabled = true;
     next.textContent = '접수 중…';
     clearError();
     try {
@@ -1211,13 +1190,7 @@
       if (!response.ok || result.success !== true) throw new Error(result.error || '접수에 실패했습니다.');
       submitted = true;
       answers.receiptId = result.consultReqId;
-      try {
-        if (metaMatching.consent && !isQaSubmission() && typeof fbq === 'function' && result.trackMetaLead !== false) {
-          fbq('consent', 'grant');
-          fbq('track', 'Lead', { currency: 'KRW' }, { eventID: result.leadEventId || eventIds.lead_submit_success });
-        }
-      } catch {}
-      try { if (typeof gtag === 'function') gtag('event', 'lead_submit_success', { event_category: 'lead', lead_event_id: result.leadEventId || eventIds.lead_submit_success }); } catch {}
+      trackSubmission(result);
       funnel('lead_submit_success');
       trackStep('complete');
       try { sessionStorage.removeItem(eventKey); } catch {}
@@ -1227,10 +1200,21 @@
       showError(error.message || '접수에 실패했습니다. 잠시 후 다시 시도해 주세요.');
       next.disabled = false;
       next.textContent = '다시 접수하기 →';
-    } finally { submitting = false; }
+    } finally {
+      submitting = false;
+      back.disabled = false;
+      document.getElementById('restart').disabled = false;
+    }
   }
 
   function render() {
+    const commercial = answers.type === '상업 공간';
+    const asideImage = document.querySelector('.aside img');
+    const asideCopy = document.querySelector('.aside-copy p:last-child');
+    if (asideImage) asideImage.hidden = commercial;
+    if (asideCopy) asideCopy.textContent = commercial
+      ? '어떤 공간에서 일하고 운영할지, 필요한 조건을 함께 알려주세요.'
+      : '어떤 집을 만들고 싶은지, 필요한 정보를 함께 알려주세요.';
     const kakaoEntry = document.getElementById('kakao-quick-consultation');
     if (kakaoEntry) kakaoEntry.hidden = current !== 'type';
     const visitIntro = document.getElementById('visit-intro');
@@ -1268,6 +1252,7 @@
   }
 
   function advance(action = 'complete') {
+    if (submitting) return;
     if (current === 'summary') { submitConsultation(); return; }
     if (current === 'success') return;
     if (current === 'question') {
@@ -1308,7 +1293,7 @@
   }
 
   next.addEventListener('click', () => advance());
-  back.addEventListener('click', () => { if (trail.length) { const previous = trail.pop(); current = previous.key; questionIndex = previous.index; render(); } });
+  back.addEventListener('click', () => { if (!submitting && trail.length) { const previous = trail.pop(); current = previous.key; questionIndex = previous.index; render(); } });
   skip.addEventListener('click', () => {
     if (current !== 'question' || questionList()[questionIndex].isRequired) return;
     const key = String(questionList()[questionIndex].id);
@@ -1322,11 +1307,11 @@
     advance('skip');
   });
   document.getElementById('restart').addEventListener('click', () => {
+    if (submitting) return;
     lookupRun++;
     clearPlan();
     answers = { responses: {} };
     fillKakaoResponses();
-    metaMatching = { consent: false, email: '' };
     submitted = false;
     started = false;
     viewedSteps = new Set();
@@ -1338,10 +1323,12 @@
     trail = [];
     questionIndex = 0;
     current = 'type';
+    applyEntryIntent();
     funnel('lead_form_view');
     render();
   });
   questions = effectiveQuestions(window.SB_CONSULTATION_QUESTIONS.residential);
+  applyEntryIntent();
   loadQuestions();
   if (typeof fetch === 'function') funnel('lead_form_view');
   render();
