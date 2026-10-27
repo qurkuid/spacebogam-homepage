@@ -42,12 +42,12 @@
   var CONSENT_ANSWER_ID = '9999';
 
   var PLATFORM_ID_KEYS = ['utm_id', 'campaign_id', 'adset_id', 'ad_id', 'asset_id'];
-  // 서버 sanitizeMarketingAttribution 허용목록 중 URL 에서 그대로 받아 넘기는 것들.
-  // 목록에 없는 키는 저장 직전 조용히 폐기되므로 임의로 늘리지 않는다.
+  // 제출 귀속값과 Meta 매체/게재위치 진단값 중 URL 에서 그대로 이어받는 것들.
   var QUERY_ATTRIBUTION_KEYS = [
     'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
     'gclid', 'gbraid', 'wbraid', 'fbclid', 'msclkid',
-    'n_keyword', 'n_query', 'n_campaign_type', 'n_ad_group', 'n_keyword_id'
+    'n_keyword', 'n_query', 'n_campaign_type', 'n_ad_group', 'n_keyword_id',
+    'placement', 'site_source_name'
   ].concat(PLATFORM_ID_KEYS);
   var STATIC_CHANNEL_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
   var SELF_REFERRAL_SOURCE = 'spacebogam.kr';
@@ -275,8 +275,7 @@
 
   function sendFunnelEvent(eventName, detail){
     var payload = {
-      // lead_* 세 단계는 세션 고정 id 를 쓴다. 특히 lead_submit_success 는 서버가
-      // 같은 id 로 이미 한 행을 쓰므로, 다른 id 를 보내면 dedup 되지 않고 두 건이 된다.
+      // 폼 조회·시작은 세션 고정 id 를 쓰고, 저장 성공 id 는 제출 payload 를 통해 서버가 소유한다.
       eventId: eventIds[eventName] || uuid(),
       clientId: clientId,
       sessionId: sessionId,
@@ -284,7 +283,7 @@
       pagePath: location.pathname,
       pageTitle: document.title,
       occurredAt: new Date().toISOString(),
-      utmSource: attributionValue('utm_source'),
+      utmSource: attributionValue('utm_source') || attributionValue('site_source_name'),
       utmMedium: attributionValue('utm_medium'),
       utmCampaign: attributionValue('utm_campaign'),
       utmContent: attributionValue('utm_content'),
@@ -295,6 +294,7 @@
       ctaLocation: (detail && detail.ctaLocation) || '',
       ctaText: (detail && detail.ctaText) || '',
       pageVariant: params.get('page_variant') || '',
+      placement: attributionValue('placement').slice(0, 100),
       deviceType: deviceType(),
       isTest: isTest
     };
@@ -613,6 +613,8 @@
   var submitSucceeded = false;
   var submitting = false;
   var completedFields = {};
+  var viewedFields = {};
+  var skippedFields = {};
   var lastCompletedQuestionId = '';
 
   function markStarted(){
@@ -634,6 +636,15 @@
       field_position: questions.indexOf(question) + 1,
       is_required: question.isRequired ? 'true' : 'false'
     };
+  }
+
+  function stepLocation(question){
+    return question && question.id === 'consent' ? 'consent' :
+      'question_' + String(question && question.id || 'unknown').replace(/[^a-z0-9_-]/gi, '_').slice(0, 80);
+  }
+
+  function sendStepEvent(eventName, question, action){
+    sendFunnelEvent(eventName, {ctaLocation: stepLocation(question), ctaText: action});
   }
 
   function fieldWrap(question){
@@ -679,7 +690,35 @@
     if (completedFields[questionId]) return;
     completedFields[questionId] = true;
     lastCompletedQuestionId = questionId;
+    sendStepEvent('lead_step_complete', question, 'field_complete');
     trackGtag('lead_form_field_complete', questionTrackingDetail(question));
+  }
+
+  function trackFieldView(event){
+    var target = event && event.target;
+    if (!target) return;
+    var wrap = target.closest && target.closest('[data-question-id]');
+    var questionId = wrap && wrap.getAttribute('data-question-id');
+    var question = questionId === 'consent' ? {id:'consent'} :
+      questions.find(function(item){ return String(item.id) === questionId; });
+    if (!question || viewedFields[questionId]) return;
+    viewedFields[questionId] = true;
+    sendStepEvent('lead_step_view', question, 'field_view');
+  }
+
+  function observeFieldViews(form){
+    form.addEventListener('focusin', trackFieldView);
+    if (typeof window.IntersectionObserver !== 'function') return;
+    var observer = new window.IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (document.visibilityState === 'hidden' || !entry.isIntersecting || entry.intersectionRatio < 0.25) return;
+        trackFieldView({target: entry.target});
+        observer.unobserve(entry.target);
+      });
+    }, {threshold:[0.25]});
+    Array.prototype.forEach.call(form.querySelectorAll('[data-question-id]'), function(field){
+      observer.observe(field);
+    });
   }
 
   function renderError(message){
@@ -775,6 +814,7 @@
     if (optional.length) form.appendChild(buildOptionalFields(optional));
 
     var consentWrap = element('div', 'cf-consent');
+    consentWrap.setAttribute('data-question-id', 'consent');
     var consentLabel = element('label', 'cf-choice');
     consentLabel.setAttribute('for', 'cf-consent-input');
     var consent = document.createElement('input');
@@ -826,6 +866,7 @@
         status.textContent = '「' + missing.question + '」 항목을 입력해주세요.';
         status.classList.add('cf-status-error');
         var field = renderQuestionError(missing);
+        sendStepEvent('lead_step_error', missing, 'validation_error');
         trackGtag('lead_form_validation_error', questionTrackingDetail(missing));
         if (field && field.focus) field.focus();
         return;
@@ -837,6 +878,7 @@
         var error = element('p', 'cf-field-error', '필수 동의 항목입니다.');
         error.setAttribute('role', 'alert');
         consentWrap.appendChild(error);
+        sendStepEvent('lead_step_error', {id:'consent'}, 'validation_error');
         trackGtag('lead_form_validation_error', {
           question_id: 'consent',
           question_type: 'consent',
@@ -847,6 +889,22 @@
         return;
       }
       answers[CONSENT_ANSWER_ID] = 'true';
+      questions.forEach(function(question){
+        var value = readAnswer(question);
+        var questionId = String(question.id);
+        if (value && !completedFields[questionId]) {
+          completedFields[questionId] = true;
+          lastCompletedQuestionId = questionId;
+          sendStepEvent('lead_step_complete', question, 'field_complete');
+        } else if (!value && !question.isRequired && !skippedFields[questionId]) {
+          skippedFields[questionId] = true;
+          sendStepEvent('lead_step_skip', question, 'field_skip');
+        }
+      });
+      if (!completedFields.consent) {
+        completedFields.consent = true;
+        sendStepEvent('lead_step_complete', {id:'consent'}, 'field_complete');
+      }
       var commercialLead = null;
       if (leadType === 'commercial') {
         commercialLead = {};
@@ -857,6 +915,7 @@
       submitting = true;
       submit.disabled = true;
       submit.textContent = '접수 중…';
+      sendFunnelEvent('lead_submit_attempt', {ctaLocation:'consultation_form', ctaText:'submit_attempt'});
 
       fetch(SUBMIT_URL, {
         method: 'POST',
@@ -875,7 +934,14 @@
         });
       }).then(function(result){
         if (!result.ok || !result.body || result.body.success !== true) {
-          throw new Error((result.body && result.body.error) || ('HTTP ' + result.status));
+          var rejected = new Error((result.body && result.body.error) || ('HTTP ' + result.status));
+          rejected.trackingReason = result.ok ? 'rejected' : 'server_error';
+          throw rejected;
+        }
+        if (!Number.isInteger(Number(result.body.consultReqId)) || Number(result.body.consultReqId) <= 0) {
+          var invalid = new Error('접수번호를 확인하지 못했습니다. 다시 시도해 주세요.');
+          invalid.trackingReason = 'invalid_response';
+          throw invalid;
         }
         renderSuccess(result.body);
       }).catch(function(error){
@@ -885,11 +951,14 @@
         status.textContent = '접수에 실패했습니다. 잠시 후 다시 시도하시거나 전화로 문의해주세요. (' +
           ((error && error.message) || 'network error') + ')';
         status.classList.add('cf-status-error');
-        trackGtag('lead_submit_error', {failure_reason: String((error && error.message) || '').slice(0, 100)});
+        var failureReason = error && error.trackingReason || 'network_error';
+        sendFunnelEvent('lead_submit_error', {ctaLocation:'consultation_form', ctaText:failureReason});
+        trackGtag('lead_submit_error', {failure_reason: failureReason});
       });
     });
 
     root.appendChild(form);
+    observeFieldViews(form);
     if (leadType === 'commercial' && COMMERCIAL_VERTICALS.indexOf(params.get('vertical')) !== -1) {
       root.querySelector('[name="qvertical"]').value = params.get('vertical');
     }
@@ -903,12 +972,11 @@
     var leadEventId = body.leadEventId || submitEventId;
     submitSucceeded = true;
     // QA successes stay observable internally, but must not train ad conversions.
-    if (!isTest) {
+    if (!isTest && !body.duplicate) {
       trackPixel('Lead', {eventID: leadEventId});
       trackGtag('lead_submit_success', {lead_event_id: leadEventId});
       trackNaverConversion();
     }
-    sendFunnelEvent('lead_submit_success');
     // 같은 세션에서 한 건 더 신청하면 별개의 상담 건이다 — id 를 비워 다음 건이 새로 뽑게 한다.
     try { if (session) session.removeItem(EVENT_IDS_KEY); } catch(e) {}
 

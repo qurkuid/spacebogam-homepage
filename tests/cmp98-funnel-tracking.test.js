@@ -64,6 +64,7 @@ function runFunnel({
       return Promise.resolve({ ok: true });
     },
     document: {
+      body: { classList: { add() {} } },
       title: '테스트',
       readyState: 'complete',
       visibilityState: 'hidden',
@@ -77,6 +78,8 @@ function runFunnel({
   sandbox.window.innerWidth = 1200;
   sandbox.window.scrollY = 0;
   sandbox.window.setTimeout = () => 1;
+  sandbox.window.setInterval = () => 1;
+  sandbox.window.clearInterval = () => {};
   sandbox.window.addEventListener = () => {};
   sandbox.window.__spacebogamHomepageHeadlineVariant = globalVariant;
   sandbox.window.crypto = {

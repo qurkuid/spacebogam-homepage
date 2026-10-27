@@ -83,8 +83,16 @@ custom domain `spacebogam.kr`)이며 상담 접수만 백엔드(INTM)로 넘긴�
 - `/commercial/call/`의 `tel:` 링크는 `data-v8-event="phone_click"`을 단다.
   마크업만으로는 발화하지 않는다 — `preview-v8.js`가 로드되어야 하고,
   그 파일의 `FUNNEL_ALLOWED` 목록에도 이벤트명이 들어 있어야 한다. 둘 다 확인한다.
-- `phone_click`은 측정 가능한 **상류 보조지표**로 유지한다. 최종 판정은 CRM(INTM
-  `consult_req`)에서 대면상담으로 이어진 유효 상담이다.
+- 최종 전환은 CRM(INTM `consult_req`)에 실제 저장되고 `consultation_request_id`로 연결된
+  상담 신청 완료 1건이다. 브라우저의 질문 단계·제출 시도, 전화·카카오·CTA 클릭은 모두
+  중간 행동이며 전환으로 세지 않는다. 유효 상담·방문·계약 성과는 그 이후 별도 지표다.
+- 고객 여정은 `content_view`, `content_click`, 실제 화면 노출 시간 기반 `page_engagement`,
+  `page_exit`과 상담 질문의 조회·완료·건너뛰기·오류·제출 시도를 기록한다. 안정적인 섹션·질문
+  ID와 고정 행동 코드만 보내며 이름·전화번호·주소·답변 같은 입력값은 행동 로그에 넣지 않는다.
+- `isTest` 이벤트는 수집 검증에만 사용하고 운영 퍼널과 광고 전환에서 제외한다. 광고 차단,
+  오프라인, 즉시 종료처럼 브라우저가 전송할 수 없는 방문은 완전 관측을 보장하지 않는다.
+- 신규 이벤트는 INTM 허용 enum과 DB CHECK 마이그레이션을 먼저 배포한 뒤 홈페이지에서
+  발화한다. 순서를 바꾸면 strict 수집 계약이 새 이벤트를 400으로 거부한다.
 - UTM은 `commercial_vertical`, `creative`, `keyword`를 보존한다.
   단, 홈 A/B 버킷이 `page_variant`를 덮으므로 광고 각도 판정은 **`utm_content`로** 한다.
 
