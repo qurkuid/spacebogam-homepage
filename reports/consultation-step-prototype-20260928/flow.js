@@ -828,6 +828,92 @@
       : '자료: apt.intm.kr 공개 목록 · 2026.09.28 스냅샷. 현재는 단지별 대표 도면 1개만 표시됩니다. 실제 도면과 다르면 직접 업로드하거나 도면 없이 진행해 주세요.'));
   }
 
+  let postcodeLoading = null;
+  function loadCommercialPostcode() {
+    if (window.kakao?.Postcode) return Promise.resolve();
+    if (postcodeLoading) return postcodeLoading;
+    postcodeLoading = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      const timer = setTimeout(fail, 10000);
+      function fail() {
+        clearTimeout(timer);
+        script.onload = script.onerror = null;
+        script.remove();
+        postcodeLoading = null;
+        reject(new Error('주소 검색을 불러오지 못했습니다. 다시 검색하거나 후보 지역을 직접 입력해 주세요.'));
+      }
+      script.src = 'https://t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+      script.async = true;
+      script.onerror = fail;
+      script.onload = () => {
+        if (!window.kakao?.Postcode) { fail(); return; }
+        clearTimeout(timer);
+        script.onload = script.onerror = null;
+        resolve();
+      };
+      document.head.appendChild(script);
+    });
+    return postcodeLoading;
+  }
+
+  function addCommercialAddressSearch(target, input) {
+    const search = el('button', 'commercial-address-search', '주소 검색');
+    search.type = 'button';
+    search.setAttribute('aria-expanded', 'false');
+    search.setAttribute('aria-controls', 'commercial-address-panel');
+    const panel = el('div', 'commercial-address-panel');
+    panel.id = 'commercial-address-panel';
+    panel.hidden = true;
+    const close = el('button', 'manual-option', '주소 검색 닫기');
+    close.type = 'button';
+    const host = el('div', 'commercial-address-host');
+    const notice = el('p', 'hint', '주소가 정해지지 않았다면 후보 지역만 직접 입력해도 됩니다.');
+    notice.setAttribute('role', 'status');
+    panel.appendChild(close);
+    panel.appendChild(host);
+    target.appendChild(search);
+    target.appendChild(panel);
+    target.appendChild(notice);
+    let requestId = 0;
+    function hide() {
+      requestId++;
+      panel.hidden = true;
+      search.setAttribute('aria-expanded', 'false');
+      search.focus();
+    }
+    close.addEventListener('click', hide);
+    search.addEventListener('click', async () => {
+      if (!panel.hidden) { hide(); return; }
+      const request = ++requestId;
+      panel.hidden = false;
+      search.setAttribute('aria-expanded', 'true');
+      notice.textContent = '주소 검색을 불러오는 중입니다…';
+      try {
+        await loadCommercialPostcode();
+        if (!panel.isConnected || panel.hidden || request !== requestId) return;
+        host.replaceChildren();
+        new window.kakao.Postcode({
+          width: '100%', height: '100%',
+          onresize: size => { if (panel.isConnected) host.style.height = size.height + 'px'; },
+          oncomplete: data => {
+            if (!panel.isConnected || panel.hidden || request !== requestId) return;
+            input.value = data.address;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            hide();
+            notice.textContent = '주소가 입력되었습니다. 필요한 상세 위치를 덧붙여 주세요.';
+            input.focus();
+          }
+        }).embed(host);
+        notice.textContent = '도로명·건물명을 검색한 뒤 주소를 선택해 주세요.';
+        close.scrollIntoView({ block: 'start' });
+      } catch (error) {
+        if (!panel.isConnected || request !== requestId) return;
+        hide();
+        notice.textContent = error.message || '주소 검색을 열지 못했습니다. 다시 검색하거나 후보 지역을 직접 입력해 주세요.';
+      }
+    });
+  }
+
   function renderQuestion() {
     const question = questionList()[questionIndex];
     const key = String(question.id);
@@ -962,6 +1048,7 @@
     input.addEventListener('keydown', event => { if (isAdvanceKey(event) && type !== 'text') { event.preventDefault(); advance(); } });
     label.appendChild(input);
     stage.appendChild(label);
+    if (type === 'address' && answers.type === '상업 공간') addCommercialAddressSearch(stage, input);
     if (type === 'address' && answers.apartmentUnmatched) stage.appendChild(el('p', 'hint', '검색 목록에 없는 아파트의 주소를 알려주세요. 도면이 없어도 상담은 진행할 수 있어요.'));
   }
 
