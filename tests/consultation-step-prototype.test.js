@@ -27,12 +27,12 @@ class Element {
   change(value) { if (this.type === 'checkbox') this.checked = value; else this.value = value; this.listeners.change?.({}); }
   showModal() { this.open = true; }
   close() { this.open = false; this.listeners.close?.({}); }
-  focus() {}
+  focus(options) { this.focused = true; this.focusOptions = options; }
   getContext() { return { fillRect() {}, translate() {}, scale(x, y) { canvasScales.push([x, y]); }, drawImage() {} }; }
   toBlob(callback, type) { callback(new Blob(['flipped-image'], { type })); }
   querySelector(selector) { return this.querySelectorAll(selector)[0] || null; }
   querySelectorAll(selector) {
-    const match = node => selector === 'input' ? node.tag === 'input'
+    const match = node => /^[a-z0-9,]+$/.test(selector) ? selector.split(',').includes(node.tag)
       : selector === '.input-row input' ? node.tag === 'input' && node.parent?.className === 'input-row'
         : node.className === selector.slice(1);
     const result = [];
