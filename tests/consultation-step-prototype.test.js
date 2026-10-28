@@ -27,14 +27,18 @@ class Element {
   change(value) { if (this.type === 'checkbox') this.checked = value; else this.value = value; this.listeners.change?.({}); }
   showModal() { this.open = true; }
   close() { this.open = false; this.listeners.close?.({}); }
-  focus(options) { this.focused = true; this.focusOptions = options; }
+  focus() { this.focused = true; }
   getContext() { return { fillRect() {}, translate() {}, scale(x, y) { canvasScales.push([x, y]); }, drawImage() {} }; }
   toBlob(callback, type) { callback(new Blob(['flipped-image'], { type })); }
   querySelector(selector) { return this.querySelectorAll(selector)[0] || null; }
   querySelectorAll(selector) {
-    const match = node => /^[a-z0-9,]+$/.test(selector) ? selector.split(',').includes(node.tag)
+    const fieldset = selector.match(/^\[data-question-id="([^"]+)"\]$/);
+    const match = node => fieldset ? node.attributes['data-question-id'] === fieldset[1]
+      : selector === '[aria-invalid]' ? 'aria-invalid' in node.attributes
+      : selector.startsWith('#') ? node.id === selector.slice(1)
+      : /^[a-z0-9,]+$/.test(selector) ? selector.split(',').includes(node.tag)
       : selector === '.input-row input' ? node.tag === 'input' && node.parent?.className === 'input-row'
-        : node.className === selector.slice(1);
+        : node.className.split(' ').includes(selector.slice(1));
     const result = [];
     const visit = node => node.children.forEach(child => { if (match(child)) result.push(child); visit(child); });
     visit(this);
@@ -42,604 +46,227 @@ class Element {
   }
 }
 
+
 const root = path.join(__dirname, '../reports/consultation-step-prototype-20260928');
 const read = name => fs.readFileSync(path.join(root, name), 'utf8');
-const nodes = Object.fromEntries(['stage', 'next', 'back', 'skip', 'restart', 'progress-fill', 'kakao-quick-consultation'].map(id => [id, new Element()]));
-const progress = new Element();
-const document = {
-  getElementById(id) { return nodes[id]; },
-  querySelector(selector) { return selector === '.progress' ? progress : null; },
-  createElement(tag) { return new Element(tag); },
-  createTextNode(value) { const node = new Element('#text'); node.textContent = value; return node; },
-  head: new Element('head')
-};
-const apartmentRows = [
-  ['거제유림아시아드', '3FO4KH04F1JS', '부산시 연제구 해맞이로 23', '64㎡', 'fph/20230222/5ee2aded7d7eeeee.jpg'],
-  ['도면없는단지', 'apt-missing', '부산시 수영구 광안동 100', '면적 미기재', '']
-];
-const stepEvents = [];
-const storage = () => { const values = new Map(); return { getItem: key => values.get(key) || null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) }; };
-const context = { document, window: { SB_APT_INDEX: apartmentRows }, location: { search: '', pathname: '/consultation/', href: 'https://spacebogam.kr/consultation/' }, innerWidth: 1200, localStorage: storage(), sessionStorage: storage(), gtag: (...args) => stepEvents.push(args), URLSearchParams, Blob, FormData, createImageBitmap: async () => ({ width: 100, height: 80, close() {} }), crypto: require('node:crypto').webcrypto, URL: {
-  createObjectURL: file => 'blob:test/' + file.name,
-  revokeObjectURL: () => {}
-} };
-vm.runInNewContext(read('apt-busan-dongs.js'), context);
-vm.runInNewContext(read('consultation-questions.js'), context);
-vm.runInNewContext(read('flow.js'), context);
-
-const stage = () => nodes.stage;
-const title = () => stage().children[1].textContent;
-const next = () => nodes.next.click();
-const choose = index => stage().querySelectorAll('.choice')[index].click();
-const answer = value => (stage().querySelector('.question-input') || stage().querySelector('.input-row input')).input(value);
-const result = () => stage().querySelector('.search-result').click();
-const error = () => stage().querySelector('.error')?.textContent;
-const summary = label => stage().querySelector('.summary').children.find(row => row.children[0].textContent === label)?.children[1].textContent;
-const settle = async () => { await Promise.resolve(); await Promise.resolve(); };
-const nextMonthWeekday = day => (new Date(new Date().getFullYear(), new Date().getMonth() + 1, day).getDay() + 6) % 7;
-const pickNextMonthDay = day => {
-  stage().querySelectorAll('.calendar-nav')[1].click();
-  stage().querySelectorAll('.calendar-day').find(item => item.textContent === String(day)).click();
-};
-
-function restart() {
-  nodes.restart.click();
-  assert.match(title(), /어떤 공간을 바꾸실 계획/);
-  assert.equal(nodes.next.textContent, '다음 →');
-  assert.equal(nodes.next.disabled, true);
-  assert.equal(nodes.back.hidden, true);
-  assert.equal(nodes.skip.hidden, true);
-  assert.equal(stage().querySelector('.consult-process'), null);
-  assert.equal(stage().children[0].textContent, '질문 01');
-  assert.equal(progress.getAttribute('aria-valuenow'), '0');
-  assert.equal(nodes['kakao-quick-consultation'].hidden, false);
+function storage() { const values = new Map(); return { getItem: key => values.get(key) || null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) }; }
+function harness({ session = storage(), fetch, search = '?is_test=1&utm_campaign=grouped_qa', gtag } = {}) {
+  const nodes = Object.fromEntries(['stage','next','back','skip','restart','progress-fill','kakao-quick-consultation'].map(id => [id, new Element()]));
+  const progress = new Element();
+  const context = { document: {
+    getElementById: id => nodes[id], querySelector: selector => selector === '.progress' ? progress : null,
+    createElement: tag => new Element(tag), createTextNode: value => Object.assign(new Element('#text'), { textContent: value }), head: new Element('head')
+  }, window: { SB_APT_INDEX: [], SB_APT_DONGS: {qa:['111동']}, scrolls: [], scrollTo(value) { this.scrolls.push(value); }, addEventListener() {} }, location: { search, pathname: '/consultation/', href: 'http://localhost/consultation/?is_test=1' },
+    innerWidth: 390, sessionStorage: session, localStorage: storage(), URLSearchParams, Blob, FormData, AbortController,
+    setTimeout, clearTimeout, fetch, gtag, crypto: require('node:crypto').webcrypto,
+    createImageBitmap: async () => ({ width: 100, height: 80, close() {} }),
+    URL: { createObjectURL: file => 'blob:test/' + file.name, revokeObjectURL() {} }
+  };
+  vm.runInNewContext(read('consultation-questions.js'), context);
+  const source = read('flow.js').replace(/\}\)\(\);\s*$/, `window.test = {
+    answers: () => answers, current: () => current, index: () => questionIndex, questions: questionList, group: groupQuestions,
+    payload: submissionPayload, render, validate: questionError, save: saveDraft,
+    plan: openPlanPreview, image: imageForSubmission, dong: renderDong, submit: submitConsultation, pending: () => pendingBody
+  };})();`);
+  vm.runInNewContext(source, context);
+  const api = context.window.test;
+  const stage = nodes.stage;
+  const all = predicate => { const found = []; const visit = node => { if (predicate(node)) found.push(node); node.children.forEach(visit); }; visit(stage); return found; };
+  return { context, nodes, api, all, stage, next: () => nodes.next.click(), title: () => stage.children[1].textContent,
+    input: (id, value) => { const field = all(node => node.id === 'answer-' + id)[0]; assert.ok(field, 'input ' + id); field.type === 'select' || field.tag === 'select' ? field.change(value) : field.input(value); },
+    button: text => { const button = all(node => node.tag === 'button' && (node.textContent === text || node.children.some(child => child.textContent === text)))[0]; assert.ok(button, text); button.click(); },
+    error: () => stage.querySelector('#form-error')?.textContent
+  };
 }
-
-assert.equal(nodes['kakao-quick-consultation'].hidden, false);
-choose(0);
-assert.equal(nodes['kakao-quick-consultation'].hidden, true, 'hide after leaving the first question');
-nodes.back.click();
-assert.equal(nodes['kakao-quick-consultation'].hidden, false, 'show again only when returning to the first question');
-choose(1);
-assert.equal(nodes['kakao-quick-consultation'].hidden, true, 'commercial questions also hide the entry');
-restart();
-assert.equal(typeof context.window.SB_CONSULTATION?.applyKakaoProfile, 'function');
-context.window.SB_CONSULTATION.applyKakaoProfile({ name: '자동입력 고객', phone: '01012345678' }, 'verified-grant');
-choose(0); choose(1);
-assert.match(title(), /성함/);
-assert.equal(stage().querySelector('.question-input').value, '자동입력 고객');
-answer('직접 수정한 이름');
-context.window.SB_CONSULTATION.applyKakaoProfile({ name: '덮어쓰면 안 됨', phone: 'invalid' }, 'verified-grant');
-assert.equal(stage().querySelector('.question-input').value, '직접 수정한 이름');
-next();
-assert.equal(stage().querySelector('.question-input').value, '01012345678');
-restart(); choose(1);
-assert.match(title(), /성명/);
-assert.equal(stage().querySelector('.question-input').value, '덮어쓰면 안 됨');
-next();
-assert.equal(stage().querySelector('.question-input').value, '');
-context.window.SB_CONSULTATION.applyKakaoProfile({}, 'verified-grant');
-stepEvents.length = 0;
-restart();
-assert.match(title(), /어떤 공간을 바꾸실 계획/, '처음 열 때 바로 첫 질문');
-assert.equal(nodes.back.hidden, true);
-
-async function startApartment(name) {
-  restart();
-  choose(0); assert.match(title(), /주거 공간/);
-  choose(0); assert.match(title(), /아파트를 찾아/);
-  answer(name); await settle(); result();
-  assert.match(title(), /몇 동/);
-}
-
-function finishResidential({ needsAddress = false, autoArea = false, features = false, declineFeatures = false } = {}) {
-  assert.match(title(), /성함/); answer('홍길동'); next();
-  assert.match(title(), /연락처/); answer('010-1234-5678'); next();
-  if (needsAddress) { assert.match(title(), /시공장소 주소/); answer('부산시 연제구 해맞이로 23'); next(); }
-  else assert.doesNotMatch(title(), /시공장소 주소를 알려주세요/);
-  assert.match(title(), /세부주소/); nodes.skip.click();
-  if (autoArea) assert.doesNotMatch(title(), /공급평형/);
-  else { assert.match(title(), /공급평형/); answer('32'); next(); }
-  let optionalCount = 0;
-  let scheduleCount = 0;
-  const firstOptional = [];
-  while (!/상담 준비/.test(title())) {
-    assert.doesNotMatch(title(), /상담을 원하는 (?:요일|날짜|시간)/);
-    assert.doesNotMatch(title(), /비밀번호/);
-    if (features) assert.doesNotMatch(title(), /연락 가능한 시간대/);
-    if (/방문 상담 희망 일정을 선택/.test(title())) scheduleCount++;
-    if (firstOptional.length < 5 && !/시공 희망 시기/.test(title())) firstOptional.push(title());
-    if (/예산 구간/.test(title())) {
-      stage().querySelector('.question-input').change('4천만원 미만');
-      assert.match(title(), /시공장소를 모두/);
-    } else if (features && /시공장소를 모두/.test(title())) {
-      assert.equal(stage().querySelectorAll('.choice').some(item => /확장|시스템에어컨/.test(item.children[1].textContent)), false);
-      choose(0); assert.match(title(), /시공장소를 모두/); next();
-    } else if (features && /발코니 확장 계획/.test(title())) {
-      choose(0); assert.match(title(), /어느 공간을 확장/);
-    } else if (features && /어느 공간을 확장/.test(title())) {
-      choose(0); assert.match(title(), /어느 공간을 확장/); next();
-    } else if (features && /시스템에어컨을 설치/.test(title())) {
-      choose(0); assert.match(title(), /몇 대 설치/);
-    } else if (features && /몇 대 설치/.test(title())) {
-      assert.equal(nodes.skip.hidden, true);
-      answer('1.5'); next(); assert.match(error(), /정수/);
-      answer('3'); next();
-      nodes.back.click(); assert.match(title(), /몇 대 설치/);
-      nodes.back.click(); assert.match(title(), /시스템에어컨을 설치/);
-      choose(1); assert.match(title(), /샤시를 교체/);
-      nodes.back.click(); choose(0); assert.match(title(), /몇 대 설치/);
-      assert.equal(stage().querySelector('.question-input').value, '');
-      answer('3'); next();
-    } else if (features && /샤시를 교체/.test(title())) {
-      choose(0); assert.doesNotMatch(title(), /샤시를 교체/);
-    } else if (features && /원하는 상담 시기는 언제인가요/.test(title())) {
-      choose(0); assert.doesNotMatch(title(), /원하는 상담 시기는 언제인가요/);
-    } else if (features && /방문 상담 희망 일정을 선택/.test(title())) {
-      assert.ok(stage().querySelector('.schedule'));
-      const weekdays = stage().querySelectorAll('.schedule-weekday');
-      const match = nextMonthWeekday(15);
-      weekdays[(match + 2) % 7].click();
-      assert.match(title(), /방문 상담 희망 일정을 선택/);
-      pickNextMonthDay(15);
-      assert.match(title(), /방문 상담 희망 일정을 선택/);
-      stage().querySelectorAll('.schedule-time')[1].click();
-      assert.match(title(), /방문 상담 희망 일정을 선택/);
-      next();
-      assert.match(title(), /방문 상담 희망 일정을 선택/);
-      assert.match(error(), /가능한 요일에 추가/);
-      weekdays[match].click();
-      next();
-      nodes.back.click();
-      assert.match(title(), /방문 상담 희망 일정을 선택/);
-      assert.equal(stage().querySelectorAll('.schedule-weekday')[match].getAttribute('aria-pressed'), 'true');
-      assert.equal(stage().querySelectorAll('.calendar-day').find(day => day.textContent === '15').getAttribute('aria-pressed'), 'true');
-      assert.equal(stage().querySelectorAll('.schedule-time')[1].getAttribute('aria-pressed'), 'true');
-      next();
-    } else if (features && /시공 희망 시기|상담을 원하는 날짜/.test(title())) {
-      const before = title();
-      assert.equal(nodes.skip.hidden, true);
-      assert.equal(nodes.next.disabled, true);
-      next(); assert.equal(title(), before);
-      assert.match(error(), /입력/);
-      nodes.skip.click(); assert.equal(title(), before);
-      const calendar = stage().querySelector('.calendar');
-      assert.ok(calendar, before);
-      assert.equal(calendar.querySelector('.calendar-weekdays').children.length, 7);
-      const heading = calendar.querySelector('.calendar-month').textContent;
-      calendar.querySelectorAll('.calendar-nav')[1].click();
-      assert.notEqual(calendar.querySelector('.calendar-month').textContent, heading);
-      calendar.querySelectorAll('.calendar-nav')[0].click();
-      assert.equal(calendar.querySelector('.calendar-month').textContent, heading);
-      if (new Date().getDate() > 1) {
-        const past = calendar.querySelectorAll('.calendar-day').find(day => day.textContent === '1');
-        assert.equal(past.disabled, true);
-        past.click();
-        assert.equal(title(), before);
-      }
-      pickNextMonthDay(15);
-      assert.notEqual(title(), before);
-      nodes.back.click();
-      assert.equal(title(), before);
-      assert.equal(stage().querySelectorAll('.calendar-day').find(day => day.textContent === '15').getAttribute('aria-pressed'), 'true');
-      next();
-    } else if (/시공 희망 시기/.test(title())) {
-      assert.equal(nodes.skip.hidden, true);
-      assert.equal(nodes.next.disabled, true);
-      stage().querySelector('.manual-option').click();
-      nodes.back.click();
-      assert.equal(stage().querySelector('.manual-option').getAttribute('aria-pressed'), 'true');
-      next();
-    } else if (declineFeatures && /발코니 확장 계획/.test(title())) {
-      choose(1); assert.match(title(), /시스템에어컨을 설치/);
-    } else if (declineFeatures && /시스템에어컨을 설치/.test(title())) {
-      choose(1); assert.match(title(), /샤시를 교체/);
-    } else if (declineFeatures && /샤시를 교체/.test(title())) {
-      choose(1); assert.doesNotMatch(title(), /샤시를 교체/);
-    } else if (declineFeatures && /방문 상담 희망 일정을 선택/.test(title())) {
-      const match = nextMonthWeekday(15);
-      stage().querySelectorAll('.schedule-weekday')[match].click();
-      pickNextMonthDay(15);
-      stage().querySelectorAll('.schedule-time')[0].click();
-      nodes.skip.click();
-      nodes.back.click();
-      assert.equal(stage().querySelectorAll('.schedule-weekday')[match].getAttribute('aria-pressed'), 'false');
-      assert.equal(stage().querySelectorAll('.calendar-day').find(day => day.textContent === '15').getAttribute('aria-pressed'), 'false');
-      assert.equal(stage().querySelectorAll('.schedule-time')[0].getAttribute('aria-pressed'), 'false');
-      nodes.skip.click();
-    } else if (declineFeatures && /연락 가능한 시간대/.test(title())) {
-      choose(0);
-      next();
-    } else if (features && /가족 구성/.test(title())) {
-      stage().querySelector('.question-input').change('부부 + 자녀');
-      stage().querySelector('.pet-choice').querySelector('input').change(true);
-      next();
-    } else {
-      assert.equal(nodes.skip.hidden, false, title());
-      nodes.skip.click();
-    }
-    optionalCount++;
-    assert.ok(optionalCount <= 28);
-  }
-  assert.ok(optionalCount >= 15);
-  assert.equal(scheduleCount, 1);
-  assert.deepEqual(firstOptional.map(value => value.match(/예산|시공장소|발코니 확장|어느 공간을 확장|시스템에어컨|샤시/)?.[0]),
-    features ? ['예산', '시공장소', '발코니 확장', '어느 공간을 확장', '시스템에어컨'] : ['예산', '시공장소', '발코니 확장', '시스템에어컨', '샤시']);
-  next(); assert.match(error(), /동의/);
-  stage().querySelector('.consent').querySelector('input').change(true);
-  next(); assert.match(title(), /입력 내용을 확인/);
-  assert.equal(nodes['kakao-quick-consultation'].hidden, true, 'summary keeps the entry hidden');
-  assert.match(stage().children[2].textContent, /신청 후 담당자가 개인 휴대전화로 연락드려/);
-  assert.match(summary('시공 희망 시기'), features ? /^\d{4}-\d{2}-15$/ : /^미정$/);
+const settle = async () => { for (let i = 0; i < 12; i++) await new Promise(resolve => setImmediate(resolve)); };
+function fillResidential(h, { detail = '' } = {}) {
+  assert.equal(h.api.current(), 'contact');
+  assert.deepEqual(Array.from(h.api.group(), question => String(question.id)), ['13', '10', '15']);
+  h.input('13', '테스트');
+  h.input('10', '010-0000-0000');
+  h.input('15', '부산광역시 연제구 해맞이로 23');
+  if (detail) h.input('8', detail);
+  h.next();
+  assert.equal(h.api.current(), 'planning');
+  assert.deepEqual(Array.from(h.api.group(), question => String(question.id)), ['21', '12']);
+  h.input('21', '5천만~6천만원');
+  h.button('거실');
+  h.button('샤시 교체');
 }
 
 async function run() {
-  const snapshot = context.window.SB_CONSULTATION_QUESTIONS;
-  assert.equal(snapshot.residential.length, 22);
-  assert.equal(snapshot.commercial.length, 17);
-  assert.deepEqual(Array.from(snapshot.residential.filter(q => q.isRequired), q => q.id), [13, 10, 15, 4]);
-  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_view_intro' && data.step_id === 'intro').length, 0);
-  assert.equal(stepEvents.filter(([, name]) => name === 'consult_view_type').length, 1);
-
-  await startApartment('해맞이로');
-  assert.equal(stepEvents.filter(([, name]) => name === 'consult_step_complete_intro').length, 0);
-  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_step_complete_type' && data.step_id === 'type').length, 1);
-  assert.deepEqual(Object.keys(stepEvents.find(([, name, data]) => name === 'consult_view_apartmentQuery' && data.step_id === 'apartmentQuery')[2]).sort(),
-    ['event_scope', 'form_id', 'journey_type', 'progress_percent', 'sb_session_id', 'send_to', 'step_action', 'step_id', 'step_number']);
-  assert.equal(stepEvents.find(([, name]) => name === 'consult_view_apartmentQuery')[2].send_to, 'G-EJGXDD5C1T');
-  assert.equal(stepEvents.find(([, name]) => name === 'consult_view_apartmentQuery')[2].sb_session_id,
-    context.sessionStorage.getItem('spacebogam_funnel_session_id'));
-  const select = stage().querySelector('.dong-select');
-  assert.equal(select.children.length, 16);
-  assert.equal(nodes.next.disabled, true);
-  select.input('111동');
-  select.change('111동');
-  assert.match(title(), /도면을 확인/);
-  const planViews = stepEvents.filter(([, name, data]) => name === 'consult_view_planReview' && data.step_id === 'planReview').length;
-  nodes.back.click(); next();
-  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_view_planReview' && data.step_id === 'planReview').length, planViews);
+  const trackingEvents = [];
+  const tracking = harness({ search: '?is_test=1&site_source_name=instagram&placement=stories', fetch: async (url, options = {}) => {
+    if (String(url).includes('/funnel-events')) trackingEvents.push(JSON.parse(options.body));
+    return { ok: true, status: 200, json: async () => ({}) };
+  }});
   await settle();
-  stage().querySelector('.plan-card').click();
-  const dialog = stage().querySelector('.plan-dialog');
-  assert.equal(dialog.open, true);
-  assert.match(dialog.querySelector('.plan-large').src, /\.jpg$/);
-  const zoomButtons = dialog.querySelectorAll('.plan-zoom-button');
-  assert.equal(zoomButtons[0].disabled, true);
-  zoomButtons[1].click();
-  assert.equal(dialog.querySelector('.plan-zoom-canvas').style.width, '150%');
-  for (let i = 0; i < 5; i++) zoomButtons[1].click();
-  assert.equal(dialog.querySelector('.plan-zoom-label').textContent, '300%');
-  assert.equal(zoomButtons[1].disabled, true);
-  zoomButtons[2].click();
-  assert.equal(dialog.querySelector('.plan-zoom-canvas').style.width, '100%');
-  dialog.querySelectorAll('.flip-button')[0].click();
-  assert.equal(dialog.querySelector('.plan-large').style.transform, 'scale(-1,1)');
-  dialog.querySelector('.plan-save').click();
-  assert.match(title(), /성함/);
-  nodes.back.click();
-  assert.match(title(), /도면을 확인/);
-  assert.match(stage().querySelector('.selected-apartment').textContent, /저장된 도면/);
-  assert.match(stage().querySelector('.selected-apartment').textContent, /공급평형 약 19\.4평 자동 입력/);
-  next();
-  finishResidential({ autoArea: true, features: true });
-  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_skip_q_8' && data.step_id === 'question_8').length, 1);
-  assert.doesNotMatch(JSON.stringify(stepEvents), /홍길동|010-1234-5678|해맞이로 23/);
-  assert.equal(summary('동'), '111동');
-  assert.match(summary('도면'), /좌우 반전/);
-  assert.equal(summary('시공장소 주소'), '부산시 연제구 해맞이로 23');
-  assert.equal(summary('공급평형'), '19.4평 · 도면 표기 64㎡ (면적 종류 확인 필요)');
-  assert.equal(summary('예산 구간을 선택해주세요'), '4천만원 미만');
-  assert.equal(summary('시공장소를 모두 선택해 주세요.'), '현관');
-  assert.equal(summary('발코니 확장 계획이 있나요?'), '네, 확장할 계획이에요');
-  assert.equal(summary('어느 공간을 확장할 계획인가요? (복수 선택 가능)'), '거실');
-  assert.equal(summary('시스템에어컨은 몇 대 설치할 계획인가요?'), '3대');
-  assert.equal(summary('샤시를 교체할 계획인가요?'), '네, 교체할 계획이에요');
-  assert.match(summary('시공 희망 시기'), /^\d{4}-\d{2}-15$/);
-  const weekdays = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'];
-  const match = nextMonthWeekday(15);
-  assert.equal(summary('상담을 원하는 요일을 선택해주세요.(복수선택 가능)'), weekdays[(match + 2) % 7] + ', ' + weekdays[match]);
-  assert.match(summary('상담을 원하는 날짜를 선택해주세요'), /^\d{4}-\d{2}-15$/);
-  assert.equal(summary('상담을 원하는 시간을 선택해주세요'), '11:00');
-  assert.equal(summary('가족 구성을 선택해주세요'), '부부 + 자녀');
-  assert.equal(summary('반려동물'), '함께 살아요');
-  assert.equal(summary('원하는 상담 시기는 언제인가요?'), undefined);
-  assert.equal(progress.getAttribute('aria-valuenow'), '100');
+  const viewEvent = trackingEvents.find(event => event.eventName === 'lead_form_view');
+  assert.equal(viewEvent.utmSource, 'instagram');
+  assert.equal(viewEvent.placement, 'stories');
+  tracking.next(); await settle();
+  assert.ok(trackingEvents.some(event => event.eventName === 'lead_step_error' && event.ctaLocation === 'contact'));
+
+  const apiMismatch = harness({ fetch: async url => String(url).includes('/questions')
+    ? { ok: true, json: async () => ({ questions: [] }) }
+    : { ok: true, status: 200, json: async () => ({}) } });
+  await settle();
+  assert.equal(apiMismatch.api.current(), 'contact');
+  assert.ok(apiMismatch.stage.querySelector('#answer-13'), '빈 질문 API 응답이 고정 주거 스키마를 지우지 않는다');
+
+  const mobile = harness();
+  assert.equal(mobile.api.current(), 'contact', '주거 상담은 안내 화면 없이 첫 입력 화면에서 시작한다');
+  assert.ok(mobile.stage.querySelector('#answer-13').focused, '모바일 첫 입력란 자동 포커스');
+  mobile.next();
+  assert.match(mobile.error(), /성함/);
+  mobile.input('13', '모바일');
+  mobile.stage.querySelector('#answer-13').listeners.keydown({ key: 'Enter', preventDefault() {} });
+  assert.ok(mobile.stage.querySelector('#answer-10').focused, '모바일 키보드 다음 입력 이동');
+  fillResidential(harness(), { detail: '101동 1001호' });
+
+  const payloadHarness = harness();
+  fillResidential(payloadHarness, { detail: '101동 1001호' });
+  assert.deepEqual(Array.from(payloadHarness.api.group().find(question => String(question.id) === '12').options),
+    ['전체 리모델링', '현관', '거실', '주방', '공용 욕실', '안방 욕실', '안방', '각 방', '발코니 확장', '샤시 교체', '시스템에어컨', '아직 미정']);
+  payloadHarness.stage.querySelector('.consent').querySelector('input').change(true);
+  const payload = payloadHarness.api.payload(null);
+  assert.equal(payload.type, 'residential');
+  assert.equal(payload.filePath, null);
+  assert.equal(payload.consent, true);
+  assert.equal(payload.marketingAttribution.form_contract, 'residential_two_page_v1');
+  assert.equal(payload.answers['8'], '101동 1001호');
+  assert.deepEqual(Array.from(payload.answers['12']), ['거실', '샤시 교체']);
+  for (const id of ['13', '10', '15', '21', '12']) assert.ok(payload.answers[id], '필수 답변 저장 ' + id);
+  for (const obsolete of ['5', '7', '17', '33', '34']) assert.equal(payload.answers[obsolete], undefined);
+
+  const undecided = harness();
+  undecided.input('13', '미정 고객'); undecided.input('10', '010-1111-2222'); undecided.input('15', '부산광역시 연제구'); undecided.next();
+  undecided.input('21', '아직 정하지 않았어요'); undecided.button('아직 미정');
+  assert.deepEqual(Array.from(undecided.api.answers().responses['12']), ['아직 미정']);
+  undecided.button('거실');
+  assert.deepEqual(Array.from(undecided.api.answers().responses['12']), ['거실'], '미정과 구체 항목은 동시에 저장하지 않는다');
+
+  const calls = [];
   const funnelEvents = [];
-  let submittedPayload;
-  let validReceipt = false;
-  let catalogImageFetched = false;
-  let catalogImageUploaded = false;
-  context.fetch = (url, options) => {
-    if (url.includes('/api/marketing/funnel-events')) funnelEvents.push(JSON.parse(options.body));
-    if (url.startsWith('/api/consultation/plan-image?url=')) {
-      catalogImageFetched = true;
-      return Promise.resolve({ ok: true, blob: () => Promise.resolve(new Blob(['catalog-image'], { type: 'image/jpeg' })) });
-    }
-    if (url === '/api/consultation/upload') {
-      catalogImageUploaded = true;
-      assert.equal(options.body.get('file').type, 'image/jpeg');
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: true, filePath: '/api/uploads/consultation/catalog.jpg' }) });
-    }
-    if (url.endsWith('/api/consultation/submit')) submittedPayload = JSON.parse(options.body);
-    return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: true, consultReqId: validReceipt ? 900001 : null, leadEventId: 'test-lead' }) });
+  const mockFetch = async (url, options = {}) => {
+    if (String(url).includes('/questions')) return { ok: true, json: async () => ({ questions: [] }) };
+    if (String(url).includes('/funnel-events')) { funnelEvents.push(JSON.parse(options.body)); return { ok: true }; }
+    calls.push({ url, ...options });
+    return { ok: true, status: 200, json: async () => ({ success: true, consultReqId: 999, leadEventId: 'qa-event' }) };
   };
-  next(); await new Promise(setImmediate);
-  assert.match(title(), /입력 내용을 확인/);
-  assert.ok(funnelEvents.some(event => event.eventName === 'lead_submit_error'));
-  assert.equal(stepEvents.some(([, name]) => name === 'lead_submit_success'), false);
-  validReceipt = true;
-  next(); await new Promise(setImmediate);
-  assert.match(title(), /방문 상담 예약 신청이 접수되었습니다/, error());
-  assert.match(stage().children[2].textContent, /담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인/);
-  assert.match(stage().children[2].textContent, /신청 접수만으로 방문 예약이 확정되지는 않습니다/);
-  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_step_complete_summary' && data.step_id === 'summary').length, 1);
-  assert.equal(stepEvents.filter(([, name, data]) => name === 'consult_view_success' && data.step_id === 'success').length, 1);
-  assert.ok(funnelEvents.some(event => event.eventName === 'lead_submit_attempt'));
-  assert.ok(funnelEvents.some(event => event.eventName === 'lead_step_complete' && event.ctaLocation === 'summary'));
-  assert.ok(funnelEvents.some(event => event.eventName === 'lead_step_view' && event.ctaLocation === 'success'));
-  assert.equal(funnelEvents.some(event => event.eventName === 'lead_submit_success'), false, 'only server records saved conversion');
-  assert.ok(funnelEvents.every(event => event.eventId && !JSON.stringify(event).includes('홍길동')));
-  assert.equal(catalogImageFetched, true);
-  assert.equal(catalogImageUploaded, true);
-  assert.deepEqual(canvasScales.at(-1), [-1, 1]);
-  assert.equal(submittedPayload.type, 'residential');
-  assert.equal(submittedPayload.kakaoGrant, 'verified-grant');
-  assert.equal(submittedPayload.answers['9999'], 'true');
-  assert.match(submittedPayload.answers['5'], /^\d{4}-\d{2}-15$/);
-  assert.match(submittedPayload.answers['7'], /아파트: 거제유림아시아드 \/ 111동/);
-  assert.match(submittedPayload.answers['7'], /좌우 반전/);
-  assert.equal(submittedPayload.filePath, '/api/uploads/consultation/catalog.jpg');
-  context.fetch = undefined;
+  const submit = harness({ fetch: mockFetch });
+  submit.context.window.SB_CONSULTATION.applyKakaoProfile({ name: '카카오 고객', phone: '010-2222-3333' }, 'grant-token');
+  assert.equal(submit.stage.querySelector('#answer-13').value, '카카오 고객');
+  assert.equal(submit.stage.querySelector('#answer-10').value, '010-2222-3333');
+  assert.equal(submit.nodes['kakao-quick-consultation'].hidden, false, '카카오 빠른 신청은 첫 화면에서 표시한다');
+  submit.input('13', '직접 입력한 이름');
+  submit.context.window.SB_CONSULTATION.applyKakaoProfile({ name: '덮어쓰면 안 됨', phone: '010-9999-9999' }, 'grant-token');
+  assert.equal(submit.stage.querySelector('#answer-13').value, '직접 입력한 이름', '카카오 재적용은 입력값을 덮어쓰지 않는다');
+  fillResidential(submit);
+  submit.stage.querySelector('.consent').querySelector('input').change(true);
+  submit.next(); await settle();
+  assert.equal(submit.api.current(), 'success', '두 번째 입력 화면에서 바로 접수 완료한다');
+  const submittedBody = JSON.parse(calls.find(call => String(call.url).includes('/submit')).body);
+  assert.equal(submittedBody.kakaoGrant, 'grant-token');
+  assert.equal(calls.filter(call => String(call.url).includes('/submit')).length, 1);
+  assert.equal(calls.filter(call => String(call.url).endsWith('/upload')).length, 0, '두 페이지 계약은 도면 업로드를 요구하지 않는다');
+  assert.ok(funnelEvents.some(event => event.eventName === 'lead_form_start'));
+  assert.ok(funnelEvents.some(event => event.eventName === 'lead_step_complete' && event.ctaLocation === 'contact'));
+  assert.ok(funnelEvents.some(event => event.eventName === 'lead_submit_attempt' && event.ctaLocation === 'planning'));
 
-  await startApartment('도면없는단지');
-  answer('101동'); next(); await settle();
-  assert.match(title(), /도면을 확인/);
-  assert.equal(stage().querySelectorAll('.plan-card').length, 0);
-  const upload = stage().querySelector('.plan-upload');
-  upload.files = [{ name: '도면.txt', type: 'text/plain', size: 1024 }];
-  upload.listeners.change();
-  assert.match(error(), /JPG·PNG·WebP 이미지/);
-  assert.equal(stage().querySelectorAll('.plan-dialog').length, 0);
-  upload.files = [Object.assign(new Blob(['uploaded-image'], { type: 'image/png' }), { name: '우리집도면.png' })];
-  upload.listeners.change();
-  const uploaded = stage().querySelector('.plan-dialog');
-  uploaded.querySelectorAll('.flip-button')[1].click();
-  assert.equal(uploaded.querySelector('.plan-large').style.transform, 'scale(1,-1)');
-  uploaded.querySelector('.plan-save').click();
-  finishResidential({ declineFeatures: true });
-  assert.match(summary('도면'), /우리집도면.png.*직접 업로드.*상하 반전/);
-  assert.equal(stage().querySelector('.summary-plan').tag, 'img');
-  assert.equal(stage().querySelector('.summary-plan').style.transform, 'scale(1,-1)');
-  let prematureSubmits = 0;
-  context.fetch = url => { if (url.endsWith('/api/consultation/submit')) prematureSubmits++; return Promise.resolve({ ok: true, json: () => Promise.resolve({}) }); };
-  stage().querySelector('.summary-plan-button').click();
-  assert.equal(stage().querySelector('.plan-large').tag, 'img');
-  stage().querySelector('.plan-save').click();
-  assert.match(title(), /입력 내용을 확인/);
-  assert.equal(prematureSubmits, 0, 'saving the summary preview must not submit the consultation');
-  assert.equal(summary('시공장소 주소'), '부산시 수영구 광안동 100');
-  assert.equal(summary('시스템에어컨은 몇 대 설치할 계획인가요?'), undefined);
-  assert.equal(summary('상담을 원하는 날짜를 선택해주세요'), undefined);
-  assert.equal(summary('연락 가능한 시간대'), '오전 (9시~12시)');
-  let uploadedImage;
-  let uploadedPayload;
-  context.fetch = (url, options) => {
-    if (url === '/api/consultation/upload') {
-      uploadedImage = options.body.get('file');
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: true, filePath: '/api/uploads/consultation/upload.jpg' }) });
+  const session = storage();
+  const draft = harness({ session }); fillResidential(draft, { detail: '2층' }); draft.api.save();
+  const restored = harness({ session });
+  assert.equal(restored.api.current(), 'planning');
+  assert.equal(restored.api.answers().responses['8'], '2층');
+  restored.nodes.back.click();
+  assert.equal(restored.api.current(), 'contact');
+  assert.equal(restored.stage.querySelector('#answer-13').value, '테스트');
+
+  const legacySession = storage();
+  legacySession.setItem('spacebogam.consultationDraft.v2', JSON.stringify({
+    version: 2, updatedAt: Date.now(), current: 'planning', trail: [{ key: 'contact', index: 0 }],
+    answers: { type: '주거 공간', housing: '아파트', responses: { '12': ['전체 수리', '공용욕실', '안방욕실'] } }
+  }));
+  const legacy = harness({ session: legacySession });
+  assert.deepEqual(Array.from(legacy.api.answers().responses['12']), ['전체 리모델링'], '기존 전체 수리 초안을 새 계약값으로 변환한다');
+  legacy.api.answers().responses['12'] = ['공용욕실', '안방욕실']; legacy.api.save();
+  const legacyBathrooms = harness({ session: legacySession });
+  assert.deepEqual(Array.from(legacyBathrooms.api.answers().responses['12']), ['공용 욕실', '안방 욕실']);
+
+  let attempts = 0;
+  const retryBodies = [];
+  const retry = harness({ fetch: async (url, options = {}) => {
+    if (String(url).includes('/questions')) return { ok: true, json: async () => ({ questions: [] }) };
+    if (String(url).includes('/funnel-events')) return { ok: true };
+    if (String(url).includes('/submit')) {
+      retryBodies.push(options.body);
+      if (attempts++ === 0) throw new Error('lost response');
+      return { ok: true, status: 200, json: async () => ({ success: true, consultReqId: 1000 }) };
     }
-    if (url.endsWith('/api/consultation/submit')) uploadedPayload = JSON.parse(options.body);
-    return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: true, consultReqId: 900002, leadEventId: 'test-lead' }) });
-  };
-  next(); await new Promise(setImmediate);
-  assert.match(title(), /접수되었습니다/);
-  assert.equal(uploadedImage.type, 'image/jpeg');
-  assert.equal(uploadedPayload.filePath, '/api/uploads/consultation/upload.jpg');
-  assert.equal(uploadedPayload.answers['5'], '미정');
-  context.fetch = undefined;
+    return { ok: true, status: 200, json: async () => ({}) };
+  }});
+  fillResidential(retry);
+  retry.stage.querySelector('.consent').querySelector('input').change(true);
+  retry.next(); await settle();
+  assert.equal(retry.api.current(), 'planning');
+  assert.match(retry.error(), /중복으로/);
+  retry.next(); await settle();
+  assert.equal(retry.api.current(), 'success');
+  assert.equal(retryBodies[0], retryBodies[1], '불확실한 응답 재시도는 동일 요청 본문을 사용한다');
 
-  await startApartment('도면없는단지');
-  answer('101동'); next(); await settle();
-  stage().querySelectorAll('.manual-option')[1].click();
-  finishResidential();
-  assert.match(summary('도면'), /없음/);
-  assert.equal(summary('시공장소 주소'), '부산시 수영구 광안동 100');
+  const missingId = harness({ fetch: async (url, options = {}) => {
+    if (String(url).includes('/questions')) return { ok: true, json: async () => ({ questions: [] }) };
+    if (String(url).includes('/funnel-events')) return { ok: true };
+    return { ok: true, status: 200, json: async () => ({ success: true }) };
+  }});
+  fillResidential(missingId);
+  missingId.stage.querySelector('.consent').querySelector('input').change(true);
+  missingId.next(); await settle();
+  assert.equal(missingId.api.current(), 'planning', '유효한 접수번호가 없으면 완료 처리하지 않는다');
+  assert.match(missingId.error(), /중복으로/);
 
-  context.fetch = url => {
-    if (url !== '/api/apartments/dataset') return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
-    return Promise.resolve({ ok: true, json: () => Promise.resolve({
-      cols: ['apartmentName', 'apartmentId', 'roadAddress', 'legacyAddress', 'type', 'planPic', 'planId'],
-      rows: [
-        ['주소로찾은단지', 'apt-address', '부산시 수영구 광안동 100', '부산시 수영구 광안동 100', '64㎡', 'fph/20230222/address.jpg', 'plan-address'],
-        ['옆건물', 'apt-neighbor', '부산시 수영구 광안동 101', '부산시 수영구 광안동 101', '64㎡', 'fph/20230222/neighbor.jpg', 'plan-neighbor']
-      ]
-    }) });
-  };
-  await startApartment('도면없는단지');
-  answer('101동'); next(); await settle();
-  assert.match(title(), /도면을 확인/);
-  const addressSearch = stage().querySelector('.address-search');
-  assert.equal(addressSearch.value, '부산시 수영구 광안동 100');
-  addressSearch.input('부산시 수영구 광안동 102'); await settle();
-  assert.equal(stage().querySelectorAll('.search-result').length, 0, 'a nearby building must not be offered');
-  addressSearch.input('부산시 수영구 광안동 100'); await settle();
-  assert.equal(stage().querySelectorAll('.search-result').length, 1);
-  stage().querySelector('.search-result').click();
-  assert.match(title(), /몇 동/);
-  answer('102동'); next();
-  assert.equal(stage().querySelectorAll('.plan-card').length, 1);
-  stage().querySelector('.plan-card').click();
-  stage().querySelector('.plan-save').click();
-  finishResidential({ autoArea: true });
-  assert.equal(summary('아파트'), '주소로찾은단지');
-  assert.equal(summary('시공장소 주소'), '부산시 수영구 광안동 100');
-  assert.match(summary('공급평형'), /^19\.4평/);
+  const gaEvents = [];
+  const duplicate = harness({ search: '', gtag: (...args) => gaEvents.push(args), fetch: async (url) => {
+    if (String(url).includes('/funnel-events')) return { ok: true, status: 200, json: async () => ({}) };
+    return { ok: true, status: 200, json: async () => ({ success: true, consultReqId: 1001, leadEventId: 'duplicate-event', duplicate: true }) };
+  }});
+  fillResidential(duplicate);
+  duplicate.stage.querySelector('.consent').querySelector('input').change(true);
+  duplicate.next(); await settle();
+  assert.equal(duplicate.api.current(), 'success');
+  assert.equal(gaEvents.filter(args => args[0] === 'event' && args[1] === 'lead_submit_success').length, 0, '중복 응답은 GA 리드 성공을 다시 전송하지 않는다');
 
-  restart();
-  choose(0); choose(0);
-  answer('검색에없는아파트'); await settle();
-  stage().querySelector('.search-manual').click();
-  answer('102동'); next(); await settle();
-  const unmatchedAddress = stage().querySelector('.address-search');
-  unmatchedAddress.input('부산시 수영구 광안동 100'); await settle();
-  assert.equal(stage().querySelectorAll('.search-result').length, 1);
-  stage().querySelector('.search-result').click();
-  assert.match(title(), /몇 동/);
-  answer('103동'); next();
-  stage().querySelector('.plan-card').click();
-  stage().querySelector('.plan-save').click();
-  finishResidential({ autoArea: true });
-  assert.equal(summary('아파트'), '주소로찾은단지');
-  assert.equal(summary('동'), '103동');
+  const successGaEvents = [];
+  const liveSuccess = harness({ search: '', gtag: (...args) => successGaEvents.push(args), fetch: async (url) => {
+    if (String(url).includes('/funnel-events')) return { ok: true, status: 200, json: async () => ({}) };
+    return { ok: true, status: 200, json: async () => ({ success: true, consultReqId: 1002, leadEventId: 'new-event' }) };
+  }});
+  fillResidential(liveSuccess);
+  liveSuccess.stage.querySelector('.consent').querySelector('input').change(true);
+  liveSuccess.next(); await settle();
+  const leadSuccessEvents = successGaEvents.filter(args => args[0] === 'event' && args[1] === 'lead_submit_success');
+  assert.equal(leadSuccessEvents.length, 1);
+  assert.equal(leadSuccessEvents[0][2].event_scope, 'submission');
+  assert.equal(leadSuccessEvents[0][2].event_id, 'new-event');
 
-  context.fetch = undefined;
-
-  restart();
-  choose(0); choose(0);
-  answer('검색에없는아파트'); await settle();
-  stage().querySelector('.search-manual').click();
-  answer('102동'); next(); await settle();
-  stage().querySelectorAll('.manual-option')[1].click();
-  finishResidential({ needsAddress: true });
-  assert.equal(summary('시공장소 주소'), '부산시 연제구 해맞이로 23');
-
-  await startApartment('도면없는단지');
-  answer('101동'); next(); await settle();
-  const pdfUpload = stage().querySelector('.plan-upload');
-  assert.equal(pdfUpload.accept, 'image/png,image/jpeg,image/webp');
-  pdfUpload.files = [{ name: '평면도.pdf', type: 'application/pdf', size: 2048 }];
-  pdfUpload.listeners.change();
-  assert.match(error(), /JPG·PNG·WebP 이미지/);
-  assert.equal(stage().querySelector('.plan-dialog'), null);
-
-  restart();
-  choose(1);
-  assert.match(title(), /성명/);
-  answer('   '); next(); assert.match(error(), /입력/);
-  answer('김고객'); next(); answer('010-2222-3333'); next();
-  let count = 2;
-  while (!/상담 준비/.test(title())) {
-    if (nodes.skip.hidden) {
-      const calendar = stage().querySelector('.calendar');
-      if (calendar) {
-        pickNextMonthDay(15);
-      } else if (stage().querySelector('.choice')) {
-        choose(0);
-        if (/설비 공사/.test(title())) next();
-      } else {
-        const input = stage().querySelector('.question-input');
-        const value = input.tag === 'select' ? input.children[1].value
-          : title().includes('주소') ? '부산 해운대구 우동 123'
-            : title().includes('요청사항') ? '사무실 전체 인테리어 상담을 원합니다.'
-              : title().includes('이전 용도') ? '사무실' : '20';
-        if (input.tag === 'select') input.change(value); else { input.input(value); next(); }
-      }
-    } else nodes.skip.click();
-    count++;
-    assert.ok(count <= 18);
+  const commercial = harness({ search: '?type=commercial&is_test=1' });
+  assert.equal(commercial.api.current(), 'intro');
+  commercial.next();
+  const commercialValues = { name:'테스트', phone:'010-0000-0000', vertical:'shop', address:'부산 연제구 후보지', area:'35', currentState:'vacant', openDate:'2099-11-15', budget:'50_100m', callbackTime:'weekday_pm', requestNote:'브랜드 동선과 진열 효율을 함께 상담하고 싶습니다', previousUse:'의류 매장' };
+  const commercialChoices = { leaseStatus:'현장 검토 중', workScope:'전체 공사', permitStatus:'아직 확인 전', drawingStatus:'도면이 없어요', facilityNeeds:'아직 몰라요' };
+  while (commercial.api.current() === 'question') {
+    const question = commercial.api.questions()[commercial.api.index()];
+    if (Object.hasOwn(commercialValues, question.id)) commercial.input(question.id, commercialValues[question.id]);
+    else commercial.button(commercialChoices[question.id]);
+    commercial.next();
   }
-  assert.equal(count, 17);
-  stage().querySelector('.consent').querySelector('input').change(true); next();
-  assert.equal(summary('업종·공간 유형을 선택해주세요.'), '사무실');
-  assert.equal(summary('예산 구간을 선택해주세요.'), '3천만원 미만');
-  assert.match(summary('오픈·입주 희망일'), /^\d{4}-\d{2}-15$/);
-  assert.equal(summary('예상 전용면적(평)'), '20평');
-  submittedPayload = null;
-  context.fetch = (url, options) => {
-    if (url.endsWith('/api/consultation/submit')) submittedPayload = JSON.parse(options.body);
-    return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: true, consultReqId: 900003, leadEventId: 'test-lead' }) });
-  };
-  next(); await settle(); await settle();
-  assert.match(title(), /접수되었습니다/);
-  assert.equal(submittedPayload.type, 'commercial');
-  assert.equal(submittedPayload.kakaoGrant, 'verified-grant');
-  assert.equal(submittedPayload.commercialLead.consent, true);
-  assert.equal(submittedPayload.commercialLead.leaseStatus, 'leased');
-  assert.equal(submittedPayload.commercialLead.facilityNeeds[0], 'plumbing');
-  context.fetch = undefined;
+  assert.equal(commercial.api.current(), 'summary');
+  const commercialPayload = commercial.api.payload(null);
+  assert.equal(commercialPayload.type, 'commercial');
+  assert.equal(commercialPayload.marketingAttribution.form_contract, undefined);
+  assert.equal(commercialPayload.commercialLead.vertical, 'shop');
 
-  restart();
-  choose(0); choose(1);
-  answer('홍길동'); next(); answer('010-1234-5678'); next();
-  answer('부산시 연제구 해맞이로 23'); next(); nodes.skip.click(); answer('32'); next();
-  assert.match(title(), /시공 희망 시기/);
-  stage().querySelector('.manual-option').click();
-  stage().querySelector('.question-input').change('4천만원 미만');
-  assert.match(title(), /시공장소를 모두/);
-  const scope = name => stage().querySelectorAll('.choice').find(option => option.children[1].textContent === name);
-  scope('전체 수리').click();
-  assert.equal(scope('전체 수리').getAttribute('aria-pressed'), 'true');
-  scope('현관').click();
-  assert.equal(scope('전체 수리').getAttribute('aria-pressed'), 'false');
-  assert.equal(scope('현관').getAttribute('aria-pressed'), 'true');
-  scope('전체 수리').click();
-  assert.equal(scope('전체 수리').getAttribute('aria-pressed'), 'true');
-  assert.equal(scope('현관').getAttribute('aria-pressed'), 'false');
-
-  restart();
-  choose(1);
-  answer('김고객'); next(); answer('010-2222-3333'); next();
-  stage().querySelector('.question-input').change('office');
-  answer('부산 해운대구 우동 123'); next(); answer('20'); next();
-  stage().querySelector('.question-input').change('vacant');
-  assert.match(title(), /오픈·입주 희망일/);
-  if (new Date().getDate() > 1) {
-    const past = stage().querySelectorAll('.calendar-day').find(day => day.textContent === '1');
-    assert.equal(past.disabled, true);
-    past.click();
-    assert.match(title(), /오픈·입주 희망일/);
-  }
-  assert.equal(stage().querySelector('.date-undecided'), null);
-  pickNextMonthDay(15);
-  assert.match(title(), /예산 구간/);
-
-  context.window.location = { protocol: 'http:' };
-  let requestedPlans = '';
-  context.fetch = url => {
-    if (url.includes('/api/apartments/')) requestedPlans = url;
-    return Promise.resolve({ ok: true, json: () => Promise.resolve({ data: [
-      { type: '64㎡', planId: 'plan-64', planPic: 'https://fphimage-cos.kujiale.com/fph/20230222/5ee2aded7d7eeeee.jpg' },
-      { type: '106A㎡', planId: 'plan-106', planPic: 'https://fphimage-cos.kujiale.com/fph/20230306/d9bc39b39048a997.jpg' }
-    ] }) });
-  };
-  await startApartment('해맞이로');
-  await settle(); await settle();
-  stage().querySelector('.dong-select').change('111동');
-  await settle(); await settle();
-  assert.equal(requestedPlans, '/api/apartments/3FO4KH04F1JS/plans');
-  assert.equal(stage().querySelectorAll('.plan-card').length, 2);
-  assert.match(stage().querySelector('.plan-source').textContent, /여러 평형/);
-  stage().querySelectorAll('.plan-card')[0].children[0].listeners.error();
-  assert.equal(stage().querySelectorAll('.plan-card').length, 1);
-  stage().querySelector('.plan-card').click();
-  stage().querySelector('.plan-save').click();
-  assert.match(title(), /성함/);
-  nodes.back.click();
-  assert.match(stage().querySelector('.selected-apartment').textContent, /공급평형 약 32\.1평 자동 입력/);
-
-  context.fetch = () => new Promise(() => {});
-  await startApartment('해맞이로');
-  stage().querySelector('.dong-select').change('111동');
-  assert.match(title(), /도면을 확인/);
-  assert.equal(stage().querySelectorAll('.plan-card').length, 1);
-  assert.equal(stage().querySelectorAll('.manual-option').length, 2);
-  stage().querySelectorAll('.manual-option')[1].click();
-  assert.match(title(), /성함/);
-  answer('홍길동'); next(); answer('010-1234-5678'); next();
-  assert.match(title(), /세부주소/); nodes.skip.click();
-  assert.match(title(), /공급평형/);
-  answer('32'); next();
-  assert.match(title(), /시공 희망 시기/);
-  stage().querySelector('.manual-option').click();
-  assert.match(title(), /예산 구간/);
-  const trackedCount = stepEvents.filter(([, name]) => name.startsWith('consult_')).length;
-  context.sessionStorage.setItem('spacebogam_funnel_is_test', 'true');
-  restart(); choose(0);
-  nodes.back.click();
-  assert.match(title(), /어떤 공간을 바꾸실 계획/, '이전 버튼도 안내 화면으로 돌아가지 않는다');
-  assert.equal(nodes.back.hidden, true);
-  assert.equal(stepEvents.filter(([, name]) => name.startsWith('consult_')).length, trackedCount);
-  console.log('consultation prototype: plan, conditional questions, combined consultation schedule, calendars passed');
+  console.log('two-page residential consultation: fields, payload, direct submit, draft, retry and commercial preservation passed');
 }
-
-run().catch(error => { console.error(error); process.exitCode = 1; });
+run().catch(error => { console.error(error); process.exitCode=1; });

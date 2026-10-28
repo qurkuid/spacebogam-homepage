@@ -169,10 +169,6 @@
     @media(max-width:800px){.shell{display:block}.aside{display:none}.topbar{height:72px;padding:0 22px}.topbar .brand{display:block;font-size:18px}.prototype{display:none}.stage{width:calc(100% - 44px);min-height:0;padding:48px 0 30px;margin:0 auto}.step-meta{margin-bottom:22px}h1{font-size:clamp(36px,9vw,48px)}.lead{margin:18px 0 34px;font-size:15px}.choice{min-height:70px}.footer{width:calc(100% - 44px);padding:18px 0 24px}.footer-note{display:none}}
     @media(max-width:560px){.calendar{padding:12px}.calendar-grid,.calendar-weekdays{gap:1px}.calendar-day{min-height:38px}.plan-list{grid-template-columns:1fr}.plan-card{display:grid;grid-template-columns:110px 1fr;grid-template-rows:auto auto}.plan-card img{grid-row:1/3;width:110px;height:115px}.plan-card span{align-self:end}.plan-card small{align-self:start}.plan-viewer{height:58svh}.plan-controls{padding:12px}.plan-save{width:100%;margin-left:0}.plan-dialog-header{padding:12px}}
     @media(max-width:430px){.footer{gap:12px}.primary{min-width:146px}.summary div{grid-template-columns:85px 1fr;gap:12px}}
-    .kakao-quick{width:min(690px,calc(100% - 72px));margin:0 auto 28px}
-    .kakao-quick__start{display:flex;align-items:center;justify-content:center;gap:8px;width:300px;max-width:100%;min-height:46px;margin:0 auto;padding:0 12px;border:0;border-radius:8px;background:#fee500;color:rgba(0,0,0,.85);font-size:14px;font-weight:500}
-    .kakao-quick__start:disabled{opacity:.55;cursor:wait}.kakao-quick__start svg{width:18px;height:18px;flex:none}.kakao-quick__start:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
-    .kakao-quick__status{margin:12px 0 0;color:var(--error);font-size:13px}.kakao-quick__status:empty{display:none}
     .plan-dialog[open]{display:flex;flex-direction:column;height:min(94svh,960px);overflow:hidden}
     .plan-dialog-header,.plan-controls,.plan-zoom-controls,.plan-confirm-note{flex-shrink:0}
     .plan-viewer{display:block;flex:1;min-height:0;height:auto;overscroll-behavior:contain}
@@ -181,10 +177,44 @@
     .plan-zoom-controls{display:flex;align-items:center;gap:8px;padding:10px 12px}
     .plan-zoom-label{font-size:13px;white-space:nowrap}
     .plan-zoom-controls button,.plan-controls button{min-height:44px}
-    @media(max-width:560px){.plan-card{display:block}.plan-card img{width:100%;height:auto;aspect-ratio:4/3}.plan-dialog{width:calc(100vw - 16px)}.plan-confirm-note{padding:8px 12px;font-size:12px}.kakao-quick{width:calc(100% - 44px)}}
+    @media(max-width:560px){.plan-card{display:block}.plan-card img{width:100%;height:auto;aspect-ratio:4/3}.plan-dialog{width:calc(100vw - 16px)}.plan-confirm-note{padding:8px 12px;font-size:12px}}
     @media(prefers-reduced-motion:reduce){.progress span,.choice{transition:none}}
+    body[data-residential-two-page="true"] .stage{margin:0 auto;padding-top:30px}body[data-residential-two-page="true"] .stage h1{font-size:clamp(28px,3vw,40px)}body[data-residential-two-page="true"] .stage .lead{margin:14px 0 24px}body[data-residential-two-page="true"] .step-meta{margin-bottom:16px}
+    body[data-residential-two-page="true"] .question-grid,body[data-residential-two-page="true"] .contact-types{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}body[data-residential-two-page="true"] .contact-types{margin-bottom:20px}
+    body[data-residential-two-page="true"] .question-block{min-width:0;margin:0;padding:16px;border:1px solid var(--line);background:#fffdf8}body[data-residential-two-page="true"] .question-block legend{max-width:100%;padding:0 5px;font-size:14px;font-weight:650;line-height:1.5}body[data-residential-two-page="true"] .question-block>.field>.field-label{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    body[data-residential-two-page="true"] .question-wide{grid-column:1/-1}body[data-residential-two-page="true"] .question-input{min-height:48px;font-size:16px}body[data-residential-two-page="true"] .question-block .choice{min-height:42px;padding:8px 10px;font-size:14px;gap:9px}body[data-residential-two-page="true"] .question-block .choices{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}body[data-residential-two-page="true"] .question-block .choice-key{display:none}body[data-residential-two-page="true"] .question-block .manual-option{min-height:42px;font-size:14px}body[data-residential-two-page="true"] .question-block .schedule{grid-template-columns:1fr 1fr;gap:16px}body[data-residential-two-page="true"] .schedule-section:first-child{grid-column:1/-1}body[data-residential-two-page="true"] .question-block .schedule-section{padding-top:0;border:0}body[data-residential-two-page="true"] .question-block .schedule-section h2{font-size:14px}body[data-residential-two-page="true"] .question-block .schedule .field-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}body[data-residential-two-page="true"] .question-block .schedule .schedule-hint{line-height:1.6}
+    body[data-residential-two-page="true"] .question-input[aria-invalid="true"]{border-color:var(--error)}body[data-residential-two-page="true"] .main .footer{position:sticky;bottom:0;background:var(--paper);z-index:2;margin-top:auto;padding:16px 0}body[data-residential-two-page="true"] .aside{position:sticky;top:0;height:100svh}body[data-residential-two-page="true"] .aside-content{height:100svh}
+    @media(max-width:800px){body[data-residential-two-page="true"] .stage{min-height:0;padding-top:24px}body[data-residential-two-page="true"] .stage h1{font-size:30px}body[data-residential-two-page="true"] .question-grid,body[data-residential-two-page="true"] .contact-types{gap:14px}body[data-residential-two-page="true"] .question-block{padding:12px}}
+    @media(max-width:560px){body[data-residential-two-page="true"] .question-grid{grid-template-columns:1fr}body[data-residential-two-page="true"] .question-block .schedule{grid-template-columns:1fr}body[data-residential-two-page="true"] .question-block .choice{font-size:13px}body[data-residential-two-page="true"] .main .footer{gap:12px}body[data-residential-two-page="true"] .question-block .schedule-section:first-child{grid-column:auto}body[data-residential-two-page="true"] .contact-types .question-input{font-size:16px}body[data-residential-two-page="true"] .stage h1{font-size:28px}}
+    body[data-residential-two-page="true"] .question-block{scroll-margin-block:90px}body[data-residential-two-page="true"] .question-block[aria-invalid="true"]{border-color:#9e3428}body[data-residential-two-page="true"] .field-error{margin:10px 0 0}body[data-residential-two-page="true"] .question-block .choice,body[data-residential-two-page="true"] .question-block .manual-option,body[data-residential-two-page="true"] .schedule-weekday,body[data-residential-two-page="true"] .schedule-time,body[data-residential-two-page="true"] .plan-close,body[data-residential-two-page="true"] .flip-button,body[data-residential-two-page="true"] .plan-save{min-height:44px}
+    body[data-residential-two-page="true"] .plan-dialog[open]{display:flex;flex-direction:column;overflow:hidden}body[data-residential-two-page="true"] .plan-dialog-header,body[data-residential-two-page="true"] .plan-controls,body[data-residential-two-page="true"] .plan-zoom-controls,body[data-residential-two-page="true"] .plan-confirm-note{flex-shrink:0}body[data-residential-two-page="true"] .plan-viewer{display:block;place-items:normal;flex:1 1 auto;min-height:120px;overscroll-behavior:contain}body[data-residential-two-page="true"] .plan-zoom-canvas{width:100%;height:100%}body[data-residential-two-page="true"] .plan-zoom-canvas .plan-large{width:100%;height:100%;max-width:none;max-height:none;object-fit:contain}body[data-residential-two-page="true"] .plan-zoom-controls{display:flex;align-items:center;gap:8px;padding:10px 12px}body[data-residential-two-page="true"] .plan-zoom-label{font-size:12px;white-space:nowrap}
+    /* The residential intake has two grouped pages; keep the commercial question layout intact. */
+    body[data-residential-two-page="true"]{--accent:var(--ink)}
+    body[data-residential-two-page="true"] .stage{max-width:620px;padding-top:24px}
+    body[data-residential-two-page="true"] .stage h1{font-size:32px;line-height:1.3}
+    body[data-residential-two-page="true"] .stage .lead{font-size:14px;margin:12px 0 26px}
+    body[data-residential-two-page="true"] .step-meta{font-weight:400;color:var(--muted)}
+    body[data-residential-two-page="true"] .step-meta:before{display:none}
+    body[data-residential-two-page="true"] .question-grid{grid-template-columns:1fr;gap:22px}
+    body[data-residential-two-page="true"] .question-block{padding:0;border:0;background:transparent}
+    body[data-residential-two-page="true"] .question-block legend{padding:0;margin-bottom:8px;font-weight:500}
+    body[data-residential-two-page="true"] .question-block .field{max-width:none}
+    body[data-residential-two-page="true"] .question-input{min-height:50px;background:transparent;border:1px solid var(--line);border-radius:0;box-shadow:none}
+    body[data-residential-two-page="true"] .question-block .choice{min-height:48px;font-weight:400}
+    body[data-residential-two-page="true"] .question-block .choice:hover{transform:none}
+    body[data-residential-two-page="true"] .choice[aria-pressed="true"]{background:color-mix(in srgb,var(--ink) 6%,var(--paper));border-color:var(--ink)}
+    body[data-residential-two-page="true"] .consent{font-size:13px;max-width:none;margin-top:26px}
+    body[data-residential-two-page="true"] .main .footer{max-width:620px;position:static;flex-wrap:wrap;padding:20px 0 24px}
+    body[data-residential-two-page="true"] .footer .primary{flex:1;min-width:0;font-weight:500}
+    body[data-residential-two-page="true"] .footer-note{flex-basis:100%;text-align:left;margin:0}
+    body[data-residential-two-page="true"] [data-question-id="15"]>.field:last-child>.field-label{position:static;width:auto;height:auto;overflow:visible;clip:auto;white-space:normal;margin:16px 0 8px}
+    body[data-residential-two-page="true"] .commercial-address-panel{padding:0;border:0}
+    body[data-residential-two-page="true"] .commercial-address-host{min-height:0}
+    @media(max-width:800px){body[data-residential-two-page="true"] .stage h1{font-size:28px}body[data-residential-two-page="true"] .topbar{height:64px}body[data-residential-two-page="true"] .stage{padding-top:22px}body[data-residential-two-page="true"] .footer{margin-top:0}}
+
+    @media(max-width:800px){body[data-residential-two-page="true"]{padding-bottom:88px}}
   </style>
-  <link rel="stylesheet" href="/assets/consultation-help.css?v=3a19ce76f16a">
+  <link rel="stylesheet" href="/assets/consultation-help.css?v=31632cf80240">
 </head>
 <body data-no-auto-cta="true">
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PW8GLP8S" height="0" width="0" style="display:none;visibility:hidden"></iframe><p>자바스크립트를 사용할 수 없다면 <a href="https://intm.kr/consultation/ggbg">기존 상담 신청서</a>를 이용해 주세요.</p></noscript>
@@ -198,20 +228,35 @@
       <div class="topbar"><span class="brand">공간보감</span><span class="prototype">방문 상담 예약 신청</span><button class="close" id="restart" type="button">처음부터</button></div>
       <div class="progress" role="progressbar" aria-label="입력 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progress-fill"></span></div>
       <section class="stage" id="stage" aria-live="polite"></section>
-      <section class="kakao-quick kakao-quick--entry" id="kakao-quick-consultation" aria-label="카카오 상담 신청">
-        <button class="kakao-quick__start" type="button" data-kakao-start><svg viewBox="60 15 16 16" fill="none" aria-hidden="true"><path d="M68.001 16.5225C64.4222 16.5225 61.5225 19.0037 61.5225 22.0641C61.5225 24.0312 62.7219 25.7596 64.5292 26.7423L63.9181 29.2113C63.8954 29.285 63.9132 29.364 63.9619 29.4184C63.9975 29.457 64.0461 29.478 64.0931 29.478C64.1337 29.478 64.1742 29.464 64.2082 29.4341L66.834 27.5144C67.2117 27.5723 67.6007 27.6039 67.9994 27.6039C71.5767 27.6039 74.478 25.1226 74.478 22.0623C74.478 19.002 71.5783 16.5225 68.001 16.5225Z" fill="#000"/></svg><span>카카오로 빠르게 상담신청하기</span></button>
-        <p class="kakao-quick__status" data-kakao-status aria-live="polite"></p>
-      </section>
       <div class="footer"><button class="back" id="back" type="button">← 이전</button><button class="primary" id="next" type="button">다음 <span aria-hidden="true">→</span></button><button class="skip" id="skip" type="button" hidden>이 질문 건너뛰기</button><span class="footer-note"><a href="tel:050713881252">방문 상담 일정 문의</a><br>신청 접수 후 방문 일정을 조율합니다.</span></div>
     </main>
   </div>
-  <a id="consultation-help" class="consultation-help" href="https://pf.kakao.com/_UEUBn/chat" target="_blank" rel="noopener noreferrer" aria-label="작성에 어려움이 있나요? 카카오톡 채널로 문의하기 (새 창)" data-cta-location="consultation_floating_help">
-    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 17v-3a10 10 0 0 1 20 0v3M6 15H4v8h5v-8H6Zm20 0h2v8h-5v-8h3ZM26 23v2a3 3 0 0 1-3 3h-5"/><circle cx="16" cy="13" r="4"/><path d="M11 24v-2a5 5 0 0 1 10 0v2"/></svg>
-    <span><small>작성이 어려우신가요?</small><strong>카카오톡 문의</strong></span>
+  <a id="consultation-help" class="consultation-help" href="https://pf.kakao.com/_UEUBn/chat" target="_blank" rel="noopener noreferrer" aria-label="카카오톡 상담 (새 창)" data-cta-location="consultation_floating_help">
+    <img src="/assets/kakao-talk-consult.svg" width="154" height="68" alt="카카오톡 상담" />
   </a>
   <script src="/reports/consultation-step-prototype-20260928/apt-busan-dongs.js"></script>
   <script src="/reports/consultation-step-prototype-20260928/consultation-questions.js?v=7821d1ae8f10"></script>
-  <script src="/reports/consultation-step-prototype-20260928/flow.js?v=72337359ebbf"></script>
+  <script>document.write('<script src="/reports/consultation-step-prototype-20260928/'+(new URLSearchParams(location.search).get('type')==='commercial'?'flow-commercial.js?v=72337359ebbf':'flow.js?v=7be80abee593')+'"><\/script>')</script>
   <script src="/assets/kakao-consultation.js?v=50be490804e4"></script>
+  <script>
+  (() => {
+    const help = document.getElementById('consultation-help');
+    const next = document.getElementById('next');
+    function positionHelp() {
+      const button = next.getBoundingClientRect();
+      const floating = help.getBoundingClientRect();
+      const keyboard = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--consult-keyboard-inset')) || 0;
+      const bottom = innerHeight - keyboard - 10;
+      const overlaps = !next.hidden && button.left < floating.right && button.right > floating.left && button.top < bottom && button.bottom > bottom - floating.height;
+      help.style.setProperty('--consult-button-lift', overlaps ? Math.max(0, bottom - button.top + 8) + 'px' : '0px');
+    }
+    addEventListener('scroll', positionHelp, {passive:true});
+    addEventListener('resize', positionHelp);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', positionHelp);
+    new ResizeObserver(positionHelp).observe(document.querySelector('.shell'));
+    new MutationObserver(positionHelp).observe(document.getElementById('stage'), {childList:true,subtree:true});
+    positionHelp();
+  })();
+  </script>
 </body>
 </html>
