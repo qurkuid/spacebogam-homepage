@@ -9,7 +9,7 @@
     consent: { title: '상담 준비를 마칠까요?', lead: '답변을 확인하기 전에 개인정보 수집·이용에 동의해 주세요.' },
     summary: { title: '입력 내용을 확인해 주세요', lead: '내용이 맞으면 방문 상담 예약 신청을 접수해 주세요. 신청 후 담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다. 신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.' },
     contact: { title: '연락처와 시공장소를 알려주세요.', lead: '성함·연락처·기본주소를 입력해 주세요. 상세주소는 정해졌다면 함께 남겨 주세요.' },
-    planning: { title: '예산과 공사 범위를 알려주세요.', lead: '아직 정하지 못한 항목은 ‘미정’을 선택할 수 있습니다.' },
+    planning: { title: '평형과 공사 계획을 알려주세요.', lead: '평형을 모르면 비워 두셔도 됩니다. 예산과 공사 범위는 ‘미정’을 선택할 수 있습니다.' },
     success: { title: '방문 상담 예약 신청이 접수되었습니다', lead: '신청 후 담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다. 신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.' }
   };
   const residentialWorkOptions = ['전체 리모델링', '현관', '거실', '주방', '공용 욕실', '안방 욕실', '안방', '각 방', '발코니 확장', '샤시 교체', '시스템에어컨', '아직 미정'];
@@ -350,7 +350,7 @@
         || q.questionType === 'short_answer' && /성함|이름/.test(q.question)
         || q.questionType === 'phonenumber'
         || q.questionType === 'address';
-      const planning = q => ['12','21'].includes(String(q.id))
+      const planning = q => ['12','21'].includes(String(q.id)) || /평형|평수/.test(q.question)
         || q.questionType === 'select' && /예산/.test(q.question)
         || q.questionType === 'multiple_choice' && /시공장소|공사 범위/.test(q.question);
       const visible = list.filter(q => !hiddenByBranch(q));
@@ -364,10 +364,11 @@
       }
       if (key === 'planning') {
         const ordered = [
+          q => /평형|평수/.test(q.question),
           q => q.questionType === 'select' && /예산/.test(q.question),
           q => q.questionType === 'multiple_choice' && /시공장소|공사 범위/.test(q.question)
         ].map(match => visible.find(match)).filter(Boolean);
-        return ordered.length === 2 ? ordered : visible.filter(planning);
+        return ordered.length === 3 ? ordered : visible.filter(planning);
       }
       return [];
     }
@@ -1029,6 +1030,7 @@
     } else if (type !== 'text') {
       input.type = { phonenumber: 'tel', number: 'number', date: 'date', password: 'password' }[type] || 'text';
       if (type === 'number') { input.min = '1'; if (question.id === 'system_ac_count') input.step = '1'; }
+      if (type === 'number' && /평형|평수/.test(question.question)) { input.placeholder = '예: 34 (평)'; input.step = 'any'; input.inputMode = 'decimal'; }
       if (type === 'phonenumber') { input.inputMode = 'tel'; input.autocomplete = 'tel'; input.placeholder = '010-0000-0000'; }
       if (type === 'detailed_address') input.placeholder = answers.dong ? answers.dong + ' · 호수 등' : '동·호수 등';
       if (type === 'address') input.placeholder = answers.type === '상업 공간' ? '예: 부산 해운대구 · 후보지 검토 중' : '현장 주소를 입력해 주세요';

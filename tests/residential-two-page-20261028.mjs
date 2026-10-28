@@ -4,7 +4,8 @@ import { resolve, extname } from 'node:path';
 import { withTestBrowser } from '/Users/changseok/.codex/browser-testing.mjs';
 
 const root = resolve('.');
-const out = resolve('artifacts/residential-two-page-20261028/qa');
+const live = process.env.RESIDENTIAL_AREA_LIVE === '1';
+const out = resolve('artifacts/residential-area-20261029/' + (live ? 'live-qa' : 'qa'));
 await mkdir(out, { recursive: true });
 const origin = 'https://spacebogam.kr';
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.woff2': 'font/woff2', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml' };
@@ -39,6 +40,7 @@ await withTestBrowser(async (context, selection) => {
       return route.fulfill({ contentType: 'application/json', body: '{"questions":[]}' });
     }
     if (url.origin !== origin) return route.abort();
+    if (live) return route.continue();
     const pathname = url.pathname.endsWith('/') ? url.pathname + 'index.html' : url.pathname;
     try {
       const baselineAssets = {
@@ -86,6 +88,7 @@ await withTestBrowser(async (context, selection) => {
     await page.locator('#next').click();
     await page.locator('#answer-21').waitFor();
     assert.match(await page.locator('.step-meta').innerText(), /2\s*\/\s*2/);
+    await page.locator('#answer-4').fill('34.5');
     await page.locator('#answer-21').selectOption({ label: '아직 정하지 않았어요' });
     await page.getByRole('button', { name: '아직 미정', exact: true }).click();
     await page.getByRole('button', { name: '주방', exact: true }).click();
@@ -127,9 +130,11 @@ await withTestBrowser(async (context, selection) => {
     await page.locator('#back').click();
     assert.equal(await page.locator('#answer-8').inputValue(), '가상 상세주소');
     await page.locator('#next').click();
+    assert.equal(await page.locator('#answer-4').inputValue(), '34.5');
     assert.equal(await page.locator('#answer-21').inputValue(), '아직 정하지 않았어요');
     await page.reload();
     await page.locator('#answer-21').waitFor();
+    assert.equal(await page.locator('#answer-4').inputValue(), '34.5');
     assert.equal(await page.locator('#answer-21').inputValue(), '아직 정하지 않았어요');
     await page.locator('.consent input').check();
     await page.locator('#next').click();
@@ -137,6 +142,7 @@ await withTestBrowser(async (context, selection) => {
     const body = submissions.at(-1);
     assert.equal(body.marketingAttribution.form_contract, 'residential_two_page_v1');
     assert.equal(body.marketingAttribution.utm_campaign, 'two_page_qa');
+    assert.equal(body.answers['4'], '34.5');
     assert.equal(body.answers['13'], '가상 신청자');
     assert.equal(body.answers['8'], '가상 상세주소');
     assert.equal(body.consent, true);
@@ -174,7 +180,7 @@ await withTestBrowser(async (context, selection) => {
   assert(!unexpectedWrites.some(path => /upload/.test(path)));
   assert.deepEqual(pageErrors, []);
   await writeFile(`${out}/sample-payload.json`, JSON.stringify(submissions[0], null, 2));
-  const result = { browser: selection.browser, results, uncertainRetry: true, actualSubmissions: 0, mockedSubmissions: submissions.length };
+  const result = { live, browser: selection.browser, results, uncertainRetry: true, actualSubmissions: 0, mockedSubmissions: submissions.length };
   await writeFile(`${out}/result.json`, JSON.stringify(result, null, 2));
   console.log(JSON.stringify(result));
 });

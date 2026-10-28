@@ -88,7 +88,7 @@ function fillResidential(h, { detail = '' } = {}) {
   if (detail) h.input('8', detail);
   h.next();
   assert.equal(h.api.current(), 'planning');
-  assert.deepEqual(Array.from(h.api.group(), question => String(question.id)), ['21', '12']);
+  assert.deepEqual(Array.from(h.api.group(), question => String(question.id)), ['4', '21', '12']);
   h.input('21', '5천만~6천만원');
   h.button('거실');
   h.button('샤시 교체');
@@ -128,6 +128,7 @@ async function run() {
   fillResidential(payloadHarness, { detail: '101동 1001호' });
   assert.deepEqual(Array.from(payloadHarness.api.group().find(question => String(question.id) === '12').options),
     ['전체 리모델링', '현관', '거실', '주방', '공용 욕실', '안방 욕실', '안방', '각 방', '발코니 확장', '샤시 교체', '시스템에어컨', '아직 미정']);
+  payloadHarness.input('4', '34.5');
   payloadHarness.stage.querySelector('.consent').querySelector('input').change(true);
   const payload = payloadHarness.api.payload(null);
   assert.equal(payload.type, 'residential');
@@ -135,6 +136,16 @@ async function run() {
   assert.equal(payload.consent, true);
   assert.equal(payload.marketingAttribution.form_contract, 'residential_two_page_v1');
   assert.equal(payload.answers['8'], '101동 1001호');
+  assert.equal(payload.answers['4'], '34.5');
+  const area = payloadHarness.api.group().find(q => String(q.id) === '4');
+  assert.equal(area.isRequired, false);
+  for (const value of ['0', '-1', 'abc']) {
+    payloadHarness.input('4', value);
+    assert.ok(payloadHarness.api.validate(area), 'invalid area: ' + value);
+  }
+  payloadHarness.input('4', '');
+  assert.equal(payloadHarness.api.validate(area), '');
+  assert.equal(payloadHarness.api.payload(null).answers['4'], undefined);
   assert.deepEqual(Array.from(payload.answers['12']), ['거실', '샤시 교체']);
   for (const id of ['13', '10', '15', '21', '12']) assert.ok(payload.answers[id], '필수 답변 저장 ' + id);
   for (const obsolete of ['5', '7', '17', '33', '34']) assert.equal(payload.answers[obsolete], undefined);
