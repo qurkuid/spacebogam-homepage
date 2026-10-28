@@ -1,0 +1,7 @@
+body{padding-bottom:88px}
+.consultation-help{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom) + var(--consult-keyboard-inset,0px));z-index:100;display:flex;align-items:center;gap:10px;min-height:56px;max-width:calc(100vw - 32px);padding:10px 16px;background:var(--paper,#f6f3ed);color:var(--ink,#1e1d1a);border:1px solid var(--ink,#1e1d1a);text-decoration:none;font-size:14px;line-height:1.4}
+.consultation-help[hidden]{display:none}
+.consultation-help svg{width:28px;height:28px;flex-shrink:0}
+.consultation-help small{display:block;font-size:12px;color:var(--muted,#66645f)}
+.consultation-help strong{font-weight:600}
+.consultation-help:focus-visible{outline:2px solid currentColor;outline-offset:4px}

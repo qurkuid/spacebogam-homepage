@@ -1225,7 +1225,13 @@
     }
   }
 
+  let renderedFocusStep = null;
   function render() {
+    const focusStep = current === 'question' ? current + ':' + questionIndex : current;
+    const help = document.getElementById('consultation-help');
+    if (help) help.hidden = current === 'success';
+    const stepChanged = renderedFocusStep !== focusStep;
+    renderedFocusStep = focusStep;
     const commercial = answers.type === '상업 공간';
     const asideImage = document.querySelector('.aside img');
     const asideCopy = document.querySelector('.aside-copy p:last-child');
@@ -1267,6 +1273,15 @@
     progress.setAttribute('aria-valuenow', String(percent));
     progressFill.style.width = percent + '%';
     trackStep('view');
+    if (stepChanged) {
+      const heading = stage.querySelector('h1');
+      heading.setAttribute('tabindex', '-1');
+      const input = Array.from(stage.querySelectorAll('input,textarea')).find(field =>
+        !field.disabled && !['hidden', 'checkbox', 'radio', 'file'].includes(field.type));
+      // Focus synchronously in the navigation gesture so mobile browsers can open the keyboard.
+      if (input) input.focus();
+      else heading.focus({ preventScroll: true });
+    }
   }
 
   function markStarted() {
@@ -1315,6 +1330,14 @@
     trail.push({ key: current, index: questionIndex });
     current = nextNode(current);
     render();
+  }
+
+  if (window.visualViewport) {
+    const updateHelpPosition = () => document.documentElement.style.setProperty('--consult-keyboard-inset',
+      Math.max(0, window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop) + 'px');
+    window.visualViewport.addEventListener('resize', updateHelpPosition);
+    window.visualViewport.addEventListener('scroll', updateHelpPosition);
+    updateHelpPosition();
   }
 
   next.addEventListener('click', () => advance());
