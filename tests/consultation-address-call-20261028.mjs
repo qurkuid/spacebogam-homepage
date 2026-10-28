@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {resolve,extname} from 'node:path';
 import {withTestBrowser} from '/Users/changseok/.codex/browser-testing.mjs';
-const root=resolve('artifacts/consultation-address-call-20261028');
+const root=resolve('artifacts/consultation-address-detail-20261028');
 const candidate=resolve(process.env.CONSULTATION_CANDIDATE_ROOT||root+'/candidate');
 const live=process.env.CONSULTATION_LIVE==='1';
 const realSdk=process.env.CONSULTATION_REAL_SDK==='1';
@@ -24,8 +24,10 @@ await withTestBrowser(async(context,selection)=>{
    return route.abort();
   }
   const path=url.pathname==='/consultation/'?'consultation/index.html':url.pathname.slice(1);
-  if(!live&&['consultation/index.html','consultation/apply/index.html','assets/consultation-help.css','reports/consultation-step-prototype-20260928/flow.js'].includes(path)){
-   return route.fulfill({body:await readFile(candidate+'/'+path),contentType:extname(path)==='.html'?'text/html':extname(path)==='.css'?'text/css':'text/javascript'});
+  if(!live&&['consultation/index.html','reports/consultation-step-prototype-20260928/flow.js'].includes(path)){
+   let body=await readFile(candidate+'/'+path,'utf8');
+   if(path.endsWith('flow.js'))body=body.replace(/\}\)\(\);\s*$/,"window.__addressPayload=()=>submissionPayload(null);})();");
+   return route.fulfill({body,contentType:extname(path)==='.html'?'text/html':extname(path)==='.css'?'text/css':'text/javascript'});
   }
   return route.continue();
  });
@@ -41,16 +43,16 @@ await withTestBrowser(async(context,selection)=>{
   };
   await noExposedNumber();
   await page.locator('#stage button').filter({hasText:'상업 공간'}).click();
-  await page.locator('#stage input').fill('주소 검색 검증');await page.locator('#next').click();
-  await page.locator('#stage input').fill('010-0000-0000');await page.locator('#next').click();
+  await page.locator('#stage input:not(#commercial-address-detail)').fill('주소 검색 검증');await page.locator('#next').click();
+  await page.locator('#stage input:not(#commercial-address-detail)').fill('010-0000-0000');await page.locator('#next').click();
   await page.locator('#stage select').selectOption('shop');
   await page.locator('.commercial-address-search').waitFor();
-  await page.locator('#stage input').fill('부산 해운대구 후보 지역');
+  await page.locator('#stage input:not(#commercial-address-detail)').fill('부산 해운대구 후보 지역');
   const search=page.locator('.commercial-address-search');
   if(!realSdk){
    failSdk=true;await search.click();
    await page.getByRole('status').filter({hasText:'다시 검색하거나 후보 지역을 직접 입력'}).waitFor();
-   assert.equal(await page.locator('#stage input').inputValue(),'부산 해운대구 후보 지역');
+   assert.equal(await page.locator('#stage input:not(#commercial-address-detail)').inputValue(),'부산 해운대구 후보 지역');
    assert(await page.locator('#next').isEnabled());
    failSdk=false;
   }
@@ -68,7 +70,8 @@ await withTestBrowser(async(context,selection)=>{
    await frame.getByText('부산 해운대구 좌동순환로 457', {exact:false}).first().waitFor({timeout:15000});
    await frame.getByText('부산 해운대구 좌동순환로 457 (백송오피스텔)',{exact:false}).first().click();
    await page.locator('#commercial-address-panel').waitFor({state:'hidden'});
-   assert((await page.locator('#stage input').inputValue()).includes('좌동순환로 457'));
+   assert((await page.locator('#stage input:not(#commercial-address-detail)').inputValue()).includes('좌동순환로 457'));
+   assert(await page.locator('#commercial-address-detail').evaluate(e=>e===document.activeElement));
    assert(await page.locator('#next').isEnabled());
    await page.screenshot({path:root+'/qa/real-sdk-selected.png',fullPage:true});
    results.push({width,realSdkLoaded:true,searchEntered:true,realAddressSelected:true});
@@ -76,19 +79,28 @@ await withTestBrowser(async(context,selection)=>{
    await page.waitForFunction(()=>!!window.__postcode);
    assert.equal(await search.getAttribute('aria-expanded'),'true');
    await page.evaluate(()=>window.__postcode.oncomplete({address:'부산광역시 해운대구 좌동순환로 457'}));
-   assert.equal(await page.locator('#stage input').inputValue(),'부산광역시 해운대구 좌동순환로 457');
-   assert(await page.locator('#stage input').evaluate(e=>e===document.activeElement));
+   assert.equal(await page.locator('#stage input:not(#commercial-address-detail)').inputValue(),'부산광역시 해운대구 좌동순환로 457');
+   assert(await page.locator('#commercial-address-detail').evaluate(e=>e===document.activeElement));
+   await page.locator('#commercial-address-detail').fill('2층 201호');
+   if(!live)assert.equal(await page.evaluate(()=>window.__addressPayload().commercialLead.address),'부산광역시 해운대구 좌동순환로 457 2층 201호');
    assert.equal(await search.getAttribute('aria-expanded'),'false');
    assert(await page.locator('#next').isEnabled());
    await page.screenshot({path:root+`/qa/${live?'live':'preview'}-${width}.png`,fullPage:true});
    await page.locator('#next').click();await page.locator('#back').click();
-   assert.equal(await page.locator('#stage input').inputValue(),'부산광역시 해운대구 좌동순환로 457');
+   assert.equal(await page.locator('#stage input:not(#commercial-address-detail)').inputValue(),'부산광역시 해운대구 좌동순환로 457');
+   assert.equal(await page.locator('#commercial-address-detail').inputValue(),'2층 201호');
    await search.click();await page.locator('#commercial-address-panel').waitFor({state:'visible'});
    await page.getByRole('button',{name:'주소 검색 닫기'}).click();
    assert(await search.evaluate(e=>e===document.activeElement));
+   await page.evaluate(()=>{window.__postcode=null;});
+   await search.click();await page.waitForFunction(()=>!!window.__postcode);
+   await page.evaluate(()=>window.__postcode.oncomplete({address:'부산광역시 연제구 해맞이로 23'}));
+   assert.equal(await page.locator('#commercial-address-detail').inputValue(),'');
+   assert(await page.locator('#next').isEnabled());
+   if(!live)assert.equal(await page.evaluate(()=>window.__addressPayload().commercialLead.address),'부산광역시 연제구 해맞이로 23');
    await noExposedNumber();
    assert(await page.locator('#consultation-help').isVisible());
-   results.push({width,noExposedNumber:true,phoneTargetCorrect:true,sdkFailureAndRetry:true,addressSelection:true,backPreservesAnswer:true,closeRestoresFocus:true});
+   results.push({width,noExposedNumber:true,phoneTargetCorrect:true,sdkFailureAndRetry:true,addressSelection:true,detailAutofocus:true,detailPreserved:true,detailInPayload:!live,backPreservesAnswer:true,closeRestoresFocus:true});
   }
   await page.close();
  }

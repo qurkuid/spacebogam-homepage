@@ -857,6 +857,26 @@
   }
 
   function addCommercialAddressSearch(target, input) {
+    const detailLabel = el('label', 'field');
+    detailLabel.appendChild(el('span', 'field-label', '상세주소 · 선택 입력'));
+    const detail = el('input', 'question-input');
+    detail.id = 'commercial-address-detail';
+    detail.type = 'text';
+    detail.autocomplete = 'address-line2';
+    detail.placeholder = '예: 2층 201호, 건물명';
+    const savedAddress = [answers.commercialAddressBase, answers.commercialAddressDetail].filter(Boolean).join(' ');
+    if (answers.commercialAddressBase && input.value === savedAddress) {
+      input.value = answers.commercialAddressBase;
+      detail.value = answers.commercialAddressDetail || '';
+    }
+    function syncAddress() {
+      answers.commercialAddressBase = input.value.trim();
+      answers.commercialAddressDetail = detail.value.trim();
+      answers.responses.address = [answers.commercialAddressBase, answers.commercialAddressDetail].filter(Boolean).join(' ');
+    }
+    input.addEventListener('input', syncAddress);
+    detail.addEventListener('input', syncAddress);
+    detailLabel.appendChild(detail);
     const search = el('button', 'commercial-address-search', '주소 검색');
     search.type = 'button';
     search.setAttribute('aria-expanded', 'false');
@@ -874,6 +894,7 @@
     target.appendChild(search);
     target.appendChild(panel);
     target.appendChild(notice);
+    target.appendChild(detailLabel);
     let requestId = 0;
     function hide() {
       requestId++;
@@ -897,11 +918,12 @@
           onresize: size => { if (panel.isConnected) host.style.height = size.height + 'px'; },
           oncomplete: data => {
             if (!panel.isConnected || panel.hidden || request !== requestId) return;
+            if (input.value !== data.address) detail.value = '';
             input.value = data.address;
             input.dispatchEvent(new Event('input', { bubbles: true }));
             hide();
-            notice.textContent = '주소가 입력되었습니다. 필요한 상세 위치를 덧붙여 주세요.';
-            input.focus();
+            notice.textContent = '주소가 입력되었습니다. 상세주소를 입력해 주세요.';
+            detail.focus();
           }
         }).embed(host);
         notice.textContent = '도로명·건물명을 검색한 뒤 주소를 선택해 주세요.';
