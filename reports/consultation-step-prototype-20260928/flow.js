@@ -840,7 +840,7 @@
         script.onload = script.onerror = null;
         script.remove();
         postcodeLoading = null;
-        reject(new Error('주소 검색을 불러오지 못했습니다. 다시 검색하거나 후보 지역을 직접 입력해 주세요.'));
+        reject(new Error('주소 검색을 불러오지 못했습니다. 잠시 후 다시 검색해 주세요.'));
       }
       script.src = 'https://t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
       script.async = true;
@@ -857,6 +857,12 @@
   }
 
   function addCommercialAddressSearch(target, input) {
+    input.readOnly = true;
+    input.autocomplete = 'off';
+    input.placeholder = '주소 검색으로 기본주소를 선택해 주세요';
+    input.className += ' commercial-address-base';
+    const baseLabel = input.parentElement?.querySelector('.field-label');
+    if (baseLabel) baseLabel.textContent = '기본주소 *';
     const detailLabel = el('label', 'field');
     detailLabel.appendChild(el('span', 'field-label', '상세주소 · 선택 입력'));
     const detail = el('input', 'question-input');
@@ -869,6 +875,8 @@
       input.value = answers.commercialAddressBase;
       detail.value = answers.commercialAddressDetail || '';
     }
+    detailLabel.hidden = !input.value;
+    detail.disabled = !input.value;
     function syncAddress() {
       answers.commercialAddressBase = input.value.trim();
       answers.commercialAddressDetail = detail.value.trim();
@@ -887,7 +895,7 @@
     const close = el('button', 'manual-option', '주소 검색 닫기');
     close.type = 'button';
     const host = el('div', 'commercial-address-host');
-    const notice = el('p', 'hint', '주소가 정해지지 않았다면 후보 지역만 직접 입력해도 됩니다.');
+    const notice = el('p', 'hint', '도로명·건물명을 검색해 기본주소를 선택해 주세요.');
     notice.setAttribute('role', 'status');
     panel.appendChild(close);
     panel.appendChild(host);
@@ -902,6 +910,7 @@
       search.setAttribute('aria-expanded', 'false');
       search.focus();
     }
+    input.addEventListener('click', () => { if (panel.hidden) search.click(); });
     close.addEventListener('click', hide);
     search.addEventListener('click', async () => {
       if (!panel.hidden) { hide(); return; }
@@ -915,10 +924,14 @@
         host.replaceChildren();
         new window.kakao.Postcode({
           width: '100%', height: '100%',
+          hideMapBtn: true, hideEngBtn: true,
+          theme: { bgColor: '#f6f3ed', searchBgColor: '#f6f3ed', contentBgColor: '#f6f3ed', textColor: '#1e1d1a', outlineColor: '#d9d4ca' },
           onresize: size => { if (panel.isConnected) host.style.height = size.height + 'px'; },
           oncomplete: data => {
             if (!panel.isConnected || panel.hidden || request !== requestId) return;
             if (input.value !== data.address) detail.value = '';
+            detailLabel.hidden = false;
+            detail.disabled = false;
             input.value = data.address;
             input.dispatchEvent(new Event('input', { bubbles: true }));
             hide();
@@ -931,7 +944,7 @@
       } catch (error) {
         if (!panel.isConnected || request !== requestId) return;
         hide();
-        notice.textContent = error.message || '주소 검색을 열지 못했습니다. 다시 검색하거나 후보 지역을 직접 입력해 주세요.';
+        notice.textContent = error.message || '주소 검색을 열지 못했습니다. 잠시 후 다시 검색해 주세요.';
       }
     });
   }
@@ -1386,10 +1399,10 @@
       const heading = stage.querySelector('h1');
       heading.setAttribute('tabindex', '-1');
       const input = Array.from(stage.querySelectorAll('input,textarea')).find(field =>
-        !field.disabled && !['hidden', 'checkbox', 'radio', 'file'].includes(field.type));
+        !field.disabled && !field.readOnly && !['hidden', 'checkbox', 'radio', 'file'].includes(field.type));
       // Focus synchronously in the navigation gesture so mobile browsers can open the keyboard.
       if (input) input.focus();
-      else heading.focus({ preventScroll: true });
+      else (stage.querySelector('.commercial-address-search') || heading).focus({ preventScroll: true });
     }
   }
 
