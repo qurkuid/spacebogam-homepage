@@ -95,6 +95,35 @@ function fillResidential(h, { detail = '' } = {}) {
 }
 
 async function run() {
+  const occupancy = harness({ search: '?is_test=1' });
+  const stateOptions = () => occupancy.stage.querySelector('#answer-currentState').children.map(option => option.textContent);
+  assert.deepEqual(stateOptions(), ['선택해 주세요', '공실', '세입자 거주중(실측가능)', '세입자 거주중(실측불가)', '현재 거주중']);
+  assert.equal(occupancy.stage.querySelector('#answer-measurementAvailableDate'), null);
+  occupancy.input('currentState', 'tenant_unmeasurable');
+  assert.ok(occupancy.stage.querySelector('#answer-measurementAvailableDate'));
+  const measurement = occupancy.api.group().find(question => question.id === 'measurementAvailableDate');
+  assert.equal(occupancy.api.validate(measurement), '', 'measurement date can remain undecided');
+  occupancy.input('measurementAvailableDate', '2020-01-01');
+  assert.match(occupancy.api.validate(measurement), /今日|오늘/);
+  occupancy.input('measurementAvailableDate', '2099-01-01');
+  assert.equal(occupancy.api.validate(measurement), '');
+  assert.match(occupancy.api.payload(null).answers['7'], /세입자 거주중\(실측불가\)/);
+  assert.match(occupancy.api.payload(null).answers['7'], /실측 가능 날짜: 2099-01-01/);
+  const resumedOccupancy = harness({ session: occupancy.context.sessionStorage, search: '?is_test=1' });
+  assert.equal(resumedOccupancy.stage.querySelector('#answer-measurementAvailableDate').value, '2099-01-01');
+  occupancy.input('currentState', 'tenant_measurable');
+  assert.equal(occupancy.stage.querySelector('#answer-measurementAvailableDate'), null);
+  assert.equal(occupancy.api.answers().responses.measurementAvailableDate, undefined);
+  assert.doesNotMatch(occupancy.api.payload(null).answers['7'], /실측 가능 날짜/);
+  occupancy.input('currentState', 'tenant_unmeasurable');
+  occupancy.input('measurementAvailableDate', '2099-01-01');
+  occupancy.button('상가·상업공간');
+  assert.equal(occupancy.stage.querySelector('#answer-measurementAvailableDate'), null);
+  assert.equal(occupancy.api.answers().responses.measurementAvailableDate, undefined);
+  assert.deepEqual(stateOptions(), ['선택해 주세요', '공실이에요', '거주·영업 중이에요', '신축·무마감이에요', '기존 인테리어 철거 예정이에요']);
+  occupancy.input('currentState', 'shell');
+  occupancy.button('주거');
+  assert.equal(occupancy.api.answers().responses.currentState, undefined, 'commercial-only state must not leak into residential');
   const trackingEvents = [];
   const tracking = harness({ search: '?is_test=1&site_source_name=instagram&placement=stories', fetch: async (url, options = {}) => {
     if (String(url).includes('/funnel-events')) trackingEvents.push(JSON.parse(options.body));
@@ -219,7 +248,7 @@ async function run() {
   for (const id of ['13', '10', '15', '21', '12']) assert.ok(payload.answers[id], '필수 답변 저장 ' + id);
   for (const obsolete of ['5', '17', '33', '34']) assert.equal(payload.answers[obsolete], undefined);
 
-  assert.match(payload.answers['7'], /공실 여부·현장 상태: 공실이에요/);
+  assert.match(payload.answers['7'], /공실 여부·현장 상태: 공실/);
 
   const undecided = harness();
   undecided.input('13', '미정 고객'); undecided.input('10', '010-1111-2222'); undecided.input('15', '부산광역시 연제구'); undecided.next();

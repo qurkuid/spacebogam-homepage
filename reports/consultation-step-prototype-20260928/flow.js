@@ -13,6 +13,12 @@
     success: { title: '방문 상담 예약 신청이 접수되었습니다', lead: '신청 후 담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다. 신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.' }
   };
   const residentialWorkOptions = ['전체 리모델링', '현관', '거실', '주방', '공용 욕실', '안방 욕실', '안방', '각 방'];
+  const residentialStateLabels = {
+    vacant: '공실',
+    tenant_measurable: '세입자 거주중(실측가능)',
+    tenant_unmeasurable: '세입자 거주중(실측불가)',
+    owner_occupied: '현재 거주중'
+  };
   function canonicalResidentialWork(value) {
     const aliases = {
       '전체 수리': '전체 리모델링', '공용욕실': '공용 욕실', '안방욕실': '안방 욕실'
@@ -98,6 +104,10 @@
       const requestedType = params.get('type') === 'commercial' ? '상업 공간' : params.get('type') === 'residential' ? '주거 공간' : null;
       if (requestedType && requestedType !== draft.answers.type && !draft.pendingBody) { clearDraft(); return; }
       answers = draft.answers;
+      if (answers.type === '주거 공간' && !draft.pendingBody && !Object.hasOwn(residentialStateLabels, answers.responses.currentState)) {
+        delete answers.responses.currentState;
+        delete answers.responses.measurementAvailableDate;
+      }
       if (answers.type === '주거 공간' && answers.responses['12'] != null) {
         answers.responses['12'] = canonicalResidentialWork(answers.responses['12']);
       }
@@ -349,19 +359,23 @@
     return new Date(year, month - 1, day) < new Date(today.getFullYear(), today.getMonth(), today.getDate());
   }
   function isApartment() { return answers.type === '주거 공간' && answers.housing === '아파트'; }
-  const commonQuestionIds = ['13', '10', '15', '8', '5', 'currentState'];
+  const commonQuestionIds = ['13', '10', '15', '8', '5', 'currentState', 'measurementAvailableDate'];
   function questionList() {
     const state = { ...window.SB_CONSULTATION_QUESTIONS.commercial.find(q => q.id === 'currentState'),
       question: '공실 여부·현재 현장 상태를 알려주세요.',
       optionLabels: { vacant: '공실이에요', occupied: '거주·영업 중이에요', shell: '신축·무마감이에요', renovation: '기존 인테리어 철거 예정이에요' } };
-    if (answers.type !== '상업 공간') return questions.concat(state);
+    if (answers.type !== '상업 공간') return questions.concat({ ...state,
+      options: Object.keys(residentialStateLabels), optionLabels: residentialStateLabels }, {
+      id: 'measurementAvailableDate', question: '실측 가능 날짜를 선택해 주세요.', questionType: 'date', isRequired: false,
+      showIf: { id: 'currentState', value: 'tenant_unmeasurable' }
+    });
     return questions.filter(q => commonQuestionIds.includes(String(q.id))).concat(state,
       window.SB_CONSULTATION_QUESTIONS.commercial.filter(q => !['name','phone','address','currentState','constructionDate'].includes(String(q.id)))
         .map(q => q.id === 'area' ? { ...q, question: '실면적을 입력해 주세요.' } : q));
   }
   function groupQuestions(key = current) {
     const visible = questionList().filter(q => !hiddenByBranch(q));
-    if (key === 'contact') return ['13','10','15', answers.type === '주거 공간' ? '4' : 'area','5','currentState']
+    if (key === 'contact') return ['13','10','15', answers.type === '주거 공간' ? '4' : 'area','5','currentState','measurementAvailableDate']
       .map(id => visible.find(q => String(q.id) === id)).filter(Boolean);
     if (key !== 'planning') return [];
     const remaining = visible.filter(q => !commonQuestionIds.concat(['4','area']).includes(String(q.id)));
@@ -1077,6 +1091,12 @@
         lookup = { status: 'ready', candidates: [], source: 'none' };
       }
       answers.responses[key] = input.value;
+      if (type === 'select' && questionList().some(q => q.showIf?.id === question.id)) {
+        questionList().filter(hiddenByBranch).forEach(q => delete answers.responses[String(q.id)]);
+        render();
+        stage.querySelector('#' + input.id)?.focus({ preventScroll: true });
+        return;
+      }
       clearError();
       syncActiveQuestionNext();
       saveDraft();
@@ -1535,6 +1555,7 @@
     }
     const state = questionList().find(q => q.id === 'currentState');
     if (answers.responses.currentState) details.push('공실 여부·현장 상태: ' + state.optionLabels[answers.responses.currentState]);
+    if (answers.responses.currentState === 'tenant_unmeasurable' && answers.responses.measurementAvailableDate) details.push('실측 가능 날짜: ' + answers.responses.measurementAvailableDate);
     if (answers.planAreaAuto && answers.planAreaSource) details.push('선택한 등록 면적: ' + answers.planAreaSource + ' / 약 ' + answers.planAreaValue + '평 (공급·전용 구분 확인 필요)');
     if (answers.apartmentSelected) details.push('아파트: ' + answers.apartmentSelected[0] + ' / ' + (answers.dong || '동 미확인'));
     if (answers.apartmentUnmatched) details.push('검색 목록에 없는 아파트: ' + (answers.apartmentQuery || '미확인'));
@@ -1697,6 +1718,9 @@
         button.addEventListener('click', () => {
           if (submitting || pendingBody || answers.type === type) return;
           answers.type = type;
+          const state = questionList().find(q => q.id === 'currentState');
+          if (!questionOptions(state).includes(answers.responses.currentState)) delete answers.responses.currentState;
+          if (type === '상업 공간') delete answers.responses.measurementAvailableDate;
           params.set('type', value);
           if (window.history?.replaceState) window.history.replaceState(null, '', location.pathname + '?' + params.toString() + (location.hash || ''));
           applyCommercialDefaults();
