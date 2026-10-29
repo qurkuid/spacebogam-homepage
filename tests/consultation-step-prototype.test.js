@@ -88,7 +88,7 @@ function fillResidential(h, { detail = '' } = {}) {
   if (detail) h.input('8', detail);
   h.next();
   assert.equal(h.api.current(), 'planning');
-  assert.deepEqual(Array.from(h.api.group(), question => String(question.id)), ['4', '21', '12']);
+  assert.deepEqual(Array.from(h.api.group(), question => String(question.id)).slice(0, 3), ['4', '21', '12']);
   h.input('21', '5천만~6천만원');
   h.button('거실');
   h.button('샤시 교체');
@@ -123,6 +123,44 @@ async function run() {
   mobile.stage.querySelector('#answer-13').listeners.keydown({ key: 'Enter', preventDefault() {} });
   assert.ok(mobile.stage.querySelector('#answer-10').focused, '모바일 키보드 다음 입력 이동');
   fillResidential(harness(), { detail: '101동 1001호' });
+
+  const restoredFields = harness();
+  fillResidential(restoredFields);
+  const exposed = new Set(restoredFields.api.group('contact').concat(restoredFields.api.group('planning')).map(q => String(q.id)));
+  for (const question of restoredFields.api.questions()) {
+    if (question.questionType === 'detailed_address' || question.showIf) continue;
+    assert.ok(exposed.has(String(question.id)), '기존 문항 누락: ' + question.question);
+  }
+  const schedule = restoredFields.api.group().find(q => q.questionType === 'schedule');
+  assert.equal(schedule.isRequired, false);
+  assert.equal(restoredFields.api.validate(schedule), '', '방문 일정 미정은 제출을 막지 않는다');
+  restoredFields.api.answers().responses['33'] = '2099-12-31';
+  assert.ok(restoredFields.api.validate(schedule), '부분 방문 일정은 검증한다');
+  restoredFields.api.answers().responses['34'] = '10:00';
+  assert.equal(restoredFields.api.validate(schedule), '');
+  delete restoredFields.api.answers().responses['33'];
+  delete restoredFields.api.answers().responses['34'];
+  const timeButton = restoredFields.stage.querySelector('.schedule-time');
+  timeButton.click();
+  assert.ok(restoredFields.api.validate(schedule));
+  timeButton.click();
+  assert.equal(restoredFields.api.validate(schedule), '', '선택한 방문 시간은 다시 눌러 해제한다');
+  restoredFields.button('네, 확장할 계획이에요');
+  assert.ok(restoredFields.stage.querySelector('[data-question-id="expansion_spaces"]'));
+  restoredFields.button('거실');
+  restoredFields.button('네, 설치할 계획이에요');
+  assert.ok(restoredFields.stage.querySelector('#answer-system_ac_count'));
+  restoredFields.input('system_ac_count', '0');
+  assert.ok(restoredFields.api.validate(restoredFields.api.group().find(q => q.id === 'system_ac_count')));
+  restoredFields.input('system_ac_count', '3');
+  restoredFields.button('네, 교체할 계획이에요');
+  restoredFields.input('7', '수납을 충분히 만들어 주세요.');
+  const restoredPayload = restoredFields.api.payload(null);
+  assert.match(restoredPayload.answers['7'], /시스템에어컨 대수: 3/);
+  assert.match(restoredPayload.answers['7'], /샤시 교체: 네, 교체할 계획이에요/);
+  restoredFields.button('설치하지 않아요');
+  assert.equal(restoredFields.api.answers().responses.system_ac_count, undefined);
+  assert.equal(restoredFields.stage.querySelector('#answer-system_ac_count'), null);
 
   const payloadHarness = harness();
   fillResidential(payloadHarness, { detail: '101동 1001호' });

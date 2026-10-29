@@ -9,7 +9,7 @@
     consent: { title: '상담 준비를 마칠까요?', lead: '답변을 확인하기 전에 개인정보 수집·이용에 동의해 주세요.' },
     summary: { title: '입력 내용을 확인해 주세요', lead: '내용이 맞으면 방문 상담 예약 신청을 접수해 주세요. 신청 후 담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다. 신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.' },
     contact: { title: '연락처와 시공장소를 알려주세요.', lead: '성함·연락처·기본주소를 입력해 주세요. 상세주소는 정해졌다면 함께 남겨 주세요.' },
-    planning: { title: '평형과 공사 계획을 알려주세요.', lead: '평형을 모르면 비워 두셔도 됩니다. 예산과 공사 범위는 ‘미정’을 선택할 수 있습니다.' },
+    planning: { title: '평형과 공사 계획을 알려주세요.', lead: '공사·설비 계획과 생활 방식을 알려주세요. 선택 항목은 아는 만큼만 입력하고, 미정이면 비워 두셔도 됩니다.' },
     success: { title: '방문 상담 예약 신청이 접수되었습니다', lead: '신청 후 담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다. 신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.' }
   };
   const residentialWorkOptions = ['전체 리모델링', '현관', '거실', '주방', '공용 욕실', '안방 욕실', '안방', '각 방', '발코니 확장', '샤시 교체', '시스템에어컨', '아직 미정'];
@@ -293,7 +293,7 @@
     const date = unique.find(q => q.questionType === 'date' && /상담을 원하는 날짜/.test(q.question));
     const time = unique.find(q => q.questionType === 'single_choice' && /상담을 원하는 시간/.test(q.question));
     const callback = unique.find(q => /연락 가능한 시간대/.test(q.question));
-    const schedule = day && date && time ? { ...day, question: '방문 상담 희망 일정을 선택해 주세요.', questionType: 'schedule', isRequired: true, parts: [day, date, time] } : null;
+    const schedule = day && date && time ? { ...day, question: '방문 상담 희망 일정을 선택해 주세요.', questionType: 'schedule', isRequired: false, parts: [day, date, time] } : null;
     return unique.filter(q => q.questionType !== 'password' && q !== day && q !== date && q !== time)
       .concat(separate, schedule ? [schedule] : []);
   }
@@ -350,9 +350,6 @@
         || q.questionType === 'short_answer' && /성함|이름/.test(q.question)
         || q.questionType === 'phonenumber'
         || q.questionType === 'address';
-      const planning = q => ['12','21'].includes(String(q.id)) || /평형|평수/.test(q.question)
-        || q.questionType === 'select' && /예산/.test(q.question)
-        || q.questionType === 'multiple_choice' && /시공장소|공사 범위/.test(q.question);
       const visible = list.filter(q => !hiddenByBranch(q));
       if (key === 'contact') {
         const ordered = [
@@ -363,12 +360,11 @@
         return ordered.length === 3 ? ordered : visible.filter(core);
       }
       if (key === 'planning') {
-        const ordered = [
-          q => /평형|평수/.test(q.question),
-          q => q.questionType === 'select' && /예산/.test(q.question),
-          q => q.questionType === 'multiple_choice' && /시공장소|공사 범위/.test(q.question)
-        ].map(match => visible.find(match)).filter(Boolean);
-        return ordered.length === 3 ? ordered : visible.filter(planning);
+        const remaining = visible.filter(q => !core(q) && q.questionType !== 'detailed_address');
+        const order = ['4','21','12','expansion','expansion_spaces','system_ac','system_ac_count','sash',
+          '5','38','17','18','22','25','26','27','32','31','35','7'];
+        return order.map(id => remaining.find(q => String(q.id) === id)).filter(Boolean)
+          .concat(remaining.filter(q => !order.includes(String(q.id))));
       }
       return [];
     }
@@ -1102,7 +1098,7 @@
       button.type = 'button';
       button.setAttribute('aria-pressed', String(response(time) === option));
       button.addEventListener('click', () => {
-        answers.responses[String(time.id)] = option;
+        answers.responses[String(time.id)] = response(time) === option ? '' : option;
         timeButtons.forEach(item => item.button.setAttribute('aria-pressed', String(item.option === option)));
         clearError(); syncActiveQuestionNext(); saveDraft();
       });
@@ -1419,6 +1415,10 @@
     }
     const grid = el('div', 'question-grid');
     groupQuestions().forEach(question => {
+      if (current === 'planning' && answers.type === '주거 공간') {
+        const section = { '4': '공사 기본 정보', expansion: '확장·설비 계획', '5': '일정·연락', '22': '취향·생활 방식', '7': '추가 요청' }[question.id];
+        if (section) grid.appendChild(el('h2', 'question-section question-wide', section));
+      }
       const workChecklist = answers.type === '주거 공간' && String(question.id) === '12';
       const block = el('fieldset', 'question-block' + (question.questionType === 'schedule' ? ' question-wide' : '') + (workChecklist ? ' work-checklist' : ''));
       block.setAttribute('data-question-id', String(question.id));
@@ -1433,6 +1433,7 @@
   }
   function questionError(question) {
     if (question.questionType === 'schedule') {
+      if (!question.isRequired && question.parts.every(part => !hasResponse(part))) return '';
       const [day, date, time] = question.parts;
       if (!hasResponse(date) || !hasResponse(time)) return '상담을 원하는 날짜와 시간을 선택해 주세요.';
       const problem = questionError({ ...date, isRequired: true });

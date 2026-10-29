@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
 import { withTestBrowser } from '/Users/changseok/.codex/browser-testing.mjs';
 
 const root = resolve('.');
 const live = process.env.RESIDENTIAL_AREA_LIVE === '1';
-const out = resolve('artifacts/residential-area-20261029/' + (live ? 'live-qa' : 'qa'));
+const out = resolve('artifacts/residential-restore-20261029/' + (live ? 'live-qa' : 'qa'));
 await mkdir(out, { recursive: true });
 const origin = 'https://spacebogam.kr';
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.woff2': 'font/woff2', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml' };
@@ -13,6 +14,14 @@ const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
 await withTestBrowser(async (context, selection) => {
   context.setDefaultTimeout(7000);
   const pageErrors = [];
+  const flowHashes = [];
+  const hashReads = [];
+  const expectedFlowHash = createHash('sha256').update(await readFile('reports/consultation-step-prototype-20260928/flow.js')).digest('hex');
+  if (live) context.on('response', response => {
+    if (new URL(response.url()).pathname === '/reports/consultation-step-prototype-20260928/flow.js') {
+      hashReads.push(response.body().then(body => flowHashes.push(createHash('sha256').update(body).digest('hex'))));
+    }
+  });
   const submissions = [];
   const unexpectedWrites = [];
   let submitMode = 'success';
@@ -84,7 +93,7 @@ await withTestBrowser(async (context, selection) => {
     await address(page);
     await page.locator('#answer-8').fill('가상 상세주소');
   }
-  async function plan(page) {
+  async function plan(page, restore = true) {
     await page.locator('#next').click();
     await page.locator('#answer-21').waitFor();
     assert.match(await page.locator('.step-meta').innerText(), /2\s*\/\s*2/);
@@ -94,6 +103,20 @@ await withTestBrowser(async (context, selection) => {
     await page.getByRole('button', { name: '주방', exact: true }).click();
     assert.equal(await page.getByRole('button', { name: '아직 미정', exact: true }).getAttribute('aria-pressed'), 'false');
     await page.getByRole('button', { name: '시스템에어컨', exact: true }).click();
+    for (const id of ['expansion', 'system_ac', 'sash', '5', '38', '17', '18', '22', '25', '26', '27', '32', '31', '35', '7']) {
+      assert.equal(await page.locator('[data-question-id="' + id + '"]').count(), 1, 'existing question restored: ' + id);
+    }
+    if (restore) {
+      await page.locator('[data-question-id="expansion"]').getByRole('button', {name:'네, 확장할 계획이에요',exact:true}).click();
+      await page.locator('[data-question-id="expansion_spaces"]').getByRole('button', {name:'거실',exact:true}).click();
+      await page.locator('[data-question-id="system_ac"]').getByRole('button', {name:'네, 설치할 계획이에요',exact:true}).click();
+      await page.locator('#answer-system_ac_count').fill('3');
+      await page.locator('[data-question-id="sash"]').getByRole('button', {name:'네, 교체할 계획이에요',exact:true}).click();
+      await page.locator('[data-question-id="25"]').getByRole('button', {name:'내추럴',exact:true}).click();
+      await page.locator('[data-question-id="26"] select').selectOption({label:'부부 + 자녀'});
+      await page.locator('.pet-choice input').check();
+      await page.locator('#answer-7').fill('수납을 충분히 만들어 주세요.');
+    }
     const sentBeforeConsent = submissions.length;
     await page.locator('#next').click();
     assert.equal(submissions.length, sentBeforeConsent, 'consent is required on second page');
@@ -130,10 +153,12 @@ await withTestBrowser(async (context, selection) => {
     await page.locator('#back').click();
     assert.equal(await page.locator('#answer-8').inputValue(), '가상 상세주소');
     await page.locator('#next').click();
+    assert.equal(await page.locator('#answer-system_ac_count').inputValue(), '3');
     assert.equal(await page.locator('#answer-4').inputValue(), '34.5');
     assert.equal(await page.locator('#answer-21').inputValue(), '아직 정하지 않았어요');
     await page.reload();
     await page.locator('#answer-21').waitFor();
+    assert.equal(await page.locator('#answer-system_ac_count').inputValue(), '3');
     assert.equal(await page.locator('#answer-4').inputValue(), '34.5');
     assert.equal(await page.locator('#answer-21').inputValue(), '아직 정하지 않았어요');
     await page.locator('.consent input').check();
@@ -143,6 +168,9 @@ await withTestBrowser(async (context, selection) => {
     assert.equal(body.marketingAttribution.form_contract, 'residential_two_page_v1');
     assert.equal(body.marketingAttribution.utm_campaign, 'two_page_qa');
     assert.equal(body.answers['4'], '34.5');
+    assert.equal(body.answers['26'], '부부 + 자녀');
+    assert.equal(body.answers['25'], '내추럴');
+    for (const phrase of ['수납을 충분히', '시스템에어컨 대수: 3', '확장 공간: 거실', '샤시 교체: 네, 교체할 계획이에요', '반려동물: 있음']) assert(body.answers['7'].includes(phrase), phrase);
     assert.equal(body.answers['13'], '가상 신청자');
     assert.equal(body.answers['8'], '가상 상세주소');
     assert.equal(body.consent, true);
@@ -155,7 +183,7 @@ await withTestBrowser(async (context, selection) => {
   }
 
   const retry = await open(390);
-  await fillContact(retry); await plan(retry);
+  await fillContact(retry); await plan(retry, false);
   submitMode = 'missing-id';
   await retry.locator('#next').click();
   await retry.getByRole('button', { name: /접수 결과 다시 확인/ }).waitFor();
@@ -166,6 +194,18 @@ await withTestBrowser(async (context, selection) => {
   await retry.getByText('접수번호 · 987654', { exact: true }).waitFor();
   assert.deepEqual(submissions.at(-1), first, 'uncertain retry must reuse same event id and answers');
   await retry.close();
+
+  const branches = await open(390);
+  await fillContact(branches); await plan(branches);
+  await branches.locator('[data-question-id="system_ac"]').getByRole('button', {name:'설치하지 않아요',exact:true}).click();
+  assert.equal(await branches.locator('#answer-system_ac_count').count(), 0);
+  await branches.locator('[data-question-id="expansion"]').getByRole('button', {name:'확장하지 않아요',exact:true}).click();
+  assert.equal(await branches.locator('[data-question-id="expansion_spaces"]').count(), 0);
+  await branches.locator('#next').click();
+  await branches.getByText('접수번호 · 987654', {exact:true}).waitFor();
+  assert(!submissions.at(-1).answers['7'].includes('시스템에어컨 대수:'));
+  assert(!submissions.at(-1).answers['7'].includes('확장 공간:'));
+  await branches.close();
 
   const commercial = await context.newPage();
   await commercial.setViewportSize({width:390,height:844});
@@ -179,8 +219,10 @@ await withTestBrowser(async (context, selection) => {
   // The fixture intercepts every request; no production form submission or upload is sent.
   assert(!unexpectedWrites.some(path => /upload/.test(path)));
   assert.deepEqual(pageErrors, []);
+  await Promise.all(hashReads);
+  if (live) { assert(flowHashes.length > 0); assert(flowHashes.every(hash => hash === expectedFlowHash)); }
   await writeFile(`${out}/sample-payload.json`, JSON.stringify(submissions[0], null, 2));
-  const result = { live, browser: selection.browser, results, uncertainRetry: true, actualSubmissions: 0, mockedSubmissions: submissions.length };
+  const result = { live, flowHashes, browser: selection.browser, results, uncertainRetry: true, actualSubmissions: 0, mockedSubmissions: submissions.length };
   await writeFile(`${out}/result.json`, JSON.stringify(result, null, 2));
   console.log(JSON.stringify(result));
 });
