@@ -1099,7 +1099,7 @@
       button.setAttribute('aria-pressed', String(response(time) === option));
       button.addEventListener('click', () => {
         answers.responses[String(time.id)] = response(time) === option ? '' : option;
-        timeButtons.forEach(item => item.button.setAttribute('aria-pressed', String(item.option === option)));
+        timeButtons.forEach(item => item.button.setAttribute('aria-pressed', String(response(time) === item.option)));
         clearError(); syncActiveQuestionNext(); saveDraft();
       });
       timeButtons.push({ button, option });

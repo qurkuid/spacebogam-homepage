@@ -201,6 +201,11 @@ await withTestBrowser(async (context, selection) => {
   assert.equal(await branches.locator('#answer-system_ac_count').count(), 0);
   await branches.locator('[data-question-id="expansion"]').getByRole('button', {name:'확장하지 않아요',exact:true}).click();
   assert.equal(await branches.locator('[data-question-id="expansion_spaces"]').count(), 0);
+  const time = branches.getByRole('button', {name:'10:00',exact:true});
+  await time.click();
+  assert.equal(await time.getAttribute('aria-pressed'), 'true');
+  await time.click();
+  assert.equal(await time.getAttribute('aria-pressed'), 'false');
   await branches.locator('#next').click();
   await branches.getByText('접수번호 · 987654', {exact:true}).waitFor();
   assert(!submissions.at(-1).answers['7'].includes('시스템에어컨 대수:'));

@@ -142,9 +142,11 @@ async function run() {
   delete restoredFields.api.answers().responses['34'];
   const timeButton = restoredFields.stage.querySelector('.schedule-time');
   timeButton.click();
+  assert.equal(timeButton.getAttribute('aria-pressed'), 'true');
   assert.ok(restoredFields.api.validate(schedule));
   timeButton.click();
   assert.equal(restoredFields.api.validate(schedule), '', '선택한 방문 시간은 다시 눌러 해제한다');
+  assert.equal(timeButton.getAttribute('aria-pressed'), 'false');
   restoredFields.button('네, 확장할 계획이에요');
   assert.ok(restoredFields.stage.querySelector('[data-question-id="expansion_spaces"]'));
   restoredFields.button('거실');
