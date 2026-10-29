@@ -50,7 +50,7 @@ test('production static server and bounded allowlisted proxies', { timeout: 2000
   const port = await listen(reservation);
   await new Promise(resolve => reservation.close(resolve));
   const child = spawn(process.execPath, [path.resolve('ops/spacebogam-serve.js'), root, String(port)], {
-    env: { ...process.env, ROOT: root, PORT: String(port), APT_ORIGIN: `http://127.0.0.1:${upstreamPort}`, INTM_ORIGIN: `http://127.0.0.1:${upstreamPort}` },
+    env: { ...process.env, ROOT: root, PORT: String(port), JEV_ORIGIN: `http://127.0.0.1:${upstreamPort}`, INTM_ORIGIN: `http://127.0.0.1:${upstreamPort}` },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   let stderr = '';
@@ -99,14 +99,14 @@ test('production static server and bounded allowlisted proxies', { timeout: 2000
   await t.test('plans allowlist strips query and credentials, preserves JSON, rejects redirect', async () => {
     const result = await request(port, '/api/apartments/apt_123/plans?url=https://example.com', { headers: { Cookie: 'secret=1', Authorization: 'Bearer secret' } });
     assert.equal(result.status, 200);
-    assert.equal(JSON.parse(result.body).path, '/api/apartments/apt_123/plans');
+    assert.equal(JSON.parse(result.body).path, '/api/public/apartments/apt_123/plans');
     assert.equal(calls.at(-1).headers.cookie, undefined);
     assert.equal(calls.at(-1).headers.authorization, undefined);
     assert.equal(result.headers['set-cookie'], undefined);
     assert.equal(result.headers['cache-control'], 'no-store');
     const dataset = await request(port, '/api/apartments/dataset?url=https://example.com', { headers: { Cookie: 'secret=1' } });
     assert.equal(dataset.status, 200);
-    assert.equal(JSON.parse(dataset.body).path, '/api/apartments/dataset');
+    assert.equal(JSON.parse(dataset.body).path, '/api/public/apartments/dataset');
     assert.equal(calls.at(-1).headers.cookie, undefined);
     assert.equal((await request(port, '/api/apartments/redirect/plans')).status, 502);
     const before = calls.length;

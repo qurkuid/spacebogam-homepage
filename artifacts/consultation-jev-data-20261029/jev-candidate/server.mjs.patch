@@ -1,0 +1,9 @@
+--- a/server.mjs
++++ b/server.mjs
+@@ -22,0 +23 @@
++import {createPublicApartmentCatalog} from './public-apartment-catalog.mjs';
+@@ -100,0 +102 @@
++ const publicApartmentCatalog=createPublicApartmentCatalog({fetchImpl});
+@@ -124,0 +127,2 @@
++   // Only these GET-only, field-filtered apartment catalog routes bypass staff session authentication.
++   if(await publicApartmentCatalog.route(req,res,path))return;

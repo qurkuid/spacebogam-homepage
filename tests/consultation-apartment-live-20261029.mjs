@@ -1,0 +1,36 @@
+import assert from 'node:assert/strict';
+import {writeFile} from 'node:fs/promises';
+import {withTestBrowser} from '/Users/changseok/.codex/browser-testing.mjs';
+const origin='https://spacebogam.kr';
+await withTestBrowser(async(context,selection)=>{
+ context.setDefaultTimeout(15000);const reads=[];let writes=0;
+ await context.route('**/*',route=>{const r=route.request(),u=new URL(r.url());if(r.method()!=='GET'){writes++;return route.abort();}if(u.origin!==origin)return route.abort();if(u.pathname.startsWith('/api/apartments/'))reads.push(u.pathname);return route.continue();});
+ let catalogSource; const sourceReads=[];
+ const page=await context.newPage();
+ page.on('response', response => { if(new URL(response.url()).pathname==='/api/apartments/dataset') sourceReads.push(response.json().then(body=>{catalogSource=body.source;})); });
+ await page.addInitScript(()=>{if(!sessionStorage.getItem('real-area-seed')){sessionStorage.setItem('real-area-seed','1');sessionStorage.setItem('spacebogam.consultationDraft.v2',JSON.stringify({version:2,updatedAt:Date.now(),current:'contact',answers:{type:'주거 공간',housing:'아파트',responses:{15:'부산 부산진구 백양산로 70'}}}));}});
+ await page.setViewportSize({width:390,height:844});
+ await page.goto(origin+'/consultation/?is_test=1&type=residential');
+ await page.locator('#apartment-area option[value="145㎡"]').waitFor({state:'attached'});
+ await page.locator('#apartment-area').selectOption('145㎡');
+ assert.equal(await page.locator('.selected-apartment').textContent(),'백양산쌍용스윗닷홈');
+ const labels=await page.locator('#apartment-area option').allTextContents();
+ assert.equal(await page.locator('#area-unit').isVisible(),false);
+ const address=await page.locator('.address-row input').boundingBox(),button=await page.locator('.address-row button').boundingBox();
+ assert.equal(address.height,button.height);assert(Math.abs(address.y-button.y)<1);
+ const apt=await page.locator('.apartment-name').boundingBox(),detail=await page.locator('#answer-8').boundingBox(),area=await page.locator('#apartment-area').boundingBox();assert(Math.abs(apt.y-area.y)<1);assert(detail.y>area.y+area.height);assert.equal(await page.locator('.apartment-data-source,#apartment-area-help').count(),0);
+ for(const width of [320,390,1440]){await page.setViewportSize({width,height:950});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await page.screenshot({path:`artifacts/consultation-apartment-release-20261029/qa/live-first-page-${width}.png`,fullPage:true});}
+ await page.locator('#apartment-area').selectOption('other');
+ await page.locator('#answer-4').fill('31.5abc');assert.equal(await page.locator('#answer-4').inputValue(),'31.5');
+ await page.locator('#area-unit-sqm').check();assert.match(await page.locator('.area-manual .field-label').textContent(),/㎡/);
+ const entered=Number(await page.locator('#answer-4').inputValue());assert(Math.abs(entered-31.5*3.305785)<0.0001);
+ const input=await page.locator('#answer-4').boundingBox(),confirm=await page.locator('#answer-4-confirm').boundingBox();assert(Math.abs(input.y-confirm.y)<1);assert(confirm.x>input.x+input.width-1);
+ await page.locator('#answer-4-confirm').click();assert.equal(await page.locator('#answer-4').getAttribute('data-unconfirmed'),null);
+ await page.setViewportSize({width:390,height:950});await page.screenshot({path:'artifacts/consultation-apartment-release-20261029/qa/live-manual-390.png',fullPage:true});
+ await page.reload();await page.locator('#answer-4').waitFor();assert(Math.abs(Number(await page.locator('#answer-4').inputValue())-entered)<0.0001);
+ await page.locator('#next').click();assert.equal(await page.locator('#apartment-area').count(),0);assert.match(await page.locator('.step-meta').textContent(),/2 \/ 2/);
+ await page.reload();await page.locator('[data-question-id="21"]').waitFor();
+ await Promise.all(sourceReads); assert.equal(catalogSource,'jev-public-apartment-catalog');
+ const result={catalogSource,jevEndpoint:'https://jev.intm.kr/api/public/apartments',browser:selection.browser,apartment:'백양산쌍용스윗닷홈',labels,reads,buttonAligned:true,overflow:false,testModeEmptyRequiredNext:true,draftRestoredOnSecond:true,actualSubmissions:0,blockedWrites:writes};
+ await writeFile('artifacts/consultation-apartment-release-20261029/qa/live-real-db-result.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result));
+});

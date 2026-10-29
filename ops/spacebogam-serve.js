@@ -5,8 +5,9 @@ const https = require('node:https');
 const fs = require('node:fs');
 const path = require('node:path');
 const { Transform } = require('node:stream');
+const { once } = require('node:events');
 
-const ROOT = path.resolve(process.env.ROOT || process.argv[2] || '/Volumes/DATABASE/spacebogam/current');
+const ROOT = path.resolve(process.env.ROOT || process.argv[2] || path.join(__dirname, 'current'));
 const PORT = Number(process.env.PORT || process.argv[3] || 3021);
 // Allow multipart overhead around the form's 15 MiB file limit.
 const MAX_UPLOAD = 16 * 1024 * 1024;
@@ -21,6 +22,7 @@ const mime = {
 };
 
 function reply(res, status, message) {
+  if (status === 503 && !res.headersSent) res.setHeader('Retry-After', '30');
   if (!res.headersSent) res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', Connection: 'close' });
   if (!res.writableEnded) res.end(JSON.stringify({ error: message }));
 }
@@ -38,8 +40,9 @@ function proxy(req, res, pathname, upload) {
     if (Number(req.headers['content-length']) > MAX_UPLOAD) return reply(res, 413, 'Upload exceeds 16 MiB');
   }
   // Origins are deployment/test configuration, never supplied by an HTTP client.
-  const origin = upload ? process.env.INTM_ORIGIN || 'https://intm.kr' : process.env.APT_ORIGIN || 'https://apt.intm.kr';
-  const target = new URL(pathname, origin);
+  const origin = upload ? process.env.INTM_ORIGIN || 'https://intm.kr' : process.env.JEV_ORIGIN || 'https://jev.intm.kr';
+  const upstreamPath = upload ? pathname : pathname.replace(/^\/api\/apartments/, '/api/public/apartments');
+  const target = new URL(upstreamPath, origin);
   if (!['https:', 'http:'].includes(target.protocol)) return reply(res, 502, 'Invalid upstream');
   const headers = { Accept: 'application/json' };
   if (upload) {
@@ -141,19 +144,33 @@ http.createServer(async (req, res) => {
   }
   if (pathname.startsWith('/api/')) return reply(res, 404, 'API not found');
   if (!['GET', 'HEAD'].includes(req.method)) return reply(res, 405, 'Method not allowed');
+  let rootReady = false;
   try {
     const root = await fs.promises.realpath(ROOT);
+    rootReady = true;
     let filename = path.resolve(root, '.' + pathname);
     if ((await fs.promises.stat(filename)).isDirectory()) filename = path.join(filename, 'index.html');
     filename = await fs.promises.realpath(filename);
     if (!filename.startsWith(root + path.sep)) return reply(res, 403, 'Path not allowed');
     const stat = await fs.promises.stat(filename);
     if (!stat.isFile()) return reply(res, 404, 'Not found');
-    res.writeHead(200, { 'Content-Type': mime[path.extname(filename).toLowerCase()] || 'application/octet-stream', 'Content-Length': stat.size });
-    if (req.method === 'HEAD') return res.end();
     const file = fs.createReadStream(filename);
+    await once(file, 'open');
+    if (res.destroyed) return file.destroy();
     file.on('error', () => res.destroy());
     res.on('close', () => file.destroy());
+    res.writeHead(200, { 'Content-Type': mime[path.extname(filename).toLowerCase()] || 'application/octet-stream', 'Content-Length': stat.size });
+    if (req.method === 'HEAD') { file.destroy(); return res.end(); }
     file.pipe(res);
-  } catch { reply(res, 404, 'Not found'); }
+  } catch (error) {
+    if (rootReady && ['ENOENT', 'ENOTDIR'].includes(error.code)) {
+      try {
+        await fs.promises.access(path.join(ROOT, 'index.html'), fs.constants.R_OK);
+        return reply(res, 404, 'Not found');
+      } catch { /* An unavailable serving root is not a missing customer page. */ }
+    }
+    const code = /^[A-Z0-9_]{2,24}$/.test(error.code || '') ? error.code : 'UNKNOWN';
+    console.error('[spacebogam.static_unavailable]', JSON.stringify({ code }));
+    reply(res, 503, 'Site temporarily unavailable');
+  }
 }).listen(PORT, () => console.log(`Spacebogam listening on ${PORT}; root ${ROOT}`));

@@ -1,22 +1,37 @@
 (function () {
   const nodes = {
+    intro: { title: '공간보감에서는 이렇게 상담합니다.', lead: '신청 후 담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다.' },
     type: { title: '어떤 공간을 바꾸실 계획인가요?', lead: '가장 가까운 항목을 골라주세요.', options: ['주거 공간', '상업 공간'] },
     housing: { title: '어떤 주거 공간인가요?', lead: '아파트라면 단지 정보로 도면 후보를 찾아볼게요.', options: ['아파트', '주택·빌라·기타'] },
     apartmentQuery: { title: '아파트를 찾아볼까요?', lead: '아파트 이름이나 도로명주소로 검색한 뒤 단지를 선택해 주세요.', label: '아파트 이름 또는 주소', placeholder: '예: 거제유림아시아드 또는 해맞이로 23', hint: '부산 단지 목록에 없거나 도면이 없으면 주소로 전체 도면 목록을 다시 조회합니다.' },
     dong: { title: '아파트 몇 동인가요?', lead: '해당 단지의 동을 선택해 주세요.', label: '동', placeholder: '예: 101동' },
-    planReview: { title: '도면을 확인해 주세요', lead: '도면을 크게 보고 방향을 맞춘 뒤 저장하거나 직접 업로드할 수 있습니다.' },
+    planReview: { title: '원하는 공간과 도면을 알려주세요.', lead: '스타일과 생활 방식, 요청사항을 함께 남겨 주세요. 도면은 필수이며 그 외 항목은 정하지 않았다면 비워 두셔도 됩니다.' },
     consent: { title: '상담 준비를 마칠까요?', lead: '답변을 확인하기 전에 개인정보 수집·이용에 동의해 주세요.' },
     summary: { title: '입력 내용을 확인해 주세요', lead: '내용이 맞으면 방문 상담 예약 신청을 접수해 주세요. 신청 후 담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다. 신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.' },
+    contact: { title: '현장과 연락처를 알려주세요.', lead: '주거·상가를 선택하고 기본 정보를 입력해 주세요. 공사 시작일이 미정이면 비워 두셔도 됩니다.' },
+    planning: { title: '평형과 공사 계획을 알려주세요.', lead: '공사·설비 계획과 원하는 상담 방식을 알려주세요. 선택 항목은 아는 만큼만 입력하고, 미정이면 비워 두셔도 됩니다.' },
     success: { title: '방문 상담 예약 신청이 접수되었습니다', lead: '신청 후 담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다. 신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.' }
   };
+  const residentialWorkOptions = ['전체 리모델링', '현관', '거실', '주방', '공용 욕실', '안방 욕실', '안방', '각 방'];
+  function canonicalResidentialWork(value) {
+    const aliases = {
+      '전체 수리': '전체 리모델링', '공용욕실': '공용 욕실', '안방욕실': '안방 욕실'
+    };
+    const source = Array.isArray(value) ? value : typeof value === 'string' ? value.split(',') : [];
+    const normalized = [...new Set(source.map(item => aliases[String(item).trim()] || String(item).trim())
+      .filter(item => residentialWorkOptions.includes(item)))];
+    if (normalized.includes('전체 리모델링')) return ['전체 리모델링'];
+    return normalized;
+  }
   const stage = document.getElementById('stage');
   const next = document.getElementById('next');
   const back = document.getElementById('back');
   const skip = document.getElementById('skip');
   const progress = document.querySelector('.progress');
   const progressFill = document.getElementById('progress-fill');
-  let answers = { responses: {} };
-  let current = 'type';
+  let answers = { type: '주거 공간', housing: '아파트', responses: {} };
+  let current = 'intro';
+  let renderedStep = null;
   let trail = [];
   let questionIndex = 0;
   let questions = [];
@@ -24,6 +39,7 @@
   let lookupRun = 0;
   let datasetPromise;
   let fullDatasetPromise;
+  const apartmentPlans = new Map();
   let addressLookupRun = 0;
   let submitting = false;
   let submitted = false;
@@ -31,9 +47,13 @@
   let kakaoGrant = '';
   const companyId = '4206bdfd-b51d-4433-9f8e-c854131948cc';
   const params = new URLSearchParams(location.search);
-  const requestedCommercial = params.get('type') === 'commercial';
   const requestedVertical = ['shop', 'office'].includes(params.get('vertical')) ? params.get('vertical') : '';
   const eventKey = 'spacebogam.consultationApply.eventIds.v1';
+  let intakeOnly = false;
+  let pendingBody = null;
+  let uncertainSubmission = false;
+  let submitAttempts = 0;
+  const naverConversions = new Set();
   const attributionKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'gbraid', 'wbraid', 'fbclid', 'msclkid', 'n_keyword', 'n_query', 'n_campaign_type', 'n_ad_group', 'n_keyword_id', 'utm_id', 'campaign_id', 'adset_id', 'ad_id', 'asset_id', 'placement', 'site_source_name'];
   const id = () => crypto.randomUUID();
   function stored(store, key) { try { return store.getItem(key); } catch { return null; } }
@@ -56,6 +76,64 @@
   let viewedSteps = new Set();
   let completedSteps = new Set();
   let skippedSteps = new Set();
+  const draftKey = 'spacebogam.consultationDraft.v2';
+  function clearDraft() { try { sessionStorage.removeItem(draftKey); sessionStorage.removeItem('spacebogam.consultationDraft.v1'); } catch {} }
+  function saveDraft() {
+    if (submitted || current === 'success') { clearDraft(); return; }
+    if (current === 'intro' && !answers.type && !Object.keys(answers.responses || {}).length) return;
+    try {
+      const savedAnswers = JSON.parse(JSON.stringify(answers));
+      if (savedAnswers.planAttachment) delete savedAnswers.planAttachment.file;
+      sessionStorage.setItem(draftKey, JSON.stringify({ version: 2, updatedAt: Date.now(), answers: savedAnswers,
+        current, trail, questionIndex, intakeOnly, pendingBody, uncertainSubmission: uncertainSubmission || !!pendingBody,
+        eventIds, submitAttempts }));
+    } catch {}
+  }
+  function restoreDraft() {
+    try {
+      const draft = JSON.parse(sessionStorage.getItem(draftKey) || sessionStorage.getItem('spacebogam.consultationDraft.v1') || 'null');
+      if (!draft) return;
+      if (![1, 2].includes(draft.version) || Date.now() - draft.updatedAt > 2 * 60 * 60 * 1000 || !draft.answers?.responses ||
+        !['intro','type','housing','apartmentQuery','dong','planReview','question','consent','contact','planning','additional','optionalWork','optionalLife','summary'].includes(draft.current)) { clearDraft(); return; }
+      const requestedType = params.get('type') === 'commercial' ? '상업 공간' : params.get('type') === 'residential' ? '주거 공간' : null;
+      if (requestedType && requestedType !== draft.answers.type && !draft.pendingBody) { clearDraft(); return; }
+      answers = draft.answers;
+      if (answers.type === '주거 공간' && answers.responses['12'] != null) {
+        answers.responses['12'] = canonicalResidentialWork(answers.responses['12']);
+      }
+      if (answers.type === '상업 공간') {
+        const legacy = answers.responses;
+        for (const [target, source] of [['13','name'],['10','phone'],['5','constructionDate']]) {
+          if (!legacy[target] && legacy[source]) legacy[target] = legacy[source];
+        }
+        if (!legacy['15'] && legacy.address) {
+          legacy['15'] = answers.commercialAddressBase || legacy.address;
+          legacy['8'] = answers.commercialAddressDetail || '';
+        }
+      }
+      const integratedStep = key => key === 'contact' || key === 'planning' ? key
+        : ['additional','optionalWork','optionalLife','planReview','summary'].includes(key) ? 'planning' : 'contact';
+      current = integratedStep(draft.current);
+      trail = current === 'planning' ? [{ key: 'contact', index: 0 }] : [];
+      questionIndex = Number.isInteger(draft.questionIndex) ? draft.questionIndex : 0;
+      intakeOnly = false;
+      pendingBody = typeof draft.pendingBody === 'string' ? draft.pendingBody : null;
+      uncertainSubmission = !!pendingBody;
+      submitAttempts = Number(draft.submitAttempts) || 0;
+      if (draft.eventIds?.lead_submit_success) { eventIds = draft.eventIds; sessionStorage.setItem(eventKey, JSON.stringify(eventIds)); }
+      if (answers.type === '주거 공간' && !pendingBody) {
+        delete answers.planAttachment;
+        delete answers.planStatus;
+        const availability = consultationAvailability();
+        answers.responses['18'] = availability.map(item => item.day);
+        answers.responses.consultationAvailability = Object.fromEntries(availability.map(item => [item.day, item.periods]));
+      }
+      if (pendingBody) current = 'planning';
+      else if (!isTestTraffic() && groupQuestions('contact').some(q => questionError(q))) { current = 'contact'; trail = []; }
+      sessionStorage.removeItem('spacebogam.consultationDraft.v1');
+    } catch { clearDraft(); }
+  }
+
   function trackingValue(key) {
     const direct = params.get(key);
     if (direct && !(key === 'utm_source' && direct === 'spacebogam.kr')) return direct;
@@ -77,7 +155,7 @@
   function marketingAttribution() {
     let journey = {};
     try { journey = JSON.parse(sessionStorage.getItem('spacebogam_funnel_journey') || 'null') || {}; } catch {}
-    const data = { form_path: location.pathname, source_page: location.pathname, landing_page: String(journey.landing_page || location.href).slice(0, 1000), referrer: String(journey.referrer || document.referrer || '').slice(0, 1000), submitted_at: new Date().toISOString(), device_type: innerWidth < 768 ? 'mobile' : innerWidth < 1024 ? 'tablet' : 'desktop', experiment_id: 'homepage_headline_v1', experiment_variant: stored(sessionStorage, 'spacebogam_homepage_headline_v1_variant') || '', page_variant: params.get('page_variant') || '', sbClientId: clientId, sbSessionId: sessionId, sbSubmitEventId: eventIds.lead_submit_success, is_test: isTestTracking() ? 'true' : '' };
+    const data = { form_path: location.pathname, source_page: location.pathname, landing_page: String(journey.landing_page || location.href).slice(0, 1000), referrer: String(journey.referrer || document.referrer || '').slice(0, 1000), submitted_at: new Date().toISOString(), device_type: innerWidth < 768 ? 'mobile' : innerWidth < 1024 ? 'tablet' : 'desktop', experiment_id: 'homepage_headline_v1', experiment_variant: stored(sessionStorage, 'spacebogam_homepage_headline_v1_variant') || '', page_variant: params.get('page_variant') || '', form_contract: 'residential_two_page_v1', sbClientId: clientId, sbSessionId: sessionId, sbSubmitEventId: eventIds.lead_submit_success, is_test: isTestTraffic() ? 'true' : '' };
     attributionKeys.forEach(key => { data[key] = trackingValue(key); });
     const fbp = metaCookie('_fbp', /^fb\.\d+\.\d{13}\.\d+$/);
     const fbc = metaCookie('_fbc', /^fb\.\d+\.\d{13}\.[A-Za-z0-9_-]+$/);
@@ -88,28 +166,40 @@
   function metaMatchingPayload() {
     return { consent: false, version: 'meta-contact-v1' };
   }
+  function requestBody() {
+    return JSON.stringify({ ...JSON.parse(pendingBody), metaMatching: metaMatchingPayload() });
+  }
   function funnel(name, detail = {}) {
     if (typeof fetch !== 'function') return;
-    const data = { eventId: eventIds[name] || id(), clientId, sessionId, eventName: name, pagePath: location.pathname, pageTitle: document.title, occurredAt: new Date().toISOString(), experimentId: 'homepage_headline_v1', experimentVariant: stored(sessionStorage, 'spacebogam_homepage_headline_v1_variant') || '', placement: trackingValue('placement').slice(0, 100), ctaLocation: detail.step || '', ctaText: detail.action || '', pageVariant: params.get('page_variant') || '', deviceType: innerWidth < 768 ? 'mobile' : innerWidth < 1024 ? 'tablet' : 'desktop', isTest: isTestTracking() };
+    const data = { eventId: eventIds[name] || id(), clientId, sessionId, eventName: name, pagePath: location.pathname, pageTitle: document.title, occurredAt: new Date().toISOString(), experimentId: 'homepage_headline_v1', experimentVariant: stored(sessionStorage, 'spacebogam_homepage_headline_v1_variant') || '', placement: trackingValue('placement').slice(0, 100), ctaLocation: detail.step || '', ctaText: detail.action || '', pageVariant: params.get('page_variant') || '', deviceType: innerWidth < 768 ? 'mobile' : innerWidth < 1024 ? 'tablet' : 'desktop', isTest: isTestTraffic() };
     ['utmSource', 'utmMedium', 'utmCampaign', 'utmContent', 'utmTerm'].forEach((field, index) => { data[field] = trackingValue(['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'][index]); });
     data.utmSource = data.utmSource || trackingValue('site_source_name');
     const send = (attempt = 0) => fetch('https://intm.kr/api/marketing/funnel-events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), keepalive: true })
       .then(response => {
-        if (!response.ok) {
-          if (attempt === 0 && (response.status === 429 || response.status >= 500)) return send(1);
-          if (typeof console !== 'undefined') console.warn('[spacebogam] form tracking rejected', response.status);
-        }
-      }).catch(() => {
-        if (attempt === 0) return send(1);
-        if (typeof console !== 'undefined') console.warn('[spacebogam] form tracking unavailable');
-      });
+        if (!response.ok && attempt === 0 && (response.status === 429 || response.status >= 500)) return send(1);
+      }).catch(() => { if (attempt === 0) return send(1); });
     void send();
   }
-  function isTestTracking() {
-    return /^(1|true|yes|y|on)$/i.test(params.get('is_test') || '') || stored(sessionStorage, 'spacebogam_funnel_is_test') === 'true';
+  function isTestTraffic() {
+    return /^(1|true|yes|y|on)$/i.test(params.get('is_test') || '')
+      || stored(sessionStorage, 'spacebogam_funnel_is_test') === 'true'
+      || stored(localStorage, 'spacebogam_funnel_is_test') === 'true';
+  }
+  function trackAction(name, detail = {}) {
+    if (isTestTraffic()) return;
+    try { if (typeof gtag === 'function') gtag('event', name, {
+      form_id: 'spacebogam_consultation', form_mode: intakeOnly ? 'intake' : 'detailed',
+      sb_session_id: sessionId, send_to: 'G-EJGXDD5C1T', ...detail,
+    }); } catch {}
+  }
+  function markStarted() {
+    if (!started && !submitted) {
+      started = true;
+      funnel('lead_form_start');
+    }
   }
   function trackSubmission(result) {
-    if (result.success !== true || !Number.isInteger(result.consultReqId) || result.consultReqId <= 0 || result.duplicate || isTestTracking()) return;
+    if (result.success !== true || !Number.isInteger(Number(result.consultReqId)) || Number(result.consultReqId) <= 0 || result.duplicate || isTestTraffic()) return;
     const leadEventId = result.leadEventId || eventIds.lead_submit_success;
     const key = 'spacebogam_ga_lead_sent_' + leadEventId;
     if (stored(sessionStorage, key) === 'true') return;
@@ -120,17 +210,35 @@
       }
     } catch {}
   }
-  function trackingStepId() {
-    return current === 'question' ? 'question_' + String(questionList()[questionIndex].id) : current;
+  function trackNaverLead(eventId) {
+    if (isTestTraffic() || naverConversions.has(eventId)) return;
+    const key = 'spacebogam.naverLead.' + eventId;
+    if (stored(sessionStorage, key) === 'true') return;
+    naverConversions.add(eventId);
+    const send = () => {
+      if (!window.wcs || typeof window.wcs.trans !== 'function') return;
+      try {
+        window.wcs_add = window.wcs_add || {};
+        window.wcs_add.wa = 's_7702568df18';
+        window.wcs.trans({ type: 'lead' });
+        try { sessionStorage.setItem(key, 'true'); } catch {}
+      } catch {}
+    };
+    if (window.wcs && typeof window.wcs.trans === 'function') send();
+    else {
+      const script = document.querySelector('script[data-spacebogam-naver-wcs]')
+        || document.querySelector('script[src*="wcs.naver.net/wcslog.js"]');
+      if (script) script.addEventListener('load', send, { once: true });
+    }
   }
   function trackStep(action) {
-    action = action === 'view' || action === 'skip' ? action : 'complete';
-    const stepId = trackingStepId();
+    action = ['view', 'complete', 'skip'].includes(action) ? action : 'complete';
+    const stepId = current === 'question' ? 'question_' + String(questionList()[questionIndex].id) : current;
     const seen = action === 'view' ? viewedSteps : action === 'skip' ? skippedSteps : completedSteps;
     if (seen.has(stepId)) return;
     seen.add(stepId);
     funnel('lead_step_' + action, { step: stepId, action });
-    if (isTestTracking()) return;
+    if (isTestTraffic()) return;
     const journeyType = answers.type === '상업 공간' ? 'commercial' : answers.type === '주거 공간'
       ? answers.housing === '아파트' ? 'residential_apartment' : answers.housing ? 'residential_other' : 'residential' : 'undecided';
     const eventStep = (current === 'question' ? 'q_' + String(questionList()[questionIndex].id) : current)
@@ -149,7 +257,7 @@
   function effectiveQuestions(list) {
     const visible = list.filter(q => q && q.id != null && q.is_visible !== false && q.isVisible !== false)
       .map(q => ({ ...q, questionType: q.questionType || q.question_type,
-        question: String(q.question || '').replace('통화 가능한 시간대', '연락 가능한 시간대') }));
+        question: String(q.id) === '5' ? '공사 시작 희망일을 선택해 주세요.' : String(q.question || '').replace('통화 가능한 시간대', '연락 가능한 시간대') }));
     const replacements = { 11: 21, 59: 7, 24: 7, 28: 7, 20: 32, 19: 31 };
     const ids = new Set(visible.map(q => String(q.id)));
     const unique = visible.filter(q => !ids.has(String(replacements[q.id])));
@@ -157,12 +265,13 @@
       q.isRequired = q.questionType === 'short_answer' && /성함|이름/.test(q.question)
         || q.questionType === 'phonenumber' || /연락처/.test(q.question)
         || (q.questionType === 'address' || /주소/.test(q.question)) && !/세부/.test(q.question)
-        || /평형|평수/.test(q.question)
-        || String(q.id) === '5' && q.questionType === 'date';
-      if (q.questionType === 'select' && /예산/.test(q.question)) q.options = ['4천만원 미만', '4천만~5천만원', '5천만~6천만원', '6천만~7천만원', '7천만~8천만원', '8천만~9천만원', '9천만~1억원', '1억~1.5억원', '1.5억~2억원', '2억원 이상'];
+        || ['12', '21'].includes(String(q.id));
+      if (q.questionType === 'select' && /예산/.test(q.question)) q.options = ['아직 정하지 않았어요', '4천만원 미만', '4천만~5천만원', '5천만~6천만원', '6천만~7천만원', '7천만~8천만원', '8천만~9천만원', '9천만~1억원', '1억~1.5억원', '1.5억~2억원', '2억원 이상'];
       if (q.questionType === 'multiple_choice' && /시공장소|공사 범위/.test(q.question)) {
-        q.options = questionOptions(q).filter(option => !/확장|시스템에어컨|샤시|샷시|창호/.test(option));
+        q.options = residentialWorkOptions;
       }
+      if (String(q.id) === '35') q.options = [...new Set([...questionOptions(q), 'AI 검색', '기타'])];
+      if (String(q.id) === '31') q.question = '원하는 상담 스타일을 선택해 주세요. (복수 선택 가능)';
       if (/가족 구성/.test(q.question)) {
         q.questionType = 'household';
         q.options = questionOptions(q).filter(option => !/반려동물/.test(option));
@@ -189,15 +298,14 @@
       { id: 'sash', question: '샤시를 교체할 계획인가요?', questionType: 'single_choice', options: ['네, 교체할 계획이에요', '교체하지 않아요', '아직 정하지 않았어요'], isRequired: false }
     ];
     const remaining = optional.filter(q => !featured.includes(q));
-    const day = remaining.find(q => q.questionType === 'multiple_choice' && /상담을 원하는 요일/.test(q.question));
-    const date = remaining.find(q => q.questionType === 'date' && /상담을 원하는 날짜/.test(q.question));
-    const time = remaining.find(q => q.questionType === 'single_choice' && /상담을 원하는 시간/.test(q.question));
-    const callback = remaining.find(q => /연락 가능한 시간대/.test(q.question));
-    const schedule = day && date && time ? { ...day, question: '방문 상담 희망 일정을 선택해 주세요.', questionType: 'schedule', parts: [day, date, time] } : null;
-    const tail = schedule ? remaining.flatMap(q => q === day ? [schedule, ...(callback ? [callback] : [])]
-      : q === date || q === time || q === callback ? [] : [q]) : remaining;
-    return ordered.concat(featured.slice(0, 2), separate, featured.slice(2), tail)
-      .map(q => isBudgetQuestion(q) ? { ...q, isRequired: true } : q);
+    const day = unique.find(q => q.questionType === 'multiple_choice' && /상담을 원하는 요일/.test(q.question));
+    const date = unique.find(q => q.questionType === 'date' && /상담을 원하는 날짜/.test(q.question));
+    const time = unique.find(q => q.questionType === 'single_choice' && /상담을 원하는 시간/.test(q.question));
+    const callback = unique.find(q => /연락 가능한 시간대/.test(q.question));
+    const schedule = day ? { ...day, question: '상담을 원하는 요일과 시간대를 선택해 주세요.', questionType: 'schedule', isRequired: false, parts: [day] } : null;
+    return unique.filter(q => q.questionType !== 'password' && q !== day && q !== date && q !== time
+      && !['17','38','22','25','26','27','32'].includes(String(q.id)))
+      .concat(separate, schedule ? [schedule] : []);
   }
 
   function questionOptions(question) {
@@ -205,26 +313,8 @@
     try { return JSON.parse(question.options || '[]'); } catch { return []; }
   }
 
-  function loadQuestions() {
-    if (typeof fetch !== 'function') return;
-    fetch('https://intm.kr/api/consultation/questions').then(response => {
-      if (!response.ok) throw new Error('questions unavailable');
-      return response.json();
-    }).then(body => {
-      const loaded = effectiveQuestions(body.questions || []);
-      if (loaded.length && current !== 'question' && current !== 'summary') {
-        questions = loaded;
-        fillKakaoResponses();
-        const addressQuestion = questions.find(q => q.questionType === 'address');
-        if (answers.apartmentSelected && addressQuestion) answers.responses[String(addressQuestion.id)] = answers.address;
-        const areaQuestion = questions.find(q => /평형|평수/.test(q.question));
-        if (answers.planAreaAuto && areaQuestion) answers.responses[String(areaQuestion.id)] = answers.planAreaValue;
-      }
-    }).catch(() => {});
-  }
-
   function fillKakaoResponses() {
-    questions.concat(window.SB_CONSULTATION_QUESTIONS.commercial).forEach(question => {
+    questions.forEach(question => {
       const key = String(question.id);
       if (String(answers.responses[key] || '').trim()) return;
       if (question.questionType === 'short_answer' && /성함|성명|이름/.test(question.question)
@@ -235,19 +325,22 @@
   }
   window.SB_CONSULTATION = {
     applyKakaoProfile(profile, grant) {
-      kakaoProfile = profile;
-      kakaoGrant = grant;
+      kakaoProfile = profile && typeof profile === 'object' ? profile : {};
+      kakaoGrant = typeof grant === 'string' ? grant : '';
       fillKakaoResponses();
-      if (current === 'question') render();
+      if (current === 'contact') render();
     }
   };
 
   function response(question) { return answers.responses[String(question.id)]; }
-  function isBudgetQuestion(question) { return question.questionType === 'select' && /예산 구간/.test(question.question); }
   function hasResponse(question) {
     const value = response(question);
-    if (isBudgetQuestion(question) && value === '기타(직접입력)') return false;
     return Array.isArray(value) ? value.length > 0 : !!String(value || '').trim();
+  }
+  function syncActiveQuestionNext() {
+    if (current !== 'question') return;
+    const question = questionList()[questionIndex];
+    next.disabled = !!question?.isRequired && !!questionError(question);
   }
   function isPastDate(value) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return false;
@@ -256,31 +349,36 @@
     return new Date(year, month - 1, day) < new Date(today.getFullYear(), today.getMonth(), today.getDate());
   }
   function isApartment() { return answers.type === '주거 공간' && answers.housing === '아파트'; }
-  function questionList() { return answers.type === '상업 공간' ? window.SB_CONSULTATION_QUESTIONS.commercial : questions; }
-  function applyEntryIntent() {
-    if (!requestedCommercial) return;
-    answers.type = '상업 공간';
-    if (requestedVertical) answers.responses.vertical = requestedVertical;
-    current = nextQuestion(0);
+  const commonQuestionIds = ['13', '10', '15', '8', '5', 'currentState'];
+  function questionList() {
+    const state = { ...window.SB_CONSULTATION_QUESTIONS.commercial.find(q => q.id === 'currentState'),
+      question: '공실 여부·현재 현장 상태를 알려주세요.',
+      optionLabels: { vacant: '공실이에요', occupied: '거주·영업 중이에요', shell: '신축·무마감이에요', renovation: '기존 인테리어 철거 예정이에요' } };
+    if (answers.type !== '상업 공간') return questions.concat(state);
+    return questions.filter(q => commonQuestionIds.includes(String(q.id))).concat(state,
+      window.SB_CONSULTATION_QUESTIONS.commercial.filter(q => !['name','phone','address','currentState','constructionDate'].includes(String(q.id)))
+        .map(q => q.id === 'area' ? { ...q, question: '실면적을 입력해 주세요.' } : q));
+  }
+  function groupQuestions(key = current) {
+    const visible = questionList().filter(q => !hiddenByBranch(q));
+    if (key === 'contact') return ['13','10','15', answers.type === '주거 공간' ? '4' : 'area','5','currentState']
+      .map(id => visible.find(q => String(q.id) === id)).filter(Boolean);
+    if (key !== 'planning') return [];
+    const remaining = visible.filter(q => !commonQuestionIds.concat(['4','area']).includes(String(q.id)));
+    const order = answers.type === '주거 공간'
+      ? ['21','12','expansion','expansion_spaces','system_ac','system_ac_count','sash',
+        '18','31','35','7']
+      : ['vertical','leaseStatus','handoverDate','previousUse','workScope','facilityNeeds',
+        'permitStatus','drawingStatus','openDate','budget','callbackTime','requestNote'];
+    return order.map(id => remaining.find(q => String(q.id) === id)).filter(Boolean)
+      .concat(remaining.filter(q => !order.includes(String(q.id))));
   }
   function hiddenByBranch(question) {
     return question.showIf && !(question.showIf.values || [question.showIf.value]).includes(answers.responses[question.showIf.id]);
   }
-  function skipQuestion(question) {
-    return hiddenByBranch(question)
-      || /연락 가능한 시간대/.test(question.question) && !!answers.responses['34']
-      || String(question.id) === '38' && !!answers.responses['33']
-      || isApartment() && answers.address && question.questionType === 'address' && hasResponse(question)
-      || isApartment() && answers.planAreaAuto && /평형|평수/.test(question.question) && hasResponse(question);
+  function applyCommercialDefaults() {
+    if (answers.type === '상업 공간' && requestedVertical && !answers.responses.vertical) answers.responses.vertical = requestedVertical;
   }
-  function nextQuestion(from) {
-    const list = questionList();
-    let index = from;
-    while (index < list.length && skipQuestion(list[index])) index++;
-    questionIndex = index;
-    return index < list.length ? 'question' : 'consent';
-  }
-
   function el(tag, className, value) {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -325,8 +423,8 @@
   function loadFullDataset() {
     if (fullDatasetPromise) return fullDatasetPromise;
     if (typeof fetch !== 'function') return Promise.reject(new Error('dataset unavailable'));
-    fullDatasetPromise = fetch('/api/apartments/dataset')
-      .then(response => { if (!response.ok) throw new Error('dataset unavailable'); return response.json(); })
+    fullDatasetPromise = timedFetch('/api/apartments/dataset')
+      .then(result => { if (!result.ok) throw new Error('dataset unavailable'); return result.data; })
       .then(body => {
         if (!Array.isArray(body.cols) || !Array.isArray(body.rows)) throw new Error('invalid dataset');
         const column = Object.fromEntries(body.cols.map((name, index) => [name, index]));
@@ -334,19 +432,23 @@
           item[column.apartmentName], item[column.apartmentId],
           item[column.roadAddress] || item[column.legacyAddress], item[column.type],
           item[column.planPic], item[column.planId], item[column.legacyAddress]
-        ]).filter(row => row[0] && row[1] && planUrl(row));
+        ]).filter(row => row[0] && row[1]);
       }).catch(error => { fullDatasetPromise = null; throw error; });
     return fullDatasetPromise;
   }
 
   function findAddressCandidates(address, rows) {
-    const key = normalize(address);
-    if (key.length < 6 || !/\d/.test(key)) return [];
+    const base = String(address || '').replace(/\([^)]*\)/g, '').trim();
+    const key = normalize(base);
+    const numbers = (base.match(/\d+/g) || []).join('-');
+    if (key.length < 6 || !numbers) return [];
     const found = new Map();
     rows.forEach(row => {
       const matches = [row[2], row[6]].some(value => {
-        const candidate = normalize(value);
-        return candidate.length >= 8 && /\d/.test(candidate) && (candidate.includes(key) || key.includes(candidate));
+        const candidateBase = String(value || '').replace(/\([^)]*\)/g, '').trim();
+        const candidate = normalize(candidateBase);
+        const candidateNumbers = (candidateBase.match(/\d+/g) || []).join('-');
+        return candidate.length >= 8 && numbers === candidateNumbers && (candidate === key || candidate.includes(key) || key.includes(candidate));
       });
       if (matches && !found.has(row[1])) found.set(row[1], row);
     });
@@ -379,157 +481,32 @@
       }).catch(fallback);
   }
 
+  function nextQuestion(from) {
+    const list = questionList();
+    let index = from;
+    while (index < list.length && hiddenByBranch(list[index])) index++;
+    questionIndex = index;
+    return index < list.length ? 'question' : 'summary';
+  }
+
   function nextNode(key) {
-    if (key === 'type') return answers.type === '주거 공간' ? 'housing' : nextQuestion(0);
-    if (key === 'housing') return isApartment() ? 'apartmentQuery' : nextQuestion(0);
-    if (key === 'apartmentQuery') return 'dong';
-    if (key === 'dong') return 'planReview';
-    if (key === 'planReview') return nextQuestion(0);
+    if (key === 'intro') return 'contact';
     if (key === 'question') return nextQuestion(questionIndex + 1);
-    if (key === 'consent') return 'summary';
+    if (key === 'contact') return 'planning';
+    if (key === 'planning' || key === 'dong') return 'planReview';
+    if (key === 'apartmentQuery') return 'dong';
     return 'summary';
   }
 
   function clearError() {
-    const box = stage.querySelector('.error');
-    if (box) box.textContent = '';
-    const input = stage.querySelector('.input-row input') || stage.querySelector('.question-input');
-    if (input) input.removeAttribute('aria-invalid');
+    stage.querySelectorAll('.error').forEach(box => { box.textContent = ''; });
+    stage.querySelectorAll('.field-error').forEach(box => box.remove());
+    stage.querySelectorAll('[aria-invalid]').forEach(input => { input.removeAttribute('aria-invalid'); input.setAttribute('aria-describedby', 'form-error'); });
   }
-
-  function isAdvanceKey(event) {
-    return event.key === 'Enter' && !event.isComposing && event.keyCode !== 229;
-  }
-
   function showError(message) {
-    if (!submitting) funnel('lead_step_error', { step: trackingStepId(), action: 'validation' });
-    const box = stage.querySelector('.error');
+    if (!submitting) funnel('lead_step_error', { step: current === 'question' ? 'question_' + String(questionList()[questionIndex].id) : current, action: 'validation' });
+    const box = stage.querySelector('#form-error');
     if (box) box.textContent = message;
-    const input = stage.querySelector('.input-row input') || stage.querySelector('.question-input');
-    if (input) { input.setAttribute('aria-invalid', 'true'); input.focus(); }
-  }
-
-  function setChoice(key, value) {
-    if (answers[key] !== value && key === 'type') {
-      lookupRun++;
-      lookup = { status: 'idle', candidates: [] };
-      clearPlan();
-      answers = { responses: {} };
-    }
-    if (answers[key] !== value && key === 'housing') {
-      lookupRun++;
-      lookup = { status: 'idle', candidates: [] };
-      clearPlan();
-      ['apartmentQuery', 'apartmentSelected', 'apartmentUnmatched', 'dong', 'dongManual', 'address', 'addressLookup'].forEach(item => delete answers[item]);
-      answers.responses = {};
-    }
-    answers[key] = value;
-    fillKakaoResponses();
-    markStarted();
-    advance();
-  }
-
-  function renderChoices(key) {
-    const options = nodes[key].options;
-    const group = el('div', 'choices');
-    options.forEach((option, position) => {
-      const button = el('button', 'choice');
-      button.type = 'button';
-      button.setAttribute('aria-pressed', answers[key] === option ? 'true' : 'false');
-      button.appendChild(el('span', 'choice-key', String.fromCharCode(65 + position)));
-      button.appendChild(el('span', null, option));
-      button.appendChild(el('span', 'choice-arrow', '↗'));
-      button.addEventListener('click', () => setChoice(key, option));
-      group.appendChild(button);
-    });
-    stage.appendChild(group);
-  }
-
-  function renderApartmentSearch() {
-    const node = nodes.apartmentQuery;
-    const label = el('label', 'field');
-    label.appendChild(el('span', 'field-label', node.label));
-    const row = el('span', 'input-row');
-    const input = el('input');
-    input.type = 'search';
-    input.value = answers.apartmentQuery || '';
-    input.placeholder = node.placeholder;
-    input.autocomplete = 'off';
-    row.appendChild(input);
-    label.appendChild(row);
-    stage.appendChild(label);
-    stage.appendChild(el('p', 'hint', node.hint));
-    if (answers.apartmentSelected) stage.appendChild(el('p', 'selected-apartment', '선택한 단지 · ' + answers.apartmentSelected[0] + ' · ' + answers.apartmentSelected[2]));
-    if (answers.apartmentUnmatched) stage.appendChild(el('p', 'selected-apartment', '검색 결과에 없는 단지 · 뒤에서 주소와 평형을 직접 입력합니다.'));
-    const results = el('div', 'search-results');
-    stage.appendChild(results);
-
-    function showResults(query) {
-      results.replaceChildren();
-      if (normalize(query).length < 2) { results.appendChild(el('p', 'hint', '두 글자 이상 입력하면 단지 이름과 주소를 함께 검색합니다.')); return; }
-      results.appendChild(el('p', 'hint', '아파트 목록을 검색하고 있어요.'));
-      loadDataset().then(rows => {
-        if (current !== 'apartmentQuery' || input.value !== query) return;
-        results.replaceChildren();
-        const matches = findCandidates(query, rows);
-        results.appendChild(el('p', 'result-caption', matches.length ? '검색 결과 · 단지를 선택해 주세요' : '일치하는 단지가 없습니다.'));
-        matches.forEach(match => {
-          const button = el('button', 'search-result');
-          button.type = 'button';
-          button.appendChild(el('strong', null, match[0]));
-          button.appendChild(el('small', null, match[2]));
-          button.addEventListener('click', () => {
-            if (answers.apartmentSelected?.[1] !== match[1]) {
-              delete answers.dong; delete answers.dongManual;
-              clearPlan();
-            }
-            answers.apartmentSelected = match;
-            answers.apartmentUnmatched = false;
-            answers.apartmentQuery = match[0];
-            answers.address = match[2];
-            const addressQuestion = questions.find(q => q.questionType === 'address');
-            if (addressQuestion) answers.responses[String(addressQuestion.id)] = match[2];
-            startLookup(match[0]);
-            trail.push({ key: current, index: questionIndex });
-            current = 'dong';
-            render();
-          });
-          results.appendChild(button);
-        });
-        const manual = el('button', 'search-manual', '검색 결과에 없어요 · 직접 입력하기');
-        manual.type = 'button';
-        manual.addEventListener('click', () => {
-          clearPlan();
-          answers.apartmentSelected = null;
-          answers.apartmentUnmatched = true;
-          delete answers.address;
-          const addressQuestion = questions.find(q => q.questionType === 'address');
-          if (addressQuestion) delete answers.responses[String(addressQuestion.id)];
-          advance();
-        });
-        results.appendChild(manual);
-      }).catch(() => {
-        if (current !== 'apartmentQuery' || input.value !== query) return;
-        results.replaceChildren(el('p', 'hint', '검색 목록을 열지 못했습니다. 잠시 후 다시 시도해 주세요.'));
-      });
-    }
-
-    input.addEventListener('input', () => {
-      if (answers.apartmentQuery !== input.value) {
-        lookupRun++;
-        lookup = { status: 'idle', candidates: [] };
-        clearPlan();
-        ['apartmentSelected', 'apartmentUnmatched', 'dong', 'dongManual', 'planStatus', 'address', 'addressLookup'].forEach(item => delete answers[item]);
-        const addressQuestion = questions.find(q => q.questionType === 'address');
-        if (addressQuestion) delete answers.responses[String(addressQuestion.id)];
-      }
-      answers.apartmentQuery = input.value;
-      clearError();
-      next.disabled = true;
-      showResults(input.value);
-    });
-    input.addEventListener('keydown', event => { if (isAdvanceKey(event)) { event.preventDefault(); advance(); } });
-    showResults(input.value);
   }
 
   function renderDong() {
@@ -552,17 +529,19 @@
     select.appendChild(manual);
     select.value = answers.dongManual ? '__manual__' : answers.dong || '';
     const chooseDong = () => {
-      if (current !== 'dong') return;
+      if (!['dong','planReview'].includes(current)) return;
+      const dong = select.value === '__manual__' ? '' : select.value;
+      if (answers.dong !== dong) clearPlan();
       answers.dongManual = select.value === '__manual__';
-      answers.dong = answers.dongManual ? '' : select.value;
-      if (answers.dong) advance(); else render();
+      answers.dong = dong;
+      render();
     };
     select.addEventListener('input', chooseDong);
     select.addEventListener('change', chooseDong);
     label.appendChild(select);
     stage.appendChild(label);
     if (answers.dongManual) renderDongInput();
-    stage.appendChild(el('p', 'hint', '동 목록: 한국부동산원 2026.08.31 자료. 목록에 없으면 직접 입력하고, 도면은 다음 단계에서 확인해 주세요.'));
+    stage.appendChild(el('p', 'hint', '동 목록: 한국부동산원 2026.08.31 자료. 목록에 없으면 직접 입력하고, 같은 화면에서 도면을 확인해 주세요.'));
   }
 
   function renderDongInput() {
@@ -576,11 +555,12 @@
     input.placeholder = node.placeholder;
     input.autocomplete = 'off';
     input.addEventListener('input', () => {
+      if (answers.dong !== input.value) clearPlan();
       answers.dong = input.value;
       clearError();
-      next.disabled = !input.value.trim();
+      saveDraft();
     });
-    input.addEventListener('keydown', event => { if (isAdvanceKey(event)) { event.preventDefault(); advance(); } });
+    input.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); advance(); } });
     row.appendChild(input);
     label.appendChild(row);
     stage.appendChild(label);
@@ -622,16 +602,17 @@
     viewer.setAttribute('aria-label', '도면 보기 · 확대 후 좌우와 위아래로 이동할 수 있습니다');
     const canvas = el('div', 'plan-zoom-canvas');
     const visual = el('img', 'plan-large');
-    visual.src = item.url;
+    const storedUpload = item.source === 'upload' && !item.file && item.filePath;
+    visual.src = storedUpload ? 'https://intm.kr' + item.filePath : item.url;
     visual.title = item.name + ' 크게 보기';
     visual.alt = item.name + ' 도면 크게 보기';
     canvas.appendChild(visual);
     viewer.appendChild(canvas);
     dialog.appendChild(viewer);
     const zoomControls = el('div', 'plan-zoom-controls');
-    const zoomOut = el('button', 'plan-zoom-button', '축소 −');
-    const zoomIn = el('button', 'plan-zoom-button', '확대 +');
-    const fit = el('button', 'plan-zoom-button', '전체 보기');
+    const zoomOut = el('button', 'flip-button', '축소 −');
+    const zoomIn = el('button', 'flip-button', '확대 +');
+    const fit = el('button', 'flip-button', '전체 보기');
     const zoomLabel = el('span', 'plan-zoom-label', '100%');
     zoomLabel.setAttribute('aria-live', 'polite');
     let zoom = 1;
@@ -650,17 +631,19 @@
     fit.addEventListener('click', () => setZoom(1));
     zoomControls.appendChild(zoomLabel);
     dialog.appendChild(zoomControls);
-    dialog.appendChild(el('p', 'plan-confirm-note', '상담할 공간의 도면이 맞는지 확인해 주세요. 목록 도면은 선택한 동이나 평형과 다를 수 있습니다.'));
+    const note = el('p', 'plan-confirm-note', storedUpload ? '저장된 도면입니다. 반전을 수정하려면 원본 이미지를 다시 업로드해 주세요.' : '상담할 공간의 도면이 맞는지 확인해 주세요. 목록 도면은 선택한 동이나 평형과 다를 수 있습니다.');
+    dialog.appendChild(note);
     const controls = el('div', 'plan-controls');
     let flipX = item.flipX || false;
     let flipY = item.flipY || false;
-    function applyFlip() { visual.style.transform = 'scale(' + (flipX ? -1 : 1) + ',' + (flipY ? -1 : 1) + ')'; }
+    function applyFlip() { visual.style.transform = storedUpload ? 'none' : 'scale(' + (flipX ? -1 : 1) + ',' + (flipY ? -1 : 1) + ')'; }
     const horizontal = el('button', 'flip-button', '좌우 반전');
     horizontal.type = 'button';
     horizontal.setAttribute('aria-pressed', String(flipX));
     horizontal.addEventListener('click', () => { flipX = !flipX; horizontal.setAttribute('aria-pressed', String(flipX)); applyFlip(); });
     const vertical = el('button', 'flip-button', '상하 반전');
     vertical.type = 'button';
+    horizontal.disabled = vertical.disabled = !!storedUpload;
     vertical.setAttribute('aria-pressed', String(flipY));
     vertical.addEventListener('click', () => { flipY = !flipY; vertical.setAttribute('aria-pressed', String(flipY)); applyFlip(); });
     controls.appendChild(horizontal);
@@ -668,9 +651,10 @@
     const save = el('button', 'plan-save', '도면이 맞아요 · 저장하기');
     save.type = 'button';
     let saved = false;
+    visual.addEventListener('error', () => { save.disabled = true; note.textContent = '도면 이미지를 불러오지 못했습니다. 닫고 다른 도면을 선택하거나 직접 업로드해 주세요.'; });
     save.addEventListener('click', () => {
       if (answers.planAttachment?.url !== item.url) clearPlan();
-      answers.planAttachment = { source: item.source, name: item.name, url: item.url, mime: item.mime, apartmentId: item.row?.[1] || null, planId: item.row?.[5] || null, file: item.file || null, flipX, flipY };
+      answers.planAttachment = { source: item.source, name: item.name, url: item.url, mime: item.mime, apartmentId: item.row?.[1] || item.apartmentId || null, planId: item.row?.[5] || item.planId || null, file: item.file || null, filePath: flipX === !!item.flipX && flipY === !!item.flipY ? item.filePath || null : null, flipX, flipY };
       answers.planStatus = 'saved';
       const squareMeters = Number(String(item.row?.[3] || '').match(/^\s*(\d+(?:\.\d+)?)[^㎡]*㎡/)?.[1]);
       const areaQuestion = questions.find(q => /평형|평수/.test(q.question));
@@ -682,8 +666,7 @@
       }
       saved = true;
       dialog.close();
-      if (current === 'planReview') advance();
-      else render();
+      render();
     });
     controls.appendChild(save);
     dialog.appendChild(controls);
@@ -700,7 +683,7 @@
 
   function renderAddressLookup() {
     const label = el('label', 'field');
-    label.appendChild(el('span', 'field-label', '도로명주소 또는 지번주소로 도면 다시 찾기'));
+    label.appendChild(el('span', 'field-label', '도면 검색용 주소 (시공장소 주소는 변경되지 않습니다)'));
     const row = el('span', 'input-row');
     const input = el('input', 'address-search');
     input.type = 'search';
@@ -721,9 +704,6 @@
         results.appendChild(el('p', 'hint', '건물번호가 포함된 주소를 입력하면 apt.intm.kr 전체 도면 목록에서 다시 찾습니다.'));
         return;
       }
-      answers.address = query;
-      const addressQuestion = questions.find(question => question.questionType === 'address');
-      if (addressQuestion) answers.responses[String(addressQuestion.id)] = query;
       const run = ++addressLookupRun;
       results.appendChild(el('p', 'hint', '주소로 도면을 다시 찾고 있어요.'));
       loadFullDataset().then(rows => {
@@ -732,7 +712,7 @@
         const matches = findAddressCandidates(query, rows);
         results.appendChild(el('p', 'result-caption', matches.length
           ? '주소가 일치하는 단지 · 이름과 도면이 맞는지 선택해 주세요.'
-          : '이 주소와 일치하는 도면이 없습니다. 직접 업로드하거나 도면 없이 진행해 주세요.'));
+          : '이 주소와 일치하는 도면이 없습니다. 도면 이미지를 직접 업로드해 주세요.'));
         matches.forEach(match => {
           const button = el('button', 'search-result');
           button.type = 'button';
@@ -744,14 +724,11 @@
             answers.apartmentSelected = match;
             answers.apartmentUnmatched = false;
             answers.apartmentQuery = match[0];
-            answers.address = query;
-            if (addressQuestion) answers.responses[String(addressQuestion.id)] = query;
-            lookup = { status: 'ready', candidates: rows.filter(candidate => candidate[1] === match[1]), source: 'address' };
+                  lookup = { status: 'ready', candidates: rows.filter(candidate => candidate[1] === match[1]), source: 'address' };
             if (previousId !== match[1]) {
               delete answers.dong;
               delete answers.dongManual;
-              trail.push({ key: current, index: questionIndex });
-              current = 'dong';
+
             }
             render();
           });
@@ -759,7 +736,7 @@
         });
       }).catch(() => {
         if (run !== addressLookupRun || current !== 'planReview' || input.value.trim() !== query) return;
-        results.replaceChildren(el('p', 'hint', '주소 조회가 일시적으로 불가능합니다. 도면 직접 업로드 또는 도면 없이 진행할 수 있습니다.'));
+        results.replaceChildren(el('p', 'hint', '주소 조회가 일시적으로 불가능합니다. 도면 이미지를 직접 업로드해 주세요.'));
       });
     }
 
@@ -768,6 +745,7 @@
   }
 
   function renderPlan() {
+    if (answers.apartmentSelected && isApartment()) renderDong();
     const rows = lookup.candidates.filter(row => planUrl(row));
     if (rows.length) {
       const list = el('div', 'plan-list');
@@ -787,7 +765,8 @@
         button.appendChild(image);
         button.appendChild(el('span', null, row[0] + ' · ' + row[3]));
         button.appendChild(el('small', null, row[2] + ' · 도면 확인하기 / 크게 보기'));
-        button.addEventListener('click', () => openPlanPreview({ source: 'catalog', row, name: row[0] + ' ' + row[3], url: planUrl(row), mime: 'image/jpeg', flipX: answers.planAttachment?.flipX, flipY: answers.planAttachment?.flipY }));
+        button.setAttribute('aria-pressed', String(answers.planAttachment?.url === planUrl(row)));
+        button.addEventListener('click', () => openPlanPreview({ source: 'catalog', row, name: row[0] + ' ' + row[3], url: planUrl(row), mime: 'image/jpeg', ...(answers.planAttachment?.url === planUrl(row) ? answers.planAttachment : {}) }));
         list.appendChild(button);
       });
       stage.appendChild(list);
@@ -813,19 +792,19 @@
       openPlanPreview({ source: 'upload', file, name: file.name, url, mime: file.type });
     });
     stage.appendChild(upload);
-    const uploadButton = el('button', 'manual-option', '도면 직접 업로드하기 (이미지)');
+    const uploadButton = el('button', 'manual-option', '도면 직접 업로드하기 (JPG·PNG·WebP)');
     uploadButton.type = 'button';
     uploadButton.addEventListener('click', () => upload.click());
     stage.appendChild(uploadButton);
-    const without = el('button', 'manual-option', '도면이 없어요 · 도면 없이 계속하기');
-    without.type = 'button';
-    without.addEventListener('click', () => { clearPlan(); answers.planStatus = 'none'; advance(); });
-    stage.appendChild(without);
+    stage.appendChild(el('p', 'hint', '도면은 필수입니다. JPG·PNG·WebP 이미지를 15MB 이하로 올려 주세요. PDF·HEIC는 이미지로 변환해 주세요.'));
+    const help = el('a', 'manual-option', '도면을 구하기 어려워요 · 전화 문의');
+    help.href = 'tel:050713881252';
+    stage.appendChild(help);
     stage.appendChild(el('p', 'plan-source', lookup.source === 'address'
       ? '자료: apt.intm.kr 전체 도면 목록. 주소가 같아도 평형·동이 다를 수 있으니 도면을 크게 보고 확인해 주세요.'
       : lookup.source === 'live'
       ? '자료: apt.intm.kr 공개 도면 목록. 같은 단지에도 여러 평형이 있습니다. 선택한 동·집의 도면이 맞는지 크게 보고 확인해 주세요.'
-      : '자료: apt.intm.kr 공개 목록 · 2026.09.28 스냅샷. 현재는 단지별 대표 도면 1개만 표시됩니다. 실제 도면과 다르면 직접 업로드하거나 도면 없이 진행해 주세요.'));
+      : '자료: apt.intm.kr 공개 목록 · 2026.09.28 스냅샷. 현재는 단지별 대표 도면 1개만 표시됩니다. 실제 도면과 다르면 직접 업로드해 주세요.'));
   }
 
   let postcodeLoading = null;
@@ -856,36 +835,32 @@
     return postcodeLoading;
   }
 
-  function addCommercialAddressSearch(target, input) {
+  function addAddressSearch(target, input, detailQuestion, addressQuestion, addressRow) {
+    const detailKey = String(detailQuestion?.id || '8');
     input.readOnly = true;
     input.autocomplete = 'off';
     input.placeholder = '주소 검색으로 기본주소를 선택해 주세요';
-    input.className += ' commercial-address-base';
+    input.className += ' address-base commercial-address-base';
     const baseLabel = input.parentElement?.querySelector('.field-label');
     if (baseLabel) baseLabel.textContent = '기본주소 *';
-    const detailLabel = el('label', 'field');
+    const detailLabel = el('label', 'field address-detail-field');
     detailLabel.appendChild(el('span', 'field-label', '상세주소 · 선택 입력'));
     const detail = el('input', 'question-input');
-    detail.id = 'commercial-address-detail';
+    detail.id = 'answer-' + detailKey;
     detail.type = 'text';
     detail.autocomplete = 'address-line2';
     detail.placeholder = '예: 2층 201호, 건물명';
-    const savedAddress = [answers.commercialAddressBase, answers.commercialAddressDetail].filter(Boolean).join(' ');
-    if (answers.commercialAddressBase && input.value === savedAddress) {
-      input.value = answers.commercialAddressBase;
-      detail.value = answers.commercialAddressDetail || '';
-    }
-    detailLabel.hidden = !input.value;
+    detail.value = answers.responses[detailKey] || '';
+    detailLabel.hidden = false;
     detail.disabled = !input.value;
     function syncAddress() {
-      answers.commercialAddressBase = input.value.trim();
-      answers.commercialAddressDetail = detail.value.trim();
-      answers.responses.address = [answers.commercialAddressBase, answers.commercialAddressDetail].filter(Boolean).join(' ');
+      answers.responses[String(addressQuestion.id)] = input.value.trim();
+      answers.responses[detailKey] = detail.value.trim();
     }
     input.addEventListener('input', syncAddress);
     detail.addEventListener('input', syncAddress);
     detailLabel.appendChild(detail);
-    const search = el('button', 'commercial-address-search', '주소 검색');
+    const search = el('button', 'address-search commercial-address-search', '주소 검색');
     search.type = 'button';
     search.setAttribute('aria-expanded', 'false');
     search.setAttribute('aria-controls', 'commercial-address-panel');
@@ -899,7 +874,7 @@
     notice.setAttribute('role', 'status');
     panel.appendChild(close);
     panel.appendChild(host);
-    target.appendChild(search);
+    (addressRow || target).appendChild(search);
     target.appendChild(panel);
     target.appendChild(notice);
     target.appendChild(detailLabel);
@@ -932,11 +907,13 @@
             if (input.value !== data.address) detail.value = '';
             detailLabel.hidden = false;
             detail.disabled = false;
-            input.value = data.address;
+            answers.addressBuildingName = data.buildingName || '';
+            input.value = data.roadAddress || data.address;
             input.dispatchEvent(new Event('input', { bubbles: true }));
             hide();
-            notice.textContent = '주소가 입력되었습니다. 상세주소를 입력해 주세요.';
-            detail.focus();
+            notice.textContent = '주소가 입력되었습니다. 상세주소는 선택해서 입력할 수 있습니다.';
+            if (answers.type === '주거 공간') render();
+            stage.querySelector('#answer-' + detailKey)?.focus();
           }
         }).embed(host);
         notice.textContent = '도로명·건물명을 검색한 뒤 주소를 선택해 주세요.';
@@ -949,52 +926,21 @@
     });
   }
 
-  function renderQuestion() {
-    const question = questionList()[questionIndex];
+  function renderQuestion(question, target = stage, addressDetail = null) {
     const key = String(question.id);
     const type = question.questionType;
     const options = questionOptions(question);
-    if (isBudgetQuestion(question)) {
-      const other = '기타(직접입력)';
-      const label = el('label', 'field');
-      label.appendChild(el('span', 'field-label', question.question + ' *'));
-      const select = el('select', 'question-input');
-      ['', ...options, other].forEach(option => {
-        const item = el('option', null, question.optionLabels?.[option] || option || '선택해 주세요');
-        item.value = option; select.appendChild(item);
-      });
-      const value = response(question) || '';
-      select.value = !value || !options.includes(value) ? other : value;
-      select.required = true;
-      label.appendChild(select); stage.appendChild(label);
-      const customLabel = el('label', 'field');
-      customLabel.appendChild(el('span', 'field-label', '예산 직접입력 *'));
-      const custom = el('input', 'question-input');
-      custom.type = 'text'; custom.maxLength = 100;
-      custom.placeholder = '예: 3,500만원 또는 4천만~5천만원';
-      custom.value = select.value === other && value !== other ? value : '';
-      customLabel.hidden = select.value !== other;
-      custom.required = !customLabel.hidden;
-      customLabel.appendChild(custom); stage.appendChild(customLabel);
-      select.addEventListener('change', () => {
-        customLabel.hidden = select.value !== other;
-        custom.required = !customLabel.hidden;
-        answers.responses[key] = select.value === other ? custom.value.trim() || other : select.value;
-        clearError(); next.disabled = !hasResponse(question);
-        if (select.value === other) custom.focus();
-        else if (select.value) advance();
-      });
-      custom.addEventListener('input', () => {
-        answers.responses[key] = custom.value.trim() || other;
-        clearError(); next.disabled = !hasResponse(question);
-      });
-      custom.addEventListener('keydown', event => {
-        if (isAdvanceKey(event)) { event.preventDefault(); advance(); }
-      });
+    if (type === 'detailed_address' && isApartment() && answers.dong && !hasResponse(question)) answers.responses[key] = answers.dong + ' ';
+    if (answers.type === '상업 공간' && key === 'area') {
+      renderManualArea(question, target, addressDetail);
+      return;
+    }
+    if (answers.type === '주거 공간' && key === '4') {
+      renderApartmentArea(question, target, addressDetail);
       return;
     }
     if (type === 'schedule') {
-      renderSchedule(question);
+      renderSchedule(question, target);
       return;
     }
     if (type === 'household') {
@@ -1006,17 +952,17 @@
       select.appendChild(placeholder);
       options.forEach(option => { const item = el('option', null, option); item.value = option; select.appendChild(item); });
       select.value = response(question) || '';
-      select.addEventListener('change', () => { answers.responses[key] = select.value; clearError(); });
+      select.addEventListener('change', () => { answers.responses[key] = select.value; clearError(); syncActiveQuestionNext(); saveDraft(); });
       label.appendChild(select);
-      stage.appendChild(label);
+      target.appendChild(label);
       const pet = el('label', 'pet-choice');
       const checkbox = el('input');
       checkbox.type = 'checkbox';
       checkbox.checked = !!answers.responses.pet;
-      checkbox.addEventListener('change', () => { answers.responses.pet = checkbox.checked; clearError(); });
+      checkbox.addEventListener('change', () => { answers.responses.pet = checkbox.checked; clearError(); syncActiveQuestionNext(); saveDraft(); });
       pet.appendChild(checkbox);
       pet.appendChild(el('span', null, '반려동물과 함께 살아요'));
-      stage.appendChild(pet);
+      target.appendChild(pet);
       return;
     }
     if (['single_choice', 'multiple_choice'].includes(type)) {
@@ -1024,6 +970,7 @@
       options.forEach((option, position) => {
         const button = el('button', 'choice');
         button.type = 'button';
+        button.id = 'choice-' + key + '-' + position;
         const selected = type === 'multiple_choice' ? (response(question) || []).includes(option) : response(question) === option;
         button.setAttribute('aria-pressed', String(selected));
         button.appendChild(el('span', 'choice-key', String.fromCharCode(65 + position)));
@@ -1031,31 +978,71 @@
         button.addEventListener('click', () => {
           if (type === 'multiple_choice') {
             const values = Array.isArray(response(question)) ? [...response(question)] : [];
-            answers.responses[key] = selected ? values.filter(value => value !== option)
-              : ['전체 수리', 'none', 'unknown'].includes(option) ? [option]
-                : values.filter(value => !['전체 수리', 'none', 'unknown'].includes(value)).concat(option);
-            render();
+            answers.responses[key] = values.includes(option) ? values.filter(value => value !== option)
+              : ['전체 리모델링', 'none', 'unknown'].includes(option) ? [option]
+                : values.filter(value => !['전체 리모델링', 'none', 'unknown'].includes(value)).concat(option);
           } else {
             answers.responses[key] = option;
             if (key === 'expansion' && option !== '네, 확장할 계획이에요') delete answers.responses.expansion_spaces;
             if (key === 'system_ac' && option !== '네, 설치할 계획이에요') delete answers.responses.system_ac_count;
-            advance();
+            questionList().filter(hiddenByBranch).forEach(q => delete answers.responses[String(q.id)]);
+            if (questionList().some(q => q.showIf?.id === question.id)) {
+              render();
+              stage.querySelector('#' + button.id)?.focus({ preventScroll: true });
+              return;
+            }
           }
+          Array.from(group.children).forEach((item, index) => item.setAttribute('aria-pressed', String(type === 'multiple_choice' ? (response(question) || []).includes(options[index]) : response(question) === options[index])));
+          clearError(); syncActiveQuestionNext(); saveDraft();
         });
         group.appendChild(button);
       });
-      stage.appendChild(group);
+      target.appendChild(group);
+      return;
+    }
+    if (key === 'budget' && answers.type === '상업 공간') {
+      const other = '기타(직접입력)';
+      const label = el('label', 'field');
+      label.appendChild(el('span', 'field-label', question.question + ' *'));
+      const select = el('select', 'question-input');
+      select.id = 'answer-budget'; select.required = true;
+      select.setAttribute('aria-describedby', 'form-error');
+      ['', ...options, other].forEach(option => {
+        const item = el('option', null, question.optionLabels?.[option] || option || '선택해 주세요');
+        item.value = option; select.appendChild(item);
+      });
+      const value = response(question) || '';
+      select.value = value && !options.includes(value) ? other : value;
+      label.appendChild(select); target.appendChild(label);
+      const customLabel = el('label', 'field');
+      customLabel.appendChild(el('span', 'field-label', '예산 직접입력 *'));
+      const custom = el('input', 'question-input');
+      custom.id = 'answer-budget-custom'; custom.type = 'text'; custom.maxLength = 100;
+      custom.setAttribute('aria-describedby', 'form-error');
+      custom.placeholder = '예: 3,500만원 또는 4천만~5천만원';
+      custom.value = select.value === other && value !== other ? value : '';
+      customLabel.hidden = select.value !== other;
+      custom.required = !customLabel.hidden;
+      customLabel.appendChild(custom); target.appendChild(customLabel);
+      const sync = () => {
+        answers.responses[key] = select.value === other ? custom.value.trim() || other : select.value;
+        clearError(); saveDraft();
+      };
+      select.addEventListener('change', () => {
+        customLabel.hidden = select.value !== other; custom.required = !customLabel.hidden;
+        sync(); if (!customLabel.hidden) custom.focus();
+      });
+      custom.addEventListener('input', sync);
       return;
     }
     if (type === 'date') {
-      renderDateCalendar(question);
-      if (key === '5') {
-        const undecided = el('button', 'manual-option', '아직 미정이에요');
-        undecided.type = 'button';
-        undecided.setAttribute('aria-pressed', String(response(question) === '미정'));
-        undecided.addEventListener('click', () => { answers.responses[key] = '미정'; advance(); });
-        stage.appendChild(undecided);
-      }
+      const label = el('label', 'field');
+      label.appendChild(el('span', 'field-label', question.question + (question.isRequired ? ' *' : ' · 선택 입력')));
+      const date = el('input', 'question-input');
+      date.id = 'answer-' + key; date.setAttribute('aria-describedby', 'form-error');
+      date.type = 'date'; date.min = localDate(); date.value = /^\d{4}-\d{2}-\d{2}$/.test(response(question) || '') ? response(question) : '';
+      date.addEventListener('input', () => { answers.responses[key] = date.value; clearError(); syncActiveQuestionNext(); saveDraft(); });
+      label.appendChild(date); target.appendChild(label);
       return;
     }
     const label = el('label', 'field');
@@ -1069,67 +1056,344 @@
     } else if (type !== 'text') {
       input.type = { phonenumber: 'tel', number: 'number', date: 'date', password: 'password' }[type] || 'text';
       if (type === 'number') { input.min = '1'; if (question.id === 'system_ac_count') input.step = '1'; }
+      if (type === 'number' && /평형|평수/.test(question.question)) { input.placeholder = '예: 34 (평)'; input.step = 'any'; input.inputMode = 'decimal'; }
       if (type === 'phonenumber') { input.inputMode = 'tel'; input.autocomplete = 'tel'; input.placeholder = '010-0000-0000'; }
       if (type === 'detailed_address') input.placeholder = answers.dong ? answers.dong + ' · 호수 등' : '동·호수 등';
-      if (type === 'address') input.placeholder = '현장 주소를 입력해 주세요';
+      if (type === 'address') input.placeholder = answers.type === '상업 공간' ? '예: 부산 해운대구 · 후보지 검토 중' : '현장 주소를 입력해 주세요';
     }
+    input.id = 'answer-' + key;
+    input.setAttribute('aria-describedby', 'form-error');
+    input.required = !!question.isRequired;
+    if (key === '13' || key === 'name') input.autocomplete = 'name';
+    if (type === 'address') input.autocomplete = 'street-address';
+    if (type === 'detailed_address') input.autocomplete = 'address-line2';
     input.value = response(question) || '';
+    if (type === 'detailed_address' && isApartment() && answers.dong) target.appendChild(el('p', 'hint', '선택한 동이 입력되어 있습니다. 호수를 덧붙여 주세요.'));
     input.addEventListener(type === 'select' ? 'change' : 'input', () => {
+      if (type === 'address' && response(question) !== input.value) {
+        clearPlan(); lookupRun++; addressLookupRun++;
+        delete answers.apartmentSelected; delete answers.apartmentQuery; delete answers.dong; delete answers.apartmentAddress;
+        if (answers.type === '주거 공간') delete answers.responses['4'];
+        lookup = { status: 'ready', candidates: [], source: 'none' };
+      }
       answers.responses[key] = input.value;
       clearError();
-      next.disabled = !!question.isRequired && !input.value.trim();
-      if (type === 'select' && input.value) advance();
+      syncActiveQuestionNext();
+      saveDraft();
     });
-    input.addEventListener('keydown', event => { if (isAdvanceKey(event) && type !== 'text') { event.preventDefault(); advance(); } });
+    input.enterKeyHint = type === 'text' ? 'enter' : 'next';
+    input.addEventListener('keydown', event => {
+      if (event.key !== 'Enter' || type === 'text' || event.isComposing) return;
+      event.preventDefault();
+      const fields = Array.from(stage.querySelectorAll('input,select,textarea')).filter(field => !field.hidden && field.type !== 'checkbox');
+      (fields[fields.indexOf(input) + 1] || next).focus();
+    });
     label.appendChild(input);
-    stage.appendChild(label);
-    if (type === 'address' && answers.type === '상업 공간') addCommercialAddressSearch(stage, input);
-    if (type === 'address' && answers.apartmentUnmatched) stage.appendChild(el('p', 'hint', '검색 목록에 없는 아파트의 주소를 알려주세요. 도면이 없어도 상담은 진행할 수 있어요.'));
+    const addressRow = type === 'address' ? el('div', 'address-row') : null;
+    if (addressRow) { addressRow.appendChild(label); target.appendChild(addressRow); }
+    else target.appendChild(label);
+    if (type === 'address') addAddressSearch(target, input,
+      questionList().find(item => item.questionType === 'detailed_address'), question, addressRow);
+    if (type === 'address' && answers.apartmentUnmatched) target.appendChild(el('p', 'hint', '검색 목록에 없는 아파트도 주소를 입력하고 도면을 직접 업로드할 수 있어요.'));
   }
 
-  function renderSchedule(question) {
-    const [day, date, time] = question.parts;
+  function loadApartmentPlans(id) {
+    if (!apartmentPlans.has(id)) {
+      const request = timedFetch('/api/apartments/' + encodeURIComponent(id) + '/plans').then(result => {
+        if (!result.ok || !Array.isArray(result.data?.data)) throw new Error('plans unavailable');
+        return [...new Set(result.data.data.map(plan => String(plan.type || '').trim()))]
+          .map(type => ({ type, area: Number.parseFloat(type.replace(/,/g, '')) }))
+          .filter(plan => /㎡|m²|m2/i.test(plan.type) && plan.area > 0)
+          .sort((a, b) => a.area - b.area || a.type.localeCompare(b.type));
+      }).catch(error => { apartmentPlans.delete(id); throw error; });
+      apartmentPlans.set(id, request);
+    }
+    return apartmentPlans.get(id);
+  }
+
+  function areaUnitControl(key, redraw) {
+    const group = el('fieldset', 'area-unit'); group.id = 'area-unit';
+    group.appendChild(el('legend', 'field-label', '면적 단위'));
+    const value = () => answers.areaUnits?.[key] === 'sqm' ? 'sqm' : 'pyeong';
+    [['pyeong','평'], ['sqm','㎡']].forEach(([option, text]) => {
+      const label = el('label', 'area-unit-option');
+      const radio = el('input'); radio.type = 'radio'; radio.name = 'area-unit-' + key;
+      radio.id = 'area-unit-' + option; radio.value = option; radio.checked = value() === option;
+      radio.addEventListener('change', () => {
+        if (!radio.checked) return;
+        const previous = value();
+        (answers.areaUnits ||= {})[key] = option; redraw(option, previous); saveDraft();
+      });
+      label.appendChild(radio); label.appendChild(el('span', null, text)); group.appendChild(label);
+    });
+    return { label: group, value };
+  }
+
+  function manualAreaField(question, target, unit, options = {}) {
+    const key = String(question.id);
+    const label = el('div', 'field area-manual');
+    const title = el('label', 'field-label'); label.appendChild(title);
+    const input = el('input', 'question-input'); input.id = 'answer-' + key;
+    input.type = options.confirm ? 'text' : 'number'; input.min = '0'; input.step = 'any'; input.inputMode = 'decimal';
+    input.setAttribute('aria-describedby', 'form-error');
+    title.htmlFor = input.id;
+    const error = el('p', 'error area-manual-error'); error.id = 'area-manual-error-' + key;
+    error.setAttribute('role', 'alert'); error.hidden = true;
+    function clearManualError() {
+      error.hidden = true; error.textContent = '';
+      input.removeAttribute('aria-invalid'); input.setAttribute('aria-describedby', 'form-error');
+    }
+    function canonicalValue() {
+      const raw = input.value.trim();
+      if (!/^\d+(?:\.\d+)?$/.test(raw) || !Number.isFinite(Number(raw)) || Number(raw) <= 0) return '';
+      const value = Number(raw);
+      return unit() === 'sqm' ? String(Math.round(value / 3.305785 * 1000000) / 1000000) : String(value);
+    }
+    let pendingValue = null;
+    function redraw() {
+      pendingValue = null; input.removeAttribute('data-unconfirmed');
+      const sqm = unit() === 'sqm';
+      title.textContent = (key === 'area' ? '실면적' : '공급면적 직접 입력') + (sqm ? ' (㎡)' : ' (평)');
+      input.placeholder = sqm ? '예: 112.4' : '예: 34';
+      const value = answers.responses[key];
+      input.value = value ? String(Math.round(Number(value) * (sqm ? 3.305785 : 1) * 10000) / 10000) : '';
+      clearManualError();
+    }
+    function changeUnit(next, previous) {
+      if (!options.confirm || pendingValue === null) { redraw(); return; }
+      const sqm = next === 'sqm';
+      title.textContent = (key === 'area' ? '실면적' : '공급면적 직접 입력') + (sqm ? ' (㎡)' : ' (평)');
+      input.placeholder = sqm ? '예: 112.4' : '예: 34';
+      const raw = Number(pendingValue);
+      if (Number.isFinite(raw) && raw > 0) {
+        const canonical = previous === 'sqm' ? raw / 3.305785 : raw;
+        input.value = String(Math.round(canonical * (next === 'sqm' ? 3.305785 : 1) * 10000) / 10000);
+        pendingValue = input.value;
+      }
+      clearManualError();
+    }
+    input.addEventListener('keydown', event => {
+      if (['e', 'E', '+', '-'].includes(event.key)) event.preventDefault();
+    });
+    input.addEventListener('input', () => {
+      clearManualError(); clearError();
+      if (options.confirm) {
+        const parts = input.value.replace(/[^\d.]/g, '').split('.');
+        input.value = parts.shift() + (parts.length ? '.' + parts.join('') : '');
+        pendingValue = input.value; input.setAttribute('data-unconfirmed', 'true');
+        return;
+      }
+      const canonical = canonicalValue();
+      answers.responses[key] = input.value === '' ? '' : canonical || input.value;
+      saveDraft();
+    });
+    if (options.confirm) {
+      const inputRow = el('div', 'area-confirm-row');
+      const confirm = el('button', 'area-confirm', '선택'); confirm.type = 'button';
+      confirm.id = 'answer-' + key + '-confirm';
+      confirm.addEventListener('click', () => {
+        const canonical = canonicalValue();
+        if (!canonical) {
+          error.textContent = '0보다 큰 숫자로 공급면적을 입력해 주세요.'; error.hidden = false;
+          input.setAttribute('aria-invalid', 'true'); input.setAttribute('aria-describedby', error.id + ' form-error');
+          input.focus(); return;
+        }
+        answers.responses[key] = canonical;
+        pendingValue = null; input.removeAttribute('data-unconfirmed');
+        clearManualError(); clearError(); saveDraft(); redraw();
+      });
+      input.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' || event.isComposing) return;
+        event.preventDefault(); confirm.click();
+      });
+      inputRow.appendChild(input); inputRow.appendChild(confirm); label.appendChild(inputRow); label.appendChild(error);
+    } else label.appendChild(input);
+    target.appendChild(label); redraw();
+    return { label, input, redraw, changeUnit, hasPending: () => pendingValue !== null, error };
+  }
+
+  function renderManualArea(question, target, addressDetail) {
+    const panel = el('div', 'area-entry');
+    let manual;
+    const unit = areaUnitControl(String(question.id), () => manual.redraw());
+    const row = el('div', 'detail-area-row');
+    if (addressDetail) row.appendChild(addressDetail);
+    manual = manualAreaField(question, row, unit.value);
+    panel.appendChild(row); panel.appendChild(unit.label);
+    panel.appendChild(el('p', 'hint', '상가의 실제 사용하는 실면적을 입력해 주세요.'));
+    target.appendChild(panel);
+  }
+
+  function renderApartmentArea(question, target, addressDetail) {
+    const panel = el('div', 'apartment-area'); target.appendChild(panel);
+    const status = el('p', 'hint apartment-status'); status.id = 'apartment-area-status'; status.setAttribute('role', 'status');
+    const results = el('div', 'search-results');
+    const selectedLabel = el('div', 'field apartment-name-field'); selectedLabel.hidden = true;
+    selectedLabel.appendChild(el('span', 'field-label', '아파트명'));
+    const selected = el('p', 'selected-apartment apartment-name'); selectedLabel.appendChild(selected);
+    function setStatus(message, loading = false) {
+      panel.setAttribute('aria-busy', String(loading));
+      status.className = 'hint apartment-status' + (loading ? ' is-loading' : '');
+      status.replaceChildren();
+      if (loading) { const spinner = el('span', 'loading-spinner'); spinner.setAttribute('aria-hidden', 'true'); status.appendChild(spinner); }
+      status.appendChild(el('span', null, message));
+    }
+    let plans = [];
+    let manual;
+    const unit = areaUnitControl('4', (next, previous) => manual.changeUnit(next, previous));
+    const row = el('div', 'detail-area-row apartment-selection-row');
+    row.appendChild(selectedLabel);
+    const areaLabel = el('label', 'field');
+    areaLabel.appendChild(el('span', 'field-label', '공급평형 선택'));
+    const select = el('select', 'question-input'); select.id = 'apartment-area';
+    select.setAttribute('aria-describedby', status.id);
+    areaLabel.appendChild(select); row.appendChild(areaLabel); panel.appendChild(row);
+    if (addressDetail) panel.appendChild(addressDetail);
+    const manualPanel = el('div', 'area-manual-panel');
+    manualPanel.appendChild(unit.label);
+    manual = manualAreaField(question, manualPanel, unit.value, { confirm: true });
+    panel.appendChild(manualPanel);
+    panel.appendChild(status); panel.appendChild(results);
+    let run = 0;
+    let manualChosen = !answers.planAreaAuto && (!answers.apartmentSelected || !!answers.responses['4']);
+    const active = () => panel.isConnected !== false && current === 'contact' && answers.type === '주거 공간' && !submitting && !pendingBody;
+    function showOptions() {
+      select.replaceChildren();
+      const placeholder = el('option', null, '평형을 선택해 주세요'); placeholder.value = ''; select.appendChild(placeholder);
+      const shown = plans.slice();
+      if (answers.planAreaAuto && answers.planAreaSource && !shown.some(plan => plan.type === answers.planAreaSource)) {
+        const area = Number.parseFloat(answers.planAreaSource.replace(/,/g, ''));
+        if (area > 0) shown.push({ type: answers.planAreaSource, area, saved: true });
+      }
+      shown.forEach(plan => {
+        const value = Math.round(plan.area / 3.305785 * 10) / 10;
+        const text = '약 ' + value + '평 (' + plan.type + ')';
+        const option = el('option', null, text + (plan.saved ? ' · 저장한 선택' : '')); option.value = plan.type;
+        select.appendChild(option);
+      });
+      const other = el('option', null, '기타 (직접 입력)'); other.value = 'other'; select.appendChild(other);
+      select.value = answers.planAreaAuto && shown.some(plan => plan.type === answers.planAreaSource)
+        ? answers.planAreaSource : manualChosen ? 'other' : '';
+      manualPanel.hidden = select.value !== 'other';
+      selectedLabel.hidden = !answers.apartmentSelected;
+      selected.textContent = answers.apartmentSelected ? answers.apartmentSelected[0] : '';
+    }
+    async function showPlans(row) {
+      const request = ++run;
+      if (answers.apartmentSelected?.[1] !== row[1]) {
+        const pendingManual = manual.hasPending();
+        const keepManual = manualChosen && !answers.planAreaAuto && (!!answers.responses['4'] || pendingManual);
+        clearPlan(); if (!keepManual) delete answers.responses['4'];
+        delete answers.dong; manualChosen = !!keepManual; if (!pendingManual) manual.redraw();
+      }
+      answers.apartmentSelected = row; answers.apartmentQuery = row[0];
+      answers.apartmentAddress = answers.responses['15'];
+      plans = []; results.replaceChildren(); showOptions(); saveDraft();
+      setStatus('주소에서 찾은 아파트의 평형을 불러오고 있어요. 기타로 직접 입력할 수도 있습니다.', true);
+      try {
+        const loaded = await loadApartmentPlans(row[1]);
+        if (!active() || request !== run || answers.apartmentSelected?.[1] !== row[1]) return;
+        plans = loaded; showOptions();
+        setStatus(plans.length ? '주소에서 아파트를 찾았어요. 등록된 평형 중 선택해 주세요.' : '등록된 평형이 없어요. 기타로 직접 입력해 주세요.');
+      } catch {
+        if (active() && request === run) setStatus('평형을 불러오지 못했어요. 기타로 직접 입력해 주세요.');
+      }
+    }
+    select.addEventListener('change', () => {
+      if (!active()) return;
+      manualChosen = select.value === 'other';
+      if (select.value && !manualChosen) {
+        const sqm = Number.parseFloat(select.value.replace(/,/g, ''));
+        answers.responses['4'] = String(Math.round(sqm / 3.305785 * 10) / 10);
+        answers.planAreaAuto = true; answers.planAreaValue = answers.responses['4']; answers.planAreaSource = select.value;
+      } else { clearPlan(); delete answers.responses['4']; }
+      manual.redraw(); manualPanel.hidden = !manualChosen;
+      clearError(); saveDraft(); if (manualChosen) manual.input.focus();
+    });
+    async function matchAddress() {
+      const address = answers.responses['15'];
+      if (!address) { setStatus('주소를 선택하면 아파트와 평형을 자동으로 찾아드려요.'); return; }
+      if (answers.apartmentSelected && (answers.apartmentAddress === address || !answers.apartmentAddress && findAddressCandidates(address, [answers.apartmentSelected]).length === 1)) {
+        showPlans(answers.apartmentSelected); return;
+      }
+      if (answers.apartmentSelected) {
+        clearPlan(); delete answers.responses['4']; delete answers.apartmentSelected; delete answers.apartmentQuery; delete answers.dong; delete answers.apartmentAddress;
+        manualChosen = true; manual.redraw(); showOptions(); saveDraft();
+      }
+      const request = ++run;
+      setStatus('시공장소 주소로 아파트를 찾고 있어요.', true);
+      try {
+        const rows = await loadFullDataset();
+        if (!active() || request !== run || answers.responses['15'] !== address) return;
+        const matches = findAddressCandidates(address, rows);
+        if (matches.length === 1) { showPlans(matches[0]); return; }
+        if (!matches.length) { setStatus('이 주소에 등록된 아파트를 찾지 못했어요. 기타로 공급면적을 입력해 주세요.'); return; }
+        setStatus('같은 주소에 여러 단지가 있어요. 해당 아파트를 선택해 주세요.');
+        matches.forEach(row => {
+          const button = el('button', 'search-result'); button.type = 'button';
+          button.appendChild(el('strong', null, row[0])); button.appendChild(el('small', null, row[2]));
+          button.addEventListener('click', () => { if (active()) showPlans(row); }); results.appendChild(button);
+        });
+      } catch { if (active() && request === run) setStatus('아파트를 조회하지 못했어요. 기타로 공급면적을 직접 입력해 주세요.'); }
+    }
+    showOptions(); matchAddress();
+  }
+
+  function consultationAvailability() {
+    const question = questions.find(q => q.questionType === 'schedule');
+    const days = question ? questionOptions(question.parts[0]) : [];
+    const selected = Array.isArray(answers.responses['18']) ? answers.responses['18'] : [];
+    const saved = answers.responses.consultationAvailability || {};
+    const first = selected.find(day => days.includes(day));
+    return (first ? [first] : []).map(day => ({ day,
+      periods: ['오전', '오후'].filter(period => Array.isArray(saved[day]) && saved[day].includes(period)) }));
+  }
+
+  function renderSchedule(question, target = stage) {
+    const day = question.parts[0];
     const panel = el('div', 'schedule');
-    const weekdays = el('section', 'schedule-section');
-    weekdays.appendChild(el('h2', null, '가능한 요일'));
-    weekdays.appendChild(el('p', 'schedule-hint', '여러 요일을 선택할 수 있어요. 날짜를 고르면 해당 요일도 포함해 주세요.'));
-    const weekdayOptions = el('div', 'schedule-options');
+    panel.appendChild(el('p', 'schedule-hint', '상담을 원하는 요일을 하루 선택해 주세요. 오전·오후는 모두 선택할 수 있어요.'));
+    const weekdays = el('div', 'schedule-options');
+    const times = el('div', 'schedule-times');
+    function drawTimes() {
+      times.replaceChildren();
+      consultationAvailability().forEach(({ day: selectedDay, periods }) => {
+        const section = el('section', 'schedule-section schedule-day-times');
+        section.setAttribute('data-weekday', selectedDay);
+        section.appendChild(el('h3', null, selectedDay));
+        const choices = el('div', 'schedule-options');
+        ['오전', '오후'].forEach(period => {
+          const button = el('button', 'schedule-time', period);
+          button.type = 'button';
+          button.setAttribute('aria-pressed', String(periods.includes(period)));
+          button.addEventListener('click', () => {
+            const slots = answers.responses.consultationAvailability ||= {};
+            const values = Array.isArray(slots[selectedDay]) ? slots[selectedDay] : [];
+            slots[selectedDay] = values.includes(period) ? values.filter(value => value !== period) : values.concat(period);
+            button.setAttribute('aria-pressed', String(slots[selectedDay].includes(period)));
+            clearError(); saveDraft();
+          });
+          choices.appendChild(button);
+        });
+        section.appendChild(choices); times.appendChild(section);
+      });
+    }
     questionOptions(day).forEach(option => {
-      const button = el('button', 'schedule-weekday', day.optionLabels?.[option] || option);
+      const button = el('button', 'schedule-weekday', option);
       button.type = 'button';
       button.setAttribute('aria-pressed', String((response(day) || []).includes(option)));
       button.addEventListener('click', () => {
         const values = Array.isArray(response(day)) ? response(day) : [];
-        answers.responses[String(day.id)] = values.includes(option) ? values.filter(value => value !== option) : values.concat(option);
-        button.setAttribute('aria-pressed', String(answers.responses[String(day.id)].includes(option)));
-        clearError();
+        const selected = values.includes(option) ? [] : [option];
+        answers.responses[String(day.id)] = selected;
+        answers.responses.consultationAvailability = {};
+        weekdays.querySelectorAll('.schedule-weekday').forEach(item => item.setAttribute('aria-pressed', String(selected.includes(item.textContent))));
+        drawTimes(); clearError(); saveDraft();
       });
-      weekdayOptions.appendChild(button);
+      weekdays.appendChild(button);
     });
-    weekdays.appendChild(weekdayOptions);
-    panel.appendChild(weekdays);
-    const dateSection = el('section', 'schedule-section');
-    dateSection.appendChild(el('h2', null, '원하는 날짜'));
-    renderDateCalendar(date, dateSection, false);
-    panel.appendChild(dateSection);
-    const times = el('section', 'schedule-section');
-    times.appendChild(el('h2', null, '원하는 시간'));
-    const timeOptions = el('div', 'schedule-options');
-    const timeButtons = [];
-    questionOptions(time).forEach(option => {
-      const button = el('button', 'schedule-time', time.optionLabels?.[option] || option);
-      button.type = 'button';
-      button.setAttribute('aria-pressed', String(response(time) === option));
-      button.addEventListener('click', () => {
-        answers.responses[String(time.id)] = option;
-        timeButtons.forEach(item => item.button.setAttribute('aria-pressed', String(item.option === option)));
-      });
-      timeButtons.push({ button, option });
-      timeOptions.appendChild(button);
-    });
-    times.appendChild(timeOptions);
-    panel.appendChild(times);
-    stage.appendChild(panel);
+    panel.appendChild(weekdays); panel.appendChild(times); drawTimes();
+    target.appendChild(panel);
   }
 
   function renderDateCalendar(question, target = stage, moveAfterSelect = true) {
@@ -1181,6 +1445,7 @@
           answers.responses[key] = date;
           selected = date;
           clearError();
+          syncActiveQuestionNext();
           if (moveAfterSelect) advance(); else draw();
         });
         grid.appendChild(button);
@@ -1192,7 +1457,7 @@
     target.appendChild(calendar);
   }
 
-  function renderConsent() {
+  function renderConsent(target = stage) {
     const label = el('label', 'consent');
     const input = el('input');
     input.type = 'checkbox';
@@ -1205,7 +1470,7 @@
     link.href = '../../privacy/'; link.target = '_blank'; link.rel = 'noopener';
     copy.appendChild(link);
     label.appendChild(copy);
-    stage.appendChild(label);
+    target.appendChild(label);
 
   }
 
@@ -1214,11 +1479,10 @@
     const rows = [['공간', answers.type]];
     if (answers.type === '주거 공간') rows.push(['주거 유형', answers.housing]);
     if (isApartment()) rows.push(['아파트', answers.apartmentSelected?.[0] || answers.apartmentQuery], ['동', answers.dong]);
-    if (isApartment()) rows.push(['도면', answers.planAttachment ? answers.planAttachment.name + ' · ' + (answers.planAttachment.source === 'upload' ? '직접 업로드' : '목록에서 저장') + (answers.planAttachment.flipX ? ' · 좌우 반전' : '') + (answers.planAttachment.flipY ? ' · 상하 반전' : '') : '없음 · 상담 시 확인']);
+    if (answers.type === '주거 공간') rows.push(['도면', answers.planAttachment ? answers.planAttachment.name + ' · ' + (answers.planAttachment.source === 'upload' ? '직접 업로드' : '목록에서 저장') + (answers.planAttachment.flipX ? ' · 좌우 반전' : '') + (answers.planAttachment.flipY ? ' · 상하 반전' : '') : '없음 · 상담 시 확인']);
     questionList().flatMap(question => question.questionType === 'schedule' ? question.parts : [question]).forEach(question => {
       const value = response(question);
-      if (!hiddenByBranch(question) && !(String(question.id) === '38' && answers.responses['33'])
-        && !(/연락 가능한 시간대/.test(question.question) && answers.responses['34'])
+      if (!hiddenByBranch(question)
         && hasResponse(question) && question.questionType !== 'password') {
         const label = item => question.optionLabels?.[item] || item;
         const display = Array.isArray(value) ? value.map(label).join(', ') : label(value) + (question.id === 'system_ac_count' ? '대' : question.id === 'area' || question.questionType === 'number' && /평형|평수/.test(question.question) ? '평' : '') + (answers.planAreaAuto && /평형|평수/.test(question.question) ? ' · 도면 표기 ' + answers.planAreaSource + ' (면적 종류 확인 필요)' : '');
@@ -1228,49 +1492,68 @@
     });
     rows.forEach(item => { const row = el('div'); row.appendChild(el('dt', null, item[0])); row.appendChild(el('dd', null, item[1] || '—')); list.appendChild(row); });
     stage.appendChild(list);
+    renderConsent();
     const attachment = answers.planAttachment;
     if (attachment) {
       const button = el('button', 'summary-plan-button');
       button.type = 'button';
-      button.setAttribute('aria-label', '저장된 도면 크게 보기');
+      button.setAttribute('aria-label', '도면 다시 확인·반전 수정');
+      button.appendChild(el('span', 'field-label', '도면 다시 확인·반전 수정'));
       button.addEventListener('click', () => openPlanPreview({ ...attachment }));
       const image = el('img', 'summary-plan');
-      image.src = attachment.url;
+      const storedUpload = attachment.source === 'upload' && !attachment.file && attachment.filePath;
+      image.src = storedUpload ? 'https://intm.kr' + attachment.filePath : attachment.url;
       image.alt = '저장된 도면';
-      image.style.transform = 'scale(' + (attachment.flipX ? -1 : 1) + ',' + (attachment.flipY ? -1 : 1) + ')';
+      image.style.transform = storedUpload ? 'none' : 'scale(' + (attachment.flipX ? -1 : 1) + ',' + (attachment.flipY ? -1 : 1) + ')';
       button.appendChild(image);
       stage.appendChild(button);
     }
   }
 
   function submissionPayload(filePath) {
+    const activeIds = new Set(questions.flatMap(q => q.questionType === 'schedule' ? q.parts : [q]).map(q => String(q.id)));
     const saved = Object.fromEntries(Object.entries(answers.responses)
-      .filter(([key, value]) => /^\d+$/.test(key) && value !== '' && value != null)
-      .map(([key, value]) => [key, Array.isArray(value) ? value.join(', ') : String(value)]));
+      .filter(([key, value]) => activeIds.has(key) && value !== '' && value != null)
+      .map(([key, value]) => [key, key === '12' ? canonicalResidentialWork(value) : Array.isArray(value) ? value.join(', ') : String(value)]));
     saved['9999'] = 'true';
     if (answers.type === '상업 공간') {
-      const lead = Object.fromEntries(Object.entries(answers.responses).filter(([key]) => !/^\d+$/.test(key)));
-      return { answers: { '9999': 'true' }, filePath: null, companyId, type: 'commercial', commercialLead: { ...lead, consent: true }, marketingAttribution: marketingAttribution(), metaMatching: metaMatchingPayload() };
+      const lead = Object.fromEntries(window.SB_CONSULTATION_QUESTIONS.commercial
+        .filter(q => !hiddenByBranch(q)).map(q => [q.id, answers.responses[q.id]]));
+      Object.assign(lead, { name: answers.responses['13'], phone: answers.responses['10'],
+        address: [answers.responses['15'], answers.responses['8']].filter(Boolean).join(' '),
+        constructionDate: answers.responses['5'] || '' });
+      const attribution = marketingAttribution();
+      delete attribution.form_contract;
+      return { answers: { '9999': 'true' }, filePath: null, companyId, type: 'commercial', commercialLead: { ...lead, consent: true }, marketingAttribution: attribution, metaMatching: metaMatchingPayload() };
     }
     const details = [];
+    const availability = consultationAvailability();
+    if (availability.length) {
+      saved['18'] = availability.map(slot => slot.day).join(', ');
+      saved['17'] = [...new Set(availability.flatMap(slot => slot.periods))].join(', ');
+      details.push('상담 희망 요일·시간: ' + availability.flatMap(slot => slot.periods.map(period => slot.day + ' ' + period)).join(', '));
+    }
+    const state = questionList().find(q => q.id === 'currentState');
+    if (answers.responses.currentState) details.push('공실 여부·현장 상태: ' + state.optionLabels[answers.responses.currentState]);
+    if (answers.planAreaAuto && answers.planAreaSource) details.push('선택한 등록 면적: ' + answers.planAreaSource + ' / 약 ' + answers.planAreaValue + '평 (공급·전용 구분 확인 필요)');
     if (answers.apartmentSelected) details.push('아파트: ' + answers.apartmentSelected[0] + ' / ' + (answers.dong || '동 미확인'));
     if (answers.apartmentUnmatched) details.push('검색 목록에 없는 아파트: ' + (answers.apartmentQuery || '미확인'));
     if (answers.planAttachment) details.push('도면: ' + (answers.planAttachment.source === 'catalog' ? 'apt.intm.kr 도면 ID ' + answers.planAttachment.planId : '직접 업로드') + ' / ' + answers.planAttachment.name + (answers.planAttachment.flipX ? ' / 좌우 반전' : '') + (answers.planAttachment.flipY ? ' / 상하 반전' : '') + (answers.planAreaSource ? ' / 면적 표기 ' + answers.planAreaSource : ''));
-    else if (isApartment()) details.push('도면: 확인 가능한 도면 없음');
-    [['발코니 확장', 'expansion'], ['확장 공간', 'expansion_spaces'], ['시스템에어컨', 'system_ac'], ['시스템에어컨 대수', 'system_ac_count'], ['샤시 교체', 'sash'], ['반려동물', 'pet']].forEach(([label, key]) => {
+    else if (isApartment() && answers.planStatus === 'none') details.push('도면: 확인 가능한 도면 없음');
+    [['발코니 확장', 'expansion'], ['확장 공간', 'expansion_spaces'], ['시스템에어컨', 'system_ac'], ['시스템에어컨 대수', 'system_ac_count'], ['샤시 교체', 'sash']].forEach(([label, key]) => {
       const value = answers.responses[key];
       if (value) details.push(label + ': ' + (Array.isArray(value) ? value.join(', ') : value === true ? '있음' : value));
     });
     if (details.length) saved['7'] = [saved['7'], ...details].filter(Boolean).join('\n');
-    return { answers: saved, filePath, companyId, type: 'residential', marketingAttribution: marketingAttribution(), metaMatching: metaMatchingPayload() };
+    return { answers: saved, filePath, companyId, type: 'residential', consent: true, marketingAttribution: marketingAttribution(), metaMatching: metaMatchingPayload() };
   }
 
   async function imageForSubmission(attachment) {
     let image = attachment.file;
     if (attachment.source === 'catalog') {
-      const response = await fetch('/api/consultation/plan-image?url=' + encodeURIComponent(attachment.url));
+      const response = await timedFetch('/api/consultation/plan-image?url=' + encodeURIComponent(attachment.url), {}, 'blob');
       if (!response.ok) throw new Error('선택한 도면 이미지를 가져오지 못했습니다. 다시 시도하거나 직접 업로드해 주세요.');
-      image = await response.blob();
+      image = response.data;
     }
     if (!image || !['image/png', 'image/jpeg', 'image/webp'].includes(image.type) || image.size > 15 * 1024 * 1024) {
       throw new Error('도면 이미지를 확인할 수 없습니다. JPG·PNG·WebP 이미지를 다시 선택해 주세요.');
@@ -1294,16 +1577,35 @@
     } finally { bitmap.close(); }
   }
 
+  async function timedFetch(url, options = {}, bodyType = 'json') {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30000);
+    try {
+      const response = await fetch(url, { ...options, signal: controller.signal });
+      let data;
+      try { data = await (bodyType === 'blob' ? response.blob() : response.json()); }
+      catch (error) { error.responseStatus = response.status; throw error; }
+      return { ok: response.ok, status: response.status, data };
+    }
+    finally { clearTimeout(timer); }
+  }
+
   async function submitConsultation() {
     if (!answers.consent) { showError('개인정보 수집·이용 동의가 필요합니다.'); return; }
     if (submitting || submitted) return;
     submitting = true;
-    funnel('lead_submit_attempt', { step: 'summary', action: 'submit' });
+    funnel('lead_submit_attempt', { step: 'planning', action: 'submit' });
     next.disabled = true;
     back.disabled = true;
     document.getElementById('restart').disabled = true;
-    next.textContent = '접수 중…';
+    stage.querySelectorAll('button,input,select,textarea').forEach(input => { input.disabled = true; });
+    next.textContent = uncertainSubmission ? '접수 결과 확인 중…' : '접수 중…';
     clearError();
+    submitAttempts++;
+    trackAction('consult_submit_attempt', { attempt_number: submitAttempts });
+    let phase = 'upload';
+    let responseStatus = 0;
+    const delayed = setTimeout(() => showError('접수 결과를 기다리고 있습니다. 중복 신청하지 않고 잠시만 기다려 주세요.'), 8000);
     try {
       let filePath = null;
       if (answers.planAttachment) {
@@ -1312,88 +1614,253 @@
           const image = await imageForSubmission(answers.planAttachment);
           const name = answers.planAttachment.name.replace(/\.[^.]+$/, '') + (image.type === 'image/jpeg' ? '.jpg' : image.type === 'image/png' ? '.png' : '.webp');
           body.append('file', image, name);
-          const uploaded = await fetch('/api/consultation/upload', { method: 'POST', body });
-          const result = await uploaded.json();
+          const uploaded = await timedFetch('/api/consultation/upload', { method: 'POST', body });
+          const result = uploaded.data;
           if (!uploaded.ok || !result.success || !result.filePath) throw new Error('도면 업로드에 실패했습니다. 다시 시도해 주세요.');
           answers.planAttachment.filePath = result.filePath;
         }
         filePath = answers.planAttachment.filePath;
       }
-      const payload = submissionPayload(filePath);
-      if (kakaoGrant) payload.kakaoGrant = kakaoGrant;
-      const response = await fetch('https://intm.kr/api/consultation/submit', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+      if (!pendingBody) {
+        const retryPayload = submissionPayload(filePath);
+        delete retryPayload.metaMatching;
+        if (kakaoGrant) retryPayload.kakaoGrant = kakaoGrant;
+        pendingBody = JSON.stringify(retryPayload);
+      }
+      phase = 'submit';
+      saveDraft();
+      const response = await timedFetch('https://intm.kr/api/consultation/submit', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: requestBody(),
       });
-      const result = await response.json();
-      if (!response.ok || result.success !== true || !Number.isInteger(result.consultReqId) || result.consultReqId <= 0) throw new Error(result.error || '접수에 실패했습니다.');
+      responseStatus = response.status;
+      const result = response.data;
+      if (!response.ok || result.success !== true || !Number.isInteger(Number(result.consultReqId)) || Number(result.consultReqId) <= 0) {
+        if (response.status >= 400 && response.status < 500) pendingBody = null;
+        throw new Error(response.status === 429 ? '요청이 많습니다. 잠시 후 다시 확인해 주세요.' : '접수 결과를 확인하지 못했습니다. 다시 확인해 주세요.');
+      }
       submitted = true;
+      clearDraft();
+      uncertainSubmission = false;
+      pendingBody = null;
       answers.receiptId = result.consultReqId;
+      answers.portalPath = result.portalPath;
       trackSubmission(result);
-      // Completion is recorded by the server after the consultation row is saved.
+      const conversionId = result.leadEventId || eventIds.lead_submit_success;
+      const conversionKey = 'spacebogam.conversion.' + conversionId;
+      if (!result.duplicate && !isTestTraffic() && stored(sessionStorage, conversionKey) !== 'true') {
+        trackNaverLead(conversionId);
+        try { sessionStorage.setItem(conversionKey, 'true'); } catch {}
+      }
       trackStep('complete');
       try { sessionStorage.removeItem(eventKey); } catch {}
       current = 'success';
       render();
     } catch (error) {
-      funnel('lead_submit_error', { step: 'summary', action: 'submission_failed' });
-      showError(error.message || '접수에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+      responseStatus = responseStatus || error.responseStatus || 0;
+      if (phase === 'submit' && responseStatus >= 400 && responseStatus < 500) pendingBody = null;
+      uncertainSubmission = phase === 'submit' && !(responseStatus >= 400 && responseStatus < 500);
+      trackAction('consult_submit_failure', { attempt_number: submitAttempts,
+        failure_type: error.name === 'AbortError' ? 'timeout' : phase === 'upload' ? 'upload' : responseStatus ? 'response' : 'network',
+        http_status: responseStatus });
+      funnel('lead_submit_error', { step: 'planning', action: 'submission_failed' });
+      showError(uncertainSubmission
+        ? '접수 결과 확인이 지연되고 있습니다. 아래 버튼으로 같은 신청의 결과를 다시 확인해 주세요. 중복으로 접수되지 않습니다.'
+        : phase === 'upload' ? '도면을 가져오거나 업로드하지 못했습니다. 도면 파일을 다시 선택한 뒤 시도해 주세요.'
+          : responseStatus === 429 ? '요청이 많습니다. 잠시 후 다시 접수해 주세요.' : '접수하지 못했습니다. 입력 내용을 확인하고 다시 시도해 주세요.');
       next.disabled = false;
-      next.textContent = '다시 접수하기 →';
+      next.textContent = uncertainSubmission ? '접수 결과 다시 확인하기 →' : '다시 접수하기 →';
+      stage.querySelectorAll('button,input,select,textarea').forEach(input => { input.disabled = uncertainSubmission; });
     } finally {
+      clearTimeout(delayed);
       submitting = false;
-      back.disabled = false;
-      document.getElementById('restart').disabled = false;
+      saveDraft();
+      back.disabled = uncertainSubmission;
+      document.getElementById('restart').disabled = uncertainSubmission;
     }
   }
 
-  let renderedFocusStep = null;
+  function localDate() {
+    const now = new Date();
+    return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+  }
+  function renderGroup() {
+    if (current === 'contact') {
+      if (isTestTraffic()) stage.appendChild(el('p', 'test-navigation-note hint', '테스트 모드 · 필수 항목은 표시만 하며 비워 두어도 다음 페이지로 이동할 수 있습니다.'));
+      const picker = el('fieldset', 'question-block space-types');
+      picker.appendChild(el('legend', null, '공간 유형 *'));
+      const choices = el('div', 'choices');
+      [['주거 공간','residential','주거'], ['상업 공간','commercial','상가·상업공간']].forEach(([type, value, label]) => {
+        const button = el('button', 'choice', label);
+        button.id = 'space-type-' + value;
+        button.type = 'button';
+        button.setAttribute('aria-pressed', String(answers.type === type));
+        button.addEventListener('click', () => {
+          if (submitting || pendingBody || answers.type === type) return;
+          answers.type = type;
+          params.set('type', value);
+          if (window.history?.replaceState) window.history.replaceState(null, '', location.pathname + '?' + params.toString() + (location.hash || ''));
+          applyCommercialDefaults();
+          render();
+          stage.querySelector('#' + button.id)?.focus({ preventScroll: true });
+        });
+        choices.appendChild(button);
+      });
+      picker.appendChild(choices);
+      stage.appendChild(picker);
+    }
+    const grid = el('div', 'question-grid');
+    let addressDetail = null;
+    groupQuestions().forEach(question => {
+      if (current === 'planning') {
+        const section = (answers.type === '주거 공간'
+          ? { '21': '공사 기본 정보', expansion: '확장·설비 계획', '18': '일정·연락', '35': '유입채널', '7': '추가 요청' }
+          : { vertical: '업종·현장 정보', leaseStatus: '계약·공사 계획', facilityNeeds: '설비·현장 준비', openDate: '일정·예산', requestNote: '추가 요청' })[question.id];
+        if (section) grid.appendChild(el('h2', 'question-section question-wide', section));
+      }
+      const workChecklist = answers.type === '주거 공간' && String(question.id) === '12';
+      const block = el('fieldset', 'question-block' + (question.questionType === 'schedule' ? ' question-wide' : '') + (workChecklist ? ' work-checklist' : ''));
+      block.setAttribute('data-question-id', String(question.id));
+      block.setAttribute('tabindex', '-1');
+      block.setAttribute('aria-describedby', 'form-error');
+      const inlineArea = current === 'contact' && ['4','area'].includes(String(question.id));
+      block.appendChild(el('legend', null, (inlineArea ? (answers.type === '주거 공간' ? '아파트·공급평형' : '상세주소·실면적') : question.question) + (question.isRequired ? ' *' : ' · 선택')));
+      renderQuestion(question, block, inlineArea ? addressDetail : null);
+      if (String(question.id) === '15') addressDetail = block.querySelector('.address-detail-field');
+      grid.appendChild(block);
+    });
+    stage.appendChild(grid);
+    if (current === 'planning') renderConsent();
+  }
+  function questionError(question) {
+    if (question.questionType === 'schedule') {
+      return consultationAvailability().some(({ periods }) => !periods.length)
+        ? '선택한 요일마다 오전 또는 오후를 선택해 주세요.' : '';
+    }
+    const value = response(question);
+    if (String(question.id) === '4' && stage.querySelector('#answer-4')?.getAttribute('data-unconfirmed') === 'true') return '공급면적을 입력한 뒤 선택 버튼을 눌러 주세요.';
+    if (question.id === 'budget' && value === '기타(직접입력)') return '예산을 직접 입력해 주세요.';
+    if (question.isRequired && !hasResponse(question)) return question.question + ' 입력이 필요합니다.';
+    if (!hasResponse(question)) return '';
+    if (question.questionType === 'date') {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || isPastDate(value)) return '오늘 이후의 날짜를 선택해 주세요.';
+      if (question.id === 'openDate' && answers.responses['5'] && value < answers.responses['5']) return '오픈·입주 희망일은 공사 시작일 이후로 선택해 주세요.';
+      const [year, month, day] = value.split('-').map(Number);
+      if (localDateOf(new Date(year, month - 1, day)) !== value) return '올바른 날짜를 선택해 주세요.';
+    }
+    if (question.questionType === 'phonenumber' && !/^01\d-?\d{3,4}-?\d{4}$/.test(String(value).replace(/\s/g, ''))) return '연락 가능한 휴대전화 번호를 입력해 주세요.';
+    if (question.questionType === 'number' && (question.id === 'system_ac_count' ? !/^[1-9]\d*$/.test(value) : !/^\d+(?:\.\d+)?$/.test(value) || Number(value) <= 0)) return '0보다 큰 숫자를 입력해 주세요. 설치 대수는 정수여야 합니다.';
+    if (question.id === 'requestNote' && String(value).trim().length < 10) return '요청사항은 10자 이상 입력해 주세요.';
+    return '';
+  }
+  function localDateOf(date) { return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0'); }
+  function validateGroup(list) {
+    for (const question of list) {
+      const error = questionError(question);
+      if (error) {
+        clearError();
+        showError(error);
+        const block = stage.querySelector('[data-question-id="' + question.id + '"]');
+        if (block) {
+          block.setAttribute('aria-invalid', 'true');
+          const inline = el('p', 'error field-error', error);
+          inline.id = 'field-error-' + question.id;
+          block.appendChild(inline);
+          let target = block.querySelector('#answer-' + question.id) || block.querySelector('input,select,textarea,button') || block;
+          if (question.questionType === 'schedule') {
+            const missing = consultationAvailability().find(slot => !slot.periods.length);
+            target = Array.from(block.querySelectorAll('.schedule-day-times'))
+              .find(section => section.getAttribute('data-weekday') === missing?.day)?.querySelector('.schedule-time') || block;
+          }
+          target.setAttribute('aria-invalid', 'true');
+          target.setAttribute('aria-describedby', inline.id);
+          target.focus();
+        }
+        return false;
+      }
+    }
+    return true;
+  }
+
   function render() {
-    const focusStep = current === 'question' ? current + ':' + questionIndex : current;
+    const stepKey = current === 'question' ? current + ':' + questionIndex : current;
     const help = document.getElementById('consultation-help');
     if (help) help.hidden = current === 'success';
-    const stepChanged = renderedFocusStep !== focusStep;
-    renderedFocusStep = focusStep;
+    const stepChanged = renderedStep !== stepKey;
+    renderedStep = stepKey;
     const commercial = answers.type === '상업 공간';
+    if (document.body) {
+      document.body.setAttribute('data-residential-two-page', 'true');
+    }
     const asideImage = document.querySelector('.aside img');
     const asideCopy = document.querySelector('.aside-copy p:last-child');
     if (asideImage) asideImage.hidden = commercial;
     if (asideCopy) asideCopy.textContent = commercial
       ? '어떤 공간에서 일하고 운영할지, 필요한 조건을 함께 알려주세요.'
       : '어떤 집을 만들고 싶은지, 필요한 정보를 함께 알려주세요.';
-    const kakaoEntry = document.getElementById('kakao-quick-consultation');
-    if (kakaoEntry) kakaoEntry.hidden = current !== 'type';
     const visitIntro = document.getElementById('visit-intro');
     if (visitIntro) visitIntro.hidden = current !== 'type';
+    const kakaoEntry = document.getElementById('kakao-quick-consultation');
+    if (kakaoEntry) kakaoEntry.hidden = commercial || current !== 'contact';
     stage.replaceChildren();
     const question = current === 'question' ? questionList()[questionIndex] : null;
-    const node = question ? { title: question.question, lead: String(question.id) === '5' ? '공사를 시작하고 싶은 날짜를 선택해 주세요. 정하지 않았다면 ‘아직 미정이에요’를 선택해 주세요.' : question.questionType === 'schedule' ? '사무실 방문이 가능한 요일과 희망 날짜·시간을 선택해 주세요. 아직 정하지 않았다면 건너뛰어도 됩니다. 신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.' : question.isRequired ? '상담에 필요한 정보입니다.' : '선택 입력입니다. 아직 정하지 않았다면 건너뛰어도 됩니다.' } : nodes[current];
-    stage.appendChild(el('p', 'step-meta', current === 'summary' ? '입력 내용 확인' : current === 'success' ? '접수 완료' : '질문 ' + String(trail.length + 1).padStart(2, '0')));
+    const node = question ? { title: question.question, lead: String(question.id) === '5' ? '공사를 시작하고 싶은 날짜를 선택해 주세요.' : question.questionType === 'schedule' ? '사무실 방문이 가능한 요일과 희망 날짜·시간을 선택해 주세요. 아직 정하지 않았다면 건너뛰어도 됩니다. 신청 접수만으로 방문 예약이 확정되지는 않습니다. 전화로 방문 일정을 조율한 뒤 확정합니다.' : question.isRequired ? '상업 공간 상담에 필요한 정보입니다.' : '선택 입력입니다. 아직 정하지 않았다면 건너뛰어도 됩니다.' } : current === 'planning' && commercial ? { title: '상가 공사 계획을 알려주세요.', lead: '업종·면적과 운영 일정을 바탕으로 상담을 준비합니다. 아직 확인 중인 내용은 해당 선택지를 골라 주세요.' } : nodes[current];
+    stage.appendChild(el('p', 'step-meta', current === 'intro' ? '상담 진행 안내' : current === 'summary' ? '입력 내용 확인' : current === 'success' ? '접수 완료' : current === 'question' ? '상업 공간 상담 ' + (questionIndex + 1) + ' / ' + questionList().length : ({ contact: '상담 정보 1 / 2', planning: '상담 정보 2 / 2' }[current] || '상담 신청')));
     stage.appendChild(el('h1', null, node.title));
     stage.appendChild(el('p', 'lead', node.lead));
-    if (['type', 'housing'].includes(current)) renderChoices(current);
-    else if (current === 'apartmentQuery') renderApartmentSearch();
-    else if (current === 'dong') renderDong();
-    else if (current === 'planReview') renderPlan();
-    else if (current === 'question') renderQuestion();
+    if (current === 'intro') {
+      const steps = el('ol', 'consult-process');
+      [
+        ['방문 일정 확인 전화', '담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다.'],
+        ['사무실 방문 상담', '사무실에서 원하시는 공간과 공사 범위, 예산, 일정을 구체적으로 상담합니다.']
+      ].forEach(([title, description]) => {
+        const item = el('li');
+        item.appendChild(el('h2', null, title));
+        item.appendChild(el('p', null, description));
+        steps.appendChild(item);
+      });
+      stage.appendChild(steps);
+      stage.appendChild(el('p', 'hint', '작성 중인 내용은 이 탭에서 임시로 보관합니다. 처음부터 다시 시작하거나 접수가 완료되면 지워집니다.'));
+      stage.appendChild(el('p', 'hint', answers.type === '상업 공간'
+        ? '광고에서 선택한 업종을 이어서 현장 조건과 공사 계획을 순서대로 확인합니다. 도면 파일은 없어도 신청할 수 있습니다.'
+        : '연락처·주소와 예산·공사 범위를 두 화면에서 작성합니다. 아직 정하지 못한 항목은 미정을 선택할 수 있습니다.'));
+    }
+    else if (current === 'question') renderQuestion(question);
+    else if (current === 'planReview') {
+      renderGroup();
+      stage.appendChild(el('h2', null, '도면을 확인해 주세요 *'));
+      renderPlan();
+    }
+    else if (['contact','planning'].includes(current)) renderGroup();
     else if (current === 'consent') renderConsent();
     else if (current === 'summary') renderSummary();
-    else if (current === 'success') stage.appendChild(el('p', 'selected-apartment', '접수번호 · ' + (answers.receiptId || '발급 완료')));
-    if (current !== 'success') stage.appendChild(el('p', 'error'));
+    else if (current === 'success') {
+      stage.appendChild(el('p', 'selected-apartment', '접수번호 · ' + (answers.receiptId || '발급 완료')));
+      if (/^\/consultation\/progress\/[a-f0-9]{64}$/.test(answers.portalPath || '')) {
+        const link = el('a', 'manual-option', '접수 내용 확인·추가 작성');
+        link.href = 'https://intm.kr' + answers.portalPath;
+        stage.appendChild(link);
+      }
+    }
+    if (current !== 'success') { const error = el('p', 'error'); error.setAttribute('role', 'status'); error.id = 'form-error'; stage.appendChild(error); }
     back.hidden = trail.length === 0 || current === 'success';
-    skip.hidden = current !== 'question' || question.isRequired;
+    back.disabled = submitting || uncertainSubmission;
+    skip.hidden = true;
     next.hidden = current === 'success';
-    next.textContent = current === 'summary' ? '방문 상담 예약 신청 접수 →' : current === 'consent' ? '입력 내용 확인 →' : current === 'dong' && answers.dong ? '도면 확인하기 →' : '다음 →';
+    next.textContent = current === 'intro' ? '상담 신청 시작하기 →' : current === 'planning' ? '상담 신청하기 →' : current === 'summary' ? (answers.type === '상업 공간' ? '상업 공간 상담 신청 접수 →' : '방문 상담 예약 신청 접수 →') : current === 'consent' ? '입력 내용 확인 →' : current === 'dong' && answers.dong ? '도면 확인하기 →' : '다음 →';
     next.disabled = current === 'summary' ? !answers.consent
-      : current === 'planReview' ? !['saved', 'none'].includes(answers.planStatus)
+      : ['intro','contact','planning'].includes(current) ? false
+      : current === 'planReview' ? !answers.planAttachment || answers.planStatus !== 'saved'
         : current === 'apartmentQuery' ? !answers.apartmentSelected && !answers.apartmentUnmatched
-          : current === 'question' ? question.isRequired && !hasResponse(question)
+          : current === 'question' ? !!question.isRequired && !!questionError(question)
             : current === 'consent' ? !answers.consent
               : !String(answers[current] || '').trim();
-    const total = questionList().filter(q => !skipQuestion(q)).length + (isApartment() ? 5 : answers.type === '주거 공간' ? 2 : 1) + 1;
-    const percent = current === 'summary' || current === 'success' ? 100 : Math.min(95, Math.round(trail.length / total * 100));
+    const percent = current === 'summary' || current === 'success' ? 100 : current === 'question'
+      ? Math.round((questionIndex + 1) / Math.max(questionList().length, 1) * 90)
+      : ({ intro: 0, contact: 50, planning: 100, planReview: 75 }[current] || 50);
     progress.setAttribute('aria-valuenow', String(percent));
     progressFill.style.width = percent + '%';
+    if (uncertainSubmission) { stage.querySelectorAll('input,select,textarea').forEach(input => { input.disabled = true; }); next.disabled = false; next.textContent = '접수 결과 다시 확인하기 →'; back.disabled = true; document.getElementById('restart').disabled = true; stage.querySelectorAll('button').forEach(button => { button.disabled = true; }); }
+    saveDraft();
     trackStep('view');
     if (stepChanged) {
       const heading = stage.querySelector('h1');
@@ -1403,45 +1870,51 @@
       // Focus synchronously in the navigation gesture so mobile browsers can open the keyboard.
       if (input) input.focus();
       else (stage.querySelector('.commercial-address-search') || heading).focus({ preventScroll: true });
+      if (!input && typeof window.scrollTo === 'function') window.scrollTo({ top: 0, behavior: 'instant' });
     }
   }
 
-  function markStarted() {
-    if (!started && !submitted) { started = true; funnel('lead_form_start'); }
-  }
-  stage.addEventListener('input', markStarted);
-  stage.addEventListener('change', markStarted);
-
   function advance(action = 'complete') {
+    action = ['complete', 'skip'].includes(action) ? action : 'complete';
     if (submitting) return;
-    if (current === 'summary') { submitConsultation(); return; }
-    if (current === 'success') return;
     markStarted();
+    if (current === 'summary') {
+      const required = pendingBody ? [] : answers.type === '상업 공간'
+        ? questionList().filter(question => !hiddenByBranch(question))
+        : groupQuestions('contact').concat(groupQuestions('planning'), groupQuestions('planReview'));
+      if (!validateGroup(required)) return;
+      if (!pendingBody && answers.type === '주거 공간' && (!answers.planAttachment || answers.planStatus !== 'saved')) { showError('도면을 저장하거나 업로드해 주세요.'); return; }
+      if (!answers.consent) { showError('개인정보 수집·이용 동의가 필요합니다.'); return; }
+      submitConsultation(); return;
+    }
+    if (current === 'success') return;
     if (current === 'question') {
       const question = questionList()[questionIndex];
-      const value = response(question);
-      if (question.isRequired && !hasResponse(question)) { showError('이 항목을 입력해 주세요.'); return; }
-      if (question.questionType === 'date' && isPastDate(value)) { showError('오늘 이후의 날짜를 선택해 주세요.'); return; }
-      if (question.questionType === 'schedule') {
-        const [day, date] = question.parts;
-        const selectedDate = response(date);
-        const weekdays = response(day);
-        if (isPastDate(selectedDate)) { showError('오늘 이후의 날짜를 선택해 주세요.'); return; }
-        if (selectedDate && Array.isArray(weekdays) && weekdays.length) {
-          const [year, month, dayOfMonth] = selectedDate.split('-').map(Number);
-          const actualDay = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'][new Date(year, month - 1, dayOfMonth).getDay()];
-          if (!weekdays.includes(actualDay)) { showError('선택한 날짜는 ' + actualDay + '이에요. 가능한 요일에 추가하거나 날짜를 바꿔 주세요.'); return; }
-        }
+      const error = questionError(question);
+      if (error) { showError(error); return; }
+    } else if (['contact','planning'].includes(current)) {
+      if (current === 'planning' && pendingBody) {
+        submitConsultation();
+        return;
       }
-      if (question.questionType === 'phonenumber' && !/^01\d-?\d{3,4}-?\d{4}$/.test(String(value).replace(/\s/g, ''))) { showError('연락 가능한 휴대전화 번호를 입력해 주세요.'); return; }
-      if (question.id === 'requestNote' && String(value || '').trim().length < 10) { showError('원하는 공간과 요청사항을 10자 이상 입력해 주세요.'); return; }
-      if (question.questionType === 'number' && question.isRequired && (question.id === 'system_ac_count' ? !/^[1-9]\d*$/.test(String(value)) : !/^\d+(?:\.\d+)?$/.test(String(value)) || Number(value) <= 0)) { showError(question.id === 'system_ac_count' ? '설치 대수를 1 이상의 정수로 입력해 주세요.' : '0보다 큰 평형을 입력해 주세요.'); return; }
-      if (question.questionType === 'address') answers.address = value;
+      if (current === 'planning' && groupQuestions('contact').some(q => questionError(q))) {
+        current = 'contact'; trail = []; render(); validateGroup(groupQuestions()); return;
+      }
+      if (!(current === 'contact' && isTestTraffic()) && !validateGroup(groupQuestions())) return;
+      const address = questionList().find(q => q.questionType === 'address');
+      if (address && response(address)) answers.address = response(address);
+      if (current === 'planning') {
+        if (!answers.consent) { showError('개인정보 수집·이용 동의가 필요합니다.'); return; }
+        submitConsultation();
+        return;
+      }
+      if (current === 'planning' && !answers.apartmentSelected) lookup = { status: 'ready', candidates: [], source: 'none' };
     } else if (current === 'planReview') {
-      if (!['saved', 'none'].includes(answers.planStatus)) { showError('도면을 저장하거나 도면 없이 진행을 선택해 주세요.'); return; }
+      if (!validateGroup(groupQuestions())) return;
+      if (!answers.planAttachment || answers.planStatus !== 'saved') { showError('도면을 저장하거나 업로드해 주세요.'); return; }
     } else if (current === 'consent') {
       if (!answers.consent) { showError('개인정보 수집·이용 동의가 필요합니다.'); return; }
-    } else {
+    } else if (current !== 'intro') {
       const value = String(answers[current] || '').trim();
       if (!value) { showError('이 항목을 입력해 주세요.'); return; }
       if (current === 'apartmentQuery' && normalize(value).length < 2) { showError('아파트 이름이나 주소를 두 글자 이상 입력해 주세요.'); return; }
@@ -1449,7 +1922,7 @@
       if (current === 'apartmentQuery') startLookup(value);
     }
     trackStep(action);
-    trail.push({ key: current, index: questionIndex });
+    trail.push({ key: current, index: questionIndex, intakeOnly });
     current = nextNode(current);
     render();
   }
@@ -1463,24 +1936,18 @@
   }
 
   next.addEventListener('click', () => advance());
-  back.addEventListener('click', () => { if (!submitting && trail.length) { const previous = trail.pop(); current = previous.key; questionIndex = previous.index; render(); } });
-  skip.addEventListener('click', () => {
-    if (current !== 'question' || questionList()[questionIndex].isRequired) return;
-    const key = String(questionList()[questionIndex].id);
-    delete answers.responses[key];
-    if (questionList()[questionIndex].questionType === 'schedule') {
-      questionList()[questionIndex].parts.forEach(part => delete answers.responses[String(part.id)]);
-    }
-    if (questionList()[questionIndex].questionType === 'household') delete answers.responses.pet;
-    if (key === 'expansion') delete answers.responses.expansion_spaces;
-    if (key === 'system_ac') delete answers.responses.system_ac_count;
-    advance('skip');
-  });
+  back.addEventListener('click', () => { if (!submitting && !uncertainSubmission && trail.length) { const previous = trail.pop(); current = previous.key; questionIndex = previous.index; intakeOnly = previous.intakeOnly ?? intakeOnly; render(); } });
   document.getElementById('restart').addEventListener('click', () => {
-    if (submitting) return;
+    if (submitting || uncertainSubmission) return;
+    clearDraft();
+    intakeOnly = false;
+    pendingBody = null;
+    uncertainSubmission = false;
+    submitAttempts = 0;
     lookupRun++;
     clearPlan();
-    answers = { responses: {} };
+    answers = { type: params.get('type') === 'commercial' ? '상업 공간' : '주거 공간', housing: '아파트', responses: {} };
+    applyCommercialDefaults();
     fillKakaoResponses();
     submitted = false;
     started = false;
@@ -1492,14 +1959,19 @@
     lookup = { status: 'idle', candidates: [] };
     trail = [];
     questionIndex = 0;
-    current = 'type';
-    applyEntryIntent();
+    current = 'contact';
     funnel('lead_form_view');
     render();
   });
   questions = effectiveQuestions(window.SB_CONSULTATION_QUESTIONS.residential);
-  applyEntryIntent();
-  loadQuestions();
+  if (params.get('type') === 'commercial') answers.type = '상업 공간';
+  restoreDraft();
+  if (current === 'intro') current = 'contact';
+  applyCommercialDefaults();
+  if (answers.apartmentSelected && current === 'planReview') startLookup(answers.apartmentQuery || answers.address);
+  stage.addEventListener('input', () => { markStarted(); saveDraft(); });
+  stage.addEventListener('change', () => { markStarted(); saveDraft(); });
+  if (typeof window.addEventListener === 'function') window.addEventListener('pagehide', saveDraft);
   if (typeof fetch === 'function') funnel('lead_form_view');
   render();
 })();

@@ -276,7 +276,7 @@ window.SB_CONSULTATION_QUESTIONS = {
     },
     {
       "id": "address",
-      "question": "현장 후보 지역·주소를 알려주세요.",
+      "question": "현장 지역·주소를 알려주세요. 계약 전이면 검토 중인 지역을 적어주세요.",
       "questionType": "address",
       "isRequired": true,
       "options": []
@@ -308,7 +308,7 @@ window.SB_CONSULTATION_QUESTIONS = {
     },
     {
       "id": "openDate",
-      "question": "오픈·입주 희망일을 알려주세요.",
+      "question": "예상 오픈·입주 희망일을 알려주세요.",
       "questionType": "date",
       "isRequired": true,
       "options": []
