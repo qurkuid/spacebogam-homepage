@@ -127,7 +127,7 @@ await withTestBrowser(async (context, selection) => {
     assert(await base.evaluate(element => element.readOnly), 'base address must be search-only');
     await page.getByRole('button', { name: '주소 검색', exact: true }).click();
     await page.waitForFunction(() => Boolean(window.__postcode));
-    await page.evaluate(() => window.__postcode.oncomplete({ address: '부산광역시 해운대구 좌동순환로 457' }));
+    await page.evaluate(() => window.__postcode.oncomplete({ address: '부산광역시 해운대구 좌동순환로 457', buildingName: '테스트건물' }));
     assert.equal(await base.inputValue(), '부산광역시 해운대구 좌동순환로 457');
     await page.locator('#answer-8').fill(detail);
   }
@@ -175,7 +175,7 @@ await withTestBrowser(async (context, selection) => {
       assert.equal(await page.locator(`[data-question-id="${id}"]`).count(), 1, 'residential question is present: ' + id);
     }
     assert.equal(await page.locator('[data-question-id="4"],[data-question-id="5"],[data-question-id="currentState"],#answer-4,#apartment-area,#area-unit').count(), 0, 'shared residential fields must not repeat on page 2');
-    await page.locator('#answer-21').selectOption({ label: '아직 정하지 않았어요' });
+    await page.locator('#answer-21').selectOption({ label: '5천만~6천만원' });
     await page.getByRole('button', { name: '거실', exact: true }).click();
     assert.deepEqual(await page.locator('.work-checklist button span:last-child').allTextContents(), ['전체 리모델링','현관','거실','주방','공용 욕실','안방 욕실','안방','각 방']);
     if (branches) {
@@ -245,6 +245,10 @@ await withTestBrowser(async (context, selection) => {
         const expected = Number(type === 'commercial' ? '35' : '34.5') * 3.305785;
         assert(Math.abs(displayed - expected) < 0.0001, 'area unit changes only the displayed first-page value');
       }
+      if (width === 390) {
+        await page.reload({ waitUntil: 'domcontentloaded' });
+        await page.locator('#answer-13').waitFor();
+      }
       await screenshot(page, type, 1, width);
       await advanceToSecond(page);
       if (type === 'residential') await fillResidentialSecond(page);
@@ -257,7 +261,7 @@ await withTestBrowser(async (context, selection) => {
         assert.equal(body.answers['13'], '주거 신청자');
         assert.equal(body.answers['10'], '010-0000-0000');
         assert.equal(body.answers['15'], '부산광역시 해운대구 좌동순환로 457');
-        assert.equal(body.answers['8'], '2층 201호');
+        assert.equal(body.answers['8'], '테스트건물 2층 201호');
         assert.equal(body.answers['5'], constructionDate);
         assert.equal(body.answers['4'], '34.5');
         assert.deepEqual(body.answers['12'], ['거실']);
@@ -271,7 +275,8 @@ await withTestBrowser(async (context, selection) => {
         assert.equal(body.filePath, null);
         assert.equal(body.commercialLead.name, '상가 신청자');
         assert.equal(body.commercialLead.phone, '010-0000-0000');
-        assert.equal(body.commercialLead.address, '부산광역시 해운대구 좌동순환로 457 2층 201호');
+        assert.equal(body.commercialLead.address, '부산광역시 해운대구 좌동순환로 457 테스트건물 2층 201호');
+        assert.equal(body.commercialLead.buildingName, '테스트건물');
         assert.equal(body.commercialLead.currentState, 'vacant');
         assert.equal(body.commercialLead.constructionDate, constructionDate);
         assert.equal(body.commercialLead.vertical, 'shop');
@@ -288,6 +293,19 @@ await withTestBrowser(async (context, selection) => {
     }
   }
 
+  const changedAddress = await open('commercial', 390, '&case=building_address_change');
+  await fillShared(changedAddress, { type: 'commercial' });
+  await changedAddress.getByRole('button', { name: '주소 검색', exact: true }).click();
+  await changedAddress.waitForFunction(() => Boolean(window.__postcode));
+  await changedAddress.evaluate(() => window.__postcode.oncomplete({ address: '부산광역시 수영구 새주소로 1' }));
+  assert.equal(await changedAddress.locator('#answer-8').inputValue(), '', 'changing address clears the old unit detail');
+  await advanceToSecond(changedAddress);
+  await fillCommercialSecond(changedAddress);
+  const changedBody = await submit(changedAddress);
+  assert.equal(changedBody.commercialLead.address, '부산광역시 수영구 새주소로 1');
+  assert.equal(changedBody.commercialLead.buildingName, undefined, 'old building must not leak into a new address');
+  await changedAddress.close();
+
   const testBypass = await open('residential', 390, '&case=test_bypass');
   await testBypass.locator('#answer-10').fill('123');
   assert.equal(await testBypass.locator('#answer-currentState').inputValue(), '');
@@ -295,12 +313,39 @@ await withTestBrowser(async (context, selection) => {
   await testBypass.locator('.step-meta').filter({ hasText: /2\s*\/\s*2/ }).waitFor();
   await testBypass.close();
 
+  for (const type of ['residential', 'commercial']) {
+    const required = await open(type, 390, '&case=required_area_budget', { testMode: false });
+    await fillShared(required, { type });
+    const areaInput = required.locator(type === 'residential' ? '#answer-4' : '#answer-area');
+    assert.equal(await areaInput.evaluate(input => input.required), true);
+    await areaInput.fill('');
+    await required.locator('#next').click();
+    assert(await required.locator('#answer-13').isVisible(), 'empty area blocks page 1');
+    assert.match(await required.locator('#form-error').innerText(), /면적|평형/);
+    await areaInput.fill('34');
+    if (type === 'residential') await required.locator('#answer-4-confirm').click();
+    await advanceToSecond(required);
+    if (type === 'residential') await fillResidentialSecond(required, { branches: false });
+    else { await fillCommercialSecond(required); await required.locator('.consent input').check(); }
+    const budget = required.locator(type === 'residential' ? '#answer-21' : '#answer-budget');
+    assert.equal(await budget.evaluate(input => input.required), true);
+    assert.equal(await budget.locator('option[value="undecided"],option[value="아직 정하지 않았어요"]').count(), 0);
+    await budget.selectOption('');
+    const before = submissions.length;
+    await required.locator('#next').click();
+    assert.match(await required.locator('#form-error').innerText(), /예산/);
+    assert.equal(submissions.length, before, 'missing budget must not send a request');
+    await budget.selectOption(type === 'residential' ? '5천만~6천만원' : '50_100m');
+    await submit(required);
+    await required.close();
+  }
+
   const validation = await open('residential', 390, '&case=optional_validation', { testMode: false });
   await fillShared(validation, { type: 'residential', date: '' });
   await validation.locator('#answer-currentState').selectOption('');
   await validation.locator('#next').click();
   assert(await validation.locator('#answer-13').isVisible(), 'required vacancy state must block page 1');
-  await validation.locator('#answer-currentState').selectOption('occupied');
+  await validation.locator('#answer-currentState').selectOption('owner_occupied');
   await validation.locator('#answer-10').fill('010');
   await validation.locator('#next').click();
   assert(await validation.locator('#answer-10').isVisible(), 'partial phone number must be rejected');
@@ -313,11 +358,11 @@ await withTestBrowser(async (context, selection) => {
   await validation.close();
 
   const switcher = await open('residential', 390, '&case=type_switch');
-  await fillShared(switcher, { type: 'residential', name: '전환 보존 신청자', state: 'occupied' });
+  await fillShared(switcher, { type: 'residential', name: '전환 보존 신청자', state: 'owner_occupied' });
   await switcher.locator('#answer-4').fill('42');
   await switcher.locator('#answer-4-confirm').click();
   await advanceToSecond(switcher);
-  await switcher.locator('#answer-21').selectOption({ label: '아직 정하지 않았어요' });
+  await switcher.locator('#answer-21').selectOption({ label: '5천만~6천만원' });
   await switcher.getByRole('button', { name: '주방', exact: true }).click();
   await switcher.locator('#back').click();
   await switcher.locator('#space-type-commercial').click();
@@ -325,13 +370,15 @@ await withTestBrowser(async (context, selection) => {
   for (const [selector, value] of [['#answer-13', '전환 보존 신청자'], ['#answer-10', '010-0000-0000'], ['#answer-8', '2층 201호'], ['#answer-5', constructionDate]]) {
     assert.equal(await switcher.locator(selector).inputValue(), value, 'shared value survives type switch: ' + selector);
   }
-  assert.equal(await switcher.locator('#answer-currentState').inputValue(), 'occupied');
+  assert.equal(await switcher.locator('#answer-currentState').inputValue(), '');
+  await switcher.locator('#answer-currentState').selectOption('occupied');
   await switcher.locator('#answer-area').fill('55');
   await advanceToSecond(switcher);
   await switcher.locator('#answer-vertical').selectOption('office');
   await switcher.locator('#back').click();
   await switcher.locator('#space-type-residential').click();
   assert.equal(await switcher.locator('#answer-4').inputValue(), '42', 'residential response survives round-trip switch');
+  await switcher.locator('#answer-currentState').selectOption('owner_occupied');
   await advanceToSecond(switcher);
   await switcher.locator('#back').click();
   await switcher.locator('#space-type-commercial').click();
@@ -341,6 +388,7 @@ await withTestBrowser(async (context, selection) => {
   assert.equal(await switcher.locator('#space-type-commercial').getAttribute('aria-pressed'), 'true');
   assert.equal(await switcher.locator('#answer-13').inputValue(), '전환 보존 신청자');
   assert.equal(await switcher.locator('#answer-area').inputValue(), '55');
+  await switcher.locator('#answer-currentState').selectOption('occupied');
   await advanceToSecond(switcher);
   assert.equal(await switcher.locator('#answer-vertical').inputValue(), 'office', 'commercial response survives reload');
   await switcher.close();

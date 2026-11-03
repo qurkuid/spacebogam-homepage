@@ -85,6 +85,8 @@ function fillResidential(h, { detail = '' } = {}) {
   h.input('13', '테스트');
   h.input('10', '010-0000-0000');
   h.input('15', '부산광역시 연제구 해맞이로 23');
+  h.input('4', '34.5');
+  h.stage.querySelector('#answer-4-confirm').click();
   if (detail) h.input('8', detail);
   h.input('currentState', 'vacant');
   h.next();
@@ -234,7 +236,7 @@ async function run() {
   assert.equal(payload.answers['8'], '101동 1001호');
   assert.equal(payload.answers['4'], '34.5');
   const area = payloadHarness.api.group().find(q => String(q.id) === '4');
-  assert.equal(area.isRequired, false);
+  assert.equal(area.isRequired, true);
   for (const value of ['0', 'abc']) {
     payloadHarness.input('4', value);
     payloadHarness.stage.querySelector('#answer-4-confirm').click();
@@ -242,18 +244,39 @@ async function run() {
     assert.equal(payloadHarness.stage.querySelector('#answer-4').getAttribute('aria-invalid'), 'true');
   }
   payloadHarness.stage.querySelector('#apartment-area').change('');
-  assert.equal(payloadHarness.api.validate(area), '');
+  assert.match(payloadHarness.api.validate(area), /공급평형/);
   assert.equal(payloadHarness.api.payload(null).answers['4'], undefined);
   assert.deepEqual(Array.from(payload.answers['12']), ['거실']);
   for (const id of ['13', '10', '15', '21', '12']) assert.ok(payload.answers[id], '필수 답변 저장 ' + id);
   for (const obsolete of ['5', '17', '33', '34']) assert.equal(payload.answers[obsolete], undefined);
 
   assert.match(payload.answers['7'], /공실 여부·현장 상태: 공실/);
+  payloadHarness.api.answers().addressBuildingName = '테스트아파트';
+  assert.equal(payloadHarness.api.payload(null).answers['8'], '테스트아파트 101동 1001호');
+  payloadHarness.api.answers().responses['8'] = '테스트아파트 101동 1001호';
+  assert.equal(payloadHarness.api.payload(null).answers['8'], '테스트아파트 101동 1001호', 'building must not repeat');
+  delete payloadHarness.api.answers().addressBuildingName;
+  payloadHarness.api.answers().responses['8'] = '';
+  payloadHarness.api.answers().apartmentSelected = ['선택아파트', 'qa'];
+  assert.equal(payloadHarness.api.payload(null).answers['8'], '선택아파트', 'catalog fallback without unit detail');
 
   const undecided = harness();
   undecided.input('13', '미정 고객'); undecided.input('10', '010-1111-2222'); undecided.input('15', '부산광역시 연제구'); undecided.next();
-  undecided.input('currentState', 'vacant'); undecided.next();
-  undecided.input('21', '아직 정하지 않았어요');
+  undecided.input('currentState', 'vacant');
+  undecided.next();
+  assert.equal(undecided.api.current(), 'contact');
+  assert.match(undecided.error(), /공급평형/);
+  undecided.input('4', '34');
+  undecided.stage.querySelector('#answer-4-confirm').click();
+  undecided.next();
+  const budget = undecided.api.group().find(q => String(q.id) === '21');
+  assert.equal(budget.isRequired, true);
+  assert.ok(undecided.api.validate(budget), 'empty budget blocks submission');
+  assert(!budget.options.includes('아직 정하지 않았어요'));
+  undecided.api.answers().responses['21'] = '아직 정하지 않았어요';
+  assert.match(undecided.api.validate(budget), /예산/);
+  undecided.input('21', '5천만~6천만원');
+  assert.equal(undecided.api.validate(budget), '');
   assert.ok(undecided.api.validate(undecided.api.group().find(q => String(q.id) === '12')), '시공장소는 선택해야 한다');
   undecided.button('거실');
   assert.deepEqual(Array.from(undecided.api.answers().responses['12']), ['거실'], '시공장소를 선택할 수 있다');
@@ -392,6 +415,11 @@ async function run() {
   assert.equal(commercialPayload.commercialLead.name, '테스트');
   assert.equal(commercialPayload.commercialLead.constructionDate, '2099-11-01');
   assert.equal(commercialPayload.commercialLead.address, '부산 연제구 후보지 2층');
+  commercial.api.answers().addressBuildingName = '테스트상가';
+  assert.equal(commercial.api.payload(null).commercialLead.address, '부산 연제구 후보지 테스트상가 2층');
+  assert.equal(commercial.api.payload(null).commercialLead.buildingName, '테스트상가');
+  commercial.api.answers().responses.budget = 'undecided';
+  assert.match(commercial.api.validate(commercial.api.group().find(q => q.id === 'budget')), /예산/);
 
   console.log('two-page residential consultation: fields, payload, direct submit, draft, retry and commercial preservation passed');
 }

@@ -275,8 +275,8 @@
       q.isRequired = q.questionType === 'short_answer' && /성함|이름/.test(q.question)
         || q.questionType === 'phonenumber' || /연락처/.test(q.question)
         || (q.questionType === 'address' || /주소/.test(q.question)) && !/세부/.test(q.question)
-        || ['12', '21'].includes(String(q.id));
-      if (q.questionType === 'select' && /예산/.test(q.question)) q.options = ['아직 정하지 않았어요', '4천만원 미만', '4천만~5천만원', '5천만~6천만원', '6천만~7천만원', '7천만~8천만원', '8천만~9천만원', '9천만~1억원', '1억~1.5억원', '1.5억~2억원', '2억원 이상'];
+        || ['4', '12', '21'].includes(String(q.id));
+      if (q.questionType === 'select' && /예산/.test(q.question)) q.options = ['4천만원 미만', '4천만~5천만원', '5천만~6천만원', '6천만~7천만원', '7천만~8천만원', '8천만~9천만원', '9천만~1억원', '1억~1.5억원', '1.5억~2억원', '2억원 이상'];
       if (q.questionType === 'multiple_choice' && /시공장소|공사 범위/.test(q.question)) {
         q.options = residentialWorkOptions;
       }
@@ -371,7 +371,8 @@
     });
     return questions.filter(q => commonQuestionIds.includes(String(q.id))).concat(state,
       window.SB_CONSULTATION_QUESTIONS.commercial.filter(q => !['name','phone','address','currentState','constructionDate'].includes(String(q.id)))
-        .map(q => q.id === 'area' ? { ...q, question: '실면적을 입력해 주세요.' } : q));
+        .map(q => q.id === 'area' ? { ...q, question: '실면적을 입력해 주세요.' }
+          : q.id === 'budget' ? { ...q, options: questionOptions(q).filter(option => option !== 'undecided') } : q));
   }
   function groupQuestions(key = current) {
     const visible = questionList().filter(q => !hiddenByBranch(q));
@@ -918,12 +919,14 @@
           onresize: size => { if (panel.isConnected) host.style.height = size.height + 'px'; },
           oncomplete: data => {
             if (!panel.isConnected || panel.hidden || request !== requestId) return;
-            if (input.value !== data.address) detail.value = '';
+            const address = data.roadAddress || data.address;
+            if (input.value !== address) detail.value = '';
             detailLabel.hidden = false;
             detail.disabled = false;
-            answers.addressBuildingName = data.buildingName || '';
-            input.value = data.roadAddress || data.address;
+            input.value = address;
             input.dispatchEvent(new Event('input', { bubbles: true }));
+            answers.addressBuildingName = (data.buildingName || '').trim();
+            saveDraft();
             hide();
             notice.textContent = '주소가 입력되었습니다. 상세주소는 선택해서 입력할 수 있습니다.';
             if (answers.type === '주거 공간') render();
@@ -1087,6 +1090,7 @@
       if (type === 'address' && response(question) !== input.value) {
         clearPlan(); lookupRun++; addressLookupRun++;
         delete answers.apartmentSelected; delete answers.apartmentQuery; delete answers.dong; delete answers.apartmentAddress;
+        delete answers.addressBuildingName;
         if (answers.type === '주거 공간') delete answers.responses['4'];
         lookup = { status: 'ready', candidates: [], source: 'none' };
       }
@@ -1154,6 +1158,7 @@
     const label = el('div', 'field area-manual');
     const title = el('label', 'field-label'); label.appendChild(title);
     const input = el('input', 'question-input'); input.id = 'answer-' + key;
+    input.required = !!question.isRequired;
     input.type = options.confirm ? 'text' : 'number'; input.min = '0'; input.step = 'any'; input.inputMode = 'decimal';
     input.setAttribute('aria-describedby', 'form-error');
     title.htmlFor = input.id;
@@ -1265,7 +1270,7 @@
     row.appendChild(selectedLabel);
     const areaLabel = el('label', 'field');
     areaLabel.appendChild(el('span', 'field-label', '공급평형 선택'));
-    const select = el('select', 'question-input'); select.id = 'apartment-area';
+    const select = el('select', 'question-input'); select.id = 'apartment-area'; select.required = !!question.isRequired;
     select.setAttribute('aria-describedby', status.id);
     areaLabel.appendChild(select); row.appendChild(areaLabel); panel.appendChild(row);
     if (addressDetail) panel.appendChild(addressDetail);
@@ -1535,12 +1540,17 @@
     const saved = Object.fromEntries(Object.entries(answers.responses)
       .filter(([key, value]) => activeIds.has(key) && value !== '' && value != null)
       .map(([key, value]) => [key, key === '12' ? canonicalResidentialWork(value) : Array.isArray(value) ? value.join(', ') : String(value)]));
+    const buildingName = String(answers.addressBuildingName || answers.apartmentSelected?.[0] || '').trim();
+    const detail = String(answers.responses['8'] || '').trim();
+    const detailedAddress = [buildingName && !detail.includes(buildingName) ? buildingName : '', detail].filter(Boolean).join(' ');
+    if (detailedAddress) saved['8'] = detailedAddress;
     saved['9999'] = 'true';
     if (answers.type === '상업 공간') {
       const lead = Object.fromEntries(window.SB_CONSULTATION_QUESTIONS.commercial
         .filter(q => !hiddenByBranch(q)).map(q => [q.id, answers.responses[q.id]]));
       Object.assign(lead, { name: answers.responses['13'], phone: answers.responses['10'],
-        address: [answers.responses['15'], answers.responses['8']].filter(Boolean).join(' '),
+        address: [answers.responses['15'], detailedAddress].filter(Boolean).join(' '),
+        ...(buildingName ? { buildingName } : {}),
         constructionDate: answers.responses['5'] || '' });
       const attribution = marketingAttribution();
       delete attribution.form_contract;
@@ -1762,6 +1772,7 @@
     }
     const value = response(question);
     if (String(question.id) === '4' && stage.querySelector('#answer-4')?.getAttribute('data-unconfirmed') === 'true') return '공급면적을 입력한 뒤 선택 버튼을 눌러 주세요.';
+    if (['21', 'budget'].includes(String(question.id)) && ['아직 정하지 않았어요', 'undecided'].includes(value)) return '예산 구간을 선택해 주세요.';
     if (question.id === 'budget' && value === '기타(직접입력)') return '예산을 직접 입력해 주세요.';
     if (question.isRequired && !hasResponse(question)) return question.question + ' 입력이 필요합니다.';
     if (!hasResponse(question)) return '';

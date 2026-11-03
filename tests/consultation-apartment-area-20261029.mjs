@@ -261,7 +261,7 @@ await withTestBrowser(async (context, selection) => {
   await page.locator('#next').click();
   await page.locator('#answer-21').waitFor();
   assert.equal(await page.locator('#answer-4,#answer-area,#area-unit,#apartment-area').count(), 0, 'area fields do not repeat on page 2');
-  await page.locator('#answer-21').selectOption({ label: '아직 정하지 않았어요' });
+  await page.locator('#answer-21').selectOption({ label: '5천만~6천만원' });
   await page.getByRole('button', { name: '주방', exact: true }).click();
   const schedule = page.locator('[data-question-id="18"]');
   await schedule.getByRole('button', { name: '월요일', exact: true }).click();
