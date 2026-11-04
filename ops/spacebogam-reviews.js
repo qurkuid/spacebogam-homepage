@@ -144,7 +144,48 @@ function approved(store) {
 }
 
 function publicReview(review) {
-  return Object.fromEntries(['id', 'rating', 'title', 'body', 'nickname', 'space', 'experienceMonth', 'publishedAt'].map(key => [key, review[key]]));
+  return Object.fromEntries(['id', 'rating', 'title', 'body', 'nickname', 'space', 'experienceMonth', 'publishedAt', 'images', 'sourceLabel', 'editedByOperator'].filter(key => review[key] !== undefined).map(key => [key, review[key]]));
+}
+
+function validPublicStore(store) {
+  if (store?.version !== 2 || !Array.isArray(store.reviews)) return false;
+  const ids = new Set();
+  return store.reviews.every(review => {
+    if (!review || !UUID.test(review.id || '') || ids.has(review.id)) return false;
+    ids.add(review.id);
+    if (review.kind !== 'customer_review' || review.status !== 'approved' || !canonicalInstant(review.publishedAt) || !validText(review.customerId, 1, 100)) return false;
+    if (!Number.isInteger(review.rating) || review.rating < 1 || review.rating > 5) return false;
+    if (!validText(review.title, 5, 100) || !validText(review.body, 20, 3000) || !validText(review.nickname, 2, 20) || !SPACES.has(review.space)) return false;
+    if (!/^\d{4}-(?:0[1-9]|1[0-2])$/.test(review.experienceMonth || '') || review.experienceMonth < '1900-01' || review.experienceMonth > koreaMonth(new Date())) return false;
+    if (!storedText(review.sourceLabel, 1, 100) || typeof review.editedByOperator !== 'boolean' || !Array.isArray(review.images) || review.images.length > 4) return false;
+    return review.images.every(image => {
+      try { return new URL(image.url).origin === 'https://intm.kr' && storedText(image.alt, 1, 200); } catch { return false; }
+    });
+  });
+}
+
+async function intmRequest(origin, method = 'GET', payload, key, token) {
+  if (method === 'POST' && !token) throw new Error('INTM submission credential unavailable');
+  const response = await fetch(new URL('/api/public/spacebogam/reviews', origin), {
+    method, redirect: 'error', signal: AbortSignal.timeout(8000),
+    headers: { Accept: 'application/json', ...(method === 'POST' ? { 'Content-Type': 'application/json', Origin: 'https://spacebogam.kr', 'Idempotency-Key': key, Authorization: `Bearer ${token}` } : {}) },
+    ...(payload ? { body: JSON.stringify(payload) } : {}),
+  });
+  const chunks = []; let size = 0;
+  for await (const chunk of response.body) {
+    size += chunk.length;
+    if (size > 4 * 1024 * 1024) throw new Error('INTM response exceeds limit');
+    chunks.push(chunk);
+  }
+  const body = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  if (!response.ok && ![400, 403, 409, 413, 415, 429].includes(response.status)) throw new Error('INTM reviews unavailable');
+  return { status: response.status, body };
+}
+
+function imagesHtml(review, preview = false) {
+  const images = preview ? (review.images || []).slice(0, 1) : (review.images || []);
+  if (!images.length) return '';
+  return `<div class="rv-images${preview ? ' rv-images-preview' : ''}">${images.map(image => `<a href="${escapeHtml(image.url)}" target="_blank" rel="noopener noreferrer"><img src="${escapeHtml(image.url)}" alt="${escapeHtml(image.alt)}" loading="lazy" decoding="async" width="960" height="720"></a>`).join('')}</div>`;
 }
 
 function statistics(reviews) {
@@ -216,8 +257,9 @@ function listHtml(result) {
   const cardHtml = reviews.map(review => `<article class="rv-card">
   <p class="rv-meta">${stars(review.rating)} · ${escapeHtml(spaceName(review.space))} · ${escapeHtml(review.experienceMonth)}</p>
   <h2><a href="/reviews/${review.id}/">${escapeHtml(review.title)}</a></h2>
+  ${imagesHtml(review, true)}
   <p>${escapeHtml(review.body)}</p>
-  <p class="rv-meta">${escapeHtml(review.nickname)} · ${escapeHtml(review.publishedAt.slice(0, 10))}</p>
+  <p class="rv-meta">${escapeHtml(review.nickname)} · ${escapeHtml(review.publishedAt.slice(0, 10))}${review.sourceLabel ? ` · ${escapeHtml(review.sourceLabel)}` : ''}</p>
 </article>`).join('\n');
   const hasFilters = Boolean(filters.q || filters.rating || filters.space || filters.sort !== 'newest');
   const cards = cardHtml || (stats.reviewCount === 0 && !hasFilters
@@ -256,8 +298,9 @@ function detailHtml(review) {
   <a href="/reviews/">← 고객 후기 모두 보기</a>
   <p class="rv-meta">${stars(review.rating)} · ${escapeHtml(spaceName(review.space))} · ${escapeHtml(review.experienceMonth)}</p>
   <h1>${escapeHtml(review.title)}</h1>
-  <p class="rv-meta">${escapeHtml(review.nickname)} · ${escapeHtml(review.publishedAt.slice(0, 10))}</p>
+  <p class="rv-meta">${escapeHtml(review.nickname)} · ${escapeHtml(review.publishedAt.slice(0, 10))}${review.sourceLabel ? ` · ${escapeHtml(review.sourceLabel)}` : ''}</p>
   <p>${escapeHtml(review.body).replace(/\r?\n/g, '<br>')}</p>
+  ${imagesHtml(review)}
 </article>`;
 }
 
@@ -308,8 +351,26 @@ function clientAddress(req, trustedProxies) {
   return peer;
 }
 
-function createReviewsHandler({ root, reviewsFile = process.env.REVIEWS_FILE || defaultFile(root), publicOrigin = process.env.REVIEWS_PUBLIC_ORIGIN || 'https://spacebogam.kr', trustedProxyAddresses = (process.env.TRUSTED_REVIEW_PROXY || '').split(',').map(value => value.trim()).filter(Boolean), now = () => new Date() }) {
+function createReviewsHandler({ root, reviewsFile = process.env.REVIEWS_FILE || defaultFile(root), intmOrigin = process.env.INTM_REVIEWS_ORIGIN, intmTokenFile = process.env.INTM_REVIEWS_TOKEN_FILE, publicOrigin = process.env.REVIEWS_PUBLIC_ORIGIN || 'https://spacebogam.kr', trustedProxyAddresses = (process.env.TRUSTED_REVIEW_PROXY || '').split(',').map(value => value.trim()).filter(Boolean), now = () => new Date() }) {
   const file = privateFile(root, reviewsFile);
+  if (intmOrigin) {
+    const upstream = new URL(intmOrigin);
+    const loopback = ['127.0.0.1', '[::1]', 'localhost'].includes(upstream.hostname);
+    if (upstream.username || upstream.password || !(upstream.protocol === 'https:' || (upstream.protocol === 'http:' && loopback))) throw new Error('INTM reviews require HTTPS or loopback');
+  }
+  let intmToken;
+  if (intmOrigin && intmTokenFile) {
+    const tokenPath = privateFile(root, intmTokenFile);
+    if (fs.statSync(tokenPath).mode & 0o077) throw new Error('INTM credential file must be private');
+    intmToken = fs.readFileSync(tokenPath, 'utf8').trim();
+    if (!/^[0-9a-f]{64}$/.test(intmToken)) throw new Error('Invalid INTM submission credential');
+  }
+  const loadStore = async () => {
+    if (!intmOrigin) return readStore(file);
+    const { status, body } = await intmRequest(intmOrigin);
+    if (status !== 200 || !validPublicStore(body)) throw new Error('Invalid INTM reviews response');
+    return body;
+  };
   const origin = new URL(publicOrigin).origin;
   const trustedProxies = new Set(trustedProxyAddresses);
   const attemptsByAddress = new Map();
@@ -348,7 +409,7 @@ function createReviewsHandler({ root, reviewsFile = process.env.REVIEWS_FILE || 
           if (active.length) attemptsByAddress.set(storedAddress, active);
           else attemptsByAddress.delete(storedAddress);
         }
-        const prior = readStore(file).reviews.find(review => review.idempotencyKey === key);
+        const prior = !intmOrigin && readStore(file).reviews.find(review => review.idempotencyKey === key);
         if (prior) {
           if (prior.fingerprint !== fingerprint) { json(res, 409, { error: '같은 요청 키에 다른 후기를 사용할 수 없습니다.' }); return true; }
           json(res, 200, { id: prior.id, status: 'received' });
@@ -360,6 +421,15 @@ function createReviewsHandler({ root, reviewsFile = process.env.REVIEWS_FILE || 
         if (attempts.length >= 5) { json(res, 429, { error: '잠시 후 다시 작성해 주세요.' }); return true; }
         attempts.push(now().getTime());
         attemptsByAddress.set(address, attempts);
+        if (intmOrigin) {
+          const result = await intmRequest(intmOrigin, 'POST', submitted, key, intmToken);
+          if (result.status >= 400) json(res, result.status, { error: typeof result.body.error === 'string' ? result.body.error : '후기를 접수하지 못했습니다.' });
+          else {
+            if (![200, 201].includes(result.status) || !UUID.test(result.body.id || '') || result.body.status !== 'received') throw new Error('Invalid INTM submission response');
+            json(res, result.status, { id: result.body.id, status: 'received' });
+          }
+          return true;
+        }
         const saved = updateStore(file, store => {
           const prior = store.reviews.find(review => review.idempotencyKey === key);
           if (prior) return prior.fingerprint === fingerprint ? { id: prior.id, duplicate: true } : { conflict: true };
@@ -377,7 +447,7 @@ function createReviewsHandler({ root, reviewsFile = process.env.REVIEWS_FILE || 
         if (!['GET', 'HEAD'].includes(req.method)) { json(res, 405, { error: 'Method not allowed' }); return true; }
         const filters = filtersFrom(new URL(req.url, origin));
         if (filters.error) { json(res, 400, { error: filters.error }); return true; }
-        const body = results(readStore(file), filters);
+        const body = results(await loadStore(), filters);
         if (req.method === 'HEAD') {
           res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
           res.end();
@@ -386,7 +456,7 @@ function createReviewsHandler({ root, reviewsFile = process.env.REVIEWS_FILE || 
       }
 
       if (!['GET', 'HEAD'].includes(req.method)) { json(res, 405, { error: 'Method not allowed' }); return true; }
-      const store = readStore(file);
+      const store = await loadStore();
       if (pathname === '/reviews/sitemap.xml') {
         const urls = approved(store).map(review => `<url><loc>${escapeHtml(origin)}/reviews/${review.id}/</loc><lastmod>${escapeHtml(review.publishedAt.slice(0, 10))}</lastmod></url>`).join('');
         const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${escapeHtml(origin)}/reviews/</loc></url>${urls}</urlset>`;

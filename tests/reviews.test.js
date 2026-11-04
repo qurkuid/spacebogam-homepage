@@ -229,3 +229,73 @@ test('review API persists pending submissions and publishes only operator-approv
     assert.equal(JSON.parse(fs.readFileSync(store, 'utf8')).reviews.length, 0);
   });
 });
+
+test('INTM-backed reviews render approved photos, persist through INTM only, and fail closed', async t => {
+  const base = fs.mkdtempSync(path.join(os.tmpdir(), 'spacebogam-intm-reviews-'));
+  const root = path.join(base, 'public');
+  const store = path.join(base, 'private', 'reviews.json');
+  fs.mkdirSync(path.join(root, 'reviews'), { recursive: true });
+  fs.copyFileSync(path.resolve('reviews/index.html'), path.join(root, 'reviews/index.html'));
+  const review = { id: crypto.randomUUID(), kind: 'customer_review', rating: 4, title: '검증 전용 고객 후기입니다', body: '운영에 등록하지 않는 검증용 데이터입니다. 실제 고객의 후기를 대신하지 않습니다.', nickname: '검증별명', space: 'apartment', experienceMonth: '2026-10', publishedAt: '2026-11-04T00:00:00.000Z', customerId: 'opaque-customer', status: 'approved', sourceLabel: '고객 작성 · 문장 정리', editedByOperator: true, images: Array.from({ length: 4 }, (_, n) => ({ url: `https://intm.kr/api/uploads/fixture-${n}.jpg`, alt: `현장 사진 ${n + 1}` })) };
+  let upstreamStatus = 200;
+  let publicData = { version: 2, reviews: [review] };
+  const received = [];
+  const savedId = crypto.randomUUID();
+  const upstream = http.createServer(async (req, res) => {
+    assert.equal(req.url, '/api/public/spacebogam/reviews');
+    res.setHeader('Content-Type', 'application/json');
+    if (req.method === 'GET') { res.statusCode = upstreamStatus; res.end(JSON.stringify(publicData)); return; }
+    let text = ''; for await (const chunk of req) text += chunk;
+    assert.equal(req.headers.authorization, `Bearer ${'a'.repeat(64)}`);
+    received.push({ body: JSON.parse(text), origin: req.headers.origin, key: req.headers['idempotency-key'] });
+    res.statusCode = received.length > 1 ? 200 : 201;
+    res.end(JSON.stringify({ id: savedId, status: 'received' }));
+  });
+  upstream.listen(0, '127.0.0.1'); await once(upstream, 'listening');
+  const intmOrigin = `http://127.0.0.1:${upstream.address().port}`;
+  const tokenFile = path.join(base, 'token'); fs.writeFileSync(tokenFile, 'a'.repeat(64), { mode: 0o600 });
+  const server = http.createServer((req, res) => { handler(req, res, new URL(req.url, 'http://localhost').pathname); });
+  server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  const port = server.address().port;
+  const origin = `http://127.0.0.1:${port}`;
+  assert.throws(() => createReviewsHandler({ root, reviewsFile: store, intmOrigin: 'http://intm.kr', intmTokenFile: tokenFile }), /HTTPS/);
+  const handler = createReviewsHandler({ root, reviewsFile: store, intmOrigin, intmTokenFile: tokenFile, publicOrigin: origin });
+  t.after(async () => {
+    server.closeAllConnections(); upstream.closeAllConnections();
+    await Promise.all([new Promise(done => server.close(done)), new Promise(done => upstream.close(done))]);
+    fs.rmSync(base, { recursive: true, force: true });
+  });
+  const listing = await request(port, '/api/reviews');
+  assert.equal(listing.status, 200);
+  const listingBody = JSON.parse(listing.text);
+  assert.equal(listingBody.stats.averageRating, 4);
+  assert.equal(listingBody.reviews[0].images.length, 4);
+  assert.equal(listingBody.reviews[0].customerId, undefined);
+  assert.equal(listingBody.reviews[0].editedByOperator, true);
+  const detail = await request(port, `/reviews/${review.id}/`);
+  assert.equal(detail.status, 200);
+  assert.equal((detail.text.match(/src="https:\/\/intm.kr\/api\/uploads\/fixture/g) || []).length, 4);
+  assert(detail.text.includes('고객 작성 · 문장 정리'));
+  assert((await request(port, '/reviews/sitemap.xml')).text.includes(review.id));
+  const key = crypto.randomUUID();
+  const value = payload();
+  for (const expected of [201, 200]) {
+    const response = await submit({ origin }, port, value, key);
+    assert.equal(response.status, expected);
+    assert.deepEqual(JSON.parse(response.text), { id: savedId, status: 'received' });
+  }
+  assert.equal(received[0].origin, 'https://spacebogam.kr');
+  assert.equal(received[0].key, key);
+  assert.deepEqual(received[0].body, value);
+  assert.equal(fs.existsSync(store), false, 'INTM mode must not write a JSON fallback');
+  upstreamStatus = 503;
+  assert.equal((await request(port, '/api/reviews')).status, 503);
+  upstreamStatus = 200;
+  publicData = { version: 2, reviews: [{ ...review, status: 'pending' }] };
+  assert.equal((await request(port, '/reviews/')).status, 503);
+  publicData = { version: 2, reviews: [{ ...review, images: [...review.images, review.images[0]] }] };
+  assert.equal((await request(port, '/api/reviews')).status, 503);
+  publicData = { version: 2, reviews: [{ ...review, images: [{ url: 'javascript:alert(1)', alt: 'invalid' }] }] };
+  assert.equal((await request(port, '/api/reviews')).status, 503);
+  assert.equal(fs.existsSync(store), false);
+});

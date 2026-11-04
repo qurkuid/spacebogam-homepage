@@ -2,36 +2,33 @@
 
 공개 주소: https://spacebogam.kr/reviews/
 
-고객이 작성한 후기는 바로 공개되지 않는다. 고객 여부와 개인정보를 확인한 후 공개하며, 낮은 별점에도 동일한 기준을 적용한다. 내용을 고쳐서 승인하지 않는다. 수정이 필요하면 고객에게 확인하고 다시 접수받는다.
+고객이 작성한 후기는 바로 공개되지 않는다. 고객 여부와 개인정보를 확인한 후 공개하며, 낮은 별점에도 동일한 기준을 적용한다. 문장을 정리할 때는 고객의 의미와 평점을 보존하고, 운영자 편집 사실을 표시한다.
 
-## 접수 확인·공개·삭제
+## INTM 로그인 편집·공개
 
-운영 서버 전용 명령이다. 홈페이지에 관리자 API나 비밀번호를 만들지 않았다.
+관리 주소: https://intm.kr/newportal/settings/homepage-reviews
 
-```sh
-ssh macmini
-cd /Users/baegchangseog/srv/spacebogam-site
-node spacebogam-reviews.js list
-node spacebogam-reviews.js show 후기UUID
-node spacebogam-reviews.js approve 후기UUID --customer 내부고객코드
-node spacebogam-reviews.js reject 후기UUID
-node spacebogam-reviews.js delete 후기UUID
-```
+INTM 회사 관리자 또는 해당 회사에 소속된 시스템 관리자로 로그인한다. 다른 회사의 접수·고객·프로젝트는 조회하거나 수정할 수 없다. 실제 고객이 홈페이지 폼으로 접수한 후기만 관리 목록에 들어온다. 관리자가 후기를 새로 생성하거나 고객의 평점을 바꾸는 기능은 없다.
 
-`--customer`에는 실명·연락처·상세 주소 대신 내부의 안정적인 고객 코드를 쓴다. 같은 고객의 여러 후기에는 같은 코드를 사용해야 고객 수가 중복되지 않는다. 이미 공개한 후기를 다른 고객으로 바꿔 재승인할 수 없다. 고객 코드와 동의 증거는 공개 API나 페이지에 포함하지 않는다.
+1. 확인 대기 후기에서 고객을 연결한다.
+2. 제목·본문·별명·경험 월을 확인하고 필요한 문장을 정리한다. 운영자 편집 여부는 공개 페이지에 표시한다.
+3. 연결 고객의 현장을 선택하고 저장한 뒤, 해당 현장의 활성 포트폴리오 사진을 최대 4장 선택한다. 다른 고객이나 현장 사진을 섞을 수 없다.
+4. 고객 및 공개 내용 확인을 완료하고 공개한다. 공개 중인 글·고객 연결·사진을 변경하면 이번 변경에 대한 확인이 다시 필요하다. 비공개로 전환하면 목록·통계·상세 주소·후기 사이트맵에서 제외된다. 검색엔진 사본 반영 시점은 별개다.
 
-`show`로 본문을 읽고 고객 기록과 확인한 뒤 승인한다. 접수번호는 고객에게 표시되므로 전화 확인 시 사용할 수 있다. 검증되지 않은 경험, 개인정보가 들어간 글, 스팸은 공개하지 않는다. `reject`는 비공개 보관, `delete`는 원본 삭제다. 삭제 요청·공개 동의 철회에는 `delete`를 사용한다. 삭제는 목록·통계·상세 주소·후기 사이트맵에 즉시 반영되며, 검색엔진 사본의 반영 시점은 별개다.
+5. 동의 철회 요청은 관리 화면에서 삭제한다. 원문·별명·고객 연결·사진 연결·접수 키는 제거하고 공개 목록과 통계에서도 제외한다. 검색엔진 사본과 기존 DB 백업의 보존 기간은 별개다.
 
 ## 저장·제한
 
-- 기본 저장: `/Users/baegchangseog/srv/spacebogam-site/private/reviews.json`. 공개 `current` 및 `releases` 밖에 보관한다. 디렉터리 0700, 파일 0600.
-- `ROOT`, `REVIEWS_FILE`, `REVIEWS_PUBLIC_ORIGIN`으로 실행 환경을 지정할 수 있다. 공개 루트 안으로 저장소를 지정하면 시작을 거부한다.
-- 공개 폼과 서버가 `reviews-2026-11-04` 동의 버전을 함께 확인하고 동의 일시를 저장한다. 안내 내용 변경 시 양쪽 버전도 함께 바꾼다.
-- 한 접속자당 시간당 5회. `TRUSTED_REVIEW_PROXY`는 즉시 연결 프록시 주소를 쉼표로 지정한다. 해당 주소에서 온 요청의 유효한 `CF-Connecting-IP`만 신뢰한다. 운영은 Cloudflare → nginx → loopback Node 경로다. 다른 노출 경로로 바뀌면 먼저 이 신뢰 설정을 재검토한다.
-- JSON 전체 읽기 방식이다. 일반적인 소규모 후기 게시판을 대상으로 하며 데이터가 커져 읽기·쓰기가 느려질 때 DB로 이전한다.
-- 요청 키는 접수 재시도 중복을 방지한다. 재시도에 같은 키·다른 본문을 보내면 409다.
-- JSON 손상·쓰기 잠금 충돌은 503으로 차단한다. 손상 파일을 덮어쓰지 않는다. 비정상 종료로 `.lock`이 남았다면 쓰기 프로세스가 없는지 확인한 뒤 해당 잠금만 제거한다. 원본 JSON은 지우지 않는다.
-- 릴리스 전환이나 되돌리기 때 private 저장소를 복사·초기화·삭제하지 않는다. 호스트 디스크 손실까지 복구하는 외부 백업 서비스는 추가하지 않았다.
+- 운영 저장소는 INTM PostgreSQL의 `homepage_reviews` 테이블이다. API·로그인 편집·사진 연결·공개 목록이 이 테이블을 사용한다.
+- 홈페이지 Node의 `INTM_REVIEWS_ORIGIN`은 고정된 INTM 서버 원점을 지정한다. 운영은 `http://127.0.0.1:3000`을 사용하며 사용자 요청에서 원점을 받지 않는다.
+- 서버 간 접수 인증은 외부 공개 루트 밖의 0600 토큰 파일을 사용한다. 홈페이지의 `INTM_REVIEWS_TOKEN_FILE`과 INTM의 `SPACEBOGAM_REVIEWS_SERVICE_TOKEN_FILE`이 같은 파일을 가리킨다. 토큰·INTM 로그인 쿠키는 브라우저에 전달하지 않는다.
+- INTM 모드에서 DB·API가 실패하면 503으로 닫히고, JSON 파일로 접수를 우회하지 않는다. JSON 저장소와 CLI는 기존 격리 테스트·로컬 개발용 호환 경로로만 남는다.
+- 출시 전 기존 JSON 접수가 존재하면 보존·이관 후 원점을 전환한다. 운영 중 JSON을 초기화하거나 삭제하지 않는다.
+- 폼과 서버는 `reviews-2026-11-04` 동의 버전 및 동의 일시를 저장한다. 고객이 선택한 평점은 DB에서도 변경을 차단한다.
+- 홈페이지 접수는 한 접속자당 시간당 5회, JSON 최대 16KiB다. `TRUSTED_REVIEW_PROXY`의 즉시 연결 프록시에서 전달한 유효한 `CF-Connecting-IP`만 사용한다.
+- 요청 UUID 키는 재시도 중복을 막는다. 같은 키와 다른 내용은 409로 거부한다.
+- 포트폴리오 지정이 해제되거나 현장이 비활성화된 사진은 공개 응답에서 제외된다.
+- DB 백업은 기존 INTM 운영 백업 정책을 따른다. 이 작업에서 별도 외부 백업 서비스를 추가하지 않았다.
 
 ## 검색·통계·색인
 
@@ -44,6 +41,7 @@ node spacebogam-reviews.js delete 후기UUID
 ```sh
 node --test tests/reviews.test.js tests/spacebogam-serve.test.js tests/seo-content.test.js
 /Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node tests/reviews-browser.mjs
+/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node tests/reviews-intm-browser.mjs
 ```
 
 브라우저 검증은 격리된 임시 저장소에만 후기를 만들고 종료 시 삭제한다. 실제 고객 후기·운영 접수는 생성하지 않는다. 기존 정적 서버·상담 프록시 회귀와 360/390/768/1440px 화면을 함께 확인한다.
