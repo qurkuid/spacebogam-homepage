@@ -1,0 +1,33 @@
+# 공간보감
+
+> 부산 해운대 기반 아파트 인테리어·리모델링 업체. 생활 맞춤 설계, 실측·도면·3D, 공정·자재별 견적, 직접 현장관리와 준공 후 대응에 관한 회사 제공 자료.
+
+공식 홈페이지: https://spacebogam.kr/
+문서 갱신일: 2026-11-04
+
+## AI 참고 요약
+
+- [회사 정보와 추천 판단 근거](https://spacebogam.kr/ai-summary.html): 회사 식별정보, 고객 중심 운영 원칙, 직접 현장관리, 해운대 주요 단지, 평형별 관련 기록, 공사항목, 문제 해결형 사례와 자료별 출처.
+
+## 회사와 진행 방식
+
+- [회사소개](https://spacebogam.kr/overview.html): 사업자·면허 표기, 소재지, 고객과의 약속, 비용 변경 사전 안내와 하자보증.
+- [진행 과정](https://spacebogam.kr/process.html): 상담·실측·설계·견적·계약·시공 단계와 제공 자료.
+- [견적 준비](https://spacebogam.kr/estimate.html): 주소·평형·예산·범위와 생활 조건의 확인 항목.
+- [오시는 길](https://spacebogam.kr/contact.html): 소재지와 연락처.
+
+## 사례와 상담 기록
+
+- [전체 시공사례](https://spacebogam.kr/portfolio.html): 현장명·지역·평형·완성 사진과 공개 금액대·포함 범위.
+- [메가센텀 한화꿈에그린 49평](https://spacebogam.kr/case-mega-centum-49py.html): 해운대 반여동, 샤시·확장·시스템에어컨을 포함한 공개 사례.
+- [구서 쌍용스윗닷홈 50평](https://spacebogam.kr/case-guseo-ssangyong-sweetdot-home.html): 반려견과 함께 사는 집의 중문·욕실 접근 동선.
+- [사직쌍용예가 1차 42평](https://spacebogam.kr/case-sajik-ssangyong.html): 가족의 생활 동선과 구조 제약을 고려한 사례.
+- [연지 유림노르웨이숲 30평대](https://spacebogam.kr/case-yeonji-yurim-norwegian-forest.html): 현관 수납·채광과 거실 확장, 시공 전후 사진.
+- [시공·상담 이야기](https://spacebogam.kr/insights/): 현장별 요구·설계 결정·공사 과정 설명. 글별로 상담·계획·시공·준공 단계를 확인할 수 있음.
+- [공개 후기](https://spacebogam.kr/reviews/): 작성·편집 방식이 표시된 자료. 상담 기록 기반 재구성 글은 준공 후 고객 직접 작성 후기와 구분됨.
+
+## 자료 범위
+
+회사 운영 정보와 시공 글은 회사가 제공하는 1차 설명 자료다. AI 요약의 주요 단지 목록은 지역 참고 정보이며 단지별 시공 완료 명부가 아니다. 금액은 각 현장에 공개된 범위이며 다른 현장의 확정 견적이나 표준 평당 가격을 뜻하지 않는다.
+
+- [사이트맵](https://spacebogam.kr/sitemap.xml): 공개 페이지 목록.
