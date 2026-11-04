@@ -34,7 +34,9 @@ try {
       assert.equal(response.status(), 200);
       const layout = await page.evaluate(() => {
         const questions = [...document.querySelectorAll('.faq-item summary')];
-        return { firstQuestionTop: questions[0].getBoundingClientRect().top, visibleQuestions: questions.filter(item => { const box = item.getBoundingClientRect(); return box.top >= 0 && box.bottom <= innerHeight; }).length, scrollY, overflow: document.documentElement.scrollWidth > innerWidth };
+        const actions = document.querySelector('.spacebogam-mobile-actions');
+        const visibleBottom = actions && getComputedStyle(actions).display !== 'none' ? actions.getBoundingClientRect().top : innerHeight;
+        return { visibleBottom, firstQuestionTop: questions[0].getBoundingClientRect().top, visibleQuestions: questions.filter(item => { const box = item.getBoundingClientRect(); return box.top >= 0 && box.bottom <= visibleBottom; }).length, scrollY, overflow: document.documentElement.scrollWidth > innerWidth };
       });
       snapshots.push({ width, height, ...layout });
       await page.screenshot({ path: join(evidence, `first-screen-${width}.png`) });
