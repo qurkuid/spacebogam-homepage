@@ -56,3 +56,5 @@
  .pf-result-row{margin-top:10px}
 }
 @media(prefers-reduced-motion:reduce){.pf-gallery-page .v8-grid img{transition:none}}
+
+.pf-section-title{font-size:20px;font-weight:400;margin:0 0 20px}.pf-filters{border-top:1px solid var(--ink);padding-top:20px}.pf-gallery-title{border-top:1px solid var(--ink);padding-top:24px;margin-top:8px}
