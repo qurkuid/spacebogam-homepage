@@ -97,7 +97,7 @@ class CasePhotosTest(unittest.TestCase):
     def test_hwamyeong_keeps_privacy_masked_photos(self):
         soup = BeautifulSoup((ROOT / 'case-hwamyeong-kolong.html').read_text(encoding='utf-8'), 'html.parser')
         photos = extract_photos(soup)
-        paths = {item['src'] for item in photos}
+        paths = {item['href'] for item in photos}
         for number in [2, 29, 31, 36]:
             self.assertIn(f'/assets/case/hwamyeong-landing/photo-{number}-privacy.webp', paths)
 

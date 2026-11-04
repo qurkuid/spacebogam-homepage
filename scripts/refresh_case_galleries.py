@@ -11,6 +11,19 @@ from urllib.parse import urlsplit
 from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parents[1]
+PREVIEWS = json.loads((ROOT / 'data/cases/gallery-previews.json').read_text())
+ROOMS = json.loads((ROOT / 'data/cases/photo-rooms.json').read_text())
+ROOM_ORDER = ('거실', '주방', '침실', '욕실', '현관·복도', '기타공간')
+GALLERY_SIZES = '(max-width:760px) calc((100vw - 40px)/2), (max-width:1000px) calc((100vw - 78px)/2), (max-width:1304px) calc((100vw - 92px)/3), 404px'
+COVER_SIZES = '(max-width:760px) calc(100vw - 32px), (max-width:1000px) calc((100vw - 88px)*.5455), (max-width:1304px) calc((100vw - 108px)*.6304), 754px'
+CARD_SIZES = '(max-width:680px) calc(100vw - 32px), (max-width:1304px) calc((100vw - 84px)/2), 610px'
+
+
+def room_buttons(rooms, class_name):
+    buttons = ''.join(f'<button type="button" data-room="{room}" aria-pressed="false">{room}</button>' for room in ROOM_ORDER if room in rooms)
+    return (f'<div class="{class_name}" role="group" aria-label="공간별 사진" hidden>'
+            '<span>공간</span><button type="button" data-room="" aria-pressed="true">전체</button>' + buttons + '</div>')
+
 
 
 def asset_path(value):
@@ -51,18 +64,18 @@ def extract_photos(soup):
     return list(out.values())
 
 
-def image_html(item, eager=False):
-    attrs = {key: item[key] for key in ('src', 'alt', 'width', 'height') if item.get(key)}
-    attrs.update(loading='eager' if eager else 'lazy', decoding='async')
-    if eager:
-        attrs['fetchpriority'] = 'high'
+def image_html(item, eager=False, sizes=GALLERY_SIZES):
+    attrs = dict(PREVIEWS[item['href']], alt=item['alt'], sizes=sizes)
+    attrs.update(loading='eager' if eager else 'lazy', decoding='async', fetchpriority='high' if eager else 'low')
     return '<img ' + ' '.join(f'{key}="{escape(str(value), quote=True)}"' for key, value in attrs.items()) + '>'
 
 
 def figure_html(item, eager=False):
     caption = f'<figcaption>{escape(item["caption"])}</figcaption>' if item['caption'] else ''
-    return (f'<figure><a data-gallery-image href="{escape(item["href"], quote=True)}" target="_blank" rel="noopener">'
-            f'{image_html(item, eager)}</a>{caption}</figure>')
+    room = ROOMS[item['href']]
+    marker = 'data-gallery-cover' if eager else 'data-gallery-image'
+    return (f'<figure data-room="{room}"><a {marker} href="{escape(item["href"], quote=True)}" target="_blank" rel="noopener">'
+            f'{image_html(item, eager, COVER_SIZES if eager else GALLERY_SIZES)}</a>{caption}</figure>')
 
 
 def before_after_html(soup):
@@ -102,7 +115,7 @@ def version(path):
 def render_page(source, card, portfolio):
     soup = BeautifulSoup(source, 'html.parser')
     photos = extract_photos(soup)
-    cover_key = photo_key(card.find('img')['src'])
+    cover_key = photo_key(card.find('img').get('data-photo', card.find('img')['src']))
     cover = next((item for item in photos if photo_key(item['href']) == cover_key), photos[0])
     photos = [cover] + [item for item in photos if item is not cover]
     title = card.find('h2').get_text(strip=True)
@@ -148,7 +161,8 @@ def render_page(source, card, portfolio):
             whitespace.extract()
     before_link = '<a href="#before-after">시공 전·후</a>' if comparisons else ''
     tag_list = ''.join(f'<li>#{escape(tag)}</li>' for tag in tags)
-    gallery = '\n'.join(figure_html(item) for item in photos[1:])
+    gallery = '\n'.join(figure_html(item) for item in photos)
+    room_controls = room_buttons({ROOMS[item['href']] for item in photos}, 'pd-rooms')
     main = f'''<main class="pd-main" id="main-content">
 <header class="pd-intro"><a class="pd-back" href="/portfolio.html#project-list">← 포트폴리오</a>
 <h1>{escape(title)}</h1><p class="pd-description">{escape(description)}</p>
@@ -159,7 +173,7 @@ def render_page(source, card, portfolio):
 <div class="pd-info-group"><h3>공사 범위</h3><dl class="pd-scope">{scope_html(card)}</dl></div>
 <div class="pd-info-group"><h3>디자인·생활 태그</h3><ul class="pd-tags">{tag_list}</ul></div></section></div>
 <section class="pd-section" id="case-photos" aria-labelledby="case-photos-title"><div class="pd-section-heading"><div><p class="pd-section-label">02 / GALLERY</p><h2 id="case-photos-title">완성 사진</h2></div><p class="pd-photo-count">전체 {len(photos)}장</p></div>
-<div class="case-gallery">{gallery}</div></section>{comparisons}
+{room_controls}<div class="case-gallery">{gallery}</div></section>{comparisons}
 <section class="pd-contact" aria-labelledby="case-contact-title"><div><p class="pd-section-label">CONSULTATION</p><h2 id="case-contact-title">이 현장으로 상담하기</h2></div><a class="sb-entry-primary" data-v8-event="case_consult_click" data-cta-location="case_gallery_bottom" href="/consultation/?type=residential">상담 신청 ↗</a><a class="pd-back" href="/portfolio.html#project-list">전체 포트폴리오</a></section>
 </main>'''
     portfolio_body = str(portfolio.body)
@@ -171,8 +185,40 @@ def render_page(source, card, portfolio):
             '<body class="pd-page" data-no-auto-cta="true" data-sb-consult-entry="residential">' + prefix + main + suffix + '</body></html>\n')
 
 
+def refresh_portfolio(portfolio):
+    for index, card in enumerate(portfolio.select('.v8-grid > article')):
+        link = card.select_one('a[data-project]')
+        source = BeautifulSoup((ROOT / urlsplit(link['href']).path).read_text(), 'html.parser')
+        photos = extract_photos(source)
+        img = card.find('img')
+        cover_key = photo_key(img.get('data-photo', img['src']))
+        cover = next((item for item in photos if photo_key(item['href']) == cover_key), photos[0])
+        img['data-photo'] = cover['href']
+        for key, value in PREVIEWS[cover['href']].items():
+            img[key] = value
+        img['sizes'] = CARD_SIZES
+        img['fetchpriority'] = 'high' if index == 0 else 'low'
+        representatives = {}
+        for item in [cover] + photos:
+            room = ROOMS[item['href']]
+            representatives.setdefault(room, dict(PREVIEWS[item['href']], alt=card.find('h2').text + ' · ' + room))
+        card['data-room-photos'] = json.dumps(representatives, ensure_ascii=False, separators=(',', ':'))
+    existing = portfolio.select_one('.pf-rooms')
+    if existing:
+        existing.decompose()
+    portfolio.select_one('.pf-gallery-title').insert_after(BeautifulSoup(room_buttons(ROOM_ORDER, 'pf-rooms'), 'html.parser'))
+    for tag in portfolio.select('link[href], script[src]'):
+        attr = 'href' if tag.name == 'link' else 'src'
+        path = urlsplit(tag[attr]).path.lstrip('/')
+        if path in ('assets/portfolio-gallery.css', 'assets/portfolio-gallery.js'):
+            tag[attr] = '/' + version(path)
+
+
 def main():
-    portfolio = BeautifulSoup((ROOT / 'portfolio.html').read_text(encoding='utf-8'), 'html.parser')
+    path = ROOT / 'portfolio.html'
+    portfolio = BeautifulSoup(path.read_text(encoding='utf-8'), 'html.parser')
+    refresh_portfolio(portfolio)
+    path.write_text(str(portfolio), encoding='utf-8')
     for card in portfolio.select('.v8-grid > article'):
         path = ROOT / card.select_one('a[data-project]')['href']
         path.write_text(render_page(path.read_text(encoding='utf-8'), card, portfolio), encoding='utf-8')

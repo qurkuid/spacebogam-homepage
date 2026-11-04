@@ -1,7 +1,49 @@
 (() => {
-  const galleryLinks = document.querySelectorAll('[data-gallery-image]');
-  const links = [...(galleryLinks.length ? galleryLinks : document.querySelectorAll('.case-gallery a'))];
+  const galleryLinks = [...document.querySelectorAll('[data-gallery-image]')];
+  const links = galleryLinks.length ? galleryLinks : [...document.querySelectorAll('.case-gallery a')];
   if (!links.length) return;
+  const roomNav = document.querySelector('.pd-rooms');
+  const roomButtons = [...(roomNav?.querySelectorAll('[data-room]') || [])];
+  const roomNames = new Set(roomButtons.map(button => button.dataset.room));
+  let room = roomNames.has(new URL(location.href).searchParams.get('room') || '')
+    ? new URL(location.href).searchParams.get('room') || '' : '';
+  const figures = [...document.querySelectorAll('#case-photos .case-gallery figure')];
+  const photoCount = document.querySelector('.pd-photo-count');
+  const total = figures.length;
+
+  function setBackLinks() {
+    document.querySelectorAll('a.pd-back[href*="portfolio"]').forEach(link => {
+      link.dataset.baseHref ||= link.getAttribute('href');
+      const url = new URL(link.dataset.baseHref, location.href);
+      room ? url.searchParams.set('room', room) : url.searchParams.delete('room');
+      link.setAttribute('href', url.pathname + url.search + url.hash);
+    });
+  }
+
+  function filter(next, changeUrl = true) {
+    room = roomNames.has(next) ? next : '';
+    roomButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.room === room)));
+    let visible = 0;
+    figures.forEach(figure => {
+      figure.hidden = Boolean(room && figure.dataset.room !== room);
+      if (!figure.hidden) visible++;
+    });
+    if (photoCount) photoCount.textContent = room ? `${room} ${visible}장 · 전체 ${total}장` : `전체 ${total}장`;
+    setBackLinks();
+    if (changeUrl) {
+      const url = new URL(location.href);
+      room ? url.searchParams.set('room', room) : url.searchParams.delete('room');
+      history.replaceState(history.state, '', url);
+    }
+  }
+
+  roomNav?.removeAttribute('hidden');
+  roomButtons.forEach(button => button.addEventListener('click', () => filter(button.dataset.room)));
+  const restoreUrlRoom = () => filter(new URL(location.href).searchParams.get('room') || '', false);
+  addEventListener('popstate', restoreUrlRoom);
+  addEventListener('pageshow', restoreUrlRoom);
+  filter(room, false);
+
   const dialog = document.createElement('dialog');
   if (typeof dialog.showModal !== 'function') return;
   dialog.className = 'lb';
@@ -12,23 +54,42 @@
   const image = dialog.querySelector('img');
   const caption = dialog.querySelector('.lb-caption');
   const viewport = dialog.querySelector('.lb-viewport');
-  let index = 0, trigger, previousOverflow, touchStart;
+  let current, index = 0, trigger, previousOverflow, touchStart;
+  const activeLinks = () => links.filter(link => !link.closest('figure')?.hidden);
   function show(next) {
-    index = (next + links.length) % links.length;
-    image.alt = links[index].querySelector('img')?.alt || '현장 사진';
+    current = activeLinks();
+    index = (next + current.length) % current.length;
+    image.alt = current[index].querySelector('img')?.alt || '현장 사진';
     caption.textContent = image.alt;
-    image.src = links[index].href;
-    dialog.querySelector('.lb-count').textContent = `${index + 1} / ${links.length}`;
+    image.src = current[index].href;
+    dialog.querySelector('.lb-count').textContent = `${index + 1} / ${current.length}`;
   }
-  links.forEach((link, position) => link.addEventListener('click', event => {
-    event.preventDefault();
-    trigger = link;
+  function open(link, focusTarget = link) {
+    current = activeLinks();
+    const position = current.indexOf(link);
+    if (position < 0) return;
+    trigger = focusTarget;
     previousOverflow = document.body.style.overflow;
     show(position);
     dialog.showModal();
     dialog.classList.add('open');
     document.body.style.overflow = 'hidden';
+  }
+  links.forEach(link => link.addEventListener('click', event => {
+    event.preventDefault();
+    open(link);
   }));
+  const cover = document.querySelector('[data-gallery-cover]');
+  cover?.addEventListener('click', event => {
+    event.preventDefault();
+    let match = links.find(link => link.href === cover.href);
+    if (!match) return;
+    if (match.closest('figure')?.hidden) {
+      filter('');
+      match = links.find(link => link.href === cover.href);
+    }
+    open(match, cover);
+  });
   dialog.querySelector('.lb-close').addEventListener('click', () => dialog.close());
   dialog.querySelector('.lb-prev').addEventListener('click', () => show(index - 1));
   dialog.querySelector('.lb-next').addEventListener('click', () => show(index + 1));

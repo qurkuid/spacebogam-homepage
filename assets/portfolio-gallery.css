@@ -58,3 +58,18 @@
 @media(prefers-reduced-motion:reduce){.pf-gallery-page .v8-grid img{transition:none}}
 
 .pf-section-title{font-size:20px;font-weight:400;margin:0 0 20px}.pf-filters{border-top:1px solid var(--ink);padding-top:20px}.pf-gallery-title{border-top:1px solid var(--ink);padding-top:24px;margin-top:8px}
+
+.pf-rooms{display:flex;flex-wrap:wrap;gap:6px;align-items:center;position:sticky;top:0;z-index:5;background:var(--paper);padding:10px 0 12px;border-bottom:1px solid var(--line);margin-bottom:24px}.pf-rooms[hidden]{display:none}.pf-rooms>span{font-size:12px;margin-right:8px}.pf-rooms button{min-height:44px;padding:0 12px;border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:13px;cursor:pointer}.pf-rooms button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}.pf-rooms button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+@media(max-width:680px){
+ .pf-gallery-page{padding-top:16px}
+ .pf-heading{margin-bottom:16px}
+ .pf-heading h1{font-size:34px}
+ .pf-filters{padding-top:12px;margin-bottom:12px}
+ .pf-section-title{margin-bottom:12px;font-size:18px}
+ .pf-search-row{margin-bottom:4px;gap:8px}
+ .pf-search input,.pf-select select{min-height:44px}
+ .pf-result-row{margin-top:0;padding-top:0}
+ .pf-gallery-title{padding-top:16px;margin-top:0;margin-bottom:8px}
+ .pf-rooms{padding-top:6px;padding-bottom:8px;margin-bottom:16px}
+}

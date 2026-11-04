@@ -24,7 +24,7 @@ if (!origin) {
 const snapshots = [];
 try {
   await withTestBrowser(async (context, selection) => {
-    await context.route('**/*', route => new URL(route.request().url()).origin === origin ? route.continue() : route.abort());
+    await context.route('**/*', route => new URL(route.request().url()).origin === origin && route.request().method() === 'GET' ? route.continue() : route.abort());
     const page = await context.newPage();
     page.setDefaultTimeout(10000);
     const errors = [];
@@ -124,10 +124,59 @@ try {
     await page.screenshot({ path: join(evidence, 'filtered-390.png'), fullPage: true });
     assert.equal(await visible(), 2);
     await reset();
+    for (const width of [360, 390, 768, 980, 1440]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto(origin + '/portfolio.html?qa_test=1');
+      for (const room of ['거실', '주방', '침실', '욕실', '현관·복도', '기타공간']) {
+        const button = page.locator('.pf-rooms').getByRole('button', { name: room, exact: true });
+        assert((await button.boundingBox()).height >= 44);
+        await button.click();
+        assert.equal(new URL(page.url()).searchParams.get('room'), room);
+        assert.equal(new URL(page.url()).searchParams.get('qa_test'), '1');
+        const matching = await page.locator('.v8-grid > article:visible').evaluateAll((cards, room) => cards.every(card => {
+          const photo = JSON.parse(card.dataset.roomPhotos)[room];
+          return card.querySelector('img').getAttribute('src') === photo.src
+            && card.querySelector('img').getAttribute('alt') === photo.alt
+            && new URL(card.querySelector('a').href).searchParams.get('room') === room;
+        }), room);
+        assert(matching && await visible() > 0, room);
+      }
+      await page.locator('.pf-rooms').getByRole('button', { name: '주방', exact: true }).click();
+      await page.getByRole('combobox', { name: '공개 금액대' }).selectOption('10000');
+      assert.deepEqual(await projects(), ['mega-centum-49py']);
+      await mega.locator('img').evaluate(img => img.decode());
+      await page.screenshot({ path: join(evidence, `room-kitchen-${width}.png`) });
+      await mega.locator('a').click();
+      await page.locator('.pd-rooms [aria-pressed="true"]').waitFor();
+      assert.equal(await page.locator('.pd-rooms [aria-pressed="true"]').getAttribute('data-room'), '주방');
+      assert.equal(await page.locator('.case-gallery figure:visible').evaluateAll(items => items.every(item => item.dataset.room === '주방')), true);
+      assert.equal(await page.locator('.pd-back').first().evaluate(link => new URL(link.href).searchParams.get('room')), '주방');
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    }
     assert.deepEqual(errors, []);
+    const touchContext = await context.browser().newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+    try {
+      await touchContext.route('**/*', route => new URL(route.request().url()).origin === origin && route.request().method() === 'GET' ? route.continue() : route.abort());
+      const touchPage = await touchContext.newPage();
+      await touchPage.goto(origin + '/portfolio.html');
+      await touchPage.locator('.pf-rooms').getByRole('button', { name: '욕실', exact: true }).tap();
+      const firstCard = touchPage.locator('.v8-grid > article:visible').first();
+      await firstCard.locator('img').evaluate(img => img.decode());
+      assert.match(await firstCard.locator('img').evaluate(img => img.currentSrc), /-(720|1280)\.webp$/);
+      await firstCard.locator('a').tap();
+      await touchPage.locator('.pd-rooms').waitFor();
+      assert.equal(await touchPage.locator('.pd-rooms [aria-pressed="true"]').getAttribute('data-room'), '욕실');
+      await touchPage.locator('.case-gallery figure:visible a').first().tap();
+      assert(await touchPage.locator('dialog[open]').isVisible());
+      await touchPage.locator('.lb-next').tap();
+      await touchPage.locator('.lb-slide img').evaluate(img => img.decode());
+      await touchPage.locator('.lb-close').tap();
+      await touchPage.waitForFunction(() => !document.querySelector('dialog').classList.contains('open'));
+      await touchPage.screenshot({ path: join(evidence, 'touch-bathroom-dpr2.png') });
+    } finally { await touchContext.close(); }
     const noJS = await context.browser().newContext({ javaScriptEnabled: false });
     try {
-      await noJS.route('**/*', route => new URL(route.request().url()).origin === origin ? route.continue() : route.abort());
+      await noJS.route('**/*', route => new URL(route.request().url()).origin === origin && route.request().method() === 'GET' ? route.continue() : route.abort());
       const staticPage = await noJS.newPage();
       await staticPage.goto(origin + '/portfolio.html');
       assert.equal(await staticPage.locator('.v8-grid > article:visible').count(), 15);

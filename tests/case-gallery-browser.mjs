@@ -56,7 +56,7 @@ try {
           font: getComputedStyle(document.body).fontFamily,
           weight: getComputedStyle(document.querySelector('h1')).fontWeight,
           background: getComputedStyle(document.body).backgroundColor,
-          columns: getComputedStyle(document.querySelector('.case-gallery')).columnCount,
+          columns: getComputedStyle(document.querySelector('.case-gallery')).gridTemplateColumns.split(' ').length,
           imageRatio: (() => { const img = document.querySelector('.pd-cover img'), r = img.getBoundingClientRect(); return Math.abs(r.width / r.height - img.naturalWidth / img.naturalHeight); })(),
         }));
         assert.equal(styles.overflow, false, project.path + width);
@@ -65,7 +65,7 @@ try {
         assert.equal(styles.background, 'rgb(246, 243, 237)');
         assert.equal(Number(styles.columns), width === 390 ? 2 : 3);
         assert(styles.imageRatio < .01, project.path + ' cover ratio');
-        const cover = page.locator('[data-gallery-image]').first();
+        const cover = page.locator('[data-gallery-cover]');
         await cover.click();
         assert(await page.locator('dialog[open]').isVisible());
         assert.equal(await page.locator('.lb-count').textContent(), `1 / ${project.count}`);
@@ -109,6 +109,26 @@ try {
           await page.screenshot({ path: join(evidence, `viewer-${width}.png`) });
           await page.getByRole('button', { name: '닫기', exact: true }).click();
         }
+        const rooms = await page.locator('.pd-rooms button[data-room]').evaluateAll(buttons => buttons.map(button => button.dataset.room).filter(Boolean));
+        for (const room of rooms) {
+          const button = page.locator('.pd-rooms').getByRole('button', { name: room, exact: true });
+          assert((await button.boundingBox()).height >= 44);
+          await button.click();
+          const visible = page.locator('.case-gallery figure:visible');
+          const count = await visible.count();
+          assert(count > 0);
+          assert.equal(await visible.evaluateAll((figures, room) => figures.every(figure => figure.dataset.room === room), room), true);
+          assert.match(await page.locator('.pd-photo-count').textContent(), new RegExp(`${room} ${count}장`));
+          assert.equal(new URL(page.url()).searchParams.get('room'), room);
+          await visible.first().locator('a').click();
+          assert.equal(await page.locator('.lb-count').textContent(), `1 / ${count}`);
+          await page.keyboard.press('ArrowLeft');
+          assert.equal(await page.locator('.lb-count').textContent(), `${count} / ${count}`);
+          await page.keyboard.press('Escape');
+          await page.waitForFunction(() => !document.querySelector('dialog').classList.contains('open'));
+        }
+        await page.locator('.pd-rooms').getByRole('button', { name: '전체', exact: true }).click();
+        assert.equal(await page.locator('.case-gallery figure:visible').count(), project.count);
         if (project.path.includes('yeonji')) {
           assert.equal(await page.locator('#before-after .pd-pair').count(), 4);
           assert.equal(await page.locator('#before-after img').count(), 8);
