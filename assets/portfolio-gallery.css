@@ -1,0 +1,58 @@
+.pf-gallery-page{padding-top:44px}
+.pf-heading{margin-bottom:26px;scroll-margin-top:100px}
+.pf-heading h1{margin-bottom:10px;font-size:clamp(38px,4vw,52px)}
+.pf-heading .portfolio-count{margin:0;font-size:13px;color:#69645b}
+.pf-filters{margin:0 0 24px}
+.pf-filters[hidden]{display:none}
+.pf-search-row{display:grid;grid-template-columns:minmax(0,1fr) 160px 180px;gap:12px;margin-bottom:20px}
+.pf-search{display:flex;align-items:center;gap:12px;min-width:0;border-bottom:1px solid var(--ink);padding:0 2px}
+.pf-search svg{flex-shrink:0}
+.pf-search input{width:100%;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;font-size:16px;min-height:50px;border-radius:0}
+.pf-search input::placeholder{color:#69645b;opacity:1}
+.pf-select select{width:100%;min-height:50px;padding:0 30px 0 12px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:0;font:inherit;font-size:14px;cursor:pointer}
+.pf-tags summary{display:flex;justify-content:space-between;align-items:center;min-height:44px;font-size:13px;cursor:pointer;list-style:none}
+.pf-tags summary::-webkit-details-marker{display:none}
+.pf-tags[open] summary span{transform:rotate(45deg)}
+.pf-tags summary:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.pf-tag-row{position:relative;min-width:0;margin:0;padding:0 0 0 58px;border:0}
+.pf-tag-row legend{position:absolute;left:0;top:14px;padding:0;font-size:12px;color:#69645b}
+.pf-tag-row>div{display:flex;flex-wrap:wrap;gap:0 8px}
+.pf-tag-row label{position:relative;display:inline-flex;align-items:center;min-height:44px;cursor:pointer}
+.pf-tag-row input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.pf-tag-row span{display:block;padding:5px 10px;border:1px solid transparent;font-size:13px;color:#59554d;line-height:1.5}
+.pf-tag-row input:checked+span{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pf-tag-row label:hover span{border-color:var(--ink)}
+.pf-tag-row input:focus-visible+span{outline:2px solid var(--ink);outline-offset:3px}
+.pf-search:focus-within{outline:2px solid var(--ink);outline-offset:3px}
+.pf-search input:focus{outline:0}
+.pf-select select:focus-visible,.pf-reset:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.pf-result-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding-top:8px;border-top:1px solid var(--line)}
+.pf-result-row p{margin:0;font-size:13px;color:#59554d}
+.pf-reset{padding:8px 0;min-width:44px;min-height:44px;border:0;background:transparent;font:inherit;font-size:13px;color:var(--ink);text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.pf-reset:disabled{color:#69645b;text-decoration:none;cursor:default}
+.pf-gallery-page .v8-grid{gap:44px 20px;scroll-margin-top:100px}
+.pf-gallery-page .v8-grid a{height:100%}
+.pf-gallery-page .v8-grid a:focus-visible{outline:2px solid var(--ink);outline-offset:5px}
+.pf-gallery-page .v8-grid img{height:auto;aspect-ratio:1.45/1;transition:filter .2s}
+.pf-gallery-page .v8-grid a:hover img{filter:brightness(.96)}
+.pf-gallery-page .v8-grid h2{margin-top:16px;font-size:22px;line-height:1.4}
+.pf-gallery-page .v8-grid p{line-height:1.7}
+.pf-gallery-page .v8-grid .pf-budget{margin-top:10px;font-size:15px;color:var(--ink)}
+.pf-gallery-page .v8-grid .pf-scope{margin-top:3px;font-size:12px;color:#59554d}
+.pf-gallery-page .v8-grid .pf-card-tags{display:flex;flex-wrap:wrap;gap:0 12px;margin-top:10px;font-size:12px;color:#59554d}
+.pf-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+@media(min-width:681px){.pf-tags[open] summary{display:none}}
+@media(max-width:680px){
+ .pf-gallery-page{padding-top:28px}
+ .pf-heading{margin-bottom:18px}
+ .pf-heading h1{font-size:38px}
+ .pf-search-row{grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+ .pf-search{grid-column:1/-1}
+ .pf-tag-row{padding-left:42px}
+ .pf-tag-row>div{gap:0 2px}
+ .pf-tag-row span{padding:5px 7px;font-size:12px}
+ .pf-gallery-page .v8-grid{grid-template-columns:1fr;gap:36px}
+ .pf-gallery-page .v8-grid h2{font-size:21px}
+ .pf-result-row{margin-top:10px}
+}
+@media(prefers-reduced-motion:reduce){.pf-gallery-page .v8-grid img{transition:none}}
