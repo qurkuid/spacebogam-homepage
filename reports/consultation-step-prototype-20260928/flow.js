@@ -1576,7 +1576,7 @@
       if (value) details.push(label + ': ' + (Array.isArray(value) ? value.join(', ') : value === true ? '있음' : value));
     });
     if (details.length) saved['7'] = [saved['7'], ...details].filter(Boolean).join('\n');
-    return { answers: saved, filePath, companyId, type: 'residential', consent: true, marketingAttribution: marketingAttribution(), metaMatching: metaMatchingPayload() };
+    return { answers: saved, filePath, companyId, type: 'residential', consent: true, ...(buildingName ? { buildingName } : {}), marketingAttribution: marketingAttribution(), metaMatching: metaMatchingPayload() };
   }
 
   async function imageForSubmission(attachment) {

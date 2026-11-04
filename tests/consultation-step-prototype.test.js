@@ -253,12 +253,14 @@ async function run() {
   assert.match(payload.answers['7'], /공실 여부·현장 상태: 공실/);
   payloadHarness.api.answers().addressBuildingName = '테스트아파트';
   assert.equal(payloadHarness.api.payload(null).answers['8'], '테스트아파트 101동 1001호');
+  assert.equal(payloadHarness.api.payload(null).buildingName, '테스트아파트', 'building name stays separate from private unit');
   payloadHarness.api.answers().responses['8'] = '테스트아파트 101동 1001호';
   assert.equal(payloadHarness.api.payload(null).answers['8'], '테스트아파트 101동 1001호', 'building must not repeat');
   delete payloadHarness.api.answers().addressBuildingName;
   payloadHarness.api.answers().responses['8'] = '';
   payloadHarness.api.answers().apartmentSelected = ['선택아파트', 'qa'];
   assert.equal(payloadHarness.api.payload(null).answers['8'], '선택아파트', 'catalog fallback without unit detail');
+  assert.equal(payloadHarness.api.payload(null).buildingName, '선택아파트');
 
   const undecided = harness();
   undecided.input('13', '미정 고객'); undecided.input('10', '010-1111-2222'); undecided.input('15', '부산광역시 연제구'); undecided.next();
