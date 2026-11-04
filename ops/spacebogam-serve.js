@@ -6,9 +6,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Transform } = require('node:stream');
 const { once } = require('node:events');
+const { createReviewsHandler } = require('./spacebogam-reviews');
 
 const ROOT = path.resolve(process.env.ROOT || process.argv[2] || path.join(__dirname, 'current'));
 const PORT = Number(process.env.PORT || process.argv[3] || 3021);
+const handleReviews = createReviewsHandler({ root: ROOT });
 // Allow multipart overhead around the form's 15 MiB file limit.
 const MAX_UPLOAD = 16 * 1024 * 1024;
 const MAX_PLAN_IMAGE = 15 * 1024 * 1024;
@@ -131,6 +133,7 @@ http.createServer(async (req, res) => {
   try { pathname = decodeURIComponent(req.url.split('?')[0]); }
   catch { return reply(res, 400, 'Invalid path'); }
   if (!pathname.startsWith('/') || pathname.includes('\\') || pathname.includes('\0') || pathname.split('/').some(part => part.startsWith('.'))) return reply(res, 403, 'Path not allowed');
+  if (await handleReviews(req, res, pathname)) return;
   const plans = /^\/api\/apartments\/[A-Za-z0-9_-]{1,64}\/plans$/.test(pathname);
   const dataset = pathname === '/api/apartments/dataset';
   const upload = pathname === '/api/consultation/upload';

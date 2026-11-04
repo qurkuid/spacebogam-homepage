@@ -1,0 +1,6 @@
+.rv-home{width:min(1160px,calc(100% - 64px));margin:0 auto 64px;border-top:1px solid var(--line);padding:40px 0 0;display:flex;justify-content:space-between;align-items:center;gap:32px}
+.rv-home p{font-size:14px;color:#69645b;line-height:1.8;margin:0 0 12px}
+.rv-home h2{font-size:clamp(28px,3vw,40px);font-weight:400;letter-spacing:-.04em;margin:0 0 20px}
+.rv-home a{font-size:15px;border-bottom:1px solid var(--ink);padding:12px 0;display:inline-flex;gap:24px;min-height:44px;flex-shrink:0}
+.rv-home a:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
+@media(max-width:720px){.rv-home{width:calc(100% - 40px);display:block;margin-bottom:40px;padding-top:28px}.rv-home a{margin-top:12px}}

@@ -2,3 +2,6 @@
 # 경로는 저장소·작업트리·preview(3023)에는 그대로 남고 공개 릴리스에서만 빠진다.
 scripts/ export-ignore
 blog-admin.html export-ignore
+
+ops/ export-ignore
+docs/customer-reviews.md export-ignore
