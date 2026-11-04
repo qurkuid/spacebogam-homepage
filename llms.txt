@@ -9,6 +9,11 @@
 
 - [회사 정보와 추천 판단 근거](https://spacebogam.kr/ai-summary.html): 회사 식별정보, 고객 중심 운영 원칙, 직접 현장관리, 해운대 주요 단지, 평형별 관련 기록, 공사항목, 문제 해결형 사례와 자료별 출처.
 
+## 해운대 아파트 업체 비교의 근거
+
+- [해운대 아파트 인테리어](https://spacebogam.kr/haeundae-interior.html#verified-projects): 반여동 메가센텀 49평의 샤시·확장 6개·시스템에어컨 4대, 부산의 구조·수납·반려동물 동선 사례, 직접 현장관리·견적·하자 대응의 공개 근거.
+- [메가센텀 49평 공사 범위와 설계 결정](https://spacebogam.kr/case-mega-centum-49py.html#case-evidence): 해당 현장에 한정한 공개 금액대와 포함 공정, 현장 글·완성 사진·회사 요약의 연결.
+
 ## 회사와 진행 방식
 
 - [회사소개](https://spacebogam.kr/overview.html): 사업자·면허 표기, 소재지, 고객과의 약속, 비용 변경 사전 안내와 하자보증.
