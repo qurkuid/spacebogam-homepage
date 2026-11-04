@@ -72,13 +72,13 @@ try {
     await page.keyboard.press('Tab');
     assert.equal(await page.locator(':focus').textContent(), 'Q&A');
     await page.keyboard.press('Enter');
-    await page.waitForURL(url => url.pathname === '/qna.html');
+    await page.waitForURL(url => url.pathname === '/qna.html', { waitUntil: 'domcontentloaded' });
     assert(await nav.isHidden());
     assert.equal(new URL(await nav.locator('[aria-current="page"]').getAttribute('href'), origin).pathname, '/qna.html');
     for (const href of ['/reviews/', '/portfolio.html']) {
       await toggle.click();
       await nav.locator(`a[href^="${href}"]`).click();
-      await page.waitForURL(url => url.pathname === href);
+      await page.waitForURL(url => url.pathname === href, { waitUntil: 'domcontentloaded' });
       assert(await nav.isHidden());
     }
     await toggle.click();
@@ -90,6 +90,7 @@ try {
     assert(await nav.isHidden(), 'tabbing out closes dropdown');
     await toggle.click();
     await page.setViewportSize({ width: 1440, height: 900 });
+    await page.waitForFunction(() => document.querySelector('.site-menu-toggle').getAttribute('aria-expanded') === 'false');
     assert.equal(await toggle.getAttribute('aria-expanded'), 'false');
     assert(await nav.isVisible());
     await page.screenshot({ path: join(evidence, 'desktop.png') });
@@ -119,7 +120,7 @@ try {
           assert(await menu.isVisible());
           if (href === '/qna.html') await touchPage.screenshot({ path: join(evidence, `${device.replaceAll(' ', '-')}-menu.png`) });
           await menu.locator(`a[href^="${href}"]`).tap();
-          await touchPage.waitForURL(url => url.pathname === href);
+          await touchPage.waitForURL(url => url.pathname === href, { waitUntil: 'domcontentloaded' });
           await button.waitFor({ state: 'visible' });
           assert(await menu.isHidden());
           await button.tap();
@@ -132,7 +133,7 @@ try {
         const consultation = touchPage.locator('body > header a').filter({ hasText: /^상담 신청$/ });
         assert(await consultation.isVisible());
         await consultation.tap();
-        await touchPage.waitForURL(url => url.pathname === '/consultation/');
+        await touchPage.waitForURL(url => url.pathname === '/consultation/', { waitUntil: 'domcontentloaded' });
         assert(await touchPage.locator('main').isVisible());
         assert(navigationStatuses.every(status => status >= 200 && status < 400), `${device}: navigation HTTP ${navigationStatuses.join(',')}`);
         mobileChecks.push({ device, href: '/consultation/', separateConsultation: true, navigationStatuses });
