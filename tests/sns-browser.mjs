@@ -91,15 +91,15 @@ try {
       const element = page.locator('#youtube iframe').first();
       await element.scrollIntoViewIfNeeded();
       const frame = await element.elementHandle().then(element => element.contentFrame());
-      await frame.locator('.ytp-large-play-button').waitFor({ timeout: 20000 });
+      await frame.locator('.ytp-large-play-button, .ytmCuedOverlayPlayButton').waitFor({ timeout: 20000 });
       await frame.evaluate(() => { const video = document.querySelector('video'); if (video) video.muted = true; });
-      await frame.locator('.ytp-large-play-button').click();
+      await frame.locator('.ytp-large-play-button, .ytmCuedOverlayPlayButton').click();
       await frame.waitForFunction(() => {
         const video = document.querySelector('video');
         return video && !video.paused && video.currentTime > 1 && document.querySelector('#movie_player')?.getVideoData?.().video_id === 'xg39Rhvspt8';
       }, null, { timeout: 30000 });
       evidence.push({ playback: await frame.evaluate(() => ({ currentTime: document.querySelector('video').currentTime, paused: document.querySelector('video').paused })), browser: selection.browser });
-      await page.screenshot({ path: `${out}/playing-390.png` });
+      await page.screenshot({ path: `${out}/playing.png` });
     }
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(origin + '/?is_test=1');
