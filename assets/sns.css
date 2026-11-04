@@ -10,6 +10,9 @@
 .sns-instagram { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; gap: 48px; }
 .sns-instagram iframe { width: 100%; height: 580px; border: 1px solid var(--line); background: var(--paper); }
 .sns-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px 24px; }
+.sns-videos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 24px; }
+.sns-video iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; }
+.sns-video h3 { font-size: 21px; font-weight: 400; line-height: 1.6; margin: 16px 0 12px; }
 .sns-card { display: block; min-width: 0; }
 .sns-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
 .sns-card h3 { font-weight: 400; font-size: 21px; margin: 16px 0 12px; }
@@ -20,6 +23,6 @@
 @media (max-width: 600px) {
   .sns-page { width: calc(100% - 40px); padding: 40px 0 64px; }
   .sns-section-head { align-items: start; flex-direction: column; gap: 16px; }
-  .sns-instagram, .sns-grid { grid-template-columns: 1fr; gap: 32px; }
+  .sns-instagram, .sns-grid, .sns-videos { grid-template-columns: 1fr; gap: 32px; }
   .sns-intro { margin-bottom: 40px; }
 }

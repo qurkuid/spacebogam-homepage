@@ -26,6 +26,9 @@ class SiteFooterTest(unittest.TestCase):
             self.assertIn(post['source'], page)
             self.assertTrue((root / post['cover'].lstrip('/')).is_file())
         self.assertIn('/assets/sns.js', page)
+        self.assertLess(page.index('id="youtube"'), page.index('id="instagram"'))
+        self.assertLess(page.index('id="instagram"'), page.index('id="blog"'))
+        self.assertIn('/assets/social-content-config.js', page)
         self.assertNotIn('access_token', page)
         for field, invalid in [('source', 'javascript:alert(1)'), ('cover', '/assets/blog/../secret')]:
             unsafe = [dict(posts[0], **{field: invalid})]

@@ -1,4 +1,27 @@
 (() => {
+  const config = window.SPACEBOGAM_SOCIAL_CONTENT;
+  if (config) {
+    const videos = [config.featuredVideo, ...config.supportVideos];
+    document.getElementById('youtube-videos').replaceChildren(...videos.filter(video => /^[\w-]{11}$/.test(video.videoId)).map(video => {
+      const card = document.createElement('article');
+      card.className = 'sns-video';
+      const player = document.createElement('iframe');
+      player.src = 'https://www.youtube-nocookie.com/embed/' + video.videoId + '?rel=0&playsinline=1';
+      player.title = video.title;
+      player.loading = 'lazy';
+      player.referrerPolicy = 'strict-origin-when-cross-origin';
+      player.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      player.allowFullscreen = true;
+      const title = document.createElement('h3');
+      title.textContent = video.title;
+      const link = document.createElement('a');
+      link.href = 'https://www.youtube.com/watch?v=' + video.videoId;
+      link.target = '_blank'; link.rel = 'noopener noreferrer'; link.className = 'sns-open';
+      link.textContent = '유튜브에서 보기 ↗';
+      card.append(player, title, link);
+      return card;
+    }));
+  }
   const grid = document.getElementById('instagram-posts');
   const status = document.getElementById('instagram-status');
   fetch('/api/social-feed', { headers: { Accept: 'application/json' } })
