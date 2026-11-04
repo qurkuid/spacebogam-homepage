@@ -1,0 +1,26 @@
+.consultation-board{max-width:1100px;margin:0 auto;padding:80px 32px 96px;min-height:65vh}
+.board-heading{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:24px}
+.board-eyebrow{font-size:13px;letter-spacing:.08em;color:#716d65;margin:0 0 12px}
+.board-heading h1{font-size:clamp(28px,4vw,44px);font-weight:600;letter-spacing:-.055em;margin:0;line-height:1.25}
+.board-apply{display:inline-flex;justify-content:center;align-items:center;gap:24px;flex-shrink:0;min-height:46px;padding:12px 22px;background:var(--ink);color:var(--paper);border:1px solid var(--ink);font-size:14px;cursor:pointer}
+.board-note,#board-status{font-size:14px;line-height:1.7;color:#716d65}
+#board-status{margin:20px 0 12px;min-height:24px}
+#board-status[data-error]{color:#9b3224}
+.board-table-wrap{border-top:1px solid var(--ink)}
+#consultation-table{width:100%;border-collapse:collapse;table-layout:fixed;text-align:left;font-size:15px}
+#consultation-table th{font-size:13px;font-weight:500;color:#716d65;padding:18px 16px;border-bottom:1px solid var(--line)}
+#consultation-table td{padding:16px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+#consultation-table th:first-child{width:25%}#consultation-table th:nth-child(2){width:23%}
+#consultation-table tbody tr:has(button){cursor:pointer}
+#consultation-table tbody tr:hover{background:rgba(255,255,255,.4)}
+.board-request{border:0;background:none;padding:8px 0;min-height:44px;color:var(--ink);text-decoration:underline;text-underline-offset:4px;cursor:pointer;font-size:inherit}
+.board-pagination{display:flex;justify-content:center;align-items:center;gap:24px;margin:28px 0;font-size:14px}
+.board-pagination button,#board-retry{border:1px solid var(--line);padding:10px 18px;min-height:44px;background:transparent;color:var(--ink);cursor:pointer}
+.board-pagination button:disabled,.board-request:disabled{opacity:.4;cursor:default}
+.board-admin{text-align:right;font-size:12px;color:#716d65;text-decoration:underline;text-underline-offset:4px}
+#board-notice{border:1px solid var(--line);padding:32px;max-width:420px;width:calc(100% - 40px);color:var(--ink);background:var(--paper)}
+#board-notice::backdrop{background:rgba(30,29,26,.45)}
+#board-notice h2{font-size:22px;margin:0 0 12px}#board-notice p{font-size:14px;line-height:1.7;margin:0 0 24px}#board-notice form{text-align:right}
+.consultation-board a:focus-visible,.consultation-board button:focus-visible,#board-notice button:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+@media(max-width:600px){.consultation-board{padding:40px 20px 56px}.board-heading{gap:12px}.board-heading h1{font-size:26px}.board-apply{padding:10px 14px;gap:10px;font-size:13px}.board-note{font-size:13px}#consultation-table{font-size:13px}#consultation-table th,#consultation-table td{padding:12px 8px}#consultation-table th:first-child{width:31%}#consultation-table th:nth-child(2){width:22%}}

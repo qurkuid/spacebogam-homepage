@@ -59,7 +59,7 @@ test('a hidden Kakao entry does not initialize authentication or callback handli
 });
 
 test('callback scrubber runs before trackers and removes only OAuth callback parameters', () => {
-  const html = fs.readFileSync(path.join(projectRoot, 'consultation/index.html'), 'utf8');
+  const html = fs.readFileSync(path.join(projectRoot, 'consultation/apply/index.html'), 'utf8');
   const marker = 'data-kakao-callback-scrubber';
   const scrubStart = html.indexOf(marker);
   const gtmStart = html.indexOf('Google Tag Manager');
@@ -70,20 +70,20 @@ test('callback scrubber runs before trackers and removes only OAuth callback par
   const saved = new Map();
   let replacement = '';
   const sandbox = {
-    location: { href: 'https://spacebogam.kr/consultation/?flow=f-12345678&kakao=success&utm_source=qa#form' },
+    location: { href: 'https://spacebogam.kr/consultation/apply/?flow=f-12345678&kakao=success&utm_source=qa#form' },
     history: { replaceState(_state, _title, url) { replacement = url; } },
     sessionStorage: { setItem(key, value) { saved.set(key, value); } },
     URL
   };
   vm.runInNewContext(scriptMatch[1], sandbox);
-  assert.equal(replacement, '/consultation/?utm_source=qa#form');
+  assert.equal(replacement, '/consultation/apply/?utm_source=qa#form');
   assert.deepEqual(JSON.parse(saved.get('spacebogam.kakao.consultation.callback.v1')), {
     flow: 'f-12345678', kakao: 'success'
   });
 });
 
 test('released entry contains only the Kakao start button', () => {
-  const html = fs.readFileSync(path.join(projectRoot, 'consultation/index.html'), 'utf8');
+  const html = fs.readFileSync(path.join(projectRoot, 'consultation/apply/index.html'), 'utf8');
   assert.match(html, /id="stage"/);
   assert.match(html, /flow\.js\?v=[a-f0-9]{12}/);
   assert.match(html, /id="kakao-quick-consultation"/);
