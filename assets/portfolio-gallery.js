@@ -82,7 +82,15 @@
     update();
   }));
   form.hidden = false;
-  if (matchMedia('(max-width:680px)').matches) form.querySelector('.pf-tags').open = false;
+  const tools = form.closest('.pf-browse-tools');
+  tools.hidden = false;
+  const mobile = matchMedia('(max-width:680px)');
+  function adaptTools() {
+    tools.open = !mobile.matches;
+    form.querySelector('.pf-tags').open = !mobile.matches;
+  }
+  mobile.addEventListener('change', adaptTools);
+  adaptTools();
   form.addEventListener('submit', event => event.preventDefault());
   form.addEventListener('input', update);
   form.addEventListener('change', update);

@@ -1,5 +1,21 @@
 (function () {
   'use strict';
+  var overview = document.querySelector('.rv-summary');
+  if (overview) {
+    var tools = document.createElement('details');
+    tools.className = 'rv-browse-tools';
+    var toggle = document.createElement('summary');
+    toggle.textContent = '후기 검색·평점 통계';
+    overview.before(tools);
+    tools.append(toggle);
+    ['.rv-tools', '.rv-summary', '.rv-summary-note', '.rv-distribution'].forEach(function (selector) {
+      tools.append(document.querySelector(selector));
+    });
+    var mobile = matchMedia('(max-width:720px)');
+    function adaptTools() { tools.open = !mobile.matches; }
+    mobile.addEventListener('change', adaptTools);
+    adaptTools();
+  }
   var form = document.getElementById('review-form');
   if (!form) return;
   var status = document.getElementById('review-status');

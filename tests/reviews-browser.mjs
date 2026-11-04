@@ -62,6 +62,7 @@ try {
     }
     await page.setViewportSize({ width: 390, height: 844 });
     await page.getByRole('link', { name: '나의 경험 남기기' }).click();
+    await page.locator('#review-writing[open]').waitFor();
     assert.equal(await page.locator('#review-writing').getAttribute('open'), '');
     await page.getByRole('radio', { name: '5점 · 매우 좋았어요', exact: true }).check();
     assert.match(await page.locator('#rating-description').innerText(), /^5점/);
@@ -110,6 +111,7 @@ try {
     assert.match(await page.locator('.rv-card').innerText(), /아쉬움/);
     assert.deepEqual((await page.locator('.rv-stat strong').allTextContents()).slice(0, 2), ['2', '3']);
     await page.locator('.rv-card h2 a').click();
+    await page.locator('.rv-detail').waitFor();
     assert(await page.locator('.rv-detail').isVisible());
     assert(await page.locator('.rv-intro').isHidden());
     assert.equal(await page.locator('link[rel=canonical]').getAttribute('href'), origin + new URL(page.url()).pathname);

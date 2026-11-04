@@ -31,7 +31,7 @@ try {
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(origin + '/portfolio.html#project-list');
     await page.screenshot({ path: join(evidence, `initial-${selection.browser}.png`) });
-    await page.locator('#portfolio-filters').waitFor();
+    await page.locator('.pf-browse-tools').waitFor();
     const visible = () => page.locator('.v8-grid > article:visible').count();
     const projects = () => page.locator('.v8-grid > article:visible [data-project]').evaluateAll(links => links.map(link => link.dataset.project));
     const toggle = name => page.getByRole('checkbox', { name, exact: true }).press('Space');
@@ -86,7 +86,8 @@ try {
     for (const width of [360, 390, 768, 980, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(origin + '/portfolio.html');
-      await page.locator('#portfolio-filters').waitFor();
+      await page.locator('.pf-browse-tools').waitFor();
+      assert.equal(await page.locator('.pf-browse-tools').getAttribute('open'), width <= 680 ? null : '');
       assert.equal(await page.locator('.pf-tags').getAttribute('open'), width <= 680 ? null : '');
       await page.evaluate(async () => {
         for (const img of document.querySelectorAll('.v8-grid img')) {
@@ -119,6 +120,7 @@ try {
     }
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(origin + '/portfolio.html');
+    await page.locator('.pf-browse-tools > summary').click();
     await page.locator('.pf-tags summary').click();
     await toggle('TV 없는 거실');
     await page.screenshot({ path: join(evidence, 'filtered-390.png'), fullPage: true });
@@ -142,6 +144,7 @@ try {
         assert(matching && await visible() > 0, room);
       }
       await page.locator('.pf-rooms').getByRole('button', { name: '주방', exact: true }).click();
+      if (width <= 680) await page.locator('.pf-browse-tools > summary').click();
       await page.getByRole('combobox', { name: '공개 금액대' }).selectOption('10000');
       assert.deepEqual(await projects(), ['mega-centum-49py']);
       await mega.locator('img').evaluate(img => img.decode());
