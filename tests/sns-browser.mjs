@@ -33,6 +33,7 @@ try {
         return route.continue();
       }
       if (url.href === 'https://scontent.cdninstagram.com/test.jpg') return route.fulfill({ contentType: 'image/jpeg', body: await readFile(resolve('assets/portfolio/mega-centum-49py.jpg')) });
+      if (mode === 'live' && route.request().method() === 'GET' && /(?:^|\.)(?:cdninstagram\.com|fbcdn\.net)$/.test(url.hostname)) return route.continue();
       return route.abort();
     });
     const page = await context.newPage();
@@ -60,6 +61,11 @@ try {
         assert.equal(await page.locator('#instagram-posts script').count(), 0);
         assert.match(await page.locator('#instagram-posts').innerText(), /<script>fixture<\/script>/);
       }
+      if (mode === 'live') {
+        assert.equal(await page.locator('#instagram-posts .sns-card').count(), 9);
+        for (const image of await page.locator('#instagram-posts img').all()) { await image.scrollIntoViewIfNeeded(); await image.evaluate(img => img.decode()); }
+        assert.equal(await page.locator('#instagram-posts img').count(), 9);
+      }
       await page.screenshot({ path: `${out}/${mode}-${width}.png`, fullPage: true });
       evidence.push({ width, mode, browser: selection.browser, ...styles });
     }
@@ -76,6 +82,11 @@ try {
     await page.locator('header nav').getByRole('link', { name: 'SNS', exact: true }).click();
     assert.equal(new URL(page.url()).pathname, '/sns/');
     assert.match(await page.locator('footer').innerText(), /대표 백창석/);
+    for (const path of ['/portfolio.html', '/contact.html', '/overview.html', '/insights/', '/privacy/']) {
+      await page.goto(origin + path + '?is_test=1');
+      assert.match(await page.locator('footer').innerText(), /부산진2022-02-07/);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, path);
+    }
     assert.deepEqual(errors, []);
   });
   await writeFile(`${out}/evidence${process.env.SNS_BASE_URL ? '-live' : ''}.json`, JSON.stringify(evidence, null, 2));
