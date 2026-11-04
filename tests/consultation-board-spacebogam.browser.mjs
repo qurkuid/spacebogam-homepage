@@ -5,8 +5,8 @@ import { withTestBrowser } from '/Users/changseok/.codex/browser-testing.mjs';
 const origin = 'https://spacebogam.kr';
 const live = process.env.BOARD_LIVE === '1';
 const candidate = new Map([
- ['/consultation/', ['consultation/index.html', 'text/html']],
- ['/consultation/apply/', ['consultation/apply/index.html', 'text/html']],
+ ['/consultation/', ['consultation/index.html', 'text/html; charset=utf-8']],
+ ['/consultation/apply/', ['consultation/apply/index.html', 'text/html; charset=utf-8']],
  ['/assets/consultation-board.js', ['assets/consultation-board.js', 'text/javascript']],
  ['/assets/consultation-board.css', ['assets/consultation-board.css', 'text/css']],
 ]);
@@ -21,7 +21,7 @@ await withTestBrowser(async (context, selection) => {
   if (url.origin === 'https://intm.kr' && url.pathname === '/api/consultation/list') {
    if (mode === 'error') return route.fulfill({ status: 503, headers: { 'Access-Control-Allow-Origin': origin }, json: { error: 'fixture' } });
    const second = url.searchParams.get('page') === '2';
-   return route.fulfill({ headers: { 'Access-Control-Allow-Origin': origin }, json: { consultRequests: mode === 'empty' ? [] : [{ id: 1, name: '김*수', buildingName: second ? '다음 아파트' : '<script>샘플 아파트</script>', createdAt: '2026-11-03T16:00:00Z' }], hasMore: mode === 'list' && !second } });
+   return route.fulfill({ headers: { 'Access-Control-Allow-Origin': origin }, json: { consultRequests: mode === 'empty' ? [] : [{ id: 1, name: '김*수', phone: '010-XXXX-1234', buildingName: second ? '다음 아파트' : '<script>샘플 아파트</script>', createdAt: '2026-11-03T16:00:00Z' }], hasMore: mode === 'list' && !second } });
   }
   if (url.origin === 'https://intm.kr' && url.pathname === '/consultation/board-access') {
    return route.fulfill({ contentType: 'text/html; charset=utf-8', body: `<!doctype html><script>const p=new URLSearchParams(location.search);window.opener.postMessage({type:'spacebogam-consultation-access',channel:p.get('channel'),status:'${permission}'},'https://spacebogam.kr');${permission === 'allowed' ? "location.replace('/consultation/detail?id=1');" : 'window.close();'}</script>` });
@@ -44,7 +44,7 @@ await withTestBrowser(async (context, selection) => {
   await page.setViewportSize({ width, height: 900 });
   await page.goto(origin + '/consultation/?utm_source=board-test', { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: '김*수 상담 내용 보기', exact: true }).waitFor();
-  assert.deepEqual(await page.locator('th').allTextContents(), ['신청날짜', '이름', '아파트이름']);
+  assert.deepEqual(await page.locator('th').allTextContents(), ['신청날짜', '이름', '전화번호', '아파트이름']);
   assert.ok((await page.locator('tbody').innerText()).includes('2026. 11. 04.'));
   assert.equal(await page.locator('tbody script').count(), 0);
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
@@ -66,11 +66,24 @@ await withTestBrowser(async (context, selection) => {
   assert.equal(await page.locator('#board-notice').evaluate(element => element.open), false);
   await popup.close();
   await page.locator('main [data-consultation-apply]').click();
-  await page.waitForURL(url => url.pathname === '/consultation/apply/' && url.searchParams.get('utm_source') === 'board-test', { waitUntil: 'domcontentloaded' });
-  await page.locator('#space-type-residential').waitFor();
-  assert.equal(await page.locator('#next').count(), 1);
-  await page.getByRole('link', { name: '상담 신청 목록으로', exact: true }).click();
-  await page.getByRole('heading', { name: '상담 신청 게시판' }).waitFor();
+  assert.equal(new URL(page.url()).pathname, '/consultation/');
+  await page.locator('#board-application').waitFor({ state: 'visible' });
+  const form = page.frameLocator('#board-application-frame');
+  await form.locator('#space-type-residential').waitFor();
+  await page.waitForFunction(() => document.getElementById('board-application-status').hidden);
+  assert.equal(await form.locator('#next').count(), 1);
+  assert.equal(await page.locator('.board-lock').count(), 1);
+  assert.equal(await page.locator('.board-phone').innerText(), '010-XXXX-1234');
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  await form.locator('#answer-13').fill('브라우저 확인');
+  await page.locator('#board-application-close').click();
+  await page.locator('#board-application').waitFor({ state: 'hidden' });
+  await page.locator('main [data-consultation-apply]').click();
+  await form.locator('#space-type-residential').waitFor();
+  assert.equal(await form.locator('#answer-13').inputValue(), '브라우저 확인');
+  await page.waitForFunction(() => { const f = document.getElementById('board-application-frame'); return f.contentDocument.body.scrollHeight <= f.contentWindow.innerHeight + 10; });
+  await page.screenshot({ path: '/tmp/consultation-inline-' + width + '.png', fullPage: true });
+  await page.locator('#board-application-close').click();
  }
  mode = 'empty';
  await page.reload({ waitUntil: 'domcontentloaded' });
@@ -85,5 +98,5 @@ await withTestBrowser(async (context, selection) => {
  await page.waitForURL(url => url.pathname === '/consultation/apply/', { waitUntil: 'domcontentloaded' });
  await page.locator('#stage').waitFor();
  assert.deepEqual(errors, []);
- console.log(JSON.stringify({ browser: selection.browser, target: origin, mode: live ? 'live' : 'candidate', mobileAndDesktop: 'passed', columns: 3, permissions: 'allowed-and-denied', originalForm: 'passed', paginationEmptyErrorRetry: 'passed', realSubmissions: 0, blockedNonGet: writes }));
+ console.log(JSON.stringify({ browser: selection.browser, target: origin, mode: live ? 'live' : 'candidate', mobileAndDesktop: 'passed', columns: 4, permissions: 'allowed-and-denied', originalForm: 'passed', paginationEmptyErrorRetry: 'passed', realSubmissions: 0, blockedNonGet: writes }));
 });

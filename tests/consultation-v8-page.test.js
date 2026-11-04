@@ -25,8 +25,10 @@ test('apply route preserves the operational staged form', () => {
 
 test('primary consultation route shows the private-detail board and apply link', () => {
   assert.match(consultation, /상담 신청 게시판/);
-  for (const label of ['신청날짜', '이름', '아파트이름']) assert.match(consultation, new RegExp('>' + label + '</th>'));
+  for (const label of ['신청날짜', '이름', '전화번호', '아파트이름']) assert.match(consultation, new RegExp('>' + label + '</th>'));
   assert.match(consultation, /href="\/consultation\/apply\/"/);
+  assert.match(consultation, /id="board-application-frame"/);
+  assert.match(consultation, /aria-controls="board-application"/);
   assert.match(consultation, /role="alertdialog"/);
   assert.match(consultation, /상담 내용을 볼 권한이 없습니다/);
   assert.match(consultation, /consultation-board\.js/);

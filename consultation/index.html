@@ -11,12 +11,12 @@
 <link rel="stylesheet" href="/assets/preview-v8.css?v=2dfbd83e">
 <link rel="stylesheet" href="/assets/site-navigation.css?v=c1da07ddb452">
 <link rel="stylesheet" href="/assets/business-info.css?v=footer-sns-20261104" data-business-info-style="spacebogam">
-<link rel="stylesheet" href="/assets/consultation-board.css?v=20261104-1">
+<link rel="stylesheet" href="/assets/consultation-board.css?v=20261104-2">
 <script>if(new URLSearchParams(location.search).has('flow')||new URLSearchParams(location.search).has('kakao'))location.replace('/consultation/apply/'+location.search+location.hash);</script>
 <script src="/assets/site-canonical.js?v=c69a8498"></script>
 <script defer src="/assets/site-navigation.js?v=footer-sns-20261104"></script>
 <script defer src="/assets/site-tracking.js?v=6303eec4"></script>
-<script defer src="/assets/consultation-board.js?v=20261104-1"></script>
+<script defer src="/assets/consultation-board.js?v=20261104-2"></script>
 </head>
 <body data-no-auto-cta="true">
 <a class="v8-skip" href="#main-content">본문 바로가기</a>
@@ -28,14 +28,20 @@
       <a href="/reviews/">고객 후기</a>
       <a href="/insights/">시공 이야기</a>
     </nav>
-    <a class="v8-consult" href="/consultation/apply/" data-consultation-apply>신청하기</a>
+    <a class="v8-consult" href="/consultation/apply/" data-consultation-apply aria-expanded="false" aria-controls="board-application">신청하기</a>
   </header>
 <main id="main-content" class="consultation-board">
-  <div class="board-heading"><div><p class="board-eyebrow">공간보감 상담</p><h1>상담 신청 게시판</h1></div><a class="board-apply" href="/consultation/apply/" data-consultation-apply>신청하기 <span aria-hidden="true">↗</span></a></div>
-  <p class="board-note">이름은 일부만 표시되며, 상담 내용은 관리자만 확인할 수 있습니다.</p>
+  <div class="board-heading"><div><p class="board-eyebrow">공간보감 상담</p><h1>상담 신청 게시판</h1></div><a class="board-apply" href="/consultation/apply/" data-consultation-apply aria-expanded="false" aria-controls="board-application">신청하기 <span aria-hidden="true">＋</span></a></div>
+  <p class="board-note">이름과 전화번호는 일부만 표시되며, 상담 내용은 관리자만 확인할 수 있습니다.</p>
+  <section id="board-application" class="board-application" aria-labelledby="board-application-title" hidden>
+    <div class="board-application-heading"><h2 id="board-application-title" tabindex="-1">상담 신청서</h2><button id="board-application-close" type="button">접기 <span aria-hidden="true">×</span></button></div>
+    <p id="board-application-status" role="status">신청서를 불러오고 있습니다.</p>
+    <iframe id="board-application-frame" title="공간보감 상담 신청서" style="height:900px" hidden></iframe>
+    <button id="board-application-retry" type="button" hidden>신청서 다시 불러오기</button>
+  </section>
   <p id="board-status" role="status" aria-live="polite">상담 신청 내역을 불러오고 있습니다.</p>
   <button id="board-retry" type="button" hidden>다시 시도</button>
-  <div class="board-table-wrap"><table aria-label="상담 신청 목록" id="consultation-table" aria-busy="true"><thead><tr><th scope="col">신청날짜</th><th scope="col">이름</th><th scope="col">아파트이름</th></tr></thead><tbody id="board-rows"></tbody></table></div>
+  <div class="board-table-wrap"><table aria-label="상담 신청 목록" id="consultation-table" aria-busy="true"><thead><tr><th scope="col">신청날짜</th><th scope="col">이름</th><th scope="col">전화번호</th><th scope="col">아파트이름</th></tr></thead><tbody id="board-rows"></tbody></table></div>
   <nav class="board-pagination" aria-label="상담 목록 페이지"><button type="button" id="board-prev" disabled>이전</button><span id="board-page" aria-live="polite">1 페이지</span><button type="button" id="board-next" disabled>다음</button></nav>
   <p class="board-admin"><a href="https://intm.kr/login" target="_blank" rel="noopener noreferrer">관리자 로그인 <span class="sr-only">(새 창)</span></a></p>
   <noscript><p>목록을 보려면 자바스크립트를 켜주세요. <a href="/consultation/apply/">상담 신청서 작성하기</a></p></noscript>
