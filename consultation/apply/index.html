@@ -6,6 +6,7 @@
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var q=[],fired=false;w.__sbLazyTag=function(fn){fired?fn():q.push(fn)};function go(){if(fired)return;fired=true;while(q.length)q.shift()()}['pointerdown','keydown','touchstart','scroll'].forEach(function(e){w.addEventListener(e,go,{once:true,passive:true})});if(d.readyState==='complete')setTimeout(go,1500);else w.addEventListener('load',function(){setTimeout(go,1500)});setTimeout(go,8000);w.__sbLazyTag(function(){var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);});})(window,document,'script','dataLayer','GTM-PW8GLP8S');</script>
 <!-- End Google Tag Manager -->
 <meta charset="utf-8">
+<script>if(new URLSearchParams(location.search).get('embed')==='board'&&window.parent!==window)document.documentElement.dataset.consultationEmbed='true';</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>공간보감 사무실 방문 상담 예약</title>
 <meta name="description" content="상담은 공간보감 사무실 방문을 기본으로 진행합니다. 신청 후 담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다.">
@@ -222,6 +223,14 @@
     @media(max-width:800px){body[data-residential-two-page="true"] .stage h1{font-size:28px}body[data-residential-two-page="true"] .topbar{height:64px}body[data-residential-two-page="true"] .stage{padding-top:22px}body[data-residential-two-page="true"] .footer{margin-top:0}}
 
     @media(max-width:800px){body[data-residential-two-page="true"]{padding-bottom:88px}}
+
+    html[data-consultation-embed] body{min-height:0;height:auto;padding-bottom:0}
+    html[data-consultation-embed] .shell{display:block;min-height:0}
+    html[data-consultation-embed] .aside,html[data-consultation-embed] .site-footer,html[data-consultation-embed] .consultation-help,html[data-consultation-embed] .topbar .brand,html[data-consultation-embed] .prototype{display:none!important}
+    html[data-consultation-embed] .main{min-height:0}
+    html[data-consultation-embed] .topbar{height:auto;padding:0 0 12px;justify-content:flex-end}
+    html[data-consultation-embed] body[data-residential-two-page] .stage{width:100%;max-width:none;min-height:0;margin:0;padding:24px 0}
+    html[data-consultation-embed] body[data-residential-two-page] .main .footer{position:static;width:100%;max-width:none;margin:0;padding:16px 0}
   </style>
   <link rel="stylesheet" href="/assets/consultation-help.css?v=31632cf80240">
 <link rel="stylesheet" href="/assets/business-info.css?v=footer-sns-20261104" data-business-info-style="spacebogam"></head>
@@ -265,6 +274,7 @@
     new ResizeObserver(positionHelp).observe(document.querySelector('.shell'));
     new MutationObserver(positionHelp).observe(document.getElementById('stage'), {childList:true,subtree:true});
     positionHelp();
+    if(document.documentElement.dataset.consultationEmbed)parent.postMessage({type:"spacebogam-consultation-ready"},location.origin);
   })();
   </script>
 <footer class="v8-footer site-footer" data-site-footer="spacebogam"><p data-business-info="spacebogam"><strong>공간보감</strong><br>상호 공간보감 인테리어 디자인 · 대표 백창석<br>사업자등록번호 625-43-01028<br>실내건축공사업 등록번호 부산진2022-02-07<br>부산광역시 해운대구 좌동순환로 457, 402호<br>대표 전화 <a href="tel:050713881252">1551-0163</a></p><nav aria-label="하단 메뉴"><a href="/contact.html">오시는 길·주차 안내</a><a href="/sns/">SNS</a><a href="/overview.html">회사소개</a><a href="/privacy/">개인정보처리방침</a></nav></footer>

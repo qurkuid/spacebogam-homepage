@@ -10,7 +10,7 @@
 #consultation-table{width:100%;border-collapse:collapse;table-layout:fixed;text-align:left;font-size:15px}
 #consultation-table th{font-size:13px;font-weight:500;color:#716d65;padding:18px 16px;border-bottom:1px solid var(--line)}
 #consultation-table td{padding:16px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
-#consultation-table th:first-child{width:25%}#consultation-table th:nth-child(2){width:23%}
+#consultation-table th:first-child{width:20%}#consultation-table th:nth-child(2){width:18%}
 #consultation-table tbody tr:has(button){cursor:pointer}
 #consultation-table tbody tr:hover{background:rgba(255,255,255,.4)}
 .board-request{border:0;background:none;padding:8px 0;min-height:44px;color:var(--ink);text-decoration:underline;text-underline-offset:4px;cursor:pointer;font-size:inherit}
@@ -24,3 +24,17 @@
 .consultation-board a:focus-visible,.consultation-board button:focus-visible,#board-notice button:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
 @media(max-width:600px){.consultation-board{padding:40px 20px 56px}.board-heading{gap:12px}.board-heading h1{font-size:26px}.board-apply{padding:10px 14px;gap:10px;font-size:13px}.board-note{font-size:13px}#consultation-table{font-size:13px}#consultation-table th,#consultation-table td{padding:12px 8px}#consultation-table th:first-child{width:31%}#consultation-table th:nth-child(2){width:22%}}
+
+#consultation-table th:nth-child(3){width:26%}
+.board-request{display:inline-flex;align-items:center;gap:7px;text-decoration:none}
+.board-lock{width:14px;height:14px;flex:none;fill:none;stroke:#877259;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.board-phone{font-variant-numeric:tabular-nums;white-space:nowrap;font-size:14px}
+.board-application[hidden]{display:none}
+.board-application{margin:30px 0 40px;padding:28px;border:1px solid var(--line);background:rgba(255,255,255,.35);scroll-margin-top:24px}
+.board-application-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:16px}
+.board-application-heading h2{margin:0;font-size:22px;font-weight:600}
+#board-application-close,#board-application-retry{min-height:44px;padding:8px 12px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+#board-application-status{font-size:14px;color:#716d65}
+#board-application-frame{display:block;width:100%;border:0}
+#board-application-frame[hidden]{display:none}
+@media(max-width:600px){#consultation-table{font-size:12px}#consultation-table th,#consultation-table td{padding:14px 5px}#consultation-table th{font-size:11px}#consultation-table th:first-child{width:23%}#consultation-table th:nth-child(2){width:20%}#consultation-table th:nth-child(3){width:30%}#consultation-table td:first-child{font-size:11px}.board-phone{font-size:11px}.board-request{gap:4px}.board-lock{width:11px;height:11px}.board-application{padding:18px 14px}.board-application-heading h2{font-size:20px}}
