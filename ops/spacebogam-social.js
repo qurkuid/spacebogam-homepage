@@ -2,31 +2,9 @@
 
 const fs = require('node:fs/promises');
 const path = require('node:path');
-const { createRequire } = require('node:module');
 const PROFILE = 'https://www.instagram.com/ggbg.official/';
 const TTL = 15 * 60 * 1000;
-
-async function instagramCredentials() {
-  // Reuse the existing INTM integration; credentials never leave the server.
-  const root = process.env.INTM_ROOT || path.join(__dirname, '../intm');
-  const requireIntm = createRequire(path.join(root, 'package.json'));
-  const { Pool } = requireIntm('pg');
-  const dotenv = requireIntm('dotenv');
-  const env = { ...process.env };
-  for (const file of ['.env.local', '.env.production', '.env']) {
-    try {
-      const values = dotenv.parse(await fs.readFile(path.join(root, file)));
-      for (const [key, value] of Object.entries(values)) if (env[key] === undefined) env[key] = value;
-    } catch (error) { if (error.code !== 'ENOENT') throw error; }
-  }
-  const pool = new Pool(env.DATABASE_URL ? { connectionString: env.DATABASE_URL, connectionTimeoutMillis: 5000 }
-    : { host: env.DB_HOST, port: env.DB_PORT, database: env.DB_NAME, user: env.DB_USER, password: env.DB_PASSWORD, connectionTimeoutMillis: 5000 });
-  try {
-    const { rows } = await pool.query("SELECT access_token, platform_user_id FROM sns_tokens WHERE platform = $1 LIMIT 1", ['instagram']);
-    if (!rows[0]?.access_token || !/^\d+$/.test(rows[0].platform_user_id)) throw new Error('Instagram is not connected');
-    return { token: rows[0].access_token, id: rows[0].platform_user_id };
-  } finally { await pool.end(); }
-}
+const MAX_STALE = 60 * 60 * 1000;
 
 function mediaPost(post) {
   const image = post.media_type === 'VIDEO' ? post.thumbnail_url : post.media_url;
@@ -41,10 +19,10 @@ function mediaPost(post) {
   } catch { return null; }
 }
 
-function createSocialHandler({ credentials = instagramCredentials, request = fetch, now = Date.now } = {}) {
+function createInstagramFeed({ credentials, request = fetch, now = Date.now, initial } = {}) {
   let lastAttempt = -Infinity;
   let pending;
-  let cached = { status: 'unavailable', profileUrl: PROFILE, posts: [], updatedAt: null };
+  let cached = initial || { status: 'unavailable', profileUrl: PROFILE, posts: [], updatedAt: null };
   async function refresh() {
     lastAttempt = now();
     try {
@@ -52,27 +30,44 @@ function createSocialHandler({ credentials = instagramCredentials, request = fet
       const headers = { Authorization: `Bearer ${token}` };
       const base = `https://graph.instagram.com/v23.0/${id}`;
       const identity = await request(base + '?fields=id,username', { headers, signal: AbortSignal.timeout(8000), redirect: 'error' });
-      if (!identity.ok || (await identity.json()).username !== 'ggbg.official') throw new Error('Instagram account unavailable');
+      if (!identity.ok) throw Object.assign(new Error('Instagram account unavailable'), { code: identity.status === 401 ? 'AUTH_REQUIRED' : 'UPSTREAM_UNAVAILABLE' });
+      if ((await identity.json()).username !== 'ggbg.official') throw Object.assign(new Error('Instagram account mismatch'), { code: 'ACCOUNT_MISMATCH' });
       const response = await request(base + '/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp&limit=9', { headers, signal: AbortSignal.timeout(8000), redirect: 'error' });
       if (!response.ok) throw new Error('Instagram media unavailable');
       const data = await response.json();
       if (!Array.isArray(data.data)) throw new Error('Invalid Instagram response');
       cached = { status: 'ready', profileUrl: PROFILE, posts: data.data.map(mediaPost).filter(Boolean).slice(0, 9), updatedAt: new Date(now()).toISOString() };
-    } catch {
-      cached = { ...cached, status: cached.updatedAt ? 'stale' : 'unavailable' };
+    } catch (error) {
+      const keep = cached.updatedAt && now() - Date.parse(cached.updatedAt) <= MAX_STALE;
+      cached = { ...cached, posts: keep ? cached.posts : [], status: keep ? 'stale' : 'unavailable', errorCode: ['AUTH_REQUIRED', 'ACCOUNT_MISMATCH'].includes(error.code) ? error.code : 'UPSTREAM_UNAVAILABLE' };
     }
   }
+  return async function getFeed() {
+    if (!pending && now() - lastAttempt >= TTL) pending = refresh().finally(() => { pending = null; });
+    if (pending) await pending;
+    return cached;
+  };
+}
+
+function createSocialHandler({ feedFile = process.env.INSTAGRAM_FEED_FILE || path.join(__dirname, 'private/instagram-feed.json'), readFeed = () => fs.readFile(feedFile, 'utf8').then(JSON.parse), now = Date.now } = {}) {
   return async function handleSocial(req, res, pathname) {
     if (pathname !== '/api/social-feed') return false;
     if (!['GET', 'HEAD'].includes(req.method)) {
       res.writeHead(405, { Allow: 'GET, HEAD' }); res.end(); return true;
     }
-    if (!pending && now() - lastAttempt >= TTL) pending = refresh().finally(() => { pending = null; });
-    if (pending) await pending;
+    let instagram = { status: 'unavailable', profileUrl: PROFILE, posts: [], updatedAt: null };
+    try {
+      const data = await readFeed();
+      const age = now() - Date.parse(data.updatedAt);
+      if (Number.isFinite(age) && age >= 0 && age <= MAX_STALE && ['ready', 'stale'].includes(data.status)) {
+        instagram = { status: age > TTL ? 'stale' : data.status, profileUrl: PROFILE, updatedAt: data.updatedAt,
+          posts: data.posts.slice(0, 9).map(post => mediaPost({ id: post.id, caption: post.caption, media_type: 'IMAGE', media_url: post.image, permalink: post.url, timestamp: post.date })).filter(Boolean) };
+      } else if (data.errorCode === 'AUTH_REQUIRED') instagram.errorCode = 'AUTH_REQUIRED';
+    } catch { /* Keep the public fallback when the private cache is unavailable. */ }
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=60', 'X-Content-Type-Options': 'nosniff' });
-    res.end(req.method === 'HEAD' ? undefined : JSON.stringify({ instagram: cached }));
+    res.end(req.method === 'HEAD' ? undefined : JSON.stringify({ instagram }));
     return true;
   };
 }
 
-module.exports = { createSocialHandler, mediaPost };
+module.exports = { createSocialHandler, createInstagramFeed, mediaPost };

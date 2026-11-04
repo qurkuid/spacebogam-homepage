@@ -14,7 +14,7 @@
         anchor.className = 'sns-card'; anchor.href = link.href; anchor.target = '_blank'; anchor.rel = 'noopener noreferrer';
         const image = document.createElement('img');
         image.src = imageUrl.href; image.alt = post.caption ? post.caption.slice(0, 100) : '공간보감 인스타그램 게시물'; image.loading = 'lazy'; image.referrerPolicy = 'no-referrer';
-        image.addEventListener('error', () => image.hidden = true);
+        image.addEventListener('error', () => image.remove());
         const caption = document.createElement('p'); caption.textContent = post.caption;
         const open = document.createElement('span'); open.className = 'sns-open'; open.textContent = '인스타그램에서 보기 ↗';
         anchor.append(image, caption, open); return anchor;

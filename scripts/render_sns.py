@@ -1,6 +1,7 @@
 """Render the SNS landing page from the existing imported blog records."""
 import html
 import json
+import re
 from pathlib import Path
 from scripts.site_footer import footer_html, FOOTER_STYLE
 
@@ -8,6 +9,10 @@ from scripts.site_footer import footer_html, FOOTER_STYLE
 def render_sns(posts):
     cards = []
     for post in sorted(posts, key=lambda p: p['date'], reverse=True)[:6]:
+        if not re.fullmatch(r'https://blog\.naver\.com/baek1985/\d+', post['source']):
+            raise ValueError('Blog source must be a Spacebogam Naver post')
+        if not post['cover'].startswith('/assets/blog/') or any(part in ('..', '.') for part in post['cover'].split('/')) or re.search(r'[?\#\\]', post['cover']):
+            raise ValueError('Blog cover must be a local blog asset')
         excerpt = post['excerpt']
         if excerpt.startswith(post['title']):
             excerpt = excerpt[len(post['title']):].strip()

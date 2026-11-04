@@ -27,6 +27,10 @@ class SiteFooterTest(unittest.TestCase):
             self.assertTrue((root / post['cover'].lstrip('/')).is_file())
         self.assertIn('/assets/sns.js', page)
         self.assertNotIn('access_token', page)
+        for field, invalid in [('source', 'javascript:alert(1)'), ('cover', '/assets/blog/../secret')]:
+            unsafe = [dict(posts[0], **{field: invalid})]
+            with self.assertRaises(ValueError):
+                render_sns(unsafe)
 
 
 if __name__ == '__main__':
