@@ -6,6 +6,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { withTestBrowser } from '/Users/changseok/.codex/browser-testing.mjs';
 import { qaEntryUrl } from '../scripts/qa/lib/qa-entry-url.mjs';
+import { devices } from '/Applications/ChatGPT.app/Contents/Resources/cua_node/lib/node_modules/playwright/index.mjs';
 
 const evidence = resolve(process.env.EVIDENCE_DIR || 'artifacts/mobile-navigation-20261104/qa');
 await mkdir(evidence, { recursive: true });
@@ -94,8 +95,51 @@ try {
     await page.screenshot({ path: join(evidence, 'desktop.png') });
     await page.setViewportSize({ width: 390, height: 844 });
     assert(await nav.isHidden());
+    const mobileChecks = [];
+    for (const device of ['iPhone 13', 'Pixel 7']) {
+      const mobile = await context.browser().newContext({ ...devices[device] });
+      try {
+        await mobile.route('**/*', route => new URL(route.request().url()).origin === origin && route.request().method() === 'GET' ? route.continue() : route.abort());
+        const touchPage = await mobile.newPage();
+        touchPage.setDefaultTimeout(10000);
+        touchPage.on('pageerror', error => errors.push(error.message));
+        const navigationStatuses = [];
+        touchPage.on('response', response => {
+          if (response.request().isNavigationRequest() && response.frame() === touchPage.mainFrame()) navigationStatuses.push(response.status());
+        });
+        const button = touchPage.locator('.site-menu-toggle');
+        const menu = touchPage.locator('#site-navigation');
+        for (const href of ['/qna.html', '/reviews/', '/portfolio.html']) {
+          const response = await touchPage.goto(qaEntryUrl(origin + '/'), { waitUntil: 'domcontentloaded' });
+          assert.equal(response.status(), 200);
+          await button.waitFor({ state: 'visible' });
+          assert(await touchPage.evaluate(() => matchMedia('(pointer: coarse)').matches && navigator.maxTouchPoints > 0));
+          await button.tap();
+          assert.equal(await button.getAttribute('aria-expanded'), 'true');
+          assert(await menu.isVisible());
+          if (href === '/qna.html') await touchPage.screenshot({ path: join(evidence, `${device.replaceAll(' ', '-')}-menu.png`) });
+          await menu.locator(`a[href^="${href}"]`).tap();
+          await touchPage.waitForURL(url => url.pathname === href);
+          await button.waitFor({ state: 'visible' });
+          assert(await menu.isHidden());
+          await button.tap();
+          assert(await menu.isVisible());
+          await button.tap();
+          assert(await menu.isHidden());
+          assert.equal(await touchPage.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+          mobileChecks.push({ device, href, touchNavigation: true, closeReopen: true });
+        }
+        const consultation = touchPage.locator('body > header a').filter({ hasText: /^상담 신청$/ });
+        assert(await consultation.isVisible());
+        await consultation.tap();
+        await touchPage.waitForURL(url => url.pathname === '/consultation/');
+        assert(await touchPage.locator('main').isVisible());
+        assert(navigationStatuses.every(status => status >= 200 && status < 400), `${device}: navigation HTTP ${navigationStatuses.join(',')}`);
+        mobileChecks.push({ device, href: '/consultation/', separateConsultation: true, navigationStatuses });
+      } finally { await mobile.close(); }
+    }
     assert.deepEqual(errors, []);
-    const result = { status: 'passed', browser: selection.browser, checks, navigation: ['Q&A', '고객 후기', '포트폴리오'], keyboard: true, outsideClose: true, resize: true, runtimeErrors: errors };
+    const result = { status: 'passed', browser: selection.browser, checks, mobileChecks, navigation: ['Q&A', '고객 후기', '포트폴리오'], keyboard: true, outsideClose: true, resize: true, runtimeErrors: errors };
     await writeFile(join(evidence, 'result.json'), JSON.stringify(result, null, 2));
     console.log(JSON.stringify({ status: result.status, browser: result.browser, checks: checks.length }));
   });
