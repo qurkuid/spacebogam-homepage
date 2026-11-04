@@ -23,7 +23,8 @@
     root.querySelectorAll('.faq-next').forEach(link => { link.hidden = terms.length > 0; });
     empty.hidden = matches > 0;
     more.hidden = terms.length > 0;
-    count.textContent = terms.length ? `관련 질문 ${matches}개` : `전체 질문 ${items.length}개 · 질문을 누르면 답변이 열립니다.`;
+    count.hidden = terms.length === 0;
+    count.textContent = terms.length ? `관련 질문 ${matches}개` : '';
   }
   function revealHash() {
     const target = document.getElementById(location.hash.slice(1));
