@@ -84,3 +84,30 @@ GSC 권한이 없어 **실제 키워드 잠식 확정은 불가**, 파일의 tit
 - 확인된 실제 배포: INTM PR #176 병합 및 Actions 성공. 다른 플랫폼은 별도 정정 필요.
 - 신규 실행 우선순위: #78의 외부 정보 고치기 및 8개 표본의 실제 플랫폼별 응답 데이터 확보.
 - 이 문서는 작업 기록과 전문가 간 인수인계의 기준이며, 자동화에는 매 실행 시 원본 Agency Agent 역할을 읽고 이 문서의 최신 상태를 확인하도록 지시한다.
+
+## 9. 2026-11-10 역할별 후속 실행·실증 결과
+
+### AI Citation Strategist — 실제 측정 상태
+- ChatGPT / Claude / Gemini / Perplexity의 **동일 질문으로 직접 호출한 실제 AI 응답이 없음**. 따라서 추천 등장률·상위 3위·공식 URL 인용률 모두 **미측정(N/A)**. 일반 검색 결과나 본 보고서를 AI 추천 표본에 넣지 않는다.
+- Bing Webmaster Tools AI Performance 실측 데이터와 Google Search Console 권한도 확인되지 않아 수치 기재를 보류한다.
+
+### AEO Foundations Architect — 2026년 공식 지침 반영
+- Google Search의 **2026-05-15 공식 가이드** https://developers.google.com/search/docs/fundamentals/ai-optimization-guide 에 따르면, Google 검색(생성형 AI 포함)에서는 `llms.txt`를 특별한 인용 신호로 사용하지 않는다. 'llms.txt 새로 게시=Google AI 추천 증가'는 성립하지 않음. 기본 색인 적격성, 사용자에게 유용한 고유 사례, 명확한 구조 및 이미지/영상 자료를 우선한다.
+- Google 공식 발표 https://blog.google/products-and-platforms/products/search/new-controls-website-owners/ (2026-06-03 게시, **2026-08-31 갱신**)에 따르면 **Google Search Console 생성형 AI 노출 리포트와 AI 기능 게재 선택 제어가 전세계 적용**됨. 직접 GSC 권한 확보 시 해당 리포트의 페이지별 노출을 KPI로 추가하되, 모델별 추천 순위/비브랜드 질문별 추천률과 섞지 않는다.
+- `robots.txt` 및 `llms.txt`는 저장소에서 확인했으나 직접 HTTP tool로 읽는 작업은 일부 실패함. GitHub 소스 검사와 **운영 응답을 확인했다는 주장**을 구분한다.
+
+### SEO Specialist — 발견 → 검증 → 수정안 → 재확인
+- **문제:** 운영 https://spacebogam.kr/portfolio.html 표기 '15개 현장/678장'과 `main/index.html`의 '13개 현장/642장'이 불일치. 운영 홈페이지 https://spacebogam.kr/의 '실제 시공사진 1,047장, 포트폴리오에서 확인'도 포트폴리오 표기와 개념이 다르므로 **운영/저장소 간 콘텐츠 드리프트** 확인 필요.
+- **검증:** `portfolio.html`에서 실제 `<article>` 수 15개, 각 사례 사진 수 76+55+8+130+35+162+15+32+30+27+19+17+48+12+12 = **678**으로 재합산. 내용 변경 전 title/H1의 사용자 검색 의도별 잠식 검토는 이 문서 §3의 비GSC 대체법을 따름. GSC 실제 데이터 없음.
+- **최소 수정안 작성:** 비배포 Draft [PR #80](https://github.com/qurkuid/spacebogam-homepage/pull/80)에서 `index.html` 4곳의 건수만 **15/678**으로 통일. 타이틀, H1, CTA/추적 코드 미변경.
+- **재확인:** PR #80 브랜치를 다시 읽어 15개·678장 각각 4회, 옛 숫자 13개·642장 0회 확인. CI 상태 보고 없음. **운영 배포/실 URL 변경 없음, 게시 전 사람 승인 및 라이브 소스 드리프트 원인 검사 필수**.
+- 실제 운영의 '1,047장'이 더 넓은 집계인지 불명. 다른 집계로 증명되면 이를 별도로 설명해야 하며 근거 없이 삭제/축소 판정하지 않는다.
+
+### PR & Communications Manager — 외부/내부 사실 확인
+- **INTM 기존 구주소/대표번호 공개 페이지 문제 해소 확인:** https://intm.kr/refund-policy 의 제9조에서 2026-11-10 현재 `1551-0163 / 부산광역시 해운대구 좌동순환로 457, 402호` 새 값을 직접 readback. 기존 [이슈 #78](https://github.com/qurkuid/spacebogam-homepage/issues/78)의 해당 체크 항목 갱신.
+- 오늘의집·사람인·구 유튜브 등 다른 운영사의 프로필은 변경/발행 권한 증명이 없으며 공개 페이지 새 정보 readback도 없으므로 여전히 **미완료**.
+
+### Reality Checker — 미완료 명확화
+- 홈페이지 PR #80은 수치 일치 제안이지 **실서비스 운영 수정**도, **AI 추천률 향상 증명**도 아니다.
+- INTM의 `refund-policy`만 운영 페이지 새 주소·번호 readback을 확인했으며, 전체 INTM 전화 CTA·알림톡·SNS 및 구 유튜브·지도 프로필의 수정 완료를 일반화하지 않는다.
+- 다음 회차 우선순위: ① Google Search Console **생성형 AI 리포트** 실측 가능 여부 ② 실서비스 1,047장과 포트폴리오 678장/저장소 main 642장 간 집계 정의 및 배포 소스 차이 ③ 타사 플랫폼 구 NAP 정정 제출/공개 결과.
