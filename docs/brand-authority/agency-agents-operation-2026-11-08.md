@@ -111,3 +111,13 @@ GSC 권한이 없어 **실제 키워드 잠식 확정은 불가**, 파일의 tit
 - 홈페이지 PR #80은 수치 일치 제안이지 **실서비스 운영 수정**도, **AI 추천률 향상 증명**도 아니다.
 - INTM의 `refund-policy`만 운영 페이지 새 주소·번호 readback을 확인했으며, 전체 INTM 전화 CTA·알림톡·SNS 및 구 유튜브·지도 프로필의 수정 완료를 일반화하지 않는다.
 - 다음 회차 우선순위: ① Google Search Console **생성형 AI 리포트** 실측 가능 여부 ② 실서비스 1,047장과 포트폴리오 678장/저장소 main 642장 간 집계 정의 및 배포 소스 차이 ③ 타사 플랫폼 구 NAP 정정 제출/공개 결과.
+
+## 10. 2026-11-10 후속 실행: 40평대 근거 정합성과 재배포 회귀 차단
+
+- **Lead / AI Citation Strategist:** 고의도 40평대 업체 추천 질문에서 잘못된 평형·예산 예시가 근거 신뢰를 해칠 위험을 우선 처리. 실제 ChatGPT/Claude/Gemini/Perplexity 반복 응답 표본은 없음. KPI 추천등장률·상위3·공식 URL 인용률 모두 **미측정**.
+- **SEO Specialist (발견):** 저장소 `main/living-40py.html`는 [오륙도 SK뷰](https://spacebogam.kr/case-oryukdo-sk-view.html)를 **40평대** 및 **1억 전후**로 기재. 하지만 해당 공식 사례는 **59평**, [공개 포트폴리오](https://spacebogam.kr/portfolio.html) 가격은 **별도 문의**. 이 저장소 오류가 재배포 시 잘못된 사례로 회귀할 위험.
+- **SEO Specialist (검증·수정):** [운영 40평 페이지](https://spacebogam.kr/living-40py.html)는 이미 사직 42·화명 45·거제 47·해운대 49평을 정확히 노출하고 있음. `main`의 구버전만 수정한 [비발행 Draft PR #81](https://github.com/qurkuid/spacebogam-homepage/pull/81)에서 59평/가격 단정을 [거제 47평](https://spacebogam.kr/case-geoje-yurim-asiad-47py.html) 카드 + [메가센텀 49평](https://spacebogam.kr/case-mega-centum-49py.html)의 실제 공개 금액(1억원 이상)/범위로 교체. 59평은 별도 50평대 사례 참고로 설명.
+- **AEO Foundations Architect:** robots/sitemap/llms 기존 자산은 재생성하지 않음. 운영 40평·47평·49평·59평 HTML은 공개 검색에서 파싱되지만, 서버 robots/sitemap 원본은 이 세션의 HTTP 도구가 제공하지 않아 실서비스 파일 유효성·색인 상태 **미확인**.
+- **PR & Communications Manager:** `main/living-40py.html` 및 `main/living-50py.html`에 **노출 문구 1551-0163 / 통화 `href="tel:050713881252"` 불일치** 발견. 구 0507이 착신·추적번호인지 확인 전 임의 교체 금지. 별도 #78 권한·실통화/설정 확인 항목으로 전달. 현재 운영 HTML의 실제 `tel:` 목적지는 아직 직접 readback하지 못함.
+- **Reality Checker (재검증):** PR #81 브랜치 파일 직접 재조회. 잘못된 40평 오륙도 카드/1억 전후 FAQ 문자열 0건, 거제 47평 카드·59평 별도 설명·49평 공개 금액 확인. 참조 47평 이미지 `assets/gallery-previews/43d698e52f777d63-720.webp`의 GitHub blob 존재 확인. diff는 `living-40py.html` 1파일만, title/H1/canonical/전화 href/폼 불변, div/section/링크 태그 균형 확인. **CI/브라우저 회귀/배포는 미실행**; 운영 페이지가 이미 수정되어 있으므로 운영 소스와 `main`의 차이를 해소한 뒤 병합/배포 승인 필요.
+- **다음 실행:** (1) 실제 AI 표본이 확보되는 접근 경로 확인 (2) PR #80(사진 수), #81(40평)과 현재 운영 빌드 소스 차이 해결 (3) #78 전화 추적번호 및 외부 계정 인증 분리 확인. [이슈 #76](https://github.com/qurkuid/spacebogam-homepage/issues/76)과 [이슈 #78](https://github.com/qurkuid/spacebogam-homepage/issues/78)에 근거 기록.
