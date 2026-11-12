@@ -16,6 +16,25 @@
 <script src="/assets/site-canonical.js?v=c69a8498"></script>
 <script defer src="/assets/site-navigation.js?v=footer-sns-20261104"></script>
 <script defer src="/assets/site-tracking.js?v=6303eec4"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-EJGXDD5C1T"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments)}
+var spacebogamGa4Referrer='';
+try{
+  var spacebogamGa4ReferrerUrl=new URL(document.referrer);
+  if(spacebogamGa4ReferrerUrl.protocol==='http:'||spacebogamGa4ReferrerUrl.protocol==='https:'){
+    spacebogamGa4Referrer=spacebogamGa4ReferrerUrl.origin+(spacebogamGa4ReferrerUrl.hostname===location.hostname?spacebogamGa4ReferrerUrl.pathname:'/');
+  }
+}catch(error){}
+gtag('js',new Date());
+gtag('config','G-EJGXDD5C1T',{
+  page_location:'https://spacebogam.kr/consultation/',
+  page_path:'/consultation/',
+  page_referrer:spacebogamGa4Referrer
+});
+</script>
 <script defer src="/assets/consultation-board.js?v=20261104-2"></script>
 </head>
 <body data-no-auto-cta="true">
