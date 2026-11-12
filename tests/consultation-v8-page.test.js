@@ -43,6 +43,16 @@ test('board and apply have separate canonical paths and avoid indexing applicant
   assert.match(apply, /canonical" href="https:\/\/spacebogam\.kr\/consultation\/apply\/"/);
 });
 
+test('board sends one canonical GA4 page view without URL parameters or referrer details', () => {
+  assert.equal((consultation.match(/googletagmanager\.com\/gtag\/js\?id=G-EJGXDD5C1T/g) || []).length, 1);
+  assert.equal((consultation.match(/gtag\('config','G-EJGXDD5C1T'/g) || []).length, 1);
+  assert.match(consultation, /page_location:'https:\/\/spacebogam\.kr\/consultation\/'/);
+  assert.match(consultation, /page_path:'\/consultation\/'/);
+  assert.match(consultation, /spacebogamGa4ReferrerUrl\.origin\+\(spacebogamGa4ReferrerUrl\.hostname===location\.hostname\?spacebogamGa4ReferrerUrl\.pathname:'\/'\)/);
+  assert.ok(consultation.indexOf("location.replace('/consultation/apply/'") < consultation.indexOf('googletagmanager.com/gtag/js'));
+  assert.doesNotMatch(consultation, /GTM-PW8GLP8S/);
+});
+
 test('staged form remains keyboard accessible and mobile responsive', () => {
   assert.match(apply, /class="v8-skip" href="#stage"/);
   assert.match(apply, /\.v8-skip:focus\{top:12px\}/);
