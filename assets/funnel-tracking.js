@@ -65,7 +65,9 @@
     if (!storage) return uuid();
     try {
       var value = storage.getItem(key);
-      if (value) return value;
+      // The ingest contract requires UUIDs. Repair malformed legacy/storage values
+      // once; keep valid identities unchanged so attribution remains continuous.
+      if (typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) return value;
       value = uuid();
       storage.setItem(key, value);
       return value;
