@@ -70,7 +70,8 @@
   function stored(store, key) { try { return store.getItem(key); } catch { return null; } }
   function savedId(store, key) {
     const value = stored(store, key);
-    if (value) return value;
+    // Keep valid attribution IDs; repair malformed persisted values before ingest.
+    if (typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) return value;
     const fresh = id();
     try { store.setItem(key, fresh); } catch {}
     return fresh;
