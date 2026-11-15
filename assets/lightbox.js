@@ -7,9 +7,13 @@
   const roomNames = new Set(roomButtons.map(button => button.dataset.room));
   let room = roomNames.has(new URL(location.href).searchParams.get('room') || '')
     ? new URL(location.href).searchParams.get('room') || '' : '';
-  const figures = [...document.querySelectorAll('#case-photos .case-gallery figure')];
+  const figures = [...document.querySelectorAll('#case-photos .case-gallery:not(.case-gallery-before) figure')];
+  const beforeFigures = [...document.querySelectorAll('#case-photos .case-gallery-before figure')];
   const photoCount = document.querySelector('.pd-photo-count');
   const total = figures.length;
+  const tabButtons = [...document.querySelectorAll('.pd-gallery-tabs [role="tab"]')];
+  const tabPanels = [...document.querySelectorAll('.pd-gallery-panel[role="tabpanel"]')];
+  let activeTab = new URL(location.href).searchParams.get('view') === 'before' && beforeFigures.length ? 'before' : 'after';
 
   function setBackLinks() {
     document.querySelectorAll('a.pd-back[href*="portfolio"]').forEach(link => {
@@ -20,6 +24,31 @@
     });
   }
 
+  function updateCount(visible) {
+    if (!photoCount) return;
+    if (activeTab === 'before') {
+      photoCount.textContent = `시공 전 ${beforeFigures.length}장`;
+      return;
+    }
+    photoCount.textContent = room ? `${room} ${visible}장 · 전체 ${total}장` : `전체 ${total}장`;
+  }
+
+  function switchTab(nextTab, changeUrl = true) {
+    if (!tabButtons.length) return;
+    activeTab = nextTab === 'before' && beforeFigures.length ? 'before' : 'after';
+    tabButtons.forEach(btn => btn.setAttribute('aria-selected', String(btn.dataset.galleryTab === activeTab)));
+    tabPanels.forEach(panel => {
+      panel.hidden = panel.id !== `panel-${activeTab}`;
+    });
+    const visible = figures.filter(figure => !figure.hidden).length;
+    updateCount(visible);
+    if (changeUrl) {
+      const url = new URL(location.href);
+      activeTab === 'before' ? url.searchParams.set('view', 'before') : url.searchParams.delete('view');
+      history.replaceState(history.state, '', url);
+    }
+  }
+
   function filter(next, changeUrl = true) {
     room = roomNames.has(next) ? next : '';
     roomButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.room === room)));
@@ -28,7 +57,7 @@
       figure.hidden = Boolean(room && figure.dataset.room !== room);
       if (!figure.hidden) visible++;
     });
-    if (photoCount) photoCount.textContent = room ? `${room} ${visible}장 · 전체 ${total}장` : `전체 ${total}장`;
+    updateCount(visible);
     setBackLinks();
     if (changeUrl) {
       const url = new URL(location.href);
@@ -39,10 +68,26 @@
 
   roomNav?.removeAttribute('hidden');
   roomButtons.forEach(button => button.addEventListener('click', () => filter(button.dataset.room)));
-  const restoreUrlRoom = () => filter(new URL(location.href).searchParams.get('room') || '', false);
-  addEventListener('popstate', restoreUrlRoom);
-  addEventListener('pageshow', restoreUrlRoom);
+  tabButtons.forEach((button, idx) => {
+    button.addEventListener('click', () => switchTab(button.dataset.galleryTab));
+    button.addEventListener('keydown', event => {
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        const nextBtn = tabButtons[(idx + (event.key === 'ArrowRight' ? 1 : -1) + tabButtons.length) % tabButtons.length];
+        nextBtn.focus();
+        switchTab(nextBtn.dataset.galleryTab);
+      }
+    });
+  });
+  const restoreUrlState = () => {
+    const params = new URL(location.href).searchParams;
+    filter(params.get('room') || '', false);
+    if (tabButtons.length) switchTab(params.get('view') === 'before' ? 'before' : 'after', false);
+  };
+  addEventListener('popstate', restoreUrlState);
+  addEventListener('pageshow', restoreUrlState);
   filter(room, false);
+  if (tabButtons.length) switchTab(activeTab, false);
 
   const dialog = document.createElement('dialog');
   if (typeof dialog.showModal !== 'function') return;
@@ -55,7 +100,7 @@
   const caption = dialog.querySelector('.lb-caption');
   const viewport = dialog.querySelector('.lb-viewport');
   let current, index = 0, trigger, previousOverflow, touchStart;
-  const activeLinks = () => links.filter(link => !link.closest('figure')?.hidden);
+  const activeLinks = () => links.filter(link => !link.closest('[hidden]'));
   function show(next) {
     current = activeLinks();
     index = (next + current.length) % current.length;
