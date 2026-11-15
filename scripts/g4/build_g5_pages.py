@@ -85,9 +85,17 @@ CASE_FILES = [
 ]
 # already-built G4 detail templates (kept as their own project records, see
 # g1-audit note: 42py/32py are separate projects, no substitute allowed)
+# CMP-1111 (G5b) added the remaining 7 via scripts/g4/build_g5b_case_pages.py
 G4_DETAIL = {
     "case-sajik-ssangyong.html": "sajik-42.html",
     "case-mega-centum-49py.html": "mega-49.html",
+    "case-daewoo-ian-35py.html": "daewoo-ian-35py.html",
+    "case-geoje-hyundai-hometown.html": "geoje-hyundai-hometown.html",
+    "case-guseo-ssangyong.html": "guseo-ssangyong.html",
+    "case-hwamyeong-kolong.html": "hwamyeong-kolong.html",
+    "case-hwamyeong-lottecastle.html": "hwamyeong-lottecastle.html",
+    "case-oryukdo-sk-view.html": "oryukdo-sk-view.html",
+    "case-samhan-goldenview.html": "samhan-goldenview.html",
 }
 
 
