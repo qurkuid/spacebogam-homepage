@@ -3,11 +3,31 @@
 <head>
 <script data-kakao-callback-scrubber>(function(){try{var u=new URL(location.href),flow=u.searchParams.get('flow'),kakao=u.searchParams.get('kakao');if(flow!==null||kakao!==null){try{sessionStorage.setItem('spacebogam.kakao.consultation.callback.v1',JSON.stringify({flow:(flow||'').slice(0,512),kakao:(kakao||'').slice(0,16)}))}catch(_storageError){}u.searchParams.delete('flow');u.searchParams.delete('kakao');history.replaceState(null,'',u.pathname+(u.search||'')+u.hash)}}catch(_error){}})();</script>
 <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var q=[],fired=false;w.__sbLazyTag=function(fn){fired?fn():q.push(fn)};function go(){if(fired)return;fired=true;while(q.length)q.shift()()}['pointerdown','keydown','touchstart','scroll'].forEach(function(e){w.addEventListener(e,go,{once:true,passive:true})});if(d.readyState==='complete')setTimeout(go,1500);else w.addEventListener('load',function(){setTimeout(go,1500)});setTimeout(go,8000);w.__sbLazyTag(function(){var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);});})(window,document,'script','dataLayer','GTM-PW8GLP8S');</script>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var q=[],fired=false;w.__sbLazyTag=function(fn){fired?fn():q.push(fn)};function go(){if(fired)return;fired=true;while(q.length)q.shift()()}['pointerdown','keydown','touchstart','scroll'].forEach(function(e){w.addEventListener(e,go,{once:true,passive:true})});if(d.readyState==='complete')setTimeout(go,1500);else w.addEventListener('load',function(){setTimeout(go,1500)});setTimeout(go,8000);w.__sbLazyTag(function(){/* Load the existing GA runtime before GTM so they do not race to fetch it twice.
+   Event queues remain immediate; errors or a slow SDK cannot suppress GTM. */
+var started=false,timer;
+function startContainer(){if(started)return;started=true;clearTimeout(timer);
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f)}
+function afterGoogleTag(){
+if(w.google_tag_manager&&w.google_tag_manager['G-EJGXDD5C1T']){startContainer();return;}
+var tag=d.querySelector('script[src*="googletagmanager.com/gtag/js?id=G-EJGXDD5C1T"]');
+if(!tag){startContainer();return;}
+tag.addEventListener('load',startContainer,{once:true});
+tag.addEventListener('error',startContainer,{once:true});
+timer=setTimeout(startContainer,2500);
+}
+function scheduleContainer(){setTimeout(afterGoogleTag,0)}
+if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',scheduleContainer,{once:true});
+else scheduleContainer();});})(window,document,'script','dataLayer','GTM-PW8GLP8S');</script>
 <!-- End Google Tag Manager -->
 <meta charset="utf-8">
 <script>if(new URLSearchParams(location.search).get('embed')==='board'&&window.parent!==window)document.documentElement.dataset.consultationEmbed='true';</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Discover form dependencies before parsing the full stylesheet. Defer preserves order. -->
+<script defer fetchpriority="high" src="/reports/consultation-step-prototype-20260928/consultation-questions.js?v=4f1cee8f8e47" id="application-questions"></script>
+<script defer fetchpriority="high" src="/reports/consultation-step-prototype-20260928/flow.js?v=95c1614af61f" id="application-flow"></script>
+<script defer src="/assets/kakao-consultation.js?v=50be490804e4"></script>
 <title>공간보감 사무실 방문 상담 예약</title>
 <meta name="description" content="상담은 공간보감 사무실 방문을 기본으로 진행합니다. 신청 후 담당자가 개인 휴대전화로 연락드려 기본 정보와 사무실 방문 일정을 확인합니다.">
 <meta name="robots" content="noindex,follow">
@@ -26,17 +46,30 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <script src="/assets/site-canonical.js?v=c69a8498"></script>
-<script defer src="/assets/site-tracking.js?v=6303eec4"></script>
+<script defer src="/assets/site-tracking.js?v=a72f3ee65d57"></script>
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-EJGXDD5C1T"></script>
+<script>__sbLazyTag(function(){var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-EJGXDD5C1T';document.head.appendChild(s)});</script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-EJGXDD5C1T');</script>
-<!-- Meta Pixel Code -->
-<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];f.__sbLazyTag(function(){t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)});}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('consent','revoke');fbq('init','512750840350337');fbq('track','PageView');</script>
-<!-- End Meta Pixel Code -->
-<script src="//wcs.naver.net/wcslog.js" data-spacebogam-naver-wcs="1"></script>
-<script>if(!window.wcs_add)window.wcs_add={};window.wcs_add.wa='s_7702568df18';if(!window._nasa)window._nasa={};if(window.wcs){window.wcs.inflow('spacebogam.kr');window.wcs_do();window.__spacebogamNaverCtsPvSent=true}</script>
-<style>
-    @font-face{font-family:Suit;src:url('../../assets/SUIT-Variable.woff2') format('woff2');font-weight:100 900;font-display:swap}
+<script data-spacebogam-naver-bootstrap="async">(function(){
+  function sendCtsPageView(){
+    if (window.__spacebogamNaverCtsPvSent) return;
+if(!window.wcs_add)window.wcs_add={};window.wcs_add.wa='s_7702568df18';if(!window._nasa)window._nasa={};if(window.wcs){window.wcs.inflow('spacebogam.kr');window.wcs_do();window.__spacebogamNaverCtsPvSent=true}
+  }
+  if (window.wcs) { sendCtsPageView(); return; }
+  var script = document.querySelector('script[data-spacebogam-naver-wcs="1"], script[src*="wcslog.js"]');
+  var fresh = !script;
+  if (fresh) {
+    script = document.createElement('script');
+    script.async = true;
+    script.src = "//wcs.naver.net/wcslog.js";
+    script.setAttribute('data-spacebogam-naver-wcs', '1');
+  }
+  script.addEventListener('load', sendCtsPageView, {once:true});
+  if (fresh) document.head.appendChild(script);
+})();</script>
+<link rel="stylesheet" href="/assets/suit-fonts-20261109.css?v=e4ef4e7df96e">
+  <style>
+
     :root{--paper:#f6f3ed;--ink:#1e1d1a;--muted:#6c675f;--line:#d9d4ca;--accent:#877259;--error:#a33a2b}
     *{box-sizing:border-box}
     html,body{margin:0;min-height:100%;background:var(--paper);color:var(--ink);font-family:Suit,'Apple SD Gothic Neo',sans-serif;-webkit-font-smoothing:antialiased;word-break:keep-all}
@@ -136,6 +169,7 @@
     .consent{display:flex;gap:11px;align-items:flex-start;max-width:590px;margin-top:28px;padding-top:22px;border-top:1px solid var(--line);font-size:14px;line-height:1.5}
     .consent input{width:19px;height:19px;margin:1px 0 0;accent-color:var(--ink);flex:none}
     .consent a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+    .meta-consent{margin-top:14px;padding-top:14px;color:var(--muted)}
     .error{min-height:22px;margin:17px 0 0;color:var(--error);font-size:13px;font-weight:650}
     .summary{max-width:600px;margin:28px 0 0;border-top:1px solid var(--ink)}
     .summary div{display:grid;grid-template-columns:110px 1fr;gap:20px;padding:17px 0;border-bottom:1px solid var(--line)}
@@ -231,31 +265,39 @@
     html[data-consultation-embed] .topbar{height:auto;padding:0 0 12px;justify-content:flex-end}
     html[data-consultation-embed] body[data-residential-two-page] .stage{width:100%;max-width:none;min-height:0;margin:0;padding:24px 0}
     html[data-consultation-embed] body[data-residential-two-page] .main .footer{position:static;width:100%;max-width:none;margin:0;padding:16px 0}
+    /* Reserve the first viewport until the real, draft-aware form is initialized. */
+    body[data-application-loading] .stage{min-height:calc(100svh - 95px)}
+    body[data-application-loading] .main .footer,body[data-application-loading] #restart{visibility:hidden}
+    @media(max-width:800px){body[data-application-loading] .stage{min-height:calc(100svh - 67px)}}
+    html[data-consultation-embed] body[data-application-loading] .stage{min-height:calc(100svh - 33px)}
   </style>
   <link rel="stylesheet" href="/assets/consultation-help.css?v=31632cf80240">
 <link rel="stylesheet" href="/assets/business-info.css?v=footer-sns-20261104" data-business-info-style="spacebogam"></head>
-<body data-no-auto-cta="true">
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PW8GLP8S" height="0" width="0" style="display:none;visibility:hidden"></iframe><p>자바스크립트를 사용할 수 없다면 <a href="https://intm.kr/consultation/ggbg">기존 상담 신청서</a>를 이용해 주세요.</p></noscript>
+<body data-no-auto-cta="true" data-no-meta-pixel="true" data-residential-two-page="true" data-application-loading="true">
+<noscript><style>#application-loading{display:none}</style><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PW8GLP8S" height="0" width="0" style="display:none;visibility:hidden"></iframe><p>자바스크립트를 사용할 수 없다면 <a href="https://intm.kr/consultation/ggbg">기존 상담 신청서</a>를 이용해 주세요.</p></noscript>
 <a class="v8-skip" href="#stage">상담 질문 바로가기</a>
   <div class="shell">
     <aside class="aside" aria-hidden="true">
-      <img src="../../assets/portfolio/mega-centum-49py.jpg" alt="">
-      <div class="aside-content"><span class="brand">공간보감</span><div class="aside-copy"><p class="aside-kicker">SPACEBOGAM · CONSULTATION</p><p>어떤 집을 만들고 싶은지,<br>한 가지씩 알려주세요.</p></div></div>
+      <img src="/assets/portfolio/mega-centum-49py.webp" width="1000" height="666" loading="lazy" decoding="async" alt="">
+      <div class="aside-content"><span class="brand">공간보감</span><div class="aside-copy"><p class="aside-kicker">SPACEBOGAM · CONSULTATION</p><p>어떤 집을 만들고 싶은지, 필요한 정보를 함께 알려주세요.</p></div></div>
     </aside>
     <main class="main">
       <div class="topbar"><a class="brand" href="/consultation/" aria-label="상담 신청 목록으로">공간보감</a><span class="prototype">방문 상담 예약 신청</span><button class="close" id="restart" type="button">처음부터</button></div>
       <div class="progress" role="progressbar" aria-label="입력 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progress-fill"></span></div>
-      <section class="stage" id="stage" aria-live="polite"></section>
+      <section class="stage" id="stage" aria-live="polite" aria-busy="true">
+        <div id="application-loading">
+          <p class="step-meta">방문 상담 예약 신청</p>
+          <h1>현장과 연락처를 알려주세요.</h1>
+          <p class="lead">주거·상가를 선택하고 기본 정보를 입력해 주세요. 공사 시작일이 미정이면 비워 두셔도 됩니다.</p>
+          <p class="hint" role="status">신청서를 준비하고 있습니다.</p>
+        </div>
+      </section>
       <div class="footer"><button class="back" id="back" type="button">← 이전</button><button class="primary" id="next" type="button">다음 <span aria-hidden="true">→</span></button><button class="skip" id="skip" type="button" hidden>이 질문 건너뛰기</button><span class="footer-note"><a href="tel:050713881252">방문 상담 일정 문의</a><br>신청 접수 후 방문 일정을 조율합니다.</span></div>
     </main>
   </div>
   <a id="consultation-help" class="consultation-help" href="https://pf.kakao.com/_UEUBn/chat" target="_blank" rel="noopener noreferrer" aria-label="카카오톡 상담 (새 창)" data-cta-location="consultation_floating_help">
     <img src="/assets/kakao-talk-consult.svg" width="154" height="68" alt="카카오톡 상담" />
   </a>
-  <script src="/reports/consultation-step-prototype-20260928/apt-busan-dongs.js"></script>
-  <script src="/reports/consultation-step-prototype-20260928/consultation-questions.js?v=4f1cee8f8e47"></script>
-  <script src="/reports/consultation-step-prototype-20260928/flow.js?v=4ea17466d95d"></script>
-  <script src="/assets/kakao-consultation.js?v=50be490804e4"></script>
   <script>
   (() => {
     const help = document.getElementById('consultation-help');
@@ -273,8 +315,46 @@
     if (window.visualViewport) window.visualViewport.addEventListener('resize', positionHelp);
     new ResizeObserver(positionHelp).observe(document.querySelector('.shell'));
     new MutationObserver(positionHelp).observe(document.getElementById('stage'), {childList:true,subtree:true});
+    let readySent = false;
+    function applicationReady() {
+      if (readySent) return;
+      // A downloaded script may have thrown. Only a completed real render is ready.
+      if (document.documentElement.dataset.consultationReady !== 'true') { applicationFailed(); return; }
+      readySent = true;
+      document.getElementById('stage').removeAttribute('aria-busy');
+      delete document.body.dataset.applicationLoading;
+      positionHelp();
+      if(document.documentElement.dataset.consultationEmbed)parent.postMessage({type:"spacebogam-consultation-ready"},location.origin);
+    }
+    function applicationFailed() {
+      const stage = document.getElementById('stage');
+      let loading = document.getElementById('application-loading');
+      if (!loading) {
+        // Do not leave a partially initialized form interactive after an exception.
+        loading = document.createElement('div');
+        loading.id = 'application-loading';
+        const heading = document.createElement('h1');
+        heading.textContent = '방문 상담 예약 신청';
+        const message = document.createElement('p');
+        message.className = 'hint';
+        message.setAttribute('role', 'status');
+        loading.append(heading, message);
+        stage.replaceChildren(loading);
+      }
+      stage.removeAttribute('aria-busy');
+      const status = loading.querySelector('[role="status"]');
+      status.textContent = '신청서를 불러오지 못했습니다. ';
+      const retry = document.createElement('a');
+      retry.href = location.href;
+      retry.textContent = '다시 불러오기';
+      status.appendChild(retry);
+    }
+    document.getElementById('application-flow').addEventListener('load', applicationReady, {once:true});
+    document.getElementById('application-flow').addEventListener('error', applicationFailed, {once:true});
+    document.getElementById('application-questions').addEventListener('error', applicationFailed, {once:true});
+    // Covers an early network error that fired before these listeners were attached.
+    document.addEventListener('DOMContentLoaded', applicationReady, {once:true});
     positionHelp();
-    if(document.documentElement.dataset.consultationEmbed)parent.postMessage({type:"spacebogam-consultation-ready"},location.origin);
   })();
   </script>
 <footer class="v8-footer site-footer" data-site-footer="spacebogam"><p data-business-info="spacebogam"><strong>공간보감</strong><br>상호 공간보감 인테리어 디자인 · 대표 백창석<br>사업자등록번호 625-43-01028<br>실내건축공사업 등록번호 부산진2022-02-07<br>부산광역시 해운대구 좌동순환로 457, 402호<br>대표 전화 <a href="tel:050713881252">1551-0163</a></p><nav aria-label="하단 메뉴"><a href="/contact.html">오시는 길·주차 안내</a><a href="/sns/">SNS</a><a href="/overview.html">회사소개</a><a href="/privacy/">개인정보처리방침</a></nav></footer>

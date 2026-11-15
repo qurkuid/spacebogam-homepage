@@ -1,9 +1,23 @@
 <!doctype html><html lang="ko"><head>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+new Date().getTime(),event:'gtm.js'});/* Load the existing GA runtime before GTM so they do not race to fetch it twice.
+   Event queues remain immediate; errors or a slow SDK cannot suppress GTM. */
+var started=false,timer;
+function startContainer(){if(started)return;started=true;clearTimeout(timer);
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f)}
+function afterGoogleTag(){
+if(w.google_tag_manager&&w.google_tag_manager['G-EJGXDD5C1T']){startContainer();return;}
+var tag=d.querySelector('script[src*="googletagmanager.com/gtag/js?id=G-EJGXDD5C1T"]');
+if(!tag){startContainer();return;}
+tag.addEventListener('load',startContainer,{once:true});
+tag.addEventListener('error',startContainer,{once:true});
+timer=setTimeout(startContainer,2500);
+}
+function scheduleContainer(){setTimeout(afterGoogleTag,0)}
+if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',scheduleContainer,{once:true});
+else scheduleContainer();
 })(window,document,'script','dataLayer','GTM-PW8GLP8S');</script>
 <!-- End Google Tag Manager -->
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>공간보감 네이버 GEO 감사 리포트</title><style>:root{--ink:#221c15;--soft:#6c6258;--bg:#fffdf9;--paper:#faf5ec;--line:#e7ddcf;--brown:#b06743;--deep:#1b1611;--max:1080px}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Pretendard","Noto Sans KR",sans-serif;line-height:1.75;letter-spacing:-.018em}.wrap{width:min(var(--max),calc(100% - 44px));margin:auto}a{text-decoration:none;color:inherit}.top{border-bottom:1px solid var(--line);background:rgba(255,255,255,.94);position:sticky;top:0;backdrop-filter:blur(14px)}.top .wrap{height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{font-weight:620;font-size:23px}.nav{display:flex;gap:18px;flex-wrap:wrap;color:#403933}.cta{background:var(--brown);color:#fff;border-radius:999px;padding:10px 15px}.hero{padding:90px 0 64px;border-bottom:1px solid var(--line)}.eyebrow{color:var(--brown);font-size:12px;letter-spacing:.14em;text-transform:uppercase}.hero h1{font-size:clamp(38px,5vw,64px);line-height:1.08;letter-spacing:-.045em;font-weight:520;margin:16px 0}.lead{font-size:20px;color:var(--soft);max-width:780px}.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:22px;padding:60px 0}.card{background:var(--paper);border:1px solid var(--line);border-radius:28px;padding:28px}.card h2{font-size:30px;line-height:1.2;font-weight:520;margin:0 0 14px}.card p{color:var(--soft);margin:0 0 14px}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;font-size:13px}.steps{display:grid;gap:10px}.step{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px}.button{display:inline-flex;align-items:center;justify-content:center;background:var(--brown);color:#fff;border-radius:999px;padding:12px 18px;margin-top:18px}footer{background:#8a8178;color:#fff;padding:36px 0;margin-top:40px}@media(max-width:820px){.grid{grid-template-columns:1fr}.top .wrap{height:auto;padding:16px 0;flex-direction:column}.nav{justify-content:center}}</style>  <!-- Google tag (gtag.js) -->
@@ -18,7 +32,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <script src="/assets/site-canonical.js?v=c69a8498"></script>
-  <script defer src="/assets/site-tracking.js?v=6303eec4"></script>
+  <script defer src="/assets/site-tracking.js?v=a72f3ee65d57"></script>
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -34,8 +48,10 @@ fbq('track', 'PageView');
 </script>
 <!-- End Meta Pixel Code -->
 <!-- Naver WCS / CTS common tracking -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js" data-spacebogam-naver-wcs="1"></script>
-<script type="text/javascript">
+<script data-spacebogam-naver-bootstrap="async">(function(){
+  function sendCtsPageView(){
+    if (window.__spacebogamNaverCtsPvSent) return;
+
 if (!window.wcs_add) window.wcs_add = {};
 window.wcs_add["wa"] = "s_7702568df18";
 if (!window._nasa) window._nasa = {};
@@ -44,7 +60,20 @@ if (window.wcs) {
   window.wcs_do();
   window.__spacebogamNaverCtsPvSent = true;
 }
-</script>
+
+  }
+  if (window.wcs) { sendCtsPageView(); return; }
+  var script = document.querySelector('script[data-spacebogam-naver-wcs="1"], script[src*="wcslog.js"]');
+  var fresh = !script;
+  if (fresh) {
+    script = document.createElement('script');
+    script.async = true;
+    script.src = "//wcs.naver.net/wcslog.js";
+    script.setAttribute('data-spacebogam-naver-wcs', '1');
+  }
+  script.addEventListener('load', sendCtsPageView, {once:true});
+  if (fresh) document.head.appendChild(script);
+})();</script>
 </head><body>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PW8GLP8S"

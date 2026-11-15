@@ -7,10 +7,26 @@
 <link rel="canonical" href="https://spacebogam.kr/commercial/call/">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/preview-v8.css?v=cmp1192-webp">
+<link rel="stylesheet" href="/assets/preview-v8.css?v=d40d1e9e59f4">
 <link rel="stylesheet" href="/assets/commercial-call.css?v=commercial-sales-20261027-stories1">
 <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var q=[],fired=false;w.__sbLazyTag=function(fn){fired?fn():q.push(fn)};function go(){if(fired)return;fired=true;while(q.length)q.shift()()}['pointerdown','keydown','touchstart','scroll'].forEach(function(e){w.addEventListener(e,go,{once:true,passive:true})});if(d.readyState==='complete')setTimeout(go,1500);else w.addEventListener('load',function(){setTimeout(go,1500)});setTimeout(go,8000);w.__sbLazyTag(function(){var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);});})(window,document,'script','dataLayer','GTM-PW8GLP8S');</script>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var q=[],fired=false;w.__sbLazyTag=function(fn){fired?fn():q.push(fn)};function go(){if(fired)return;fired=true;while(q.length)q.shift()()}['pointerdown','keydown','touchstart','scroll'].forEach(function(e){w.addEventListener(e,go,{once:true,passive:true})});if(d.readyState==='complete')setTimeout(go,1500);else w.addEventListener('load',function(){setTimeout(go,1500)});setTimeout(go,8000);w.__sbLazyTag(function(){/* Load the existing GA runtime before GTM so they do not race to fetch it twice.
+   Event queues remain immediate; errors or a slow SDK cannot suppress GTM. */
+var started=false,timer;
+function startContainer(){if(started)return;started=true;clearTimeout(timer);
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f)}
+function afterGoogleTag(){
+if(w.google_tag_manager&&w.google_tag_manager['G-EJGXDD5C1T']){startContainer();return;}
+var tag=d.querySelector('script[src*="googletagmanager.com/gtag/js?id=G-EJGXDD5C1T"]');
+if(!tag){startContainer();return;}
+tag.addEventListener('load',startContainer,{once:true});
+tag.addEventListener('error',startContainer,{once:true});
+timer=setTimeout(startContainer,2500);
+}
+function scheduleContainer(){setTimeout(afterGoogleTag,0)}
+if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',scheduleContainer,{once:true});
+else scheduleContainer();});})(window,document,'script','dataLayer','GTM-PW8GLP8S');</script>
 <!-- End Google Tag Manager -->
 <script>__sbLazyTag(function(){var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-EJGXDD5C1T';document.head.appendChild(s)});</script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-EJGXDD5C1T');</script>
@@ -18,9 +34,24 @@
 <script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];f.__sbLazyTag(function(){t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)})}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','512750840350337');fbq('track','PageView');</script>
 <!-- End Meta Pixel Code -->
 <!-- Naver WCS / CTS common tracking -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js" data-spacebogam-naver-wcs="1"></script>
-<script type="text/javascript">if(!window.wcs_add)window.wcs_add={};window.wcs_add["wa"]="s_7702568df18";if(!window._nasa)window._nasa={};if(window.wcs){window.wcs.inflow("spacebogam.kr");window.wcs_do();window.__spacebogamNaverCtsPvSent=true}</script>
-<script defer src="/assets/funnel-tracking.js?v=2963943a"></script>
+<script data-spacebogam-naver-bootstrap="async">(function(){
+  function sendCtsPageView(){
+    if (window.__spacebogamNaverCtsPvSent) return;
+if(!window.wcs_add)window.wcs_add={};window.wcs_add["wa"]="s_7702568df18";if(!window._nasa)window._nasa={};if(window.wcs){window.wcs.inflow("spacebogam.kr");window.wcs_do();window.__spacebogamNaverCtsPvSent=true}
+  }
+  if (window.wcs) { sendCtsPageView(); return; }
+  var script = document.querySelector('script[data-spacebogam-naver-wcs="1"], script[src*="wcslog.js"]');
+  var fresh = !script;
+  if (fresh) {
+    script = document.createElement('script');
+    script.async = true;
+    script.src = "//wcs.naver.net/wcslog.js";
+    script.setAttribute('data-spacebogam-naver-wcs', '1');
+  }
+  script.addEventListener('load', sendCtsPageView, {once:true});
+  if (fresh) document.head.appendChild(script);
+})();</script>
+<script defer src="/assets/funnel-tracking.js?v=d571c658b480"></script>
 <script defer src="/assets/commercial-call.js?v=commercial-sales-20261027-stories1"></script>
 </head><body class="commercial-call">
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PW8GLP8S" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>

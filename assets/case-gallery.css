@@ -29,11 +29,17 @@
 @media(max-width:760px){.pd-main{width:calc(100% - 32px);padding-top:16px}.pd-intro h1{font-size:30px}.pd-description{font-size:14px}.pd-sections{gap:24px}.pd-overview{grid-template-columns:1fr;gap:28px}.pd-info h2,.pd-section h2{font-size:25px}.pd-scope dd{font-size:13px}.pd-section{margin-top:40px;padding-top:20px}.pd-page .case-gallery{gap:8px}.pd-contact .sb-entry-primary{width:100%;justify-content:center}.lb-prev{left:8px}.lb-next{right:8px}}
 
 .pd-rooms{display:flex;flex-wrap:wrap;gap:6px;align-items:center;position:sticky;top:0;z-index:5;background:var(--paper);padding:10px 0 12px;border-bottom:1px solid var(--line);margin-bottom:14px}.pd-rooms[hidden],.case-gallery figure[hidden]{display:none}.pd-rooms>span{font-size:12px;margin-right:8px}.pd-rooms button{min-height:44px;padding:0 12px;border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:13px;cursor:pointer}.pd-rooms button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
-.pd-gallery-tabs{display:flex;gap:8px;border-bottom:1px solid var(--ink);margin-bottom:18px}
-.pd-gallery-tabs button{min-height:44px;padding:0 18px;border:1px solid var(--line);border-bottom:0;background:transparent;color:#69645b;font:inherit;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
-.pd-gallery-tabs button span{font-size:11px;opacity:.85}
-.pd-gallery-tabs button[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.pd-gallery-panel[hidden]{display:none}
-.pd-before-note{font-size:13px;color:#69645b;line-height:1.7;margin:0 0 16px}
-.pd-story p{font-size:15px;line-height:1.85;color:var(--ink);max-width:780px;margin:14px 0 0}
-.pd-story h2{margin-bottom:6px}
+
+/* Completed work is the default; earlier stages are explicitly opt-in. */
+.pd-page [role="tabpanel"][hidden]{display:none!important}
+.pd-photo-tabs{display:flex;gap:8px;margin:40px 0 0;padding-bottom:14px;border-bottom:1px solid #dce2dc}
+.pd-photo-tabs button{font:inherit;font-weight:600;border:1px solid #dce2dc;border-radius:999px;padding:10px 20px;background:#fff;color:#445348;cursor:pointer}
+.pd-photo-tabs button[aria-selected="true"]{background:#263d2c;border-color:#263d2c;color:#fff}
+.pd-photo-tabs button:focus-visible{outline:3px solid #779e80;outline-offset:3px}
+.pd-photo-tabs+[role="tabpanel"]{margin-top:24px}
+
+/* Ratio-aware consecutive rows: complete images, no crop, no grid-height holes. */
+.pd-page .case-gallery.is-justified{display:flex;flex-wrap:wrap;gap:var(--gallery-gap,16px);align-items:flex-start}
+.pd-page .case-gallery.is-justified figure{flex:0 0 auto;max-width:100%}
+.pd-page .case-gallery.is-justified img{width:100%;height:auto;object-fit:contain}
+.pd-page .case-gallery.is-justified figcaption{overflow-wrap:anywhere}

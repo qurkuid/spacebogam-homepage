@@ -33,8 +33,10 @@ fbq('track', 'PageView');
 </script>
 <!-- End Meta Pixel Code -->
 <!-- Naver WCS / CTS common tracking -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js" data-spacebogam-naver-wcs="1"></script>
-<script type="text/javascript">
+<script data-spacebogam-naver-bootstrap="async">(function(){
+  function sendCtsPageView(){
+    if (window.__spacebogamNaverCtsPvSent) return;
+
 if (!window.wcs_add) window.wcs_add = {};
 window.wcs_add["wa"] = "s_7702568df18";
 if (!window._nasa) window._nasa = {};
@@ -43,7 +45,20 @@ if (window.wcs) {
   window.wcs_do();
   window.__spacebogamNaverCtsPvSent = true;
 }
-</script>
+
+  }
+  if (window.wcs) { sendCtsPageView(); return; }
+  var script = document.querySelector('script[data-spacebogam-naver-wcs="1"], script[src*="wcslog.js"]');
+  var fresh = !script;
+  if (fresh) {
+    script = document.createElement('script');
+    script.async = true;
+    script.src = "//wcs.naver.net/wcslog.js";
+    script.setAttribute('data-spacebogam-naver-wcs', '1');
+  }
+  script.addEventListener('load', sendCtsPageView, {once:true});
+  if (fresh) document.head.appendChild(script);
+})();</script>
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->

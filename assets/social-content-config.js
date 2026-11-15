@@ -8,7 +8,7 @@ window.SPACEBOGAM_SOCIAL_CONTENT = {
   featuredVideo: {
     enabled: true,
     videoId: 'xg39Rhvspt8',
-    title: '인테리어백선생 대표 영상',
+    title: '⭐️역대급 비포에프터⭐️ 40평대 아파트 인테리어 이렇게만 하시면 됩니다! 꿀팁과 노하우 공개',
     description: '상담 전에 공간보감의 설명 방식과 인테리어 기준을 영상으로 먼저 확인할 수 있는 대표 콘텐츠입니다.',
     eyebrow: '인테리어백선생 YouTube',
     metricLabel: '대표 영상',
@@ -17,17 +17,17 @@ window.SPACEBOGAM_SOCIAL_CONTENT = {
   supportVideos: [
     {
       videoId: 'HgoMifgvtZ0',
-      title: '보조 영상 01',
+      title: '20년된 34평 아파트 집값 올리는 비밀 3가지나 있다고!? I 부산사직쌍용아파트 #아파트인테리어',
       description: '상담 전 기준을 더 넓게 볼 수 있는 보조 영상입니다.'
     },
     {
       videoId: 'x_7T2JXTwGc',
-      title: '보조 영상 02',
+      title: '⚠️5000만원 쓰고 후회하는 주방 인테리어 5가지✋🏻 주방 리모델링 하기전 무조건 알아야할 상식 지금 공개💡 ⎮ 대면형 아일랜드? 고집하지마세요 후회합니다',
       description: '공사 범위와 결정 기준을 확인할 수 있는 보조 영상입니다.'
     },
     {
       videoId: 'uZUngUhAM1s',
-      title: '보조 영상 03',
+      title: '40평대 아파트 리얼 후기! 단란한 다섯식구의 솔직담백한 공감인터뷰🏡',
       description: '실제 상담 전에 참고하기 좋은 보조 영상입니다.'
     }
   ],

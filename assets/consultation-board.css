@@ -38,3 +38,16 @@
 #board-application-frame{display:block;width:100%;border:0}
 #board-application-frame[hidden]{display:none}
 @media(max-width:600px){#consultation-table{font-size:12px}#consultation-table th,#consultation-table td{padding:14px 5px}#consultation-table th{font-size:11px}#consultation-table th:first-child{width:23%}#consultation-table th:nth-child(2){width:20%}#consultation-table th:nth-child(3){width:30%}#consultation-table td:first-child{font-size:11px}.board-phone{font-size:11px}.board-request{gap:4px}.board-lock{width:11px;height:11px}.board-application{padding:18px 14px}.board-application-heading h2{font-size:20px}}
+
+/* Reserve the API's 20-row page before its first response. The placeholder is
+   decorative: the existing live status announces loading. Match 44px buttons,
+   vertical cell padding and the 1px row divider at each breakpoint. */
+#consultation-table[aria-busy="true"] #board-rows:empty::after{
+ content:"";display:table-row;height:1540px;
+ background:repeating-linear-gradient(to bottom,transparent 0 76px,var(--line) 76px 77px)
+}
+@media(max-width:600px){
+ #consultation-table[aria-busy="true"] #board-rows:empty::after{
+  height:1460px;background:repeating-linear-gradient(to bottom,transparent 0 72px,var(--line) 72px 73px)
+ }
+}

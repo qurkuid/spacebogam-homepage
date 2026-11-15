@@ -45,6 +45,10 @@
   let lookupRun = 0;
   let datasetPromise;
   let fullDatasetPromise;
+  let catalogManifestPromise;
+  const catalogDatasets = new Map();
+  // Refresh the dated complete snapshot and province shards together.
+  const catalogBase = '/assets/apartment-catalog/20261109/';
   const apartmentPlans = new Map();
   let addressLookupRun = 0;
   let submitting = false;
@@ -57,6 +61,7 @@
   const eventKey = 'spacebogam.consultationApply.eventIds.v1';
   let intakeOnly = false;
   let pendingBody = null;
+  let metaMeasurementConsent = false;
   let uncertainSubmission = false;
   let submitAttempts = 0;
   const naverConversions = new Set();
@@ -88,8 +93,12 @@
     if (submitted || current === 'success') { clearDraft(); return; }
     if (current === 'intro' && !answers.type && !Object.keys(answers.responses || {}).length) return;
     try {
-      const savedAnswers = JSON.parse(JSON.stringify(answers));
-      if (savedAnswers.planAttachment) delete savedAnswers.planAttachment.file;
+      // Keep the attachment object intact without serializing the whole draft twice.
+      const savedAnswers = { ...answers };
+      if (savedAnswers.planAttachment) {
+        savedAnswers.planAttachment = { ...savedAnswers.planAttachment };
+        delete savedAnswers.planAttachment.file;
+      }
       sessionStorage.setItem(draftKey, JSON.stringify({ version: 2, updatedAt: Date.now(), answers: savedAnswers,
         current, trail, questionIndex, intakeOnly, pendingBody, uncertainSubmission: uncertainSubmission || !!pendingBody,
         eventIds, submitAttempts }));
@@ -174,7 +183,7 @@
     return data;
   }
   function metaMatchingPayload() {
-    return { consent: false, version: 'meta-contact-v1' };
+    return { consent: metaMeasurementConsent, version: 'meta-contact-v1' };
   }
   function requestBody() {
     return JSON.stringify({ ...JSON.parse(pendingBody), metaMatching: metaMatchingPayload() });
@@ -190,13 +199,70 @@
       }).catch(() => { if (attempt === 0) return send(1); });
     void send();
   }
+  // Two-page progress contract. Only fixed route/step labels, never field values.
+  const progressStateKey = 'spacebogam.consultationApply.progress.v2';
+  let progressHadDraft = !!stored(sessionStorage, draftKey);
+  let progressState = null;
+  function progressPathKey() {
+    const route = answers.type === '상업 공간' ? 'commercial' : answers.type === '주거 공간'
+      ? answers.housing === '아파트' ? 'residential_apartment' : answers.housing ? 'residential_other' : 'residential_pending'
+      : 'undecided';
+    return route + (intakeOnly ? '_intake' : '_detailed');
+  }
+  function trackProgress(action, detail = {}) {
+    if (typeof fetch !== 'function' || !['contact', 'planning', 'success'].includes(current)) return;
+    try {
+      const attemptId = eventIds.lead_submit_success;
+      const pathKey = progressPathKey();
+      if (!progressState || progressState.attemptId !== attemptId) {
+        let saved;
+        try { saved = JSON.parse(stored(sessionStorage, progressStateKey) || 'null'); } catch {}
+        progressState = saved?.attemptId === attemptId && Number.isInteger(saved.eventSeq) && saved.eventSeq > 0 && saved.eventSeq < 100000
+          ? saved : { attemptId, eventSeq: 0, pathKey, routeRevision: 1, attemptOrigin: progressHadDraft || current !== 'contact' ? 'legacy_restore' : 'fresh' };
+      }
+      if (progressState.pathKey !== pathKey) { progressState.pathKey = pathKey; progressState.routeRevision++; }
+      if (!progressState.eventSeq && action !== 'start') trackProgress('start');
+      if (progressState.eventSeq >= 100000) return;
+      const metadata = {
+        schemaVersion: 'consult_progress_v2', attemptId, eventSeq: ++progressState.eventSeq,
+        pathKey, questionSchema: 'qs_80cd3850', routeRevision: progressState.routeRevision,
+        stepId: current, stepIndex: current === 'contact' ? 1 : 2, stepTotal: 2,
+        stepCountBasis: 'current_eligible', attemptOrigin: progressState.attemptOrigin, stepAction: action
+      };
+      // Deliberate allowlist: no spread of form answers, errors, URLs or free text.
+      if (Number.isInteger(detail.submitAttempt)) metadata.submitAttempt = detail.submitAttempt;
+      if (Number.isInteger(detail.httpStatus)) metadata.httpStatus = detail.httpStatus;
+      if (['timeout', 'network', 'http', 'upload', 'rejected', 'unknown'].includes(detail.errorType)) metadata.errorType = detail.errorType;
+      try { sessionStorage.setItem(progressStateKey, JSON.stringify(progressState)); } catch {}
+      const payload = { eventId: id(), clientId, sessionId, eventName: 'consult_progress',
+        pagePath: location.pathname, occurredAt: new Date().toISOString(), formId: 'spacebogam_consultation',
+        deviceType: innerWidth < 768 ? 'mobile' : innerWidth < 1024 ? 'tablet' : 'desktop',
+        isTest: isTestTraffic(), progressMetadata: metadata };
+      const send = (attempt = 0) => fetch('https://intm.kr/api/marketing/funnel-events', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), keepalive: true
+      }).then(response => {
+        if (!response.ok && attempt === 0 && (response.status === 429 || response.status >= 500)) return send(1);
+      }).catch(() => { if (attempt === 0) return send(1); });
+      void send();
+    } catch {} // Measurement must never block the application flow.
+  }
   function isTestTraffic() {
     return /^(1|true|yes|y|on)$/i.test(params.get('is_test') || '')
       || stored(sessionStorage, 'spacebogam_funnel_is_test') === 'true'
       || stored(localStorage, 'spacebogam_funnel_is_test') === 'true';
   }
+  function trackClarityEvent(name) {
+    if (isTestTraffic()) return;
+    // Fixed event names only; queue safely until the existing GTM Clarity loader runs.
+    if (!/^(consult_(view|step_complete|skip)_(contact|planning|success)|consult_submit_(attempt|failure)|lead_submit_success)$/.test(name)) return;
+    try {
+      window.clarity = window.clarity || function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
+      window.clarity('event', name);
+    } catch {}
+  }
   function trackAction(name, detail = {}) {
     if (isTestTraffic()) return;
+    trackClarityEvent(name);
     try { if (typeof gtag === 'function') gtag('event', name, {
       form_id: 'spacebogam_consultation', form_mode: intakeOnly ? 'intake' : 'detailed',
       sb_session_id: sessionId, send_to: 'G-EJGXDD5C1T', ...detail,
@@ -211,6 +277,11 @@
   function trackSubmission(result) {
     if (result.success !== true || !Number.isInteger(Number(result.consultReqId)) || Number(result.consultReqId) <= 0 || result.duplicate || isTestTraffic()) return;
     const leadEventId = result.leadEventId || eventIds.lead_submit_success;
+    const clarityKey = 'spacebogam_clarity_lead_sent_' + leadEventId;
+    if (stored(sessionStorage, clarityKey) !== 'true') {
+      trackClarityEvent('lead_submit_success');
+      try { sessionStorage.setItem(clarityKey, 'true'); } catch {}
+    }
     const key = 'spacebogam_ga_lead_sent_' + leadEventId;
     if (stored(sessionStorage, key) === 'true') return;
     try {
@@ -248,13 +319,16 @@
     if (seen.has(stepId)) return;
     seen.add(stepId);
     funnel('lead_step_' + action, { step: stepId, action });
+    trackProgress(action);
     if (isTestTraffic()) return;
     const journeyType = answers.type === '상업 공간' ? 'commercial' : answers.type === '주거 공간'
       ? answers.housing === '아파트' ? 'residential_apartment' : answers.housing ? 'residential_other' : 'residential' : 'undecided';
     const eventStep = (current === 'question' ? 'q_' + String(questionList()[questionIndex].id) : current)
       .replace(/[^a-z0-9_]/gi, '_').slice(0, 23);
+    const eventName = 'consult_' + (action === 'complete' ? 'step_complete' : action) + '_' + eventStep;
+    trackClarityEvent(eventName);
     try {
-      if (typeof gtag === 'function') gtag('event', 'consult_' + (action === 'complete' ? 'step_complete' : action) + '_' + eventStep, {
+      if (typeof gtag === 'function') gtag('event', eventName, {
         form_id: 'spacebogam_consultation', event_scope: 'step', step_action: action, step_id: stepId, step_number: trail.length + 1,
         progress_percent: Number(progress.getAttribute('aria-valuenow') || 0), journey_type: journeyType,
         sb_session_id: sessionId,
@@ -262,7 +336,8 @@
       });
     } catch {}
   }
-  const dongLists = window.SB_APT_DONGS || {};
+  let dongLists = window.SB_APT_DONGS;
+  let dongDatasetPromise;
 
   function effectiveQuestions(list) {
     const visible = list.filter(q => q && q.id != null && q.is_visible !== false && q.isVisible !== false)
@@ -435,7 +510,7 @@
     return datasetPromise;
   }
 
-  function loadFullDataset() {
+  function loadLiveDataset() {
     if (fullDatasetPromise) return fullDatasetPromise;
     if (typeof fetch !== 'function') return Promise.reject(new Error('dataset unavailable'));
     fullDatasetPromise = timedFetch('/api/apartments/dataset')
@@ -450,6 +525,84 @@
         ]).filter(row => row[0] && row[1]);
       }).catch(error => { fullDatasetPromise = null; throw error; });
     return fullDatasetPromise;
+  }
+
+
+  function catalogFile(file) {
+    if (!/^[a-z]+(?:-[a-z]+)*\.json$/.test(file)) throw new Error('invalid catalog file');
+    return catalogBase + file;
+  }
+
+  function loadCatalogManifest() {
+    if (!catalogManifestPromise) {
+      catalogManifestPromise = timedFetch(catalogFile('manifest.json')).then(result => {
+        const manifest = result.data;
+        if (!result.ok || manifest?.version !== 1 || manifest.full?.file !== 'full.json'
+          || manifest.full.gzipFile !== undefined && manifest.full.gzipFile !== 'full.json.gz'
+          || !Array.isArray(manifest.provinces) || !manifest.provinces.every(province =>
+            Array.isArray(province.aliases) && province.aliases.every(alias => typeof alias === 'string')
+            && typeof province.file === 'string' && /^[a-z]+\.json$/.test(province.file)
+            && (province.gzipFile === undefined || province.gzipFile === province.file + '.gz'))) {
+          throw new Error('invalid catalog manifest');
+        }
+        return manifest;
+      }).catch(error => { catalogManifestPromise = null; throw error; });
+    }
+    return catalogManifestPromise;
+  }
+
+  async function fetchCatalogDataset(file) {
+    const url = catalogFile(file);
+    // Precompressed sidecars avoid depending on the host's text-compression settings.
+    if (typeof DecompressionStream === 'function') {
+      try {
+        const result = await timedFetch(url + '.gz', {}, 'blob');
+        if (!result.ok) throw new Error('compressed catalog unavailable');
+        const stream = result.data.stream().pipeThrough(new DecompressionStream('gzip'));
+        return { ...result, data: await new Response(stream).json() };
+      } catch { /* Older browsers or a bad sidecar can still read the plain JSON. */ }
+    }
+    return timedFetch(url);
+  }
+
+  function loadCatalogDataset(file) {
+    const url = catalogFile(file);
+    if (!catalogDatasets.has(url)) {
+      const request = fetchCatalogDataset(file).then(result => {
+        const body = result.data;
+        const required = ['apartmentName', 'apartmentId', 'roadAddress', 'legacyAddress'];
+        if (!result.ok || body?.source !== 'jev-public-apartment-catalog' || !Array.isArray(body.cols)
+          || !required.every(name => body.cols.includes(name)) || !Array.isArray(body.rows)
+          || !body.rows.every(row => Array.isArray(row) && row.length === body.cols.length)) {
+          throw new Error('invalid catalog dataset');
+        }
+        const column = Object.fromEntries(body.cols.map((name, index) => [name, index]));
+        return body.rows.map(row => [row[column.apartmentName], row[column.apartmentId],
+          row[column.roadAddress] || row[column.legacyAddress], undefined, undefined, undefined,
+          row[column.legacyAddress]]).filter(row => row[0] && row[1]);
+      }).catch(error => { catalogDatasets.delete(url); throw error; });
+      catalogDatasets.set(url, request);
+    }
+    return catalogDatasets.get(url);
+  }
+
+  async function loadFullDataset(address = '') {
+    let file = 'full.json';
+    if (address) {
+      try {
+        const manifest = await loadCatalogManifest();
+        const province = String(address).normalize('NFKC').trim().split(/\s+/)[0];
+        const matches = manifest.provinces.filter(item => item.aliases.includes(province));
+        if (matches.length === 1) file = matches[0].file;
+      } catch { /* An unknown prefix or unavailable manifest uses the complete snapshot. */ }
+    }
+    try { return await loadCatalogDataset(file); }
+    catch {
+      if (file !== 'full.json') {
+        try { return await loadCatalogDataset('full.json'); } catch {}
+      }
+      return loadLiveDataset();
+    }
   }
 
   function findAddressCandidates(address, rows) {
@@ -484,11 +637,9 @@
       if (current === 'planReview' && !stage.querySelector('.plan-dialog')) render();
     };
     if (!/^https?:$/.test(window.location?.protocol || '') || typeof fetch !== 'function') { fallback(); return; }
-    fetch('/api/apartments/' + encodeURIComponent(selected[1]) + '/plans')
-      .then(response => { if (!response.ok) throw new Error('plans unavailable'); return response.json(); })
-      .then(body => {
+    loadApartmentPlanData(selected[1])
+      .then(plans => {
         if (run !== lookupRun) return;
-        const plans = Array.isArray(body.data) ? body.data : [];
         const candidates = plans.map(plan => [selected[0], selected[1], selected[2], plan.type, plan.planPic, plan.planId])
           .filter(row => planUrl(row));
         lookup = { status: 'ready', candidates, source: 'live' };
@@ -514,7 +665,7 @@
   }
 
   function clearError() {
-    stage.querySelectorAll('.error').forEach(box => { box.textContent = ''; });
+    stage.querySelectorAll('.error').forEach(box => { if (box.textContent) box.textContent = ''; });
     stage.querySelectorAll('.field-error').forEach(box => box.remove());
     stage.querySelectorAll('[aria-invalid]').forEach(input => { input.removeAttribute('aria-invalid'); input.setAttribute('aria-describedby', 'form-error'); });
   }
@@ -524,7 +675,35 @@
     if (box) box.textContent = message;
   }
 
+  function loadDongLists() {
+    if (window.SB_APT_DONGS) return Promise.resolve(dongLists = window.SB_APT_DONGS);
+    if (dongDatasetPromise) return dongDatasetPromise;
+    dongDatasetPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = '/reports/consultation-step-prototype-20260928/apt-busan-dongs.js';
+      script.onload = () => window.SB_APT_DONGS
+        ? resolve(dongLists = window.SB_APT_DONGS) : reject(new Error('empty dong list'));
+      script.onerror = () => { script.remove(); reject(new Error('dong list unavailable')); };
+      document.head.appendChild(script);
+    }).catch(error => { dongDatasetPromise = null; throw error; });
+    return dongDatasetPromise;
+  }
+
   function renderDong() {
+    if (!dongLists) {
+      const note = el('p', 'lookup-note', '동 목록을 불러오고 있어요. 직접 입력할 수도 있습니다.');
+      const retry = el('button', 'manual-option', '동 목록 다시 불러오기');
+      retry.type = 'button'; retry.hidden = true;
+      stage.appendChild(note); stage.appendChild(retry); renderDongInput();
+      const load = () => {
+        retry.hidden = true;
+        loadDongLists().then(() => { if (note.isConnected && ['dong', 'planReview'].includes(current)) render(); })
+          .catch(() => { if (note.isConnected) { note.textContent = '동 목록을 불러오지 못했어요. 직접 입력하거나 다시 시도해 주세요.'; retry.hidden = false; } });
+      };
+      retry.addEventListener('click', load);
+      load();
+      return;
+    }
     const apartment = answers.apartmentSelected;
     const dongs = apartment ? dongLists[apartment[1]] : null;
     if (!dongs) {
@@ -572,8 +751,8 @@
     input.addEventListener('input', () => {
       if (answers.dong !== input.value) clearPlan();
       answers.dong = input.value;
+      answers.dongManual = true;
       clearError();
-      saveDraft();
     });
     input.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); advance(); } });
     row.appendChild(input);
@@ -900,6 +1079,20 @@
       search.setAttribute('aria-expanded', 'false');
       search.focus();
     }
+    // Warm only after intent on the address controls, never on initial form render.
+    // The click path shares the promise, reports failures and can retry a failed warm-up.
+    let postcodeWarmRequested = false;
+    const warmPostcode = () => {
+      const connection = navigator.connection;
+      if (postcodeWarmRequested || connection?.saveData || /(^|-)2g$/.test(connection?.effectiveType || '')) return;
+      postcodeWarmRequested = true;
+      loadCommercialPostcode().catch(() => {});
+    };
+    [input, search].forEach(control => {
+      control.addEventListener('pointerenter', warmPostcode, { passive: true });
+      control.addEventListener('pointerdown', warmPostcode, { passive: true });
+      control.addEventListener('focus', warmPostcode);
+    });
     input.addEventListener('click', () => { if (panel.hidden) search.click(); });
     close.addEventListener('click', hide);
     search.addEventListener('click', async () => {
@@ -969,14 +1162,14 @@
       select.appendChild(placeholder);
       options.forEach(option => { const item = el('option', null, option); item.value = option; select.appendChild(item); });
       select.value = response(question) || '';
-      select.addEventListener('change', () => { answers.responses[key] = select.value; clearError(); syncActiveQuestionNext(); saveDraft(); });
+      select.addEventListener('change', () => { answers.responses[key] = select.value; clearError(); syncActiveQuestionNext(); });
       label.appendChild(select);
       target.appendChild(label);
       const pet = el('label', 'pet-choice');
       const checkbox = el('input');
       checkbox.type = 'checkbox';
       checkbox.checked = !!answers.responses.pet;
-      checkbox.addEventListener('change', () => { answers.responses.pet = checkbox.checked; clearError(); syncActiveQuestionNext(); saveDraft(); });
+      checkbox.addEventListener('change', () => { answers.responses.pet = checkbox.checked; clearError(); syncActiveQuestionNext(); });
       pet.appendChild(checkbox);
       pet.appendChild(el('span', null, '반려동물과 함께 살아요'));
       target.appendChild(pet);
@@ -1043,7 +1236,7 @@
       customLabel.appendChild(custom); target.appendChild(customLabel);
       const sync = () => {
         answers.responses[key] = select.value === other ? custom.value.trim() || other : select.value;
-        clearError(); saveDraft();
+        clearError();
       };
       select.addEventListener('change', () => {
         customLabel.hidden = select.value !== other; custom.required = !customLabel.hidden;
@@ -1058,7 +1251,7 @@
       const date = el('input', 'question-input');
       date.id = 'answer-' + key; date.setAttribute('aria-describedby', 'form-error');
       date.type = 'date'; date.min = localDate(); date.value = /^\d{4}-\d{2}-\d{2}$/.test(response(question) || '') ? response(question) : '';
-      date.addEventListener('input', () => { answers.responses[key] = date.value; clearError(); syncActiveQuestionNext(); saveDraft(); });
+      date.addEventListener('input', () => { answers.responses[key] = date.value; clearError(); syncActiveQuestionNext(); });
       label.appendChild(date); target.appendChild(label);
       return;
     }
@@ -1103,7 +1296,6 @@
       }
       clearError();
       syncActiveQuestionNext();
-      saveDraft();
     });
     input.enterKeyHint = type === 'text' ? 'enter' : 'next';
     input.addEventListener('keydown', event => {
@@ -1121,18 +1313,29 @@
     if (type === 'address' && answers.apartmentUnmatched) target.appendChild(el('p', 'hint', '검색 목록에 없는 아파트도 주소를 입력하고 도면을 직접 업로드할 수 있어요.'));
   }
 
+  // Share in-flight requests, then retain successful public plan data for at most
+  // five minutes in memory. Do not extend freshness when reusing a cached result.
+  function loadApartmentPlanData(id) {
+    const cached = apartmentPlans.get(id);
+    if (cached && cached.expiresAt > Date.now()) return cached.promise;
+    const entry = { expiresAt: Infinity, promise: null };
+    entry.promise = timedFetch('/api/apartments/' + encodeURIComponent(id) + '/plans').then(result => {
+      if (!result.ok || !Array.isArray(result.data?.data)) throw new Error('plans unavailable');
+      entry.expiresAt = Date.now() + 300000;
+      return result.data.data;
+    }).catch(error => {
+      if (apartmentPlans.get(id) === entry) apartmentPlans.delete(id);
+      throw error;
+    });
+    apartmentPlans.set(id, entry);
+    return entry.promise;
+  }
+
   function loadApartmentPlans(id) {
-    if (!apartmentPlans.has(id)) {
-      const request = timedFetch('/api/apartments/' + encodeURIComponent(id) + '/plans').then(result => {
-        if (!result.ok || !Array.isArray(result.data?.data)) throw new Error('plans unavailable');
-        return [...new Set(result.data.data.map(plan => String(plan.type || '').trim()))]
-          .map(type => ({ type, area: Number.parseFloat(type.replace(/,/g, '')) }))
-          .filter(plan => /㎡|m²|m2/i.test(plan.type) && plan.area > 0)
-          .sort((a, b) => a.area - b.area || a.type.localeCompare(b.type));
-      }).catch(error => { apartmentPlans.delete(id); throw error; });
-      apartmentPlans.set(id, request);
-    }
-    return apartmentPlans.get(id);
+    return loadApartmentPlanData(id).then(plans => [...new Set(plans.map(plan => String(plan.type || '').trim()))]
+      .map(type => ({ type, area: Number.parseFloat(type.replace(/,/g, '')) }))
+      .filter(plan => /㎡|m²|m2/i.test(plan.type) && plan.area > 0)
+      .sort((a, b) => a.area - b.area || a.type.localeCompare(b.type)));
   }
 
   function areaUnitControl(key, redraw) {
@@ -1146,7 +1349,7 @@
       radio.addEventListener('change', () => {
         if (!radio.checked) return;
         const previous = value();
-        (answers.areaUnits ||= {})[key] = option; redraw(option, previous); saveDraft();
+        (answers.areaUnits ||= {})[key] = option; redraw(option, previous);
       });
       label.appendChild(radio); label.appendChild(el('span', null, text)); group.appendChild(label);
     });
@@ -1210,7 +1413,6 @@
       }
       const canonical = canonicalValue();
       answers.responses[key] = input.value === '' ? '' : canonical || input.value;
-      saveDraft();
     });
     if (options.confirm) {
       const inputRow = el('div', 'area-confirm-row');
@@ -1333,7 +1535,7 @@
         answers.planAreaAuto = true; answers.planAreaValue = answers.responses['4']; answers.planAreaSource = select.value;
       } else { clearPlan(); delete answers.responses['4']; }
       manual.redraw(); manualPanel.hidden = !manualChosen;
-      clearError(); saveDraft(); if (manualChosen) manual.input.focus();
+      clearError(); if (manualChosen) manual.input.focus();
     });
     async function matchAddress() {
       const address = answers.responses['15'];
@@ -1347,19 +1549,36 @@
       }
       const request = ++run;
       setStatus('시공장소 주소로 아파트를 찾고 있어요.', true);
-      try {
-        const rows = await loadFullDataset();
-        if (!active() || request !== run || answers.responses['15'] !== address) return;
-        const matches = findAddressCandidates(address, rows);
+      const stillCurrent = () => active() && request === run && answers.responses['15'] === address;
+      const hasManualArea = () => manual.hasPending() || manualChosen && !!answers.responses['4'];
+      function showMatches(matches) {
         if (matches.length === 1) { showPlans(matches[0]); return; }
-        if (!matches.length) { setStatus('이 주소에 등록된 아파트를 찾지 못했어요. 기타로 공급면적을 입력해 주세요.'); return; }
         setStatus('같은 주소에 여러 단지가 있어요. 해당 아파트를 선택해 주세요.');
+        results.replaceChildren();
         matches.forEach(row => {
           const button = el('button', 'search-result'); button.type = 'button';
           button.appendChild(el('strong', null, row[0])); button.appendChild(el('small', null, row[2]));
           button.addEventListener('click', () => { if (active()) showPlans(row); }); results.appendChild(button);
         });
-      } catch { if (active() && request === run) setStatus('아파트를 조회하지 못했어요. 기타로 공급면적을 직접 입력해 주세요.'); }
+      }
+      try {
+        const rows = await loadFullDataset(address);
+        if (!stillCurrent()) return;
+        const matches = findAddressCandidates(address, rows);
+        if (matches.length) { showMatches(matches); return; }
+        // Manual entry stays usable while complete coverage and newer live records are checked.
+        setStatus('이 주소에 등록된 아파트를 찾지 못했어요. 기타로 공급면적을 입력해 주세요.');
+        const allRows = await loadFullDataset();
+        if (!stillCurrent()) return;
+        const allMatches = allRows === rows ? [] : findAddressCandidates(address, allRows);
+        if (allMatches.length) { showMatches(allMatches); return; }
+        if (hasManualArea()) return;
+        void loadLiveDataset().then(liveRows => {
+          if (!stillCurrent() || hasManualArea() || liveRows === allRows) return;
+          const liveMatches = findAddressCandidates(address, liveRows);
+          if (liveMatches.length) showMatches(liveMatches);
+        }).catch(() => { /* Keep manual entry available if the optional live check fails. */ });
+      } catch { if (stillCurrent()) setStatus('아파트를 조회하지 못했어요. 기타로 공급면적을 직접 입력해 주세요.'); }
     }
     showOptions(); matchAddress();
   }
@@ -1497,6 +1716,17 @@
     label.appendChild(copy);
     target.appendChild(label);
 
+    const metaLabel = el('label', 'consent meta-consent');
+    const metaInput = el('input');
+    metaInput.type = 'checkbox';
+    metaInput.checked = metaMeasurementConsent;
+    metaInput.addEventListener('change', () => {
+      metaMeasurementConsent = metaInput.checked;
+      clearError();
+    });
+    metaLabel.appendChild(metaInput);
+    metaLabel.appendChild(el('span', null, '(선택) Meta 광고 성과 측정을 위해 광고 식별자(_fbp/_fbc), IP 주소, 브라우저 정보와 상담 접수 이벤트를 Meta Platforms(국외)에 전송하는 데 동의합니다. 이름·전화번호·이메일·상담 내용은 보내지 않으며, 동의하지 않아도 상담을 신청할 수 있습니다.'));
+    target.appendChild(metaLabel);
   }
 
   function renderSummary() {
@@ -1633,6 +1863,7 @@
     next.textContent = uncertainSubmission ? '접수 결과 확인 중…' : '접수 중…';
     clearError();
     submitAttempts++;
+    trackProgress('submit_attempt', { submitAttempt: submitAttempts });
     trackAction('consult_submit_attempt', { attempt_number: submitAttempts });
     let phase = 'upload';
     let responseStatus = 0;
@@ -1685,6 +1916,7 @@
       trackStep('complete');
       try { sessionStorage.removeItem(eventKey); } catch {}
       current = 'success';
+      trackProgress('success');
       render();
     } catch (error) {
       responseStatus = responseStatus || error.responseStatus || 0;
@@ -1694,6 +1926,8 @@
         failure_type: error.name === 'AbortError' ? 'timeout' : phase === 'upload' ? 'upload' : responseStatus ? 'response' : 'network',
         http_status: responseStatus });
       funnel('lead_submit_error', { step: 'planning', action: 'submission_failed' });
+      trackProgress('submit_failure', { submitAttempt: submitAttempts, httpStatus: responseStatus,
+        errorType: error.name === 'AbortError' ? 'timeout' : phase === 'upload' ? 'upload' : responseStatus ? 'http' : 'network' });
       showError(uncertainSubmission
         ? '접수 결과 확인이 지연되고 있습니다. 아래 버튼으로 같은 신청의 결과를 다시 확인해 주세요. 중복으로 접수되지 않습니다.'
         : phase === 'upload' ? '도면을 가져오거나 업로드하지 못했습니다. 도면 파일을 다시 선택한 뒤 시도해 주세요.'
@@ -1974,9 +2208,12 @@
   back.addEventListener('click', () => { if (!submitting && !uncertainSubmission && trail.length) { const previous = trail.pop(); current = previous.key; questionIndex = previous.index; intakeOnly = previous.intakeOnly ?? intakeOnly; render(); } });
   document.getElementById('restart').addEventListener('click', () => {
     if (submitting || uncertainSubmission) return;
+    trackProgress('restart');
     clearDraft();
+    progressHadDraft = false;
     intakeOnly = false;
     pendingBody = null;
+    metaMeasurementConsent = false;
     uncertainSubmission = false;
     submitAttempts = 0;
     lookupRun++;
@@ -2004,9 +2241,15 @@
   if (current === 'intro') current = 'contact';
   applyCommercialDefaults();
   if (answers.apartmentSelected && current === 'planReview') startLookup(answers.apartmentQuery || answers.address);
-  stage.addEventListener('input', () => { markStarted(); saveDraft(); });
+  // Persist once after field handlers have updated answers. Change-only controls also
+  // emit input first, before their answer changes, so save those on change instead.
+  stage.addEventListener('input', event => {
+    if (event.target.matches('select,input[type="checkbox"],input[type="radio"],input[type="file"]')) return;
+    markStarted(); saveDraft();
+  });
   stage.addEventListener('change', () => { markStarted(); saveDraft(); });
   if (typeof window.addEventListener === 'function') window.addEventListener('pagehide', saveDraft);
   if (typeof fetch === 'function') funnel('lead_form_view');
   render();
+  document.documentElement.dataset.consultationReady = 'true';
 })();

@@ -1,9 +1,23 @@
 <!doctype html><html lang="ko"><head>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+new Date().getTime(),event:'gtm.js'});/* Load the existing GA runtime before GTM so they do not race to fetch it twice.
+   Event queues remain immediate; errors or a slow SDK cannot suppress GTM. */
+var started=false,timer;
+function startContainer(){if(started)return;started=true;clearTimeout(timer);
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f)}
+function afterGoogleTag(){
+if(w.google_tag_manager&&w.google_tag_manager['G-EJGXDD5C1T']){startContainer();return;}
+var tag=d.querySelector('script[src*="googletagmanager.com/gtag/js?id=G-EJGXDD5C1T"]');
+if(!tag){startContainer();return;}
+tag.addEventListener('load',startContainer,{once:true});
+tag.addEventListener('error',startContainer,{once:true});
+timer=setTimeout(startContainer,2500);
+}
+function scheduleContainer(){setTimeout(afterGoogleTag,0)}
+if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',scheduleContainer,{once:true});
+else scheduleContainer();
 })(window,document,'script','dataLayer','GTM-PW8GLP8S');</script>
 <!-- End Google Tag Manager -->
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>공간보감 블로그 글 모음 | 부산 인테리어 이야기</title><meta name="description" content="공간보감 블로그의 부산 인테리어 글 목록입니다. 견적, 시공 과정, 포트폴리오 글을 모아 확인하세요."><meta name="robots" content="noindex,follow,max-image-preview:large,max-snippet:-1"><link rel="canonical" href="https://spacebogam.kr/insights/"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR"><meta property="og:site_name" content="공간보감"><meta property="og:title" content="공간보감 블로그 글 모음 | 부산 인테리어 이야기"><meta property="og:description" content="공간보감 블로그의 부산 인테리어 글 목록입니다. 견적, 시공 과정, 포트폴리오 글을 모아 확인하세요."><meta property="og:url" content="https://spacebogam.kr/insights/"><meta property="og:image" content="https://intm.kr/images/portfolio/ad270e74-a62c-4f19-a25a-c9e0eb91cf34/0bc5f79c-ab61-4780-ab73-6939c7454ec8.webp"><script type="application/ld+json">{"@context":"https://schema.org","@type":["LocalBusiness","HomeAndConstructionBusiness","ProfessionalService"],"@id":"https://spacebogam.kr/#localbusiness","name":"공간보감","alternateName":["공간보감","공간보감 인테리어","부산 공간보감"],"url":"https://spacebogam.kr/","image":"https://spacebogam.kr/assets/portfolio/daewoo-ian-35py.jpg","description":"부산 아파트 인테리어와 리모델링, 상업공간 디자인을 상담하는 인테리어 디자인 회사입니다.","areaServed":["부산","해운대","동래","금정구","화명동","구서동","사직동"],"sameAs":["https://blog.naver.com/baek1985","https://instagram.com/ggbg.official"]}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"Blog","@id":"https://spacebogam.kr/insights/#blog","name":"공간보감 블로그 | 부산 인테리어 이야기","url":"https://spacebogam.kr/insights/","publisher":{"@id":"https://spacebogam.kr/#localbusiness"},"inLanguage":"ko-KR","blogPost":[{"@type":"BlogPosting","headline":"부산 아파트 인테리어, 공간보감 포트폴리오 (2025-2026)","url":"https://spacebogam.kr/insights/224289898461-부산-아파트-인테리어-공간보감-포트폴리오-2025-2026.html","datePublished":"2026-05-19"},{"@type":"BlogPosting","headline":"부산 구축 아파트 인테리어 견적, 후회 없는 리모델링을 위해 먼저 살펴야 할 기준","url":"https://spacebogam.kr/insights/224285757703-부산-구축-아파트-인테리어-견적-후회-없는.html","datePublished":"2026-05-15"},{"@type":"BlogPosting","headline":"부산 인테리어 업체 추천, 후기만 믿기 불안할 때 확인해야 할 3가지 사실","url":"https://spacebogam.kr/insights/224280575103-부산-인테리어-업체-추천-후기만-믿기-불안할.html","datePublished":"2026-05-11"},{"@type":"BlogPosting","headline":"부산 인테리어 비용, 똑같은 아파트인데 왜 견적은 수천만 원씩 차이 날까요?","url":"https://spacebogam.kr/insights/224277991193-부산-인테리어-비용-똑같은-아파트인데-왜-견적은.html","datePublished":"2026-05-07"},{"@type":"BlogPosting","headline":"부산 남구 구축 40평대 아파트 인테리어 시작 전 고민들을 해결하는 현실적인 제안","url":"https://spacebogam.kr/insights/224273223528-부산-남구-구축-40평대-아파트-인테리어-시작.html","datePublished":"2026-05-03"},{"@type":"BlogPosting","headline":"부산 인테리어 업체 상담, 계약 이후에는 어떤 과정을 거칠까요?","url":"https://spacebogam.kr/insights/224259674942-부산-인테리어-업체-상담-계약-이후에는-어떤.html","datePublished":"2026-04-21"},{"@type":"BlogPosting","headline":"부산 화명동 대우이안 35평, 화이트 앤 우드 인테리어로 완성한 30평대 신혼집 공간","url":"https://spacebogam.kr/insights/224254948259-부산-화명동-대우이안-35평-화이트-앤-우드.html","datePublished":"2026-04-17"},{"@type":"BlogPosting","headline":"부산 아파트 인테리어, 화려한 포트폴리오보다 값진 공간보감의 정직한 상담 기록","url":"https://spacebogam.kr/insights/224249736922-부산-아파트-인테리어-화려한-포트폴리오보다-값진-공간보감의.html","datePublished":"2026-04-13"},{"@type":"BlogPosting","headline":"화명동 인테리어 대우이안 35평 공간을 넓어 보이게 하는 공간보감의 설계 디테일","url":"https://spacebogam.kr/insights/224237135940-화명동-인테리어-대우이안-35평-공간을-넓어-보이게.html","datePublished":"2026-04-01"},{"@type":"BlogPosting","headline":"부산 아파트 인테리어 반려동물과 보호자의 일상을 배려한 펫테리어 필수 요소 3가지","url":"https://spacebogam.kr/insights/224228168633-부산-아파트-인테리어-반려동물과-보호자의-일상을-배려한.html","datePublished":"2026-03-25"},{"@type":"BlogPosting","headline":"부산 30평대 아파트 인테리어, 연지 유림노르웨이숲 우드 포인트를 더한 아늑한 신혼집","url":"https://spacebogam.kr/insights/224227103387-부산-30평대-아파트-인테리어-연지-유림노르웨이숲-우드.html","datePublished":"2026-03-24"},{"@type":"BlogPosting","headline":"부산 해운대구 인테리어 고민 중이신가요? 30평대 아파트 자녀 중심 공간 디자인 포인트","url":"https://spacebogam.kr/insights/224219286226-부산-해운대구-인테리어-고민-중이신가요-30평대-아파트.html","datePublished":"2026-03-17"},{"@type":"BlogPosting","headline":"구서동인테리어, 금정구 구서쌍용스윗닷홈 50평 반려견을 위한 배려가 담긴 공간","url":"https://spacebogam.kr/insights/224211725948-구서동인테리어-금정구-구서쌍용스윗닷홈-50평-반려견을-위한-배려가.html","datePublished":"2026-03-10"},{"@type":"BlogPosting","headline":"부산 진구 연지 유림노르웨이숲 30평대 아파트 인테리어, 신혼집의 불안을 확신으로 바꾼 과정","url":"https://spacebogam.kr/insights/224204272116-부산-진구-연지-유림노르웨이숲-30평대-아파트-인테리어.html","datePublished":"2026-03-04"},{"@type":"BlogPosting","headline":"화명동 대우이안 35평 인테리어, 구축 아파트 변수를 해결하는 공간보감의 디테일","url":"https://spacebogam.kr/insights/224195906561-화명동-대우이안-35평-인테리어-구축-아파트-변수를.html","datePublished":"2026-02-25"},{"@type":"BlogPosting","headline":"부산 턴키 인테리어 해운대 구축 메가센텀꿈에그린 아파트 49평 설계 과정","url":"https://spacebogam.kr/insights/224192971796-부산-턴키-인테리어-해운대-구축-메가센텀꿈에그린-아파트.html","datePublished":"2026-02-23"},{"@type":"BlogPosting","headline":"부산 해운대 좌동 아파트 인테리어 4베이 구조의 단점을 개선한 40평대 아파트 리모델링","url":"https://spacebogam.kr/insights/224185650527-부산-해운대-좌동-아파트-인테리어-4베이-구조의.html","datePublished":"2026-02-17"},{"@type":"BlogPosting","headline":"부산 해운대 아파트 인테리어, 개방감을 살리는 24평 신혼집 리모델링 제안","url":"https://spacebogam.kr/insights/224182980295-부산-해운대-아파트-인테리어-개방감을-살리는-24평.html","datePublished":"2026-02-13"},{"@type":"BlogPosting","headline":"구서동 인테리어 구서쌍용스윗닷홈 50평대 구축 아파트 공간 재구성 공사 과정","url":"https://spacebogam.kr/insights/224161251315-구서동-인테리어-구서쌍용스윗닷홈-50평대-구축-아파트-공간.html","datePublished":"2026-01-27"},{"@type":"BlogPosting","headline":"구서동 쌍용스윗닷홈50평 인테리어, 공간에 취향을 담아 내는 공간보감만의 상담 과정","url":"https://spacebogam.kr/insights/224156072501-구서동-쌍용스윗닷홈50평-인테리어-공간에-취향을-담아-내는.html","datePublished":"2026-01-22"}]}</script><link rel="stylesheet" href="../assets/blog.css">  <!-- Google tag (gtag.js) -->
@@ -18,7 +32,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <script src="/assets/site-canonical.js?v=c69a8498"></script>
-  <script defer src="/assets/site-tracking.js?v=6303eec4"></script>
+  <script defer src="/assets/site-tracking.js?v=a72f3ee65d57"></script>
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -34,8 +48,10 @@ fbq('track', 'PageView');
 </script>
 <!-- End Meta Pixel Code -->
 <!-- Naver WCS / CTS common tracking -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js" data-spacebogam-naver-wcs="1"></script>
-<script type="text/javascript">
+<script data-spacebogam-naver-bootstrap="async">(function(){
+  function sendCtsPageView(){
+    if (window.__spacebogamNaverCtsPvSent) return;
+
 if (!window.wcs_add) window.wcs_add = {};
 window.wcs_add["wa"] = "s_7702568df18";
 if (!window._nasa) window._nasa = {};
@@ -44,7 +60,20 @@ if (window.wcs) {
   window.wcs_do();
   window.__spacebogamNaverCtsPvSent = true;
 }
-</script>
+
+  }
+  if (window.wcs) { sendCtsPageView(); return; }
+  var script = document.querySelector('script[data-spacebogam-naver-wcs="1"], script[src*="wcslog.js"]');
+  var fresh = !script;
+  if (fresh) {
+    script = document.createElement('script');
+    script.async = true;
+    script.src = "//wcs.naver.net/wcslog.js";
+    script.setAttribute('data-spacebogam-naver-wcs', '1');
+  }
+  script.addEventListener('load', sendCtsPageView, {once:true});
+  if (fresh) document.head.appendChild(script);
+})();</script>
 <link rel="stylesheet" href="/assets/site-navigation.css?v=b34f76c81468"><script defer src="/assets/site-navigation.js?v=bba0dbe37148"></script><script defer src="/assets/insights-filter.js?v=cc2a34a328c4"></script></head><body>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PW8GLP8S"
@@ -87,7 +116,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <article class="post-card"><a href="../insights/224022947548-금정구-인테리어-구서쌍용예가2차-58평-내추럴톤-리모델링.html"><img src="/assets/blog/224022947548-금정구-인테리어-구서쌍용예가2차-58평-내추럴톤-리모델링-1.jpg" alt="금정구 인테리어 구서쌍용예가2차 58평 내추럴톤 리모델링" loading="lazy" referrerpolicy="no-referrer"></a><div><span class="cat">금정구·구서동</span><h2><a href="../insights/224022947548-금정구-인테리어-구서쌍용예가2차-58평-내추럴톤-리모델링.html">금정구 인테리어 구서쌍용예가2차 58평 내추럴톤 리모델링</a></h2><p>금정구 인테리어 구서쌍용예가2차 58평 내추럴톤 리모델링 안녕하세요. 부산 금정구 인테리어 전문, 공감보감 백창석입니다. 오늘은 구서쌍용예가2차 58평 리모델링 현장을 소개해드리겠습니다. 구서쌍용예가 2단지는 2010년에 입주한 단지로, 올해로 15년 차를 맞았습니다. 세대 수가 많아 단지 규모가 크고, 바로 앞에 장서초…</p><div class="meta"><span>2025-09-26</span><span>금정구</span></div></div></article>
 <article class="post-card"><a href="../insights/224015797038-부산-인테리어-견적-제대로-이해하는-4가지-기준.html"><img src="/assets/blog/224015797038-부산-인테리어-견적-제대로-이해하는-4가지-기준-1.jpg" alt="부산 인테리어 견적 제대로 이해하는 4가지 기준" loading="lazy" referrerpolicy="no-referrer"></a><div><span class="cat">견적·상담</span><h2><a href="../insights/224015797038-부산-인테리어-견적-제대로-이해하는-4가지-기준.html">부산 인테리어 견적 제대로 이해하는 4가지 기준</a></h2><p>부산 인테리어 견적 제대로 이해하는 4가지 기준 인테리어를 준비할 때 가장 먼저 떠오르는 질문은 “견적이 얼마일까?”일 겁니다. 하지만 부산에서 여러 업체의 견적을 받아보신 분들은 금세 알게 됩니다. 30평 아파트 견적을 받아보면, 한쪽은 2천만 원대, 다른 한쪽은 5천만 원 이상 같은 공간인데도 금액 차이가 이렇게 크니…</p><div class="meta"><span>2025-09-21</span><span>부산 인테리어 · 견적 · 비용</span></div></div></article>
 <article class="post-card"><a href="../insights/224010253704-부산-아파트-리모델링-사직롯데캐슬더클래식-33평-호텔-분위기.html"><img src="/assets/blog/224010253704-부산-아파트-리모델링-사직롯데캐슬더클래식-33평-호텔-분위기-1.jpg" alt="부산 아파트 리모델링, 사직롯데캐슬더클래식 33평 호텔 분위기 미니멀 인테리어" loading="lazy" referrerpolicy="no-referrer"></a><div><span class="cat">사직동·동래구</span><h2><a href="../insights/224010253704-부산-아파트-리모델링-사직롯데캐슬더클래식-33평-호텔-분위기.html">부산 아파트 리모델링, 사직롯데캐슬더클래식 33평 호텔 분위기 미니멀 인테리어</a></h2><p>부산 아파트 리모델링, 사직롯데캐슬더클래식 33평 호텔 분위기 미니멀 인테리어 안녕하세요. 부산 아파트 리모델링 전문, 공간보감 백창석입니다. 오늘은 사직롯데캐슬더클래식 33평 아파트 리모델링 현장을 소개해드리겠습니다. 사직롯데캐슬더클래식은 지하철 3호선 사직역이 가까운 초역세권 입지, 우수 학군, 사직야구장과 대형마트,…</p><div class="meta"><span>2025-09-16</span><span>공간보감</span></div></div></article>
-<article class="post-card"><a href="../insights/224005033357-사직-쌍용예가-1차-42평-인테리어-다섯-식구.html"><img src="/assets/blog/224005033357-사직-쌍용예가-1차-42평-인테리어-다섯-식구-1.jpg" alt="사직 쌍용예가 1차 42평 인테리어 다섯 식구 맞춤 네츄럴 무드 리모델링" loading="lazy" referrerpolicy="no-referrer"></a><div><span class="cat">견적·상담</span><h2><a href="../insights/224005033357-사직-쌍용예가-1차-42평-인테리어-다섯-식구.html">사직 쌍용예가 1차 42평 인테리어 다섯 식구 맞춤 네츄럴 무드 리모델링</a></h2><p>사직 쌍용예가 1차 42평 인테리어 다섯 식구 맞춤 네츄럴 무드 리모델링 안녕하세요. 부산 동래, 사직동 아파트 인테리어 전문, 공간보감 백창석입니다. 오늘은 사직쌍용예가 1차 42평 리모델링 현장을 소개합니다. 사직쌍용예가는 입지나 생활 인프라 덕분에 여전히 선호도가 높은 단지입니다. 정문에서 1분 거리에 예원초가 있어…</p><div class="meta"><span>2025-09-12</span><span>상담</span></div></div></article>
+<article class="post-card"><a href="../insights/224005033357-사직-쌍용예가-1차-42평-인테리어-다섯-식구.html"><img src="/assets/case/sajik-hq-20261114/blog-05-2000.webp" alt="사직 쌍용예가 1차 42평 인테리어 다섯 식구 맞춤 네츄럴 무드 리모델링" loading="lazy" referrerpolicy="no-referrer"></a><div><span class="cat">견적·상담</span><h2><a href="../insights/224005033357-사직-쌍용예가-1차-42평-인테리어-다섯-식구.html">사직 쌍용예가 1차 42평 인테리어 다섯 식구 맞춤 네츄럴 무드 리모델링</a></h2><p>사직 쌍용예가 1차 42평 인테리어 다섯 식구 맞춤 네츄럴 무드 리모델링 안녕하세요. 부산 동래, 사직동 아파트 인테리어 전문, 공간보감 백창석입니다. 오늘은 사직쌍용예가 1차 42평 리모델링 현장을 소개합니다. 사직쌍용예가는 입지나 생활 인프라 덕분에 여전히 선호도가 높은 단지입니다. 정문에서 1분 거리에 예원초가 있어…</p><div class="meta"><span>2025-09-12</span><span>상담</span></div></div></article>
 <article class="post-card"><a href="../insights/223982552548-사직-인테리어업체-롯데캐슬더클래식-33평-tv-없는-집.html"><img src="/assets/blog/223982552548-사직-인테리어업체-롯데캐슬더클래식-33평-tv-없는-집-1.jpg" alt="사직 인테리어업체, 롯데캐슬더클래식 33평 TV 없는 집 리모델링 성공" loading="lazy" referrerpolicy="no-referrer"></a><div><span class="cat">사직동·동래구</span><h2><a href="../insights/223982552548-사직-인테리어업체-롯데캐슬더클래식-33평-tv-없는-집.html">사직 인테리어업체, 롯데캐슬더클래식 33평 TV 없는 집 리모델링 성공</a></h2><p>* 사직 인테리어업체, 공간보감이 시공한 롯데캐슬더클래식 33평 리모델링 2편 * TV 없는 집, 호텔 같은 무드를 구현한 공간 변화 확인 안녕하세요. 사직 인테리어업체, 공간보감 백창석입니다. 지난 시간에 이어 오늘은 부산 사직롯데캐슬더클래식 33평 리모델링 2편을 소개해 드리려고 합니다. 이번 포스팅에서는 실제 완성된…</p><div class="meta"><span>2025-08-25</span><span>공간보감</span></div></div></article>
 <article class="post-card"><a href="../insights/223982545239-동래-인테리어업체-5가지-요청사항을-빠짐없이-구현해-낸.html"><img src="/assets/blog/223982545239-동래-인테리어업체-5가지-요청사항을-빠짐없이-구현해-낸-1.jpg" alt="동래 인테리어업체, 5가지 요청사항을 빠짐없이 구현해 낸 사직롯데캐슬더클래식 33평" loading="lazy" referrerpolicy="no-referrer"></a><div><span class="cat">화명동·북구</span><h2><a href="../insights/223982545239-동래-인테리어업체-5가지-요청사항을-빠짐없이-구현해-낸.html">동래 인테리어업체, 5가지 요청사항을 빠짐없이 구현해 낸 사직롯데캐슬더클래식 33평</a></h2><p>* 사직롯데캐슬더클래식 30평대 리모델링 1편. * 동래 인테리어업체, 공간보감이 고객님의 5가지 요청사항을 빠짐없이 구현해 낸 현장. 안녕하세요. 동래 인테리어업체, 공간보감 백창석입니다. 오늘은 사직롯데캐슬더클래식 33평 리모델링 사례를 소개해드리겠습니다. 이 아파트는 2017년에 준공된 곳으로, 이번 현장은 40대…</p><div class="meta"><span>2025-08-25</span><span>30평대</span></div></div></article>
 <article class="post-card"><a href="../insights/223973094721-화명동-인테리어업체-화명롯데캐슬멤버스-45평-리모델링.html"><img src="/assets/blog/223973094721-화명동-인테리어업체-화명롯데캐슬멤버스-45평-리모델링-1.jpg" alt="화명동 인테리어업체, 화명롯데캐슬멤버스 45평 리모델링" loading="lazy" referrerpolicy="no-referrer"></a><div><span class="cat">견적·상담</span><h2><a href="../insights/223973094721-화명동-인테리어업체-화명롯데캐슬멤버스-45평-리모델링.html">화명동 인테리어업체, 화명롯데캐슬멤버스 45평 리모델링</a></h2><p>* 부산 화명동 인테리어업체, 공간보감의 화명롯데캐슬멤버스 45평 리모델링 2편. * 현관부터 주방, 거실까지 세련된 디자인 포인트와 시공 노하우 소개. 안녕하세요. 화명동 인테리어업체 공간보감 대표 백창석입니다. 지난 글에서 고객님께서 셀프 인테리어의 한계를 느끼고 무려 12곳의 업체와 미팅을 거친 끝에 저희 공간보감을…</p><div class="meta"><span>2025-08-17</span><span>화명동 · 상담</span></div></div></article>
