@@ -1222,7 +1222,7 @@
         item.value = option; select.appendChild(item);
       });
       const value = response(question) || '';
-      select.value = value && !options.includes(value) ? other : value;
+      select.value = options.includes(value) ? value : other;
       label.appendChild(select); target.appendChild(label);
       const customLabel = el('label', 'field');
       customLabel.appendChild(el('span', 'field-label', '예산 직접입력 *'));

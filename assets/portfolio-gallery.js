@@ -82,11 +82,8 @@
     update();
   }));
   form.hidden = false;
-  const tools = form.closest('.pf-browse-tools');
-  tools.hidden = false;
   const mobile = matchMedia('(max-width:680px)');
   function adaptTools() {
-    tools.open = !mobile.matches;
     form.querySelector('.pf-tags').open = !mobile.matches;
   }
   mobile.addEventListener('change', adaptTools);

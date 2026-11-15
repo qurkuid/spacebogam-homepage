@@ -55,7 +55,7 @@ function harness({ search = '?type=commercial&vertical=shop&utm_source=meta&utm_
   const location = { search, pathname: '/consultation/', href: 'http://localhost/consultation/' + search, protocol: 'http:' };
   const context = {
     document: {
-      getElementById: id => nodes[id],
+      documentElement: { dataset: {} }, getElementById: id => nodes[id],
       querySelector: selector => selector === '.progress' ? progress : selector === '.aside img' ? asideImage : selector === '.aside-copy p:last-child' ? asideCopy : null,
       createElement: tag => new Element(tag),
       createTextNode: value => Object.assign(new Element('#text'), { textContent: value }),
@@ -147,6 +147,9 @@ assert.deepEqual(Array.from(commercial.api.group('planning'), question => String
   'permitStatus', 'drawingStatus', 'openDate', 'budget', 'callbackTime', 'requestNote'
 ]);
 assert.doesNotMatch(commercial.text(), /도면을 저장|도면 직접 업로드|없음 · 상담 시 확인/, '상업 두 번째 페이지에 주거 도면 절차가 섞이지 않는다');
+assert.match(commercial.text(), /예산 직접입력/);
+commercial.input('budget-custom', '4천만원');
+assert.equal(commercial.api.payload(null).commercialLead.budget, '4천만원');
 fillCommercialPage(commercial);
 assert.deepEqual(Array.from(commercial.api.group('planning'), question => String(question.id)), [
   'vertical', 'leaseStatus', 'handoverDate', 'previousUse', 'workScope', 'facilityNeeds',

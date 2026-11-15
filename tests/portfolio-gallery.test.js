@@ -17,7 +17,15 @@ test('all 15 live projects and their photos remain indexable and linked to the s
     assert.match(card, /<img\b[^>]*alt="[^"]+"/);
     assert.doesNotMatch(card, /\bhidden\b/);
   }
-  assert.match(html, /678/);
+  const count = cards.reduce((total, card) => {
+    const filename = card.match(/href="([^"]+)"/)[1];
+    const detail = fs.readFileSync(path.join(__dirname, '..', filename), 'utf8');
+    const gallery = detail.match(/<section[^>]*id="case-photos"[^>]*>([\s\S]*?)<\/section>/)[1];
+    const photos = [...gallery.matchAll(/<figure\b/g)].length;
+    assert.match(card, new RegExp(`사진 ${photos}장`), filename);
+    return total + photos;
+  }, 0);
+  assert.match(html, new RegExp(`${count}장의 완성 사진`));
 });
 
 test('filters use complete options and explicit scope without the old guide', () => {

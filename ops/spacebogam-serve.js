@@ -7,10 +7,12 @@ const path = require('node:path');
 const { Transform } = require('node:stream');
 const { once } = require('node:events');
 const { createReviewsHandler } = require('./spacebogam-reviews');
+const { createSocialHandler } = require('./spacebogam-social');
 
 const ROOT = path.resolve(process.env.ROOT || process.argv[2] || path.join(__dirname, 'current'));
 const PORT = Number(process.env.PORT || process.argv[3] || 3021);
 const handleReviews = createReviewsHandler({ root: ROOT });
+const handleSocial = createSocialHandler();
 // Allow multipart overhead around the form's 15 MiB file limit.
 const MAX_UPLOAD = 16 * 1024 * 1024;
 const MAX_PLAN_IMAGE = 15 * 1024 * 1024;
@@ -134,6 +136,7 @@ http.createServer(async (req, res) => {
   catch { return reply(res, 400, 'Invalid path'); }
   if (!pathname.startsWith('/') || pathname.includes('\\') || pathname.includes('\0') || pathname.split('/').some(part => part.startsWith('.'))) return reply(res, 403, 'Path not allowed');
   if (await handleReviews(req, res, pathname)) return;
+  if (await handleSocial(req, res, pathname)) return;
   const plans = /^\/api\/apartments\/[A-Za-z0-9_-]{1,64}\/plans$/.test(pathname);
   const dataset = pathname === '/api/apartments/dataset';
   const upload = pathname === '/api/consultation/upload';
@@ -162,7 +165,15 @@ http.createServer(async (req, res) => {
     if (res.destroyed) return file.destroy();
     file.on('error', () => res.destroy());
     res.on('close', () => file.destroy());
-    res.writeHead(200, { 'Content-Type': mime[path.extname(filename).toLowerCase()] || 'application/octet-stream', 'Content-Length': stat.size });
+    const ext = path.extname(filename).toLowerCase();
+    const cacheControl = pathname.startsWith('/assets/gallery-previews/') || pathname.startsWith('/assets/case/') || ext === '.woff2' || ext === '.woff'
+      ? 'public, max-age=31536000, immutable'
+      : pathname.startsWith('/assets/')
+        ? 'public, max-age=86400, stale-while-revalidate=604800'
+        : ext === '.html'
+          ? 'public, max-age=60, stale-while-revalidate=600'
+          : 'public, max-age=3600';
+    res.writeHead(200, { 'Content-Type': mime[ext] || 'application/octet-stream', 'Content-Length': stat.size, 'Cache-Control': cacheControl });
     if (req.method === 'HEAD') { file.destroy(); return res.end(); }
     file.pipe(res);
   } catch (error) {

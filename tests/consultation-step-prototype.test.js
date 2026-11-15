@@ -23,11 +23,17 @@ class Element {
   getAttribute(name) { return this.attributes[name]; }
   addEventListener(name, listener) { this.listeners[name] = listener; }
   click() { this.listeners.click?.({ preventDefault() {} }); }
-  input(value) { this.value = value; this.listeners.input?.({}); }
+  input(value) {
+    this.value = value;
+    for (let node = this; node; node = node.parent) node.listeners.input?.({ target: this });
+  }
   change(value) { if (this.type === 'checkbox') this.checked = value; else this.value = value; this.listeners.change?.({}); }
   showModal() { this.open = true; }
   close() { this.open = false; this.listeners.close?.({}); }
   focus() { this.focused = true; }
+  matches(selector) {
+    return this.tag === 'select' || selector.includes(`input[type="${this.type}"]`);
+  }
   getContext() { return { fillRect() {}, translate() {}, scale(x, y) { canvasScales.push([x, y]); }, drawImage() {} }; }
   toBlob(callback, type) { callback(new Blob(['flipped-image'], { type })); }
   querySelector(selector) { return this.querySelectorAll(selector)[0] || null; }
@@ -54,7 +60,7 @@ function harness({ session = storage(), fetch, search = '?utm_campaign=grouped_q
   const nodes = Object.fromEntries(['stage','next','back','skip','restart','progress-fill','kakao-quick-consultation'].map(id => [id, new Element()]));
   const progress = new Element();
   const context = { document: {
-    getElementById: id => nodes[id], querySelector: selector => selector === '.progress' ? progress : null,
+    documentElement: { dataset: {} }, getElementById: id => nodes[id], querySelector: selector => selector === '.progress' ? progress : null,
     createElement: tag => new Element(tag), createTextNode: value => Object.assign(new Element('#text'), { textContent: value }), head: new Element('head')
   }, window: { SB_APT_INDEX: [], SB_APT_DONGS: {qa:['111동']}, scrolls: [], scrollTo(value) { this.scrolls.push(value); }, addEventListener() {} }, location: { search, pathname: '/consultation/', href: 'http://localhost/consultation/?is_test=1' },
     innerWidth: 390, sessionStorage: session, localStorage: storage(), URLSearchParams, Blob, FormData, AbortController,

@@ -1,7 +1,7 @@
 (() => {
   // Before/process photos are opt-in and never enter the completed-photo lightbox.
   const stageTabs = [...document.querySelectorAll('[data-photo-stage]')];
-  function selectStage(stage, focus = false) {
+  function selectStage(stage, focus = false, updateUrl = false) {
     stageTabs.forEach(tab => {
       const active = tab.dataset.photoStage === stage;
       tab.setAttribute('aria-selected', String(active));
@@ -10,9 +10,14 @@
       if (panel) panel.hidden = !active;
       if (active && focus) tab.focus();
     });
+    if (updateUrl && stageTabs.length) {
+      const url = new URL(location.href);
+      stage === 'before' ? url.searchParams.set('view', 'before') : url.searchParams.delete('view');
+      history.replaceState(history.state, '', url);
+    }
   }
   stageTabs.forEach((tab, index) => {
-    tab.addEventListener('click', () => selectStage(tab.dataset.photoStage));
+    tab.addEventListener('click', () => selectStage(tab.dataset.photoStage, false, true));
     tab.addEventListener('keydown', event => {
       let next;
       if (event.key === 'ArrowRight') next = (index + 1) % stageTabs.length;
@@ -21,10 +26,16 @@
       else if (event.key === 'End') next = stageTabs.length - 1;
       else return;
       event.preventDefault();
-      selectStage(stageTabs[next].dataset.photoStage, true);
+      selectStage(stageTabs[next].dataset.photoStage, true, true);
     });
   });
-  selectStage('after');
+  if (stageTabs.length) {
+    const restoreStage = () => selectStage(new URL(location.href).searchParams.get('view') === 'before' ? 'before' : 'after');
+    addEventListener('pageshow', restoreStage);
+    addEventListener('popstate', restoreStage);
+    document.querySelector('.pd-sections a[href="#case-photos"]')?.addEventListener('click', () => selectStage('after', false, true));
+    restoreStage();
+  }
   const galleryLinks = [...document.querySelectorAll('[data-gallery-image]')];
   const links = galleryLinks.length ? galleryLinks : [...document.querySelectorAll('.case-gallery a')];
   if (!links.length) return;
@@ -158,7 +169,7 @@
   }
   cover?.addEventListener('click', event => {
     event.preventDefault();
-    selectStage('after');
+    selectStage('after', false, true);
     let match = links.find(link => link.href === cover.href);
     if (!match) return;
     if (match.closest('figure')?.hidden) {

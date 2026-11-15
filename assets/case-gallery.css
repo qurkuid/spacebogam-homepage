@@ -43,3 +43,6 @@
 .pd-page .case-gallery.is-justified figure{flex:0 0 auto;max-width:100%}
 .pd-page .case-gallery.is-justified img{width:100%;height:auto;object-fit:contain}
 .pd-page .case-gallery.is-justified figcaption{overflow-wrap:anywhere}
+.pd-story p{font-size:15px;line-height:1.85;color:var(--ink);max-width:780px;margin:14px 0 0}
+.pd-story h2{margin-bottom:6px}
+.pd-photo-tabs button{min-height:44px}
