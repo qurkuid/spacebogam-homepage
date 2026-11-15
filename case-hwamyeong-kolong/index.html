@@ -1,9 +1,23 @@
 <!doctype html><html lang="ko"><head>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+new Date().getTime(),event:'gtm.js'});/* Load the existing GA runtime before GTM so they do not race to fetch it twice.
+   Event queues remain immediate; errors or a slow SDK cannot suppress GTM. */
+var started=false,timer;
+function startContainer(){if(started)return;started=true;clearTimeout(timer);
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f)}
+function afterGoogleTag(){
+if(w.google_tag_manager&&w.google_tag_manager['G-EJGXDD5C1T']){startContainer();return;}
+var tag=d.querySelector('script[src*="googletagmanager.com/gtag/js?id=G-EJGXDD5C1T"]');
+if(!tag){startContainer();return;}
+tag.addEventListener('load',startContainer,{once:true});
+tag.addEventListener('error',startContainer,{once:true});
+timer=setTimeout(startContainer,2500);
+}
+function scheduleContainer(){setTimeout(afterGoogleTag,0)}
+if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',scheduleContainer,{once:true});
+else scheduleContainer();
 })(window,document,'script','dataLayer','GTM-PW8GLP8S');</script>
 <!-- End Google Tag Manager -->
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,follow"><meta http-equiv="refresh" content="0; url=../case-hwamyeong-kolong.html"><link rel="canonical" href="https://spacebogam.kr/case-hwamyeong-kolong.html"><title>공간보감 페이지 이동</title><script>(function(u){var s=location.search,h=location.hash;if(s)u+=(u.indexOf('?')>-1?'&':'?')+s.slice(1);if(h)u+=h;location.replace(u);})('../case-hwamyeong-kolong.html');</script>  <!-- Google tag (gtag.js) -->
@@ -18,7 +32,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <script src="/assets/site-canonical.js?v=c69a8498"></script>
-  <script defer src="/assets/site-tracking.js?v=6303eec4"></script>
+  <script defer src="/assets/site-tracking.js?v=a72f3ee65d57"></script>
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -34,8 +48,10 @@ fbq('track', 'PageView');
 </script>
 <!-- End Meta Pixel Code -->
 <!-- Naver WCS / CTS common tracking -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js" data-spacebogam-naver-wcs="1"></script>
-<script type="text/javascript">
+<script data-spacebogam-naver-bootstrap="async">(function(){
+  function sendCtsPageView(){
+    if (window.__spacebogamNaverCtsPvSent) return;
+
 if (!window.wcs_add) window.wcs_add = {};
 window.wcs_add["wa"] = "s_7702568df18";
 if (!window._nasa) window._nasa = {};
@@ -44,7 +60,20 @@ if (window.wcs) {
   window.wcs_do();
   window.__spacebogamNaverCtsPvSent = true;
 }
-</script>
+
+  }
+  if (window.wcs) { sendCtsPageView(); return; }
+  var script = document.querySelector('script[data-spacebogam-naver-wcs="1"], script[src*="wcslog.js"]');
+  var fresh = !script;
+  if (fresh) {
+    script = document.createElement('script');
+    script.async = true;
+    script.src = "//wcs.naver.net/wcslog.js";
+    script.setAttribute('data-spacebogam-naver-wcs', '1');
+  }
+  script.addEventListener('load', sendCtsPageView, {once:true});
+  if (fresh) document.head.appendChild(script);
+})();</script>
 </head><body>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PW8GLP8S"

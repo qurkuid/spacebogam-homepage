@@ -400,7 +400,7 @@
       }
     } catch(error) {}
     try {
-      if (typeof window.gtag === 'function') {
+      if (!payload.isTest && typeof window.gtag === 'function') {
         window.gtag('event', 'funnel_ingest_error', {
           failed_event_name: record.eventName,
           failure_reason: record.reason

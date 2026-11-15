@@ -23,15 +23,58 @@
   var applicationTimer;
   var applicationReady = false;
   var lastApplyLink;
+  var applicationWarmup;
+  var stopApplicationWatching;
+  function applicationUrl() {
+    var url = new URL('/consultation/apply/' + location.search, location.origin);
+    url.searchParams.set('embed', 'board');
+    return url;
+  }
+  // Warm only public, same-origin files. Do not instantiate a hidden form:
+  // that would emit form-view analytics for people who never open it.
+  function warmApplication() {
+    var connection = navigator.connection;
+    if (applicationWarmup || frame.getAttribute('src') || document.hidden ||
+        connection?.saveData || /(^|-)2g$/.test(connection?.effectiveType || '')) return;
+    if (window.__sbConsultationPreload) {
+      applicationWarmup = window.__sbConsultationPreload.form(applicationUrl().href)
+        .finally(function () { applicationWarmup = null; });
+      return;
+    }
+    applicationWarmup = fetch(applicationUrl().href, {
+      credentials: 'same-origin', cache: 'force-cache', priority: 'low'
+    }).then(function (response) {
+      if (!response.ok) throw new Error('Application warmup unavailable');
+      return response.text();
+    }).then(function (html) {
+      var sources = Array.from(html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["']/gi));
+      var urls = new Set();
+      sources.forEach(function (match) {
+        var url = new URL(match[1], applicationUrl());
+        if (url.origin === location.origin &&
+            (/^\/reports\/consultation-step-prototype-20260928\/(flow|consultation-questions)\.js$/.test(url.pathname) ||
+             /^\/assets\/(application-speed-[\w-]+|kakao-consultation)\.js$/.test(url.pathname))) urls.add(url.href);
+      });
+      return Promise.allSettled(Array.from(urls, function (url) {
+        return fetch(url, { credentials: 'same-origin', cache: 'force-cache', priority: 'low' })
+          .then(function (response) { return response.arrayBuffer(); });
+      }));
+    }).catch(function () { applicationWarmup = null; });
+  }
+  function scheduleApplicationWarmup() {
+    if ('requestIdleCallback' in window) window.requestIdleCallback(warmApplication, { timeout: 2000 });
+    else setTimeout(warmApplication, 500);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scheduleApplicationWarmup, { once: true });
+  else scheduleApplicationWarmup();
   function startApplication() {
     applicationReady = false;
+    if (stopApplicationWatching) stopApplicationWatching();
     applicationStatus.hidden = false;
     applicationStatus.textContent = '신청서를 불러오고 있습니다.';
     applicationRetry.hidden = true;
     frame.hidden = false;
-    var url = new URL('/consultation/apply/' + location.search, location.origin);
-    url.searchParams.set('embed', 'board');
-    frame.src = url.href;
+    frame.src = applicationUrl().href;
     clearTimeout(applicationTimer);
     applicationTimer = setTimeout(function () {
       if (applicationReady) return;
@@ -41,6 +84,8 @@
   }
   applyLinks.forEach(function (link) {
     link.href = '/consultation/apply/' + location.search + location.hash;
+    link.addEventListener('mouseenter', warmApplication, { once: true });
+    link.addEventListener('focus', warmApplication, { once: true });
     link.addEventListener('click', function (event) {
       event.preventDefault();
       lastApplyLink = link;
@@ -75,8 +120,23 @@
       if (lastStep && step !== lastStep) application.scrollIntoView({ block: 'start' });
       lastStep = step;
     }
-    new ResizeObserver(resizeApplication).observe(doc.querySelector('.shell'));
-    new MutationObserver(resizeApplication).observe(doc.getElementById('stage'), { childList: true, subtree: true });
+    var resizeFrame = 0;
+    function scheduleResize() {
+      if (!resizeFrame) resizeFrame = requestAnimationFrame(function () {
+        resizeFrame = 0;
+        resizeApplication();
+      });
+    }
+    var resizeObserver = new ResizeObserver(scheduleResize);
+    var mutationObserver = new MutationObserver(scheduleResize);
+    resizeObserver.observe(doc.querySelector('.shell'));
+    mutationObserver.observe(doc.getElementById('stage'), { childList: true, subtree: true });
+    stopApplicationWatching = function () {
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+      if (resizeFrame) cancelAnimationFrame(resizeFrame);
+      stopApplicationWatching = null;
+    };
     resizeApplication();
   });
   function message(title, text) {
@@ -134,7 +194,7 @@
     retry.hidden = true;
     status.removeAttribute('data-error');
     status.textContent = '상담 신청 내역을 불러오고 있습니다.';
-    rows.replaceChildren();
+    // Keep the current page in place while fetching the next one.
     try {
       var response = await fetch('https://intm.kr/api/consultation/list?public=true&companySlug=ggbg&page=' + page, { credentials: 'omit', cache: 'no-store', signal: AbortSignal.timeout(20000) });
       if (!response.ok) throw new Error('List unavailable');
@@ -142,6 +202,7 @@
       if (!Array.isArray(data.consultRequests)) throw new Error('Invalid list');
       if (currentRequest !== requestNumber) return;
       hasMore = data.hasMore === true;
+      rows.replaceChildren();
       data.consultRequests.forEach(function (request) {
         var row = document.createElement('tr');
         var created = document.createElement('td');

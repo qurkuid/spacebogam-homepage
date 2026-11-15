@@ -74,3 +74,5 @@
  .pf-gallery-title{padding-top:16px;margin-top:0;margin-bottom:8px}
  .pf-rooms{padding-top:6px;padding-bottom:8px;margin-bottom:16px}
 }
+
+@media(max-width:680px){.pf-rooms{flex-wrap:nowrap;overflow-x:auto}.pf-rooms>span,.pf-rooms button{flex-shrink:0}}

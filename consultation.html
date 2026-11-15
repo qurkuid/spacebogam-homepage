@@ -3,9 +3,23 @@
 <head>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+new Date().getTime(),event:'gtm.js'});/* Load the existing GA runtime before GTM so they do not race to fetch it twice.
+   Event queues remain immediate; errors or a slow SDK cannot suppress GTM. */
+var started=false,timer;
+function startContainer(){if(started)return;started=true;clearTimeout(timer);
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f)}
+function afterGoogleTag(){
+if(w.google_tag_manager&&w.google_tag_manager['G-EJGXDD5C1T']){startContainer();return;}
+var tag=d.querySelector('script[src*="googletagmanager.com/gtag/js?id=G-EJGXDD5C1T"]');
+if(!tag){startContainer();return;}
+tag.addEventListener('load',startContainer,{once:true});
+tag.addEventListener('error',startContainer,{once:true});
+timer=setTimeout(startContainer,2500);
+}
+function scheduleContainer(){setTimeout(afterGoogleTag,0)}
+if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',scheduleContainer,{once:true});
+else scheduleContainer();
 })(window,document,'script','dataLayer','GTM-PW8GLP8S');</script>
 <!-- End Google Tag Manager -->
 
@@ -42,7 +56,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <script src="/assets/site-canonical.js?v=c69a8498"></script>
-<script defer src="/assets/site-tracking.js?v=6303eec4"></script>
+<script defer src="/assets/site-tracking.js?v=a72f3ee65d57"></script>
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -58,8 +72,10 @@ fbq('track', 'PageView');
 </script>
 <!-- End Meta Pixel Code -->
 <!-- Naver WCS / CTS common tracking -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js" data-spacebogam-naver-wcs="1"></script>
-<script type="text/javascript">
+<script data-spacebogam-naver-bootstrap="async">(function(){
+  function sendCtsPageView(){
+    if (window.__spacebogamNaverCtsPvSent) return;
+
 if (!window.wcs_add) window.wcs_add = {};
 window.wcs_add["wa"] = "s_7702568df18";
 if (!window._nasa) window._nasa = {};
@@ -68,8 +84,21 @@ if (window.wcs) {
   window.wcs_do();
   window.__spacebogamNaverCtsPvSent = true;
 }
-</script>
-<link rel="stylesheet" href="/assets/site-navigation.css?v=b34f76c81468"><script defer src="/assets/site-navigation.js?v=bba0dbe37148"></script></head>
+
+  }
+  if (window.wcs) { sendCtsPageView(); return; }
+  var script = document.querySelector('script[data-spacebogam-naver-wcs="1"], script[src*="wcslog.js"]');
+  var fresh = !script;
+  if (fresh) {
+    script = document.createElement('script');
+    script.async = true;
+    script.src = "//wcs.naver.net/wcslog.js";
+    script.setAttribute('data-spacebogam-naver-wcs', '1');
+  }
+  script.addEventListener('load', sendCtsPageView, {once:true});
+  if (fresh) document.head.appendChild(script);
+})();</script>
+<link rel="stylesheet" href="/assets/site-navigation.css?v=b34f76c81468"><script defer src="/assets/site-navigation.js?v=footer-sns-20261104"></script><link rel="stylesheet" href="/assets/business-info.css?v=footer-sns-20261104" data-business-info-style="spacebogam"></head>
 <body>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PW8GLP8S"
@@ -112,6 +141,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="field">마음에 드는 포트폴리오 링크</div>
         <div class="field">원하는 분위기와 꼭 해결하고 싶은 불편</div>
       </div>
+<p>막연한 분위기를 생활 기준으로 정리하고 싶다면 <a href="/estimate.html#life-to-design">생활 질문 5개와 작성 예시</a>를 참고해 보세요. 기존 신청 항목을 추가로 작성할 필요는 없습니다.</p>
     </div>
   </section>
 
@@ -138,6 +168,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </section>
 </main>
-<footer><div class="wrap">공간보감 · 부산 인테리어 상담 · <a href="/consultation/">상담 안내</a> · <a href="/portfolio.html">포트폴리오</a></div><div class="wrap foot-legal"><a href="/privacy/">개인정보처리방침</a></div></footer>
+<footer class="v8-footer site-footer" data-site-footer="spacebogam"><p data-business-info="spacebogam"><strong>공간보감</strong><br>상호 공간보감 인테리어 디자인 · 대표 백창석<br>사업자등록번호 625-43-01028<br>실내건축공사업 등록번호 부산진2022-02-07<br>부산광역시 해운대구 좌동순환로 457, 402호<br>대표 전화 <a href="tel:050713881252">1551-0163</a></p><nav aria-label="하단 메뉴"><a href="/contact.html">오시는 길·주차 안내</a><a href="/sns/">SNS</a><a href="/overview.html">회사소개</a><a href="/privacy/">개인정보처리방침</a><a href="/consultation/">상담 안내</a><a href="/portfolio.html">포트폴리오</a></nav></footer>
 </body>
 </html>

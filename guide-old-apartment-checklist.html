@@ -3,9 +3,23 @@
 <head>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+new Date().getTime(),event:'gtm.js'});/* Load the existing GA runtime before GTM so they do not race to fetch it twice.
+   Event queues remain immediate; errors or a slow SDK cannot suppress GTM. */
+var started=false,timer;
+function startContainer(){if(started)return;started=true;clearTimeout(timer);
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f)}
+function afterGoogleTag(){
+if(w.google_tag_manager&&w.google_tag_manager['G-EJGXDD5C1T']){startContainer();return;}
+var tag=d.querySelector('script[src*="googletagmanager.com/gtag/js?id=G-EJGXDD5C1T"]');
+if(!tag){startContainer();return;}
+tag.addEventListener('load',startContainer,{once:true});
+tag.addEventListener('error',startContainer,{once:true});
+timer=setTimeout(startContainer,2500);
+}
+function scheduleContainer(){setTimeout(afterGoogleTag,0)}
+if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',scheduleContainer,{once:true});
+else scheduleContainer();
 })(window,document,'script','dataLayer','GTM-PW8GLP8S');</script>
 <!-- End Google Tag Manager -->
 
@@ -31,7 +45,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="twitter:image" content="https://spacebogam.kr/assets/portfolio/daewoo-ian-35py.jpg" />
 
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://spacebogam.kr/"},{"@type":"ListItem","position":2,"name":"인테리어 가이드","item":"https://spacebogam.kr/guides.html"},{"@type":"ListItem","position":3,"name":"구축 아파트 체크리스트","item":"https://spacebogam.kr/guide-old-apartment-checklist.html"}]}</script>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://spacebogam.kr/guide-old-apartment-checklist.html#article","headline":"부산 구축 아파트 리모델링 체크리스트 — 상담 전부터 입주까지 22개 항목","description":"구축 아파트 리모델링에서 단계별로 확인해야 할 22개 항목. 상담 전 준비, 실측 확인, 계약 전 필수 점검, 공사 중 기록, 입주 전 마무리를 실제 시공 기준으로 정리.","image":"https://spacebogam.kr/assets/portfolio/daewoo-ian-35py.jpg","author":{"@id":"https://spacebogam.kr/#localbusiness"},"publisher":{"@id":"https://spacebogam.kr/#localbusiness"},"datePublished":"2026-07-14","dateModified":"2026-07-14","mainEntityOfPage":"https://spacebogam.kr/guide-old-apartment-checklist.html","inLanguage":"ko-KR","about":["구축 아파트 리모델링","리모델링 체크리스트","부산 아파트 인테리어"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://spacebogam.kr/guide-old-apartment-checklist.html#article","headline":"부산 구축 아파트 리모델링 체크리스트 — 상담 전부터 입주까지 22개 항목","description":"구축 아파트 리모델링에서 단계별로 확인해야 할 22개 항목. 상담 전 준비, 실측 확인, 계약 전 필수 점검, 공사 중 기록, 입주 전 마무리를 실제 시공 기준으로 정리.","image":"https://spacebogam.kr/assets/portfolio/daewoo-ian-35py.jpg","author":{"@id":"https://spacebogam.kr/#localbusiness"},"publisher":{"@id":"https://spacebogam.kr/#localbusiness"},"datePublished":"2026-07-14","dateModified":"2026-11-03","mainEntityOfPage":"https://spacebogam.kr/guide-old-apartment-checklist.html","inLanguage":"ko-KR","about":["구축 아파트 리모델링","리모델링 체크리스트","부산 아파트 인테리어"]}</script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-EJGXDD5C1T"></script>
   <script>
@@ -44,7 +58,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <script src="/assets/site-canonical.js?v=c69a8498"></script>
-  <script defer src="/assets/site-tracking.js?v=6303eec4"></script>
+  <script defer src="/assets/site-tracking.js?v=a72f3ee65d57"></script>
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -60,8 +74,10 @@ fbq('track', 'PageView');
 </script>
 <!-- End Meta Pixel Code -->
 <!-- Naver WCS / CTS common tracking -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js" data-spacebogam-naver-wcs="1"></script>
-<script type="text/javascript">
+<script data-spacebogam-naver-bootstrap="async">(function(){
+  function sendCtsPageView(){
+    if (window.__spacebogamNaverCtsPvSent) return;
+
 if (!window.wcs_add) window.wcs_add = {};
 window.wcs_add["wa"] = "s_7702568df18";
 if (!window._nasa) window._nasa = {};
@@ -70,8 +86,21 @@ if (window.wcs) {
   window.wcs_do();
   window.__spacebogamNaverCtsPvSent = true;
 }
-</script>
-<link rel="stylesheet" href="/assets/site-navigation.css?v=b34f76c81468"><script defer src="/assets/site-navigation.js?v=bba0dbe37148"></script></head>
+
+  }
+  if (window.wcs) { sendCtsPageView(); return; }
+  var script = document.querySelector('script[data-spacebogam-naver-wcs="1"], script[src*="wcslog.js"]');
+  var fresh = !script;
+  if (fresh) {
+    script = document.createElement('script');
+    script.async = true;
+    script.src = "//wcs.naver.net/wcslog.js";
+    script.setAttribute('data-spacebogam-naver-wcs', '1');
+  }
+  script.addEventListener('load', sendCtsPageView, {once:true});
+  if (fresh) document.head.appendChild(script);
+})();</script>
+<link rel="stylesheet" href="/assets/site-navigation.css?v=b34f76c81468"><script defer src="/assets/site-navigation.js?v=footer-sns-20261104"></script><link rel="stylesheet" href="/assets/business-info.css?v=footer-sns-20261104" data-business-info-style="spacebogam"></head>
 <body class="guide">
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PW8GLP8S"
@@ -121,7 +150,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </section>
 
-    <section id="step3">
+
+<section id="inspection-boundaries"><div class="wrap"><div class="head"><div class="kicker">실측과 철거 후</div><div><h2>철거 전에 볼 수 있는 것과, 열어 봐야 확인되는 것</h2><p>누수 흔적이나 결로 자국은 점검할 위치를 정하는 단서입니다. 가려진 배관과 방수층 전체의 상태까지 확인했다는 뜻은 아닙니다. 확인된 사실과 아직 보지 못한 부분을 나눠 견적에 남기세요.</p></div></div><div class="how-list"><div class="how-row"><span class="how-no">01</span><div><h3>실측에서는 위치와 증상을 기록합니다</h3><p>물 자국·곰팡이·들뜸의 위치, 현재 배수·수압과 사용하는 가전, 분전반과 콘센트 위치를 사진·도면에 표시합니다. 가구나 마감에 가려 확인하지 못한 곳도 함께 적어 둡니다.</p></div></div><div class="how-row"><span class="how-no">02</span><div><h3>철거 후에는 드러난 상태로 범위를 다시 확인합니다</h3><p>배관·바탕면·방수층 등 실제로 드러난 부분의 사진과 설명을 받고, 보수가 필요한 범위와 선택 가능한 개선을 구분합니다. 실측 때의 추정과 달라졌다면 이유·추가 또는 감액·일정 영향을 확인한 뒤 진행 범위를 정합니다.</p></div></div><div class="how-row"><span class="how-no">03</span><div><h3>가리기 전과 마무리 후의 기록을 함께 남깁니다</h3><p>설비·배선이 가려지기 전 위치 사진, 적용 자재와 보수 범위, 마무리 후 작동 확인 내용을 같은 위치 기준으로 모읍니다. 어떤 곳을 확인했고 무엇이 미확인인지 다음 공정과 입주 전 점검까지 이어가세요.</p></div></div></div><p>실제 <a href="case-sajik-32py.html#story-5">사직 32평 시공 기록</a>에서는 철거 뒤 실제 폭을 확인한 후 주방 계획을 재판단했습니다. 이 사례의 설계 가능 범위를 다른 집에 그대로 적용하지 않고, 우리 집 실측·철거 후 상태를 기준으로 확인합니다. 금액·일정 합의는 <a href="guide-apartment-cost.html#extra-costs">변경 기록 양식</a>으로 정리할 수 있습니다.</p><p class="prep-note">작성·정리: <a href="overview.html">공간보감</a> · <time datetime="2026-11-03">2026.11.03</time> 철거 전후 확인 범위와 기록 기준 보강. 기존 22개 체크 항목은 함께 확인하세요.</p></div></section>
+<section id="step3">
       <div class="wrap">
         <div class="head"><div class="kicker">3단계 · 계약 전</div><div><h2>계약서와 견적서에서 확인할 5가지</h2><p>이 다섯 개가 문서에 없으면 계약 전에 요구하세요. 견적서 보는 법은 <a href="insights/224015797038-부산-인테리어-견적-제대로-이해하는-4가지-기준.html">견적 이해 4가지 기준</a>에서 더 자세히.</p></div></div>
         <div class="faq">
@@ -175,7 +206,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </section>
   </main>
 
-  <footer><div class="wrap foot"><div><b>공간보감 체크리스트</b><br>부산 구축 아파트 리모델링 준비 기준<br><a data-cta-location="guide_check_footer_call" href="tel:050713881252">전화 상담하기</a></div><div>공간은 사는 사람을 닮아야 합니다.</div></div><div class="wrap foot-legal"><a href="/privacy/">개인정보처리방침</a></div></footer>
+  <footer class="v8-footer site-footer" data-site-footer="spacebogam"><p data-business-info="spacebogam"><strong>공간보감</strong><br>상호 공간보감 인테리어 디자인 · 대표 백창석<br>사업자등록번호 625-43-01028<br>실내건축공사업 등록번호 부산진2022-02-07<br>부산광역시 해운대구 좌동순환로 457, 402호<br>대표 전화 <a href="tel:050713881252">1551-0163</a></p><nav aria-label="하단 메뉴"><a href="/contact.html">오시는 길·주차 안내</a><a href="/sns/">SNS</a><a href="/overview.html">회사소개</a><a href="/privacy/">개인정보처리방침</a></nav></footer>
   <script src="assets/site.js" defer></script>
 </body>
 </html>

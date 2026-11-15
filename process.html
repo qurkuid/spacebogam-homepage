@@ -3,9 +3,23 @@
 <head>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+new Date().getTime(),event:'gtm.js'});/* Load the existing GA runtime before GTM so they do not race to fetch it twice.
+   Event queues remain immediate; errors or a slow SDK cannot suppress GTM. */
+var started=false,timer;
+function startContainer(){if(started)return;started=true;clearTimeout(timer);
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f)}
+function afterGoogleTag(){
+if(w.google_tag_manager&&w.google_tag_manager['G-EJGXDD5C1T']){startContainer();return;}
+var tag=d.querySelector('script[src*="googletagmanager.com/gtag/js?id=G-EJGXDD5C1T"]');
+if(!tag){startContainer();return;}
+tag.addEventListener('load',startContainer,{once:true});
+tag.addEventListener('error',startContainer,{once:true});
+timer=setTimeout(startContainer,2500);
+}
+function scheduleContainer(){setTimeout(afterGoogleTag,0)}
+if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',scheduleContainer,{once:true});
+else scheduleContainer();
 })(window,document,'script','dataLayer','GTM-PW8GLP8S');</script>
 <!-- End Google Tag Manager -->
 
@@ -26,7 +40,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"HowTo","name":"공간보감 부산 인테리어 진행 과정","description":"상담부터 시공, 사후관리까지 공간보감이 부산 아파트 인테리어와 리모델링을 진행하는 단계","totalTime":"P6W","step":[{"@type":"HowToStep","position":1,"name":"1차 미팅","text":"방향, 예산, 일정, 현재 불편한 점을 듣고 가능한 공사 범위와 대략 견적을 함께 봅니다."},{"@type":"HowToStep","position":2,"name":"유료 현장실측","text":"현장에서 치수, 구조, 설비, 마감 상태와 하자 위험을 직접 확인하고 현장 보고서를 작성합니다."},{"@type":"HowToStep","position":3,"name":"실측도면·실측 견적서","text":"실측을 바탕으로 도면을 그리고 공정과 자재별로 견적을 다시 맞춥니다."},{"@type":"HowToStep","position":4,"name":"1차 디자인","text":"3D 디자인과 자재 리스트로 마감 방향과 분위기를 눈으로 확인합니다."},{"@type":"HowToStep","position":5,"name":"2차 조정·본계약","text":"수정 사항을 반영해 최종 디자인과 견적, 일정을 확정하고 계약서, 공정표, 하자보수 기준을 함께 정합니다."},{"@type":"HowToStep","position":6,"name":"책임시공·사후관리","text":"공정표대로 시공하며 현장 사진, 발주 기록, 변경 내역을 남기고 준공 후 하자보수까지 책임집니다."}]}</script>
 <link rel="stylesheet" href="assets/page.css">
 <link rel="stylesheet" href="assets/process.css">
-<link rel="stylesheet" href="assets/preview-v8.css?v=cmp1127">
+<link rel="stylesheet" href="assets/preview-v8.css?v=d40d1e9e59f4">
 <style>:root{--bg:#f6f3ed;--brown:#1e1d1a;--deep:#1e1d1a;--shadow:0 14px 34px rgba(30,29,26,.08)}</style>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-EJGXDD5C1T"></script>
@@ -40,7 +54,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <script src="/assets/site-canonical.js?v=c69a8498"></script>
-  <script defer src="/assets/site-tracking.js?v=6303eec4"></script>
+  <script defer src="/assets/site-tracking.js?v=a72f3ee65d57"></script>
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -56,8 +70,10 @@ fbq('track', 'PageView');
 </script>
 <!-- End Meta Pixel Code -->
 <!-- Naver WCS / CTS common tracking -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js" data-spacebogam-naver-wcs="1"></script>
-<script type="text/javascript">
+<script data-spacebogam-naver-bootstrap="async">(function(){
+  function sendCtsPageView(){
+    if (window.__spacebogamNaverCtsPvSent) return;
+
 if (!window.wcs_add) window.wcs_add = {};
 window.wcs_add["wa"] = "s_7702568df18";
 if (!window._nasa) window._nasa = {};
@@ -66,9 +82,22 @@ if (window.wcs) {
   window.wcs_do();
   window.__spacebogamNaverCtsPvSent = true;
 }
-</script>
+
+  }
+  if (window.wcs) { sendCtsPageView(); return; }
+  var script = document.querySelector('script[data-spacebogam-naver-wcs="1"], script[src*="wcslog.js"]');
+  var fresh = !script;
+  if (fresh) {
+    script = document.createElement('script');
+    script.async = true;
+    script.src = "//wcs.naver.net/wcslog.js";
+    script.setAttribute('data-spacebogam-naver-wcs', '1');
+  }
+  script.addEventListener('load', sendCtsPageView, {once:true});
+  if (fresh) document.head.appendChild(script);
+})();</script>
 <script defer src="assets/preview-v8.js?v=cmp1289"></script>
-<link rel="stylesheet" href="/assets/site-navigation.css?v=b34f76c81468"><script defer src="/assets/site-navigation.js?v=bba0dbe37148"></script></head>
+<link rel="stylesheet" href="/assets/site-navigation.css?v=b34f76c81468"><script defer src="/assets/site-navigation.js?v=footer-sns-20261104"></script><link rel="stylesheet" href="/assets/business-info.css?v=footer-sns-20261104" data-business-info-style="spacebogam"></head>
 <body>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PW8GLP8S"
@@ -284,7 +313,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </section>
 </main>
-<footer class="v8-footer v8-footer-simple"><a href="/privacy/">개인정보처리방침</a></footer>
+<footer class="v8-footer site-footer" data-site-footer="spacebogam"><p data-business-info="spacebogam"><strong>공간보감</strong><br>상호 공간보감 인테리어 디자인 · 대표 백창석<br>사업자등록번호 625-43-01028<br>실내건축공사업 등록번호 부산진2022-02-07<br>부산광역시 해운대구 좌동순환로 457, 402호<br>대표 전화 <a href="tel:050713881252">1551-0163</a></p><nav aria-label="하단 메뉴"><a href="/contact.html">오시는 길·주차 안내</a><a href="/sns/">SNS</a><a href="/overview.html">회사소개</a><a href="/privacy/">개인정보처리방침</a></nav></footer>
 
 <script type="application/json" id="pr-insp-data">[{"space":"전체","items":[{"cat":"준비물","f":"단위세대평면도 준비","t":"checkbox","o":null,"u":null},{"cat":"준비물","f":"실측 준비물 (줄자, 레이저자 등)","t":"checkbox","o":null,"u":null},{"cat":"설비","f":"수도계량기 위치 확인","t":"text","o":null,"u":null},{"cat":"설비","f":"가스계량기, 배관 위치 확인","t":"text","o":null,"u":null},{"cat":"기타","f":"통신함 여부 확인 (인터넷선 인입)","t":"radio","o":["있음","없음"],"u":null},{"cat":"기타","f":"자재, 폐기물 반출 경로 및 방법 확인","t":"text","o":null,"u":null},{"cat":"기타","f":"특이사항","t":"text","o":null,"u":null}]},{"space":"거실","items":[{"cat":"치수","f":"가로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"세로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"높이 치수","t":"dimension","o":null,"u":"mm"},{"cat":"구조/간섭","f":"구조 간섭","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 처짐 및 자재 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 누수 및 결로 흔적 확인","t":"radio","o":["있음","없음"],"u":null},{"cat":"천장","f":"천장 깊이 확인","t":"dimension","o":null,"u":"mm"},{"cat":"천장","f":"커튼박스 사이즈 확인","t":"dimension","o":null,"u":"mm"},{"cat":"천장","f":"화재 감지기 종류와 수량","t":"text","o":null,"u":null},{"cat":"천장","f":"스프링클러 위치 및 수량","t":"text","o":null,"u":null},{"cat":"천장","f":"전열교환기 디퓨저 위치 및 수량","t":"text","o":null,"u":null},{"cat":"천장","f":"각 공간 조명 회로 체크","t":"text","o":null,"u":null},{"cat":"벽체","f":"스위치 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"콘센트 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"창호 사이즈 확인","t":"dimension","o":null,"u":"mm"},{"cat":"벽체","f":"벽체 상태","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"바닥","f":"기존 바닥재 확인 (덧방 여부)","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"설비","f":"에어컨 배관라인, 실외기 위치 확인","t":"text","o":null,"u":null},{"cat":"기타","f":"특이사항","t":"text","o":null,"u":null}]},{"space":"주방","items":[{"cat":"치수","f":"가로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"세로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"높이 치수","t":"dimension","o":null,"u":"mm"},{"cat":"구조/간섭","f":"구조 간섭","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 처짐 및 자재 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 누수 및 결로 흔적 확인","t":"radio","o":["있음","없음"],"u":null},{"cat":"천장","f":"각 공간 조명 회로 체크","t":"text","o":null,"u":null},{"cat":"천장","f":"화재 감지기 종류와 수량","t":"text","o":null,"u":null},{"cat":"벽체","f":"스위치 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"콘센트 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"창호 사이즈 확인","t":"dimension","o":null,"u":"mm"},{"cat":"벽체","f":"벽체 상태","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"바닥","f":"기존 바닥재 확인 (덧방 여부)","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"설비","f":"급수 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"설비","f":"배수 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"기타","f":"특이사항","t":"text","o":null,"u":null}]},{"space":"안방","items":[{"cat":"치수","f":"가로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"세로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"높이 치수","t":"dimension","o":null,"u":"mm"},{"cat":"구조/간섭","f":"구조 간섭","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 처짐 및 자재 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 누수 및 결로 흔적 확인","t":"radio","o":["있음","없음"],"u":null},{"cat":"천장","f":"커튼박스 사이즈 확인","t":"dimension","o":null,"u":"mm"},{"cat":"천장","f":"각 공간 조명 회로 체크","t":"text","o":null,"u":null},{"cat":"천장","f":"화재 감지기 종류와 수량","t":"text","o":null,"u":null},{"cat":"천장","f":"스프링클러 위치 및 수량","t":"text","o":null,"u":null},{"cat":"천장","f":"전열교환기 디퓨저 위치 및 수량","t":"text","o":null,"u":null},{"cat":"벽체","f":"스위치 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"콘센트 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"창호 사이즈 확인","t":"dimension","o":null,"u":"mm"},{"cat":"벽체","f":"벽체 상태","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"벽체","f":"문 사이즈 확인","t":"dimension","o":null,"u":"mm"},{"cat":"바닥","f":"기존 바닥재 확인 (덧방 여부)","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"설비","f":"에어컨 배관라인, 실외기 위치 확인","t":"text","o":null,"u":null},{"cat":"기타","f":"특이사항","t":"text","o":null,"u":null}]},{"space":"공용욕실","items":[{"cat":"치수","f":"가로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"세로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"높이 치수","t":"dimension","o":null,"u":"mm"},{"cat":"구조/간섭","f":"구조 간섭","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 처짐 및 자재 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 누수 및 결로 흔적 확인","t":"radio","o":["있음","없음"],"u":null},{"cat":"천장","f":"화재 감지기 종류와 수량","t":"text","o":null,"u":null},{"cat":"천장","f":"전열교환기 디퓨저 위치 및 수량","t":"text","o":null,"u":null},{"cat":"벽체","f":"결로, 곰팡이 확인","t":"radio","o":["있음","없음"],"u":null},{"cat":"벽체","f":"스위치 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"콘센트 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"벽체 상태","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"벽체","f":"문 사이즈 확인","t":"dimension","o":null,"u":"mm"},{"cat":"바닥","f":"기존 바닥재 확인 (덧방 여부)","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"설비","f":"급수 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"설비","f":"배수 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"기타","f":"특이사항","t":"text","o":null,"u":null}]},{"space":"현관","items":[{"cat":"치수","f":"가로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"세로 치수","t":"dimension","o":null,"u":"mm"},{"cat":"치수","f":"높이 치수","t":"dimension","o":null,"u":"mm"},{"cat":"구조/간섭","f":"구조 간섭","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"천장 처짐 및 자재 상태 확인","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"천장","f":"각 공간 조명 회로 체크","t":"text","o":null,"u":null},{"cat":"벽체","f":"월패드(인터폰), 도어락 모델 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"스위치 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"콘센트 위치 및 수량 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"전열교환기 스위치 및 모델 확인","t":"text","o":null,"u":null},{"cat":"벽체","f":"문 사이즈 확인","t":"dimension","o":null,"u":"mm"},{"cat":"벽체","f":"벽체 상태","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"바닥","f":"기존 바닥재 확인 (덧방 여부)","t":"radio","o":["양호","주의 필요","해당 없음"],"u":null},{"cat":"기타","f":"특이사항","t":"text","o":null,"u":null}]}]</script>
 <script>
