@@ -1,6 +1,5 @@
 (function () {
   'use strict';
-  if (window.__sbConsultationPreload) return;
   // Only public static files, never an iframe, form data, analytics or apartment APIs.
   var jobs = new Map();
   var pageJobs = new Map();
@@ -37,15 +36,12 @@
     pump();
     return promise;
   }
-  function coreResource(path, kind) {
-    if (kind === 'form') return /^\/reports\/consultation-step-prototype-20260928\/(flow|consultation-questions)\.js$/.test(path) ||
+  function coreResource(path) {
+    return /^\/reports\/consultation-step-prototype-20260928\/(flow|consultation-questions)\.js$/.test(path) ||
       /^\/assets\/(kakao-consultation\.js|suit-fonts-[\w-]+\.css|consultation-help\.css|business-info\.css)$/.test(path);
-    return /^\/assets\/(consultation-board\.(?:js|css)|site-navigation\.js|suit-fonts-[\w-]+\.css|business-info\.css)$/.test(path);
   }
-  function warmPage(value, kind) {
-    var url;
-    try { url = new URL(value, location.href); } catch (_) { return Promise.resolve(); }
-    if (!allowed() || url.origin !== location.origin || url.pathname !== (kind === 'form' ? '/consultation/apply/' : '/consultation/')) return Promise.resolve();
+  function warmForm(url) {
+    if (!allowed()) return Promise.resolve();
     url.hash = '';
     var previous = pageJobs.get(url.href);
     if (previous && Date.now() - previous.time < 60000) return previous.promise;
@@ -55,7 +51,7 @@
       Array.from(html.matchAll(/<(?:script|link)\b[^>]*\b(?:src|href)=["']([^"']+)["'][^>]*>/gi)).forEach(function (match) {
         var asset;
         try { asset = new URL(match[1], url); } catch (_) { return; }
-        if (asset.origin === location.origin && coreResource(asset.pathname, kind)) found.add(asset.href);
+        if (asset.origin === location.origin && coreResource(asset.pathname)) found.add(asset.href);
       });
       return Promise.all(Array.from(found).slice(0, 8).map(function (asset) { return request(new URL(asset), false); }));
     }).catch(function () {}).finally(function () {
@@ -65,25 +61,11 @@
     pageJobs.set(url.href, { promise: pending, time: Date.now() });
     return pending;
   }
-  function warmForm(value) { return warmPage(value, 'form'); }
-  function warmBoard(value) {
-    var board;
-    try { board = new URL(value, location.href); } catch (_) { return Promise.resolve(); }
-    if (board.origin !== location.origin || board.pathname !== '/consultation/') return Promise.resolve();
-    var form = new URL('/consultation/apply/' + board.search, location.origin);
-    form.searchParams.set('embed', 'board');
-    return Promise.all([warmPage(board, 'board'), warmForm(form)]);
-  }
-  window.__sbConsultationPreload = { form: warmForm, board: warmBoard };
-  // The board owns its earlier idle/intent scheduler and iframe lifecycle.
-  if (document.getElementById('consultation-table')) return;
   function target(anchor) {
     if (!anchor) return;
     var url;
     try { url = new URL(anchor.href, location.href); } catch (_) { return; }
-    if (url.origin !== location.origin) return;
-    if (url.pathname === '/consultation/') warmBoard(url.href);
-    else if (url.pathname === '/consultation/apply/') warmForm(url.href);
+    if (url.origin === location.origin && ['/consultation/', '/consultation/apply/'].includes(url.pathname)) warmForm(url);
   }
   function intent(event) { target(event.target.closest?.('a[href]')); }
   ['pointerover', 'focusin', 'pointerdown'].forEach(function (name) { document.addEventListener(name, intent, { passive: true }); });
