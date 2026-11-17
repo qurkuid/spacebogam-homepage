@@ -46,6 +46,18 @@ test('wrong 40py case and directly asserted unpublished budget are rejected', ()
   assert(r.errors.some(e => e.includes('GUIDE_WRONG_AREA')));
   assert(r.errors.some(e => e.includes('GUIDE_UNVERIFIED_BUDGET')));
 });
+test('32py and 42py in the same apartment complex resolve by stated floor area', () => {
+  const d = docs();
+  d.portfolio += article('sajik32', '사직쌍용예가 1차 32평', 32, '금액대 별도 문의', 3);
+  d.portfolio += article('sajik42', '사직쌍용예가 1차 42평', 42, '금액대 별도 문의', 4);
+  d.sitemap += '<loc>https://spacebogam.kr/case-sajik32.html</loc>' +
+    '<loc>https://spacebogam.kr/case-sajik42.html</loc>';
+  d.home = '7개 실제 시공사례와 완성 사진 57장';
+  d.guide = d.guide.replace('<u>거제유림아시아드 47평</u>',
+    '<u>사직 쌍용예가 1차 42평</u>, <u>거제유림아시아드 47평</u>');
+  const r = auditDocuments(d);
+  assert.equal(r.ok, true, JSON.stringify(r));
+});
 test('a 49py case inside 50py guide must be rejected', () => {
   const d = docs();
   d.guide = d.guide.replace('<u>오륙도 SK뷰 59평</u>',
