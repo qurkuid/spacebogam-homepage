@@ -56,7 +56,11 @@ export function auditDocuments({ portfolio, sitemap, home, living40, living50, g
     if (!claims.length) errors.push('GUIDE_CASES_NOT_PARSEABLE ' + band + '평');
     for (const m of claims) {
       const label = caseKey(m[1]);
-      const matches = [...cards.values()].filter(c => caseKey(c.title).includes(label) || label.includes(caseKey(c.title)));
+      const statedPy = Number(first(m[1], /(\d{2})평/));
+      // Two units in the same complex may share an identical title once floor area is stripped.
+      const matches = [...cards.values()].filter(c =>
+        (!statedPy || c.py === statedPy) &&
+        (caseKey(c.title).includes(label) || label.includes(caseKey(c.title))));
       if (matches.length !== 1) {
         errors.push('GUIDE_UNMATCHED_CASE ' + band + '평: ' + clean(m[1]));
         continue;
