@@ -423,6 +423,11 @@
     const value = response(question);
     return Array.isArray(value) ? value.length > 0 : !!String(value || '').trim();
   }
+  function extractBudgetCustom(value) {
+    if (!value || typeof value !== 'string') return '';
+    const match = value.match(/^4천만원 미만\s*(?:\((?:직접 입력:\s*)?([^)]+)\))?$/);
+    return match ? (match[1] || '').trim() : '';
+  }
   function syncActiveQuestionNext() {
     if (current !== 'question') return;
     const question = questionList()[questionIndex];
@@ -1211,6 +1216,73 @@
       target.appendChild(group);
       return;
     }
+    if (key === '21') {
+      const label = el('label', 'field');
+      label.appendChild(el('span', 'field-label', question.question + ' *'));
+      const select = el('select', 'question-input');
+      select.id = 'answer-21';
+      select.required = true;
+      select.setAttribute('aria-describedby', 'form-error');
+      const placeholder = el('option', null, '선택해 주세요');
+      placeholder.value = '';
+      select.appendChild(placeholder);
+      options.forEach(option => {
+        const item = el('option', null, question.optionLabels?.[option] || option);
+        item.value = option;
+        select.appendChild(item);
+      });
+      const rawValue = response(question) || '';
+      const isUnder40m = typeof rawValue === 'string' && rawValue.startsWith('4천만원 미만');
+      select.value = isUnder40m ? '4천만원 미만' : rawValue;
+      label.appendChild(select);
+      target.appendChild(label);
+
+      const customLabel = el('label', 'field budget-custom-field');
+      customLabel.id = 'answer-21-custom-label';
+      customLabel.style.marginTop = '12px';
+      customLabel.appendChild(el('span', 'field-label', '희망 예산 직접 입력 *'));
+      const custom = el('input', 'question-input');
+      custom.id = 'answer-21-custom';
+      custom.type = 'text';
+      custom.maxLength = 100;
+      custom.setAttribute('aria-describedby', 'form-error');
+      custom.placeholder = '예: 3,500만원';
+      custom.value = isUnder40m ? extractBudgetCustom(rawValue) : '';
+      customLabel.hidden = select.value !== '4천만원 미만';
+      custom.required = !customLabel.hidden;
+      customLabel.appendChild(custom);
+      target.appendChild(customLabel);
+
+      const sync = () => {
+        if (select.value === '4천만원 미만') {
+          const customVal = custom.value.trim();
+          answers.responses['21'] = customVal ? '4천만원 미만 (직접 입력: ' + customVal + ')' : '4천만원 미만';
+        } else {
+          answers.responses['21'] = select.value;
+        }
+        clearError();
+        syncActiveQuestionNext();
+        saveDraft();
+      };
+
+      select.addEventListener('change', () => {
+        const under40 = select.value === '4천만원 미만';
+        customLabel.hidden = !under40;
+        custom.required = under40;
+        if (!under40) custom.value = '';
+        sync();
+        if (under40) custom.focus();
+      });
+      custom.addEventListener('input', sync);
+      custom.enterKeyHint = 'next';
+      custom.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' || event.isComposing) return;
+        event.preventDefault();
+        const fields = Array.from(stage.querySelectorAll('input,select,textarea')).filter(field => !field.hidden && field.type !== 'checkbox');
+        (fields[fields.indexOf(custom) + 1] || next).focus();
+      });
+      return;
+    }
     if (key === 'budget' && answers.type === '상업 공간') {
       const other = '기타(직접입력)';
       const label = el('label', 'field');
@@ -1223,7 +1295,8 @@
         item.value = option; select.appendChild(item);
       });
       const value = response(question) || '';
-      select.value = options.includes(value) ? value : other;
+      const isUnder40 = typeof value === 'string' && value.startsWith('4천만원 미만');
+      select.value = isUnder40 ? '4천만원 미만' : (options.includes(value) ? value : other);
       label.appendChild(select); target.appendChild(label);
       const customLabel = el('label', 'field');
       customLabel.appendChild(el('span', 'field-label', '예산 직접입력 *'));
@@ -1231,16 +1304,26 @@
       custom.id = 'answer-budget-custom'; custom.type = 'text'; custom.maxLength = 100;
       custom.setAttribute('aria-describedby', 'form-error');
       custom.placeholder = '예: 3,500만원 또는 4천만~5천만원';
-      custom.value = select.value === other && value !== other ? value : '';
-      customLabel.hidden = select.value !== other;
+      custom.value = isUnder40 ? extractBudgetCustom(value) : (select.value === other && value !== other ? value : '');
+      customLabel.hidden = select.value !== other && select.value !== '4천만원 미만';
       custom.required = !customLabel.hidden;
       customLabel.appendChild(custom); target.appendChild(customLabel);
       const sync = () => {
-        answers.responses[key] = select.value === other ? custom.value.trim() || other : select.value;
+        if (select.value === '4천만원 미만') {
+          const customVal = custom.value.trim();
+          answers.responses[key] = customVal ? '4천만원 미만 (직접 입력: ' + customVal + ')' : '4천만원 미만';
+        } else if (select.value === other) {
+          answers.responses[key] = custom.value.trim() || other;
+        } else {
+          answers.responses[key] = select.value;
+        }
         clearError();
+        saveDraft();
       };
       select.addEventListener('change', () => {
-        customLabel.hidden = select.value !== other; custom.required = !customLabel.hidden;
+        const needsCustom = select.value === other || select.value === '4천만원 미만';
+        customLabel.hidden = !needsCustom; custom.required = !customLabel.hidden;
+        if (!needsCustom) custom.value = '';
         sync(); if (!customLabel.hidden) custom.focus();
       });
       custom.addEventListener('input', sync);
@@ -2007,8 +2090,13 @@
     }
     const value = response(question);
     if (String(question.id) === '4' && stage.querySelector('#answer-4')?.getAttribute('data-unconfirmed') === 'true') return '공급면적을 입력한 뒤 선택 버튼을 눌러 주세요.';
-    if (['21', 'budget'].includes(String(question.id)) && ['아직 정하지 않았어요', 'undecided'].includes(value)) return '예산 구간을 선택해 주세요.';
-    if (question.id === 'budget' && value === '기타(직접입력)') return '예산을 직접 입력해 주세요.';
+    if (['21', 'budget'].includes(String(question.id))) {
+      if (!value || ['아직 정하지 않았어요', 'undecided'].includes(value)) return '예산 구간을 선택해 주세요.';
+      if (question.id === 'budget' && value === '기타(직접입력)') return '예산을 직접 입력해 주세요.';
+      if (value === '4천만원 미만' || (typeof value === 'string' && value.startsWith('4천만원 미만') && !extractBudgetCustom(value))) {
+        return '희망 예산을 직접 입력해 주세요.';
+      }
+    }
     if (question.isRequired && !hasResponse(question)) return question.question + ' 입력이 필요합니다.';
     if (!hasResponse(question)) return '';
     if (question.questionType === 'date') {
@@ -2036,6 +2124,10 @@
           inline.id = 'field-error-' + question.id;
           block.appendChild(inline);
           let target = block.querySelector('#answer-' + question.id) || block.querySelector('input,select,textarea,button') || block;
+          if (['21', 'budget'].includes(String(question.id)) && (value === '4천만원 미만' || (typeof value === 'string' && value.startsWith('4천만원 미만')))) {
+            const customTarget = block.querySelector('#answer-21-custom') || block.querySelector('#answer-budget-custom');
+            if (customTarget && !customTarget.hidden) target = customTarget;
+          }
           if (question.questionType === 'schedule') {
             const missing = consultationAvailability().find(slot => !slot.periods.length);
             target = Array.from(block.querySelectorAll('.schedule-day-times'))

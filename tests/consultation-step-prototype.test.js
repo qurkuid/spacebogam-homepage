@@ -285,6 +285,20 @@ async function run() {
   assert.match(undecided.api.validate(budget), /예산/);
   undecided.input('21', '5천만~6천만원');
   assert.equal(undecided.api.validate(budget), '');
+
+  undecided.input('21', '4천만원 미만');
+  const customLabel = undecided.stage.querySelector('#answer-21-custom-label');
+  const customInput = undecided.stage.querySelector('#answer-21-custom');
+  assert.equal(customLabel.hidden, false, '4천만원 미만 선택 시 직접 입력 레이블 표시');
+  assert.equal(customInput.required, true, '직접 입력 필드는 필수');
+  assert.equal(undecided.api.validate(budget), '희망 예산을 직접 입력해 주세요.');
+  undecided.input('21-custom', '3,500만원');
+  assert.equal(undecided.api.validate(budget), '', '직접 예산 입력 후 유효성 검사 통과');
+  assert.equal(undecided.api.answers().responses['21'], '4천만원 미만 (직접 입력: 3,500만원)');
+  undecided.input('21', '5천만~6천만원');
+  assert.equal(customLabel.hidden, true, '다른 구간 선택 시 직접 입력 숨김');
+  assert.equal(customInput.required, false);
+  assert.equal(undecided.api.answers().responses['21'], '5천만~6천만원');
   assert.ok(undecided.api.validate(undecided.api.group().find(q => String(q.id) === '12')), '시공장소는 선택해야 한다');
   undecided.button('거실');
   assert.deepEqual(Array.from(undecided.api.answers().responses['12']), ['거실'], '시공장소를 선택할 수 있다');

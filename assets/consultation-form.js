@@ -505,6 +505,29 @@
         select.appendChild(new Option((question.optionLabels && question.optionLabels[choice]) || choice, choice));
       });
       wrap.appendChild(select);
+      if (String(question.id) === '21' || /예산/.test(question.question)) {
+        var customWrap = element('div', 'cf-field cf-custom-budget-wrap');
+        customWrap.hidden = true;
+        customWrap.style.marginTop = '10px';
+        var customLabel = element('label', 'cf-label', '희망 예산 직접 입력');
+        var customReq = element('span', 'cf-required', ' *');
+        customLabel.appendChild(customReq);
+        var customInput = document.createElement('input');
+        customInput.type = 'text';
+        customInput.name = name + '_custom';
+        customInput.id = name + '_custom';
+        customInput.className = 'cf-input';
+        customInput.placeholder = '예: 3,500만원';
+        customWrap.appendChild(customLabel);
+        customWrap.appendChild(customInput);
+        wrap.appendChild(customWrap);
+        select.addEventListener('change', function(){
+          var isUnder40 = select.value === '4천만원 미만';
+          customWrap.hidden = !isUnder40;
+          if (isUnder40) customInput.focus();
+          else customInput.value = '';
+        });
+      }
     } else if (type === 'text') {
       var textarea = document.createElement('textarea');
       textarea.name = name;
@@ -557,7 +580,13 @@
       return picked ? picked.value : '';
     }
     var field = root.querySelector('[name="' + name + '"]');
-    return field ? String(field.value || '').trim() : '';
+    var val = field ? String(field.value || '').trim() : '';
+    if ((String(question.id) === '21' || /예산/.test(question.question)) && val === '4천만원 미만') {
+      var customField = root.querySelector('[name="' + name + '_custom"]');
+      var customVal = customField ? String(customField.value || '').trim() : '';
+      return customVal ? '4천만원 미만 (직접 입력: ' + customVal + ')' : '4천만원 미만';
+    }
+    return val;
   }
 
   // ---- 필수 항목 축소 (CMP-1369) ------------------------------------------
@@ -860,12 +889,19 @@
         var value = readAnswer(question);
         if (value) answers[String(question.id)] = value;
         if (!missing && question.isRequired && !value) missing = question;
+        if (!missing && (String(question.id) === '21' || /예산/.test(question.question)) && value === '4천만원 미만') {
+          missing = Object.assign({}, question, { customBudgetRequired: true });
+        }
       });
 
       if (missing) {
-        status.textContent = '「' + missing.question + '」 항목을 입력해주세요.';
+        status.textContent = missing.customBudgetRequired ? '희망 예산을 직접 입력해 주세요.' : '「' + missing.question + '」 항목을 입력해주세요.';
         status.classList.add('cf-status-error');
         var field = renderQuestionError(missing);
+        if (missing.customBudgetRequired) {
+          field = root.querySelector('[name="q' + missing.id + '_custom"]');
+          if (field) field.setAttribute('aria-invalid', 'true');
+        }
         sendStepEvent('lead_step_error', missing, 'validation_error');
         trackGtag('lead_form_validation_error', questionTrackingDetail(missing));
         if (field && field.focus) field.focus();
