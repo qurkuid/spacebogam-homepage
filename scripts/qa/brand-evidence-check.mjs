@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const normalize = s => s.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/[\s·()]/g, '').toLowerCase();
+// Compare case labels after removing their floor-area suffix. e.g. "대우이안 35평" vs "화명 대우이안".
+const caseKey = s => normalize(s).replace(/\d{2}평/g, '');
 const first = (s, re) => (s.match(re) || [])[1] || '';
 const clean = s => s.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 
@@ -18,7 +20,7 @@ export function auditDocuments({ portfolio, sitemap, home, living40, living50, g
     const title = clean(first(article, /<h2[^>]*>([\s\S]*?)<\/h2>/));
     const budget = clean(first(article, /<p class="pf-budget">([\s\S]*?)<\/p>/));
     const photos = Number(first(article, /사진\s*(\d+)장/));
-    if (!href || !py || !photos) errors.push('PORTFOLIO_INCOMPLETE ' + (href || '[unknown]'));
+    if (!href || !py || !photos || !budget) errors.push('PORTFOLIO_INCOMPLETE ' + (href || '[unknown]'));
     else cards.set(href, { href, py, title, budget, photos });
   }
   if (cards.size !== articles.length || !cards.size) errors.push('PORTFOLIO_PARSE_FAILED');
@@ -45,21 +47,27 @@ export function auditDocuments({ portfolio, sitemap, home, living40, living50, g
     }
   }
   const sections = [...guide.matchAll(/<a href="living-(20|30|40|50)py\.html">([\s\S]*?)<\/a>/g)];
+  for (const required of [20, 30, 40, 50]) {
+    if (!sections.some(s => Number(s[1]) === required)) errors.push('GUIDE_SECTION_MISSING ' + required + '평');
+  }
   for (const sec of sections) {
     const band = Number(sec[1]);
     const claims = [...sec[2].matchAll(/<u>([^<]+)<\/u>([^<]*?)(?=<u>|<\/span>|$)/g)];
+    if (!claims.length) errors.push('GUIDE_CASES_NOT_PARSEABLE ' + band + '평');
     for (const m of claims) {
-      const label = normalize(m[1]);
-      const matches = [...cards.values()].filter(c => normalize(c.title).includes(label) || label.includes(normalize(c.title)));
+      const label = caseKey(m[1]);
+      const matches = [...cards.values()].filter(c => caseKey(c.title).includes(label) || label.includes(caseKey(c.title)));
       if (matches.length !== 1) {
-        warnings.push('GUIDE_UNMATCHED_CASE ' + band + '평: ' + clean(m[1]));
+        errors.push('GUIDE_UNMATCHED_CASE ' + band + '평: ' + clean(m[1]));
         continue;
       }
       const c = matches[0];
-      const inBand = band === 50 ? c.py >= 45 && c.py < 60 : c.py >= band && c.py < band + 10;
+      const inBand = c.py >= band && c.py < band + 10;
       if (!inBand) errors.push('GUIDE_WRONG_AREA ' + band + '평 목록에 ' + c.title + ' (' + c.py + '평)');
-      const adjacentText = clean(m[2]).slice(0, 48);
-      if (/별도\s*문의/.test(c.budget) && /(?:\d+천만|\d+억|\d+만\s*원)/.test(adjacentText)) {
+      // Only treat an amount immediately following this underlined case as *its* stated price.
+      // A later summary (e.g. "구서 58평은 8천만원 이상") must not be assigned to the 59평 case.
+      const adjacentText = clean(m[2]);
+      if (/별도\s*문의/.test(c.budget) && /^(?:[은는:]\s*)?(?:\d+천만|\d+억|\d+만\s*원)/.test(adjacentText)) {
         errors.push('GUIDE_UNVERIFIED_BUDGET ' + c.title + ': "' + c.budget + '" vs "' + adjacentText + '"');
       }
     }
