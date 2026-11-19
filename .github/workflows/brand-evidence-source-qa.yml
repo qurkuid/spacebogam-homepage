@@ -1,0 +1,39 @@
+name: Brand evidence source audit
+
+# Review-only static source checks. No production deploy, external API keys, or site writes.
+on:
+  pull_request:
+    paths:
+      - 'portfolio.html'
+      - 'index.html'
+      - 'living-40py.html'
+      - 'living-50py.html'
+      - 'guide-apartment-cost.html'
+      - 'sitemap.xml'
+      - 'scripts/qa/brand-evidence-check.mjs'
+      - 'scripts/qa/brand-evidence-check.test.mjs'
+      - '.github/workflows/brand-evidence-source-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: brand-evidence-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout proposed changes
+        uses: actions/checkout@v4
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run evidence audit unit tests
+        run: node --test scripts/qa/brand-evidence-check.test.mjs
+      - name: Cross-check portfolio, case areas, budgets, home count, and sitemap
+        run: node scripts/qa/brand-evidence-check.mjs --json
